@@ -1,0 +1,13 @@
+Features:
+ * open session for a resource:
+  * get initial content as an XMI file
+  * get already executed commands
+   * must be executed
+ * execute a command on the resource:
+  * get command ID
+  * send all events of the command
+  * receive commit or rollback
+ * receive executed commands
+  * receive command ID
+  * receive command events serialized
+  * must be executed on the local model

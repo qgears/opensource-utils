@@ -1,0 +1,4 @@
+For compilation the following libraries must be installed on target computer
+
+freeglut3-dev
+libglew1.6-dev

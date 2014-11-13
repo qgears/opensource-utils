@@ -1,0 +1,5 @@
+When using multiple resources:
+ * a valid like URI must be set for each resource.
+ * the path need not exist
+ * If path is not set then the references mixed in the same and other files will not be resolved fine.
+

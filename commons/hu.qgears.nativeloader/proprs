@@ -1,0 +1,30 @@
+{java.runtime.name=Java(TM) SE Runtime Environment,
+ sun.boot.library.path=/usr/lib/jvm/java-6-sun-1.6.0.2
+ 0/jre/lib/amd64, java.vm.version=16.3-b01, java.vm.vendor=Su
+ n Microsystems Inc., java.vendor.url=http://java.sun.com/, path.s
+ eparator=:, java.vm.name=Java HotSpot(TM) 64-Bit Server VM, file.encodi
+ ng.pkg=sun.io, sun.java.launcher=SUN_STANDARD, user.country=GB, sun.os.patch.
+ level=unknown, java.vm.specification.name=Java Virtual Machine Specification, 
+ user.dir=/home/rizsi/workspaces/3dui/artoolkit.embed, 
+ java.runtime.version=1.6.0_20-b02, java.awt.graphicsenv=sun.awt.X11GraphicsEnvironment, java.endorsed.dirs=/usr/lib/jvm/java-6-sun-1.6.0.20/jre/lib/endorsed, os.arch=amd64, java.io.tmpdir=/tmp, line.separator=
+, java.vm.specification.vendor=Sun Microsystems Inc., os.name=Linux,
+ sun.jnu.encoding=UTF-8,
+  java.library.path=/usr/lib/jvm/java-6-sun-1.6.0.20/jre/lib/amd64/server:
+  /usr/lib/jvm/java-6-sun-1.6.0.20/jre/lib/amd64:/usr/lib/jvm/java-6-sun-1
+  .6.0.20/jre/../lib/amd64:/usr/lib64/xulrunner-devel-1.9.2.3:/usr/java/pac
+  kages/lib/amd64:/usr/lib64:/lib64:/lib:/usr/lib, 
+  java.specification.name=Java Platform API Specification,
+   java.class.version=50.0, sun.management.compiler=HotSpot 64-Bit Server Compiler,
+    os.version=2.6.32-21-generic,
+     user.home=/home/rizsi, user.timezone=,
+      java.awt.printerjob=sun.print.PSPrinterJob, file.encoding=UTF-8,
+       java.specification.version=1.6, user.name=rizsi, java.vm.specification.version=1.0,
+        java.home=/usr/lib/jvm/java-6-sun-1.6.0.20/jre, sun.arch.data.model=64,
+         user.language=en, java.specification.vendor=Sun Microsystems Inc.
+         , java.vm.info=mixed mode, java.version=1.6.0_20, java.ext.dirs=/usr/lib/jvm/
+         java-6-sun-1.6.0.20/jre/lib/ext:/usr/java/packages/lib/ext, sun.boot.class.path=/
+         usr/lib/jvm/java-6-sun-1.6.0.20/jre/lib/resources.jar:/usr/lib/jvm/java-6-sun-1.6.0.20
+         /jre/lib/rt.jar:/usr/lib/jvm/java-6-sun-1.6.0.20/jre/lib/sunrsasign.jar:/usr/lib/jvm/java
+         -6-sun-1.6.0.20/jre/lib/jsse.jar:/usr/lib/jvm/java-6-sun-1.6.0.20/jre/lib/jce.jar:/us
+         r/lib/jvm/java-6-sun-1.6.0.20/jre/lib/charsets.jar:/usr/lib/jvm/java-6-sun-1.6.0.20/jre/cl
+         asses, java.vendor=Sun Microsystems Inc., file.separator=/, java.vendor.url.bug=http://java.sun.com/cgi-bin/bugreport.cgi, sun.io.unicode.encoding=UnicodeLittle, sun.cpu.endian=little, sun.desktop=gnome, sun.cpu.isalist=}

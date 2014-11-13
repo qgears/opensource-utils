@@ -1,0 +1,24 @@
+get source form ftp://ftp.freedesktop.org/pub/mesa/8.0.3/MesaLib-8.0.3.tar.bz2
+unpack
+install dependencies:
+$ apt-get build-dep libosmesa6
+$ apt-get install llvm
+
+configure:
+$ ./configure --disable-dri --disable-glx
+
+build:
+$ make
+
+Wait patiently
+
+llvm fails: 
+/usr/lib/llvm-2.8/lib/libLLVMSystem.a(ThreadLocal.o): In function `llvm::sys::ThreadLocalImpl::getInstance()':
+(.text+0xc7): undefined reference to `pthread_getspecific'
+
+If I'm not mistaken, the problem is that -lpthread comes before the object files that need it. And since LDFLAGS includes -Wl,--as-needed, pthread gets the boot. :)
+  Comment by Laurent Carlier (lordheavy) - Sunday, 10 July 2011, 21:39 GMT
+yes, adding "export LDFLAGS=${LDFLAGS/-Wl,--as-needed/}" fix the problem. Good catch!
+
+
+./configure --disable-glx --disable-dri --disable-gallium-llvm --with-gallium-drivers= --enable-osmesa

@@ -1,0 +1,31 @@
+<project name="export-osgi" default="export-osgi" basedir=".">
+	<description>
+		Export the osgi server that runs this bundle.
+	</description>
+	<target name="copy-template">
+		<copy toDir="dist">
+			<fileset dir="template">
+			    <include name="**/*"/>
+  			</fileset>
+		</copy>
+	</target>
+	<target name="export-osgi" depends="copy-template,check.ineclipse">
+		<pde.exportPlugins 
+			plugins="com.rizsi.coolrmi"
+			useJarFormat="true"
+			exportType="dir"
+			exportsource="true"
+			destination="dist">
+		</pde.exportPlugins>
+		<antcall target="refresh"/>
+	</target>
+	<target name="check.ineclipse" unless="eclipse.running">
+		<echo message="Eclipse not running, refreshing projects does not happen"/>
+		<echo message="From Eclipse run from the same JRE:"/>
+		<echo message="Run as->Ant Build...->JRE->Same as Eclipse"/>
+		<fail message="This ant task must be executed in Eclipse JVM"/>
+	</target>
+	<target name="refresh">
+		<eclipse.refreshLocal resource="com.rizsi.coolrmi/" depth="infinite"/>
+	</target>
+</project>

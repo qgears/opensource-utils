@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Require-Bundle: hu.qgears.commons
+Export-Package: hu.qgears.nativeloader
+Bundle-ActivationPolicy: lazy
+Bundle-Version: 0.9.9.qualifier
+Bundle-Name: Nativeloader
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: hu.qgears.nativeloader
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+

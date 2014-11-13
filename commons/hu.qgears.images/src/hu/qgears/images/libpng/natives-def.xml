@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<natives-def>
+	<platform name="Linux">
+		<platform arch="(amd|x86_)64">
+			<lib path="libqpng64.so" 
+				installPath="/opt/qgears/libqpng64.so"/>
+		</platform>
+		<platform arch="(i386)">
+			<lib path="libqpng.so" 
+				installPath="/opt/qgears/libqpng.so" />
+		</platform>
+	</platform>
+</natives-def>

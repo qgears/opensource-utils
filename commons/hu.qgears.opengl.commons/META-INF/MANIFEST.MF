@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Export-Package: hu.qgears.opengl.commons,
+ hu.qgears.opengl.commons.container,
+ hu.qgears.opengl.commons.context,
+ hu.qgears.opengl.commons.input,
+ hu.qgears.opengl.osmesa
+Require-Bundle: lwjgl.osgi;bundle-version="0.9.9";visibility:=reexport
+ ,hu.qgears.commons;bundle-version="0.9.9";visibility:=reexport,hu.qge
+ ars.images;visibility:=reexport
+Bundle-Vendor: QGears
+Bundle-Version: 0.9.9.qualifier
+Bundle-Name: Commons
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: hu.qgears.opengl.commons
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+

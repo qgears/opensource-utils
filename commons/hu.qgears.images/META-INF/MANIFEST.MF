@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Require-Bundle: hu.qgears.commons;visibility:=reexport,hu.qgears.nativ
+ eloader,org.junit4;resolution:=optional
+Export-Package: hu.qgears.images,
+ hu.qgears.images.devil,
+ hu.qgears.images.libpng,
+ hu.qgears.images.text,
+ hu.qgears.images.tiff,
+ hu.qgears.images.vnc
+Bundle-Vendor: QGears
+Bundle-Version: 0.9.9.qualifier
+Bundle-Name: Images
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: hu.qgears.images
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+

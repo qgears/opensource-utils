@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<natives-def>
+	<platform name="Linux">
+		<platform arch="(amd|x86_)64">
+			<lib path="libqosmesa64.so"
+			installPath="/opt/qgears/libqosmesa64.so" />
+		</platform>
+		<platform arch="(i386)">
+			<lib path="libqosmesa.so" 
+				installPath="/opt/qgears/libqosmesa.so" />
+		</platform>
+	</platform>
+</natives-def>

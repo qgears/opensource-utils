@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Test bundle for opengl.commons
+Bundle-SymbolicName: hu.qgears.opengl.commons.test
+Bundle-Version: 0.9.9.qualifier
+Bundle-Vendor: QGears
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Require-Bundle: hu.qgears.opengl.commons;bundle-version="0.9.9",
+ org.junit4;bundle-version="4.8.1"

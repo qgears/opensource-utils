@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            id="com.rizsi.emfcollab.editor.category1"
+            name="EMFCollab">
+      </category>
+      <view
+            allowMultiple="false"
+            category="com.rizsi.emfcollab.editor.category1"
+            class="hu.qgears.emfcollab.editor.view.HistoryView"
+            id="com.rizsi.emfcollab.editor.view1"
+            name="EMFCollab History"
+            restorable="true">
+      </view>
+   </extension>
+
+</plugin>

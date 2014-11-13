@@ -1,0 +1,4 @@
+Basic editor connection of EMF Collab:
+use this code to add collab functionality to 
+a generated EMF editor.
+This can also be the base of the integration into a real editor.

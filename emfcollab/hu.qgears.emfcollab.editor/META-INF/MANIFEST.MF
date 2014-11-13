@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Export-Package: hu.qgears.emfcollab.editor
+Require-Bundle: org.eclipse.ui,org.eclipse.core.runtime,org.eclipse.co
+ re.resources;visibility:=reexport,hu.qgears.emfcollab,hu.qgears.coolr
+ mi,org.eclipse.emf.ecore.xmi;visibility:=reexport,org.eclipse.emf.edi
+ t.ui;visibility:=reexport,org.eclipse.ui.ide;visibility:=reexport
+Bundle-Vendor: QGears
+Bundle-ActivationPolicy: lazy
+Bundle-Version: 0.9.9.qualifier
+Bundle-Name: Editor
+Bundle-Activator: hu.qgears.emfcollab.editor.internal.Activator
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: hu.qgears.emfcollab.editor;singleton:=true
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+

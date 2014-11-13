@@ -1,0 +1,20 @@
+<project name="generate" default="refresh" basedir=".">
+	<description>
+		Compile native library.
+		Dependencies:
+		freeglut3-dev libglew1.6-dev
+	</description>
+	<target name="refresh" depends="make-c">
+		<eclipse.refreshLocal resource="hu.qgears.opengl.commons" depth="infinite" />
+	</target>
+	<target name="make-c" depends="jnigen">
+		<exec dir="./linux" executable="make"/>
+	</target>
+	<target name="jnigen">
+		<mkdir dir="generated"/>
+		<javah class="hu.qgears.opengl.glut.Glut"
+			classpath="../bin"
+			destdir="./generated"
+			/>
+	</target>
+</project>

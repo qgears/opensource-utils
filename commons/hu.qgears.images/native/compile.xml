@@ -1,0 +1,37 @@
+<project name="generate" default="make-c" basedir=".">
+	<description>
+		Compile native library.
+		Dependencies:
+		libavcodec libavformat libswscale
+	</description>
+	<target name="make-c" depends="jnigen">
+<!-- TODO fix		<exec dir="./ffmpeg" executable="make"/> -->
+		<exec dir="./devIL/linux" executable="make"/>
+		<exec dir="./libpng/linux" executable="make"/>
+		<exec dir="./tiff/linux" executable="make"/>
+<!-- TODO fix windows binary	<exec dir="./devIL/windows" executable="make"/> -->
+	</target>
+	<target name="jnigen">
+		<mkdir dir="generated"/>
+<!-- TODO fix		<javah class="com.rizsi.video.ffmpeg.NativeVideo"
+			classpath="../bin"
+			destdir="./generated"
+			/> -->
+		<javah class="hu.qgears.images.devil.NativeDevIL"
+			classpath="../bin"
+			destdir="./devIL"
+			/>
+		<javah class="hu.qgears.images.libpng.NativeLibPng"
+			classpath="../bin"
+			destdir="./libpng"
+			/>
+	 	<javah class="hu.qgears.images.tiff.NativeTiffLoader"
+			classpath="../bin"
+			destdir="./tiff/jni"
+			/> 
+	 	<javah class="hu.qgears.images.tiff.ImageData"
+			classpath="../bin"
+			destdir="./tiff/jni"
+			/> 
+	</target>
+</project>

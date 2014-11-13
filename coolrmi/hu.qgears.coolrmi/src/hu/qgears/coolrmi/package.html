@@ -1,0 +1,18 @@
+<body>
+Cool RMI remote method invocation library. Usage is so simple:
+<br/>
+Server side:
+<pre>
+		String host="localhost";
+		int port=8889;
+		CoolRMIServer server=new CoolRMIServer(getClass().getClassLoader(), host, port);
+		server.addService(TestServiceInterface.class.getName(), new TestServiceImpl());
+		server.start();
+</pre>
+<br/>
+Client side:
+<pre>
+		String reply=((TestServiceInterface)new CoolRMIClient(host, port).getSingleUseService(TestServiceInterface.class.getClassLoader(), TestServiceInterface.class)).addPreAndPostfix("Cool RMI");
+</pre>
+
+</body>

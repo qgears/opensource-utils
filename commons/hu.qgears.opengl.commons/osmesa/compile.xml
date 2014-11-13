@@ -1,0 +1,17 @@
+<project name="generate" default="make-c" basedir=".">
+	<description>
+		Compile native library.
+		Dependencies:
+		libosmesa6-dev
+	</description>
+	<target name="make-c" depends="jnigen">
+		<exec dir="./linux" executable="make"/>
+	</target>
+	<target name="jnigen">
+		<mkdir dir="generated"/>
+		<javah class="hu.qgears.opengl.osmesa.OSMesa"
+			classpath="../bin"
+			destdir="./generated"
+			/>
+	</target>
+</project>
