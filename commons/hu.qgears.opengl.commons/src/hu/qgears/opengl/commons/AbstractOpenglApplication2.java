@@ -7,7 +7,6 @@ import hu.qgears.opengl.commons.input.IMouse;
 import hu.qgears.opengl.lwjgl.GLContextProviderLwjgl;
 
 import org.lwjgl.LWJGLException;
-import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.Rectangle;
 import org.lwjgl.util.glu.GLU;
@@ -202,15 +201,15 @@ public abstract class AbstractOpenglApplication2 {
 	protected void keyDown(int eventKey, char ch, boolean shift, boolean ctrl, boolean alt,
 			boolean special) throws Exception
 	{
-		switch(eventKey)
+		switch(ch)
 		{
-		case Keyboard.KEY_1:
+		case '1':
 			setFullScreen(true);
 			break;
-		case Keyboard.KEY_2:
+		case '2':
 			setFullScreen(false);
 			break;
-		case Keyboard.KEY_V:
+		case 'v':
 			System.out.println("Wireframe toggled!");
 			wireFrame=!wireFrame;
 			break;

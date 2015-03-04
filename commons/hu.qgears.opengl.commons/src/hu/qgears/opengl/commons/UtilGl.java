@@ -13,12 +13,9 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.lwjgl.BufferUtils;
-import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
-import org.lwjgl.opengl.Pbuffer;
-import org.lwjgl.opengl.PixelFormat;
 import org.lwjgl.util.Rectangle;
 import org.lwjgl.util.glu.GLU;
 import org.lwjgl.util.vector.Matrix4f;
@@ -258,61 +255,6 @@ public class UtilGl {
 		GL11.glVertex2f(p.x, p.y);
 	}
 	
-    /**
-     * Create a Pbuffer for use as an offscreen buffer, with the given
-     * width and height.  Use selectPbuffer() to make the pbuffer the
-     * context for all subsequent opengl commands.  Use selectDisplay() to
-     * make the Display the context for opengl commands.
-     * <P>
-     * @param width
-     * @param height
-     * @return Pbuffer
-     * @throws LWJGLException 
-     * @see selectPbuffer(), selectDisplay()
-     */
-    public static Pbuffer makePbuffer(final int width,
-    		final int height) throws LWJGLException {
-    	Pbuffer pbuffer = null;
-   		pbuffer = new Pbuffer(width, height,
-   				new PixelFormat(24, //bitsperpixel
-   						8,  //alpha
-   						0, //depth
-   						0,  //stencil
-   						0), //samples
-   						null,
-   						null);
-    	return pbuffer;
-    }
-    /**
-     * Make the pbuffer the current context for opengl commands.  All following
-     * gl functions will operate on this buffer instead of the display.
-     * <P>
-     * NOTE: the Pbuffer may be recreated if it was lost since last used.  It's
-     * a good idea to use:
-     * <PRE>
-     *         pbuff = selectPbuffer(pbuff);
-     * </PRE>
-     * to hold onto the new Pbuffer reference if Pbuffer was recreated.
-     *
-     * @param pb  pbuffer to make current
-     * @return    Pbuffer
-     * @throws LWJGLException 
-     * @see       selectDisplay(), makePbuffer()
-     */
-    public static Pbuffer selectPbuffer(Pbuffer pb) throws LWJGLException {
-    	if (pb != null) {
-    			// re-create the buffer if necessary
-    			if (pb.isBufferLost()) {
-    				int w = pb.getWidth();
-    				int h = pb.getHeight();
-    				pb.destroy();
-    				pb = makePbuffer(w, h);
-    			}
-    			// select the pbuffer for rendering
-    			pb.makeCurrent();
-    	}
-    	return pb;
-    }
 	public static void pickMatrix(int width, int height, float x, float y,
 			float size) {
 		float translateSize=size;

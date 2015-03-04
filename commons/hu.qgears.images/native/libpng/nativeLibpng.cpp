@@ -300,6 +300,7 @@ METHODPREFIX(PNGCLASS, void, closeSave)(ST_ARGS)
 		free(str->destination);
 	}
 	clearStruct(str);
+	free(str);
 }
 
 METHODPREFIX(PNGCLASS, void, beginLoad)(ST_ARGS, jobject dataBuffer)
@@ -419,6 +420,7 @@ METHODPREFIX(PNGCLASS, void, closeLoad)(ST_ARGS)
 		free(str->row_pointers);
 	}
 	clearStruct(str);
+	free(str);
 }
 METHODPREFIX(PNGCLASS, jint, getWidth)(ST_ARGS)
 {

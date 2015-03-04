@@ -9,10 +9,8 @@ import hu.qgears.images.SizeInt;
 import hu.qgears.opengl.commons.context.EBlendFunc;
 import hu.qgears.opengl.commons.context.RGlContext;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
-import java.util.concurrent.ExecutionException;
 
 import org.lwjgl.opengl.APPLEClientStorage;
 import org.lwjgl.opengl.ContextCapabilities;
@@ -46,6 +44,10 @@ public class Texture implements IDisposeable {
 	public NativeImage sourceImage;
 	public EMipMapType sourceMipmapType;
 	public ETextureWrapType sourceTextureWrapType;
+	/**
+	 * Use for debug purpose only: number of allocated texture objects.
+	 */
+	public static int numberOfTextures=0;
 
 	public EBlendFunc getBlendFunc() {
 		return blendFunc;
@@ -82,14 +84,6 @@ public class Texture implements IDisposeable {
 	}
 
 	public static int defaultAligment = 1;
-
-	public static Texture create(SizeInt size,  EMipMapType mtype) throws IOException,
-	InterruptedException, ExecutionException {
-		ByteBuffer pixels = UtilGl.allocBytes(size.getNumberOfPixels() * 4);
-		NativeImage im=new NativeImage(
-				new DefaultJavaNativeMemory(pixels), size, ENativeImageComponentOrder.RGBA, 4);
-		return create(im, mtype);
-	}
 
 	/**
 	 * Create texture object and upload the image to its content.
@@ -140,6 +134,7 @@ public class Texture implements IDisposeable {
 			IntBuffer textureHandle = UtilGl.allocInts(1);
 			textureHandle.put(this.textureHandle).flip();
 			GL11.glDeleteTextures(textureHandle);
+			numberOfTextures--;
 			disposed = true;
 		} else {
 			throw new RuntimeException("Already disposed!");
@@ -186,7 +181,6 @@ public class Texture implements IDisposeable {
 
 		// restore previous texture settings
 		GL11.glPopAttrib();
-
 		return textureHandle;
 	}
 
@@ -200,73 +194,29 @@ public class Texture implements IDisposeable {
 		}
 		return GL11.GL_RGB;
 	}
-	// /**
-	// * Create a texture from the given pixels in the default OpenGL RGBA pixel
-	// * format. Configure the texture to repeat in both directions and use
-	// LINEAR
-	// * for magnification.
-	// * <P>
-	// *
-	// * @return the texture handle
-	// */
-	// public static int makeTexture(
-	// ByteBuffer pixels, int w, int h,
-	// boolean anisotropic) {
-	// // get a new empty texture
-	// int textureHandle = allocateTexture();
-	// // preserve currently bound texture, so glBindTexture() below won't
-	// // affect anything)
-	// GL11.glPushAttrib(GL11.GL_TEXTURE_BIT);
-	// // 'select' the new texture by it's handle
-	// GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureHandle);
-	// // set texture parameters
-	// GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S,
-	// GL11.GL_REPEAT);
-	// GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T,
-	// GL11.GL_REPEAT);
-	// GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER,
-	// GL11.GL_LINEAR); // GL11.GL_NEAREST);
-	// GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER,
-	// GL11.GL_LINEAR); // GL11.GL_NEAREST);
-	//
-	// // make texture "anisotropic" so it will minify more gracefully
-	// if (anisotropic
-	// && UtilGl.getInstance().extensionExists(
-	// "GL_EXT_texture_filter_anisotropic")) {
-	// // Due to LWJGL buffer check, you can't use smaller sized buffers
-	// // (min_size = 16 for glGetFloat()).
-	// FloatBuffer max_a = UtilGl.allocFloats(16);
-	// // Grab the maximum anisotropic filter.
-	// GL11
-	// .glGetFloat(
-	// EXTTextureFilterAnisotropic.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT,
-	// max_a);
-	// // Set up the anisotropic filter.
-	// GL11.glTexParameterf(GL11.GL_TEXTURE_2D,
-	// EXTTextureFilterAnisotropic.GL_TEXTURE_MAX_ANISOTROPY_EXT,
-	// max_a.get(0));
-	// }
-	//
-	// // Create the texture from pixels
-	// GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, // level of detail
-	// GL11.GL_RGBA8, // internal format for texture is RGB with Alpha
-	// w, h, // size of texture image
-	// 0, // no border
-	// GL11.GL_RGBA, // incoming pixel format: 4 bytes in RGBA order
-	// GL11.GL_UNSIGNED_BYTE, // incoming pixel data type: unsigned
-	// // bytes
-	// pixels); // incoming pixels
-	//
-	// // restore previous texture settings
-	// GL11.glPopAttrib();
-	//
-	// return textureHandle;
-	// }
-
+	/**
+	 * Implement finalizer to detect textures not disposed.
+	 * In case a texture is finalized without beind disposed an error log
+	 * is written to stderr.
+	 * 
+	 * The texture can not be disposed in the finalizer method because
+	 * the OpenGL resource must be freed on the OpenGL thread.
+	 * Calling dispose here would raise a threading exception in
+	 * OpenGL.
+	 */
+	@Override
+	protected void finalize() throws Throwable {
+		if(!disposed)
+		{
+			System.err.println("ERROR! Texture not disposed before garbage collected!");
+		}
+		super.finalize();
+	}
 	/**
 	 * Allocate a texture (glGenTextures) and return the handle to it.
 	 */
 	private static int allocateTexture() {
+		numberOfTextures++;
 		return GL11.glGenTextures();
 	}
 

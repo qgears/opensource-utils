@@ -16,7 +16,7 @@ import java.net.URL;
 import java.nio.ByteBuffer;
 
 public class NativeLibPng {
-	public long ptr;
+	private long ptr;
 	public NativeLibPng()
 	{
 		try {
@@ -195,6 +195,9 @@ public class NativeLibPng {
 		}
 	}
 	native private void saveImage(ByteBuffer file);
+	/**
+	 * Release all resources that were allocated in the current save process.
+	 */
 	native private void closeSave();
 	public void saveImage(NativeImage im, File out) throws IOException {
 		INativeMemory mem=saveImage(im, new DefaultJavaNativeMemoryAllocator());

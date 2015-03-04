@@ -1,0 +1,19 @@
+<project name="generate" default="refresh" basedir=".">
+	<description>
+		Compile native mirgl library.
+		Dependencies: mir client dev files and egl 1.4 at least
+	</description>
+	<target name="refresh" depends="make-c">
+		<eclipse.refreshLocal resource="hu.qgears.opengl.commons" depth="infinite" />
+	</target>
+	<target name="make-c" depends="jnigen">
+		<exec dir="." executable="make"/>
+	</target>
+	<target name="jnigen">
+		<mkdir dir="generated"/>
+		<javah class="hu.qgears.opengl.mirgl.MirGl"
+			classpath="../bin"
+			destdir="./generated"
+			/>
+	</target>
+</project>

@@ -19,21 +19,40 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
+/**
+ * Utilities for I/O operations on {@link NativeImage}s.
+ * 
+ * @author Q-Gears
+ *
+ */
 public class UtilNativeImageIo {
+	/**
+	 * The header size of the custom QIMG image format.
+	 */
 	private static int headerSize=24;
+	
+	/**
+	 * Returns the size, that is required to save specified
+	 * {@link NativeImage} as QIMG image.
+	 * 
+	 * @param im
+	 * @return The required size in bytes.
+	 */
 	static public int imageToBytesSize(NativeImage im)
 	{
 		SizeInt size=im.getSize();
 		ENativeImageComponentOrder co=im.getComponentOrder();
 		return headerSize+co.getNCHannels()*size.getNumberOfPixels();
 	}
+
 	/**
-	 * Convert an image to a native image format.
-	 * 
-	 * This image format contains the uncompressed data of the NativeImage
+	 * Converts a {@link NativeImage} into a QIMG image. This image format
+	 * contains a minimal header to specify image width height and other, and
+	 * the uncompressed data of the image.
 	 * 
 	 * @param im
-	 * @return
+	 * @return The QIMG image bytes
+	 * 
 	 */
 	static public byte[] imageToBytes(NativeImage im)
 	{
@@ -43,6 +62,18 @@ public class UtilNativeImageIo {
 		imageToNativeBytes(im, bb);
 		return ret;
 	}
+
+	/**
+	 * Returns <code>true</code> if and only if the specified QIMG image content
+	 * equals the given {@link NativeImage} (contains the same image data in
+	 * same image format). Returns <code>false</code> otherwise.
+	 * 
+	 * @param mbb
+	 *            The QIMG image as {@link MappedByteBuffer}.
+	 * @param contents
+	 *            The {@link NativeImage} to compare with.
+	 * @return
+	 */
 	public static boolean isEqual(MappedByteBuffer mbb, NativeImage contents) {
 		boolean head=mbb.get()=='Q'&&mbb.get()=='I'&&mbb.get()=='M'&&mbb.get()=='G';
 		if(head)
@@ -80,11 +111,17 @@ public class UtilNativeImageIo {
 		}
 		return false;
 	}
+
 	/**
-	 * Store the image into a byte buffer.
-	 * Target is written from its current position and imageToBytesSize(im) bytes are written.
-	 * @param im This image is stored in native uncompressed format.
-	 * @param target The remaining size of the target byte buffer must be at least imageToBytesSize(im)
+	 * Store the image into a byte buffer. Target is written from its current
+	 * position and {@link #imageToBytesSize(NativeImage) imageToBytesSize(im)}
+	 * bytes are written.
+	 * 
+	 * @param im
+	 *            This image stored in native uncompressed format.
+	 * @param target
+	 *            The target buffer, where the QIMG iage will be written. The
+	 *            remaining size of the if must be at least imageToBytesSize(im)
 	 */
 	static public void imageToNativeBytes(NativeImage im, ByteBuffer target)
 	{
@@ -115,24 +152,27 @@ public class UtilNativeImageIo {
 	}
 	
 	/**
-	 * Saves the passed image as a PNG file. Works for {@link NativeImage}s that 
-	 * are handled by {@link NativeLibPng} 
+	 * Saves the passed image as a PNG file. Works for {@link NativeImage}s that
+	 * are handled by {@link NativeLibPng}
 	 * 
-	 * @param im
-	 * @param f
+	 * @param im The iamge to save
+	 * @param f The target file
 	 * @throws IOException
 	 */
 	public static void saveImageToFile(NativeImage im, File f) throws IOException{
 		new NativeLibPng().saveImage(im, f);
 	}
+
 	/**
-	 * Saves the passed image as a PNG file. Works only for {@link NativeImage}s that have 
-	 * {@link ENativeImageComponentOrder#RGBA}, {@link ENativeImageComponentOrder#ARGB}.
+	 * Saves the passed image as a PNG file and write results in a new
+	 * {@link INativeMemory} instance (allocated by
+	 * {@link DefaultJavaNativeMemoryAllocator}).
 	 * 
-	 * TODO implement for other storage types
 	 * @param im
-	 * @param f
+	 *            The iamge to save
 	 * @throws IOException
+	 * 
+	 * @return the PNG file as {@link INativeMemory}
 	 */
 	public static INativeMemory saveImageToBB(NativeImage im) throws IOException{
 		INativeMemory ret=new NativeLibPng().saveImage(im, DefaultJavaNativeMemoryAllocator.getInstance());
@@ -140,11 +180,12 @@ public class UtilNativeImageIo {
 	}
 
 	/**
-	 * Load an image from a native image format. Image of this format can be exported using the 
-	 * imageToBytes() method.
-	 * This image format contains the uncompressed data of the NativeImage.
+	 * Load an image from a QIMG image format. Image of this format can be
+	 * exported using the imageToBytes() method. This image format contains the
+	 * uncompressed data of the NativeImage.
 	 * 
-	 * @param f file to load
+	 * @param f
+	 *            file to load
 	 * @return the native image loaded into memory
 	 */
 	public static NativeImage loadImageFromFile(File f) throws IOException
@@ -153,11 +194,15 @@ public class UtilNativeImageIo {
 		nm.getJavaAccessor().order(ByteOrder.nativeOrder());
 		return wrapImageFromMemory(nm);
 	}
+
 	/**
-	 * Parse image header from memory, wrap the memory
-	 * and return an image that's content is this part of the memory.
-	 * @param nm memory to parse image from.
-	 * @return image object with data backed by the memory buffer from constructor
+	 * Parse QIMG image header from memory, wrap the memory and return an image
+	 * that's content is this part of the memory.
+	 * 
+	 * @param nm
+	 *            memory to parse image from (QIMG image).
+	 * @return image object with data backed by the memory buffer from
+	 *         constructor
 	 * @throws IOException
 	 */
 	public static NativeImage wrapImageFromMemory(INativeMemory nm) throws IOException
@@ -192,7 +237,7 @@ public class UtilNativeImageIo {
 //				nm.decrementReferenceCounter();
 				NativeImage ret=new NativeImage(imMem, new SizeInt(w, h), co, 1);
 				ret.setAlphaStorageFormat(af);
-				ret.transparentOrOpaqueMask=transparentOrOpaqueMask;
+				ret.setTransparentOrOpaqueMask(transparentOrOpaqueMask);
 
 				return ret;
 			}
@@ -205,6 +250,15 @@ public class UtilNativeImageIo {
 //			nm.decrementReferenceCounter();
 		}
 	}
+
+	/**
+	 * Checks whether the given byte and the given char equals. Throws an
+	 * {@link IOException} if they differ, otherwise it returns normally.
+	 * 
+	 * @param b The byte
+	 * @param c The char
+	 * @throws IOException When the specified parameters differ
+	 */
 	private static void check(byte b, char c) throws IOException {
 		if(((char)b)!=c)
 		{
@@ -444,6 +498,23 @@ public class UtilNativeImageIo {
 		}
 		return false;
 	}
+
+	/**
+	 * Loads the PNG file from specified URL as {@link NativeImage}, and
+	 * converts to required component order.
+	 * 
+	 * @param url
+	 *            The {@link URL} of PNG file
+	 * @param allocator
+	 *            The {@link INativeMemoryAllocator} that will be used to create
+	 *            the new {@link NativeImage}
+	 * @param order
+	 *            The required {@link ENativeImageComponentOrder}
+	 * @return a new {@link NativeImage} instance depicting the PNG image in required component order.
+	 * 
+	 * @throws IOException
+	 * @see {@link #convertType(NativeImage, INativeMemoryAllocator, ENativeImageComponentOrder)}
+	 */
 	public static NativeImage loadPngAndConvert(URL url,
 			INativeMemoryAllocator allocator, ENativeImageComponentOrder order) throws IOException {
 		NativeImage ret=NativeLibPng.loadImage(url);

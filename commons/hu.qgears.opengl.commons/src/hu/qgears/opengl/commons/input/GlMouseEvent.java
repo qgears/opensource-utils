@@ -31,20 +31,31 @@ public class GlMouseEvent {
 	 * Timestamp when the mouse event has happened.
 	 */
 	public long nanoseconds;
+	
+	/**
+	 * The id of the element on which the mouse event eventually occurred.
+	 */
+	public String affectedElementIds;
+	
 	@Override
 	public String toString() {
 		return "["+x+", "+y+"; "+button+": "+buttonState+"]";
 	}
-	public void parseFromLog(List<String> pieces)
+	public void parseFromLog(final String macroLine, List<String> pieces)
 	{
 		nanoseconds=Long.parseLong(pieces.get(0));
 		x=Integer.parseInt(pieces.get(2));
 		y=Integer.parseInt(pieces.get(3));
 		button=EMouseButton.parseSafe(Integer.parseInt(pieces.get(4)));
 		buttonState=Boolean.parseBoolean(pieces.get(5));
+		
+		final int bracketIdx = macroLine.indexOf('[');
+		
+		affectedElementIds = bracketIdx == -1 ? null : macroLine.substring(bracketIdx);
 	}
-	public String serializeToLog(long t) {
-		StringBuilder ret=new StringBuilder();
+	public String serializeToLog(final long t, final String affectedElementIds) {
+		final StringBuilder ret=new StringBuilder();
+		
 		ret.append(""+t);
 		ret.append(" 0 ");
 		ret.append(""+x);
@@ -54,6 +65,13 @@ public class GlMouseEvent {
 		ret.append(""+EMouseButton.ordinalSafe(button));
 		ret.append(" ");
 		ret.append(""+buttonState);
+		
+		if (affectedElementIds != null && !affectedElementIds.isEmpty()
+				&& !"null".equals(affectedElementIds)) {
+			ret.append(" ");
+			ret.append(affectedElementIds);
+		}
+		
 		return ret.toString();
 	}
 	public void clone(GlMouseEvent ev) {

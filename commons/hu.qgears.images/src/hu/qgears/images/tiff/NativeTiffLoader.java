@@ -7,6 +7,7 @@ import hu.qgears.commons.mem.WrappedJavaNativeMemory;
 import hu.qgears.images.ENativeImageComponentOrder;
 import hu.qgears.images.NativeImage;
 import hu.qgears.images.SizeInt;
+import hu.qgears.images.UtilNativeImageIo;
 import hu.qgears.nativeloader.UtilNativeLoader;
 
 import java.io.File;
@@ -93,4 +94,5 @@ public class NativeTiffLoader {
 	private native void loadTiffImagePrimitive(ByteBuffer fileData, ImageData image) throws NativeTiffLoaderException;
 	
 	private native void saveImageAsTiffPrimitive(int width,int height,ByteBuffer data, String filePath) throws NativeTiffLoaderException;
+
 }

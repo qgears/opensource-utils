@@ -189,21 +189,27 @@ public class UtilFile {
 
 	/**
 	 * Load the content of <code>InputStream</code> into a string. The input
-	 * must be UTF-8 encoded.
+	 * must be UTF-8 encoded. The method automatically closes the stream after
+	 * operation is finished.
 	 * 
 	 * @param is
 	 * @return
 	 * @throws IOException
+	 * @throws NullPointerException if is is <code>null</code>
 	 */
 	public static String loadAsString(InputStream is) throws IOException {
-		InputStreamReader reader = new InputStreamReader(is, "UTF-8");
-		char[] chars = new char[1024];
-		StringBuilder ret = new StringBuilder();
-		int count;
-		while ((count = reader.read(chars)) > 0) {
-			ret.append(chars, 0, count);
+		try {
+			InputStreamReader reader = new InputStreamReader(is, "UTF-8");
+			char[] chars = new char[1024];
+			StringBuilder ret = new StringBuilder();
+			int count;
+			while ((count = reader.read(chars)) > 0) {
+				ret.append(chars, 0, count);
+			}
+			return ret.toString();
+		} finally {
+			is.close();
 		}
-		return ret.toString();
 	}
 
 	/**
@@ -288,31 +294,6 @@ public class UtilFile {
 		} finally {
 			is.close();
 		}
-	}
-
-	/**
-	 * Parse the hexadecimal representation of a byte array and return it as a
-	 * byte array.
-	 * 
-	 * The method is used to export byte arrays from EMF models without using
-	 * the EMF deserializator. It is once used in mode upgrade null to
-	 * "200904030229".
-	 * 
-	 * TODO Remove this function and model upgrade null.
-	 * 
-	 * @param content
-	 *            the content of a byte array encoded into hexadecimal numbers
-	 * @return the byte array that is decoded from the input string
-	 */
-	public static byte[] decodeHexString(String content) {
-		int l = content.length() / 2;
-		byte[] bs = new byte[l];
-		for (int i = 0; i < l; ++i) {
-			byte b = (byte) Integer.parseInt(
-					content.substring(i * 2, i * 2 + 2), 16);
-			bs[i] = b;
-		}
-		return bs;
 	}
 
 	/**

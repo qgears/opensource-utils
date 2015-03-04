@@ -28,6 +28,12 @@ public class UtilProcess {
 		}
 		return ret.toString();
 	}
+	/**
+	 * Wait for process to finish its task.
+	 * @param p
+	 * @return
+	 * @throws IOException
+	 */
 	public static String execute(Process p) throws IOException
 	{
 		Reader r=new InputStreamReader(p.getInputStream(), "UTF-8");

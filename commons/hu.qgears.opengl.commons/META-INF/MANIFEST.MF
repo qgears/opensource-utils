@@ -7,7 +7,7 @@ Export-Package: hu.qgears.opengl.commons,
 Require-Bundle: lwjgl.osgi;bundle-version="0.9.9";visibility:=reexport
  ,hu.qgears.commons;bundle-version="0.9.9";visibility:=reexport,hu.qge
  ars.images;visibility:=reexport
-Bundle-Vendor: QGears
+Bundle-Vendor: Q-Gears
 Bundle-Version: 0.9.9.qualifier
 Bundle-Name: Commons
 Bundle-ManifestVersion: 2

@@ -84,7 +84,7 @@ public class KeyboardImplX11 implements IKeyboard {
 		return isCtrl((int)(ev>>16));
 	}
 
-	private boolean isCtrl(int state) {
+	protected boolean isCtrl(int state) {
 		return (state&4)!=0;
 	}
 
@@ -94,7 +94,7 @@ public class KeyboardImplX11 implements IKeyboard {
 		return isShift((int)(ev>>16));
 	}
 
-	private boolean isShift(int state) {
+	protected boolean isShift(int state) {
 		return (state&1)!=0;
 	}
 
@@ -103,7 +103,7 @@ public class KeyboardImplX11 implements IKeyboard {
 		long ev=getEvent();
 		return isAlt((int)(ev>>16));
 	}
-	private boolean isAlt(int state) {
+	protected boolean isAlt(int state) {
 		return (state&8)!=0;
 	}
 	private class KeyCodeMapping
@@ -158,7 +158,7 @@ public class KeyboardImplX11 implements IKeyboard {
 			if(OGlGlobalParameters.logKeyMessages)
 			{
 				char ch=(char)unicode;
-				System.out.println("kev: p: "+press+" keycode: "+keyCode+" st: "+decodeState(state)+" "+(
+				System.out.println("kev: p: "+press+" keycode: "+keyCode+" st: "+state+" "+decodeState(state)+" "+(
 						specialKey?("mapping: "+(m==null?"null":m.name)):
 								(""+unicode+" '"+ch+"'")));
 			}

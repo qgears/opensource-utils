@@ -1,5 +1,8 @@
 package hu.qgears.nativeloader;
 
+/**
+ * TODO not used feature. 
+ */
 public class SourceFile {
 	private String path;
 	private String exec;

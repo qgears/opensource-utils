@@ -4,6 +4,7 @@
 		Dependencies:
 		libavcodec libavformat libswscale
 	</description>
+	<property environment="env"/>
 	<target name="make-c" depends="jnigen">
 <!-- TODO fix		<exec dir="./ffmpeg" executable="make"/> -->
 		<exec dir="./devIL/linux" executable="make"/>
@@ -18,19 +19,19 @@
 			destdir="./generated"
 			/> -->
 		<javah class="hu.qgears.images.devil.NativeDevIL"
-			classpath="../bin"
+			classpath="../bin:${env.QGEARSDEPS}"
 			destdir="./devIL"
 			/>
 		<javah class="hu.qgears.images.libpng.NativeLibPng"
-			classpath="../bin"
+			classpath="../bin:${env.QGEARSDEPS}"
 			destdir="./libpng"
 			/>
 	 	<javah class="hu.qgears.images.tiff.NativeTiffLoader"
-			classpath="../bin"
+			classpath="../bin:${env.QGEARSDEPS}"
 			destdir="./tiff/jni"
 			/> 
 	 	<javah class="hu.qgears.images.tiff.ImageData"
-			classpath="../bin"
+			classpath="../bin:${env.QGEARSDEPS}"
 			destdir="./tiff/jni"
 			/> 
 	</target>

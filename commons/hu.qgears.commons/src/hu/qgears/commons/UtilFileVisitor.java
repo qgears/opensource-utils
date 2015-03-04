@@ -2,6 +2,11 @@ package hu.qgears.commons;
 
 import java.io.File;
 
+/**
+ * Simple file system visitor that visits a folder with all subfolders and files.
+ * @author rizsi
+ *
+ */
 public class UtilFileVisitor {
 	final public void visit(File dir) throws Exception
 	{
@@ -28,6 +33,13 @@ public class UtilFileVisitor {
 		}
 	}
 
+	/**
+	 * Subclasses must override this method to implement useful feature.
+	 * @param dir folder or file currently visited.
+	 * @param localPath the local path of the file relative to the root folder of visiting.
+	 * @return true means that children must also be visited. False blocks visiting the children of current folder.
+	 * @throws Exception
+	 */
 	protected boolean visited(File dir, String localPath) throws Exception {
 		return true;
 	}

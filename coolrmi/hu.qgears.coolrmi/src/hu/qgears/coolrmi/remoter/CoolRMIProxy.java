@@ -83,7 +83,7 @@ public class CoolRMIProxy implements InvocationHandler {
 			} catch (Throwable t) {
 				throw new CoolRMIException("Exception doing the RMI", t);
 			}
-			if (reply != null) {
+			if (reply.getException() != null) {
 				throw reply.getException();
 			} else {
 				throw new CoolRMIException("Internal error");

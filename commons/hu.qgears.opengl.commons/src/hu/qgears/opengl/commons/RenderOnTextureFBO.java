@@ -26,12 +26,16 @@ public class RenderOnTextureFBO extends AbstarctRenderOnTexture implements IRend
 	private boolean depthBuffer=false;
 	private int rbId=-1;
 	private int fbId=-1;
+	public static int numberOfROT;
+	public static int rotCreated;
 
 	public RenderOnTextureFBO(Texture target, boolean needDephBuffer) throws LWJGLException
 	{
 		this.target=target;
 		this.depthBuffer=needDephBuffer;
 		init(target.getSize());
+		numberOfROT++;
+		rotCreated++;
 	}
 	private void init(SizeInt size) throws LWJGLException
 	{
@@ -120,6 +124,10 @@ public class RenderOnTextureFBO extends AbstarctRenderOnTexture implements IRend
 		{
 			EXTFramebufferObject.glDeleteFramebuffersEXT(fbId);
 			fbId=-1;
+		}
+		if(!disposed)
+		{
+			numberOfROT--;
 		}
 		disposed=true;
 	}

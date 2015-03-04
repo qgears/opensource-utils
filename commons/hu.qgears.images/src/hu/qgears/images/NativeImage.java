@@ -17,7 +17,15 @@ import java.nio.ByteBuffer;
  */
 public class NativeImage extends AbstractReferenceCountedDisposeable
 {
+	/**
+	 * The transparent marker bit mask in the returned value of getTransparentOrOpaqueMask() method.
+	 * The returned value means transparent when getTransparentOrOpaqueMask()&transparentBit!=0
+	 */
 	public static final int transparentBit=1;
+	/**
+	 * The opaque marker bit mask in the returned value of getTransparentOrOpaqueMask() method.
+	 * The returned value means opaque when getTransparentOrOpaqueMask()&opaqueBit!=0
+	 */
 	public static final int opaqueBit=2;
 	
 	private INativeMemory buffer;
@@ -38,10 +46,10 @@ public class NativeImage extends AbstractReferenceCountedDisposeable
 	 * loaded using {@link UtilNativeImageIo#loadImageFromFile(java.io.File)} or
 	 * {@link UtilNativeImageIo#loadImageFromFile(INativeMemory)}, or, if the
 	 * image has been created another way, {@link #getTransparentOrOpaqueMask()} 
-	 * is called previously. DO USE {@link #getTransparentOrOpaqueMask()} 
-	 * instead! DO NOT modify the value of this field directly!
+	 * is called previously.
+	 * In case the image is modified since calculation of this flag this flag will be incorrect!
 	 */
-	public int transparentOrOpaqueMask = -1;
+	private int transparentOrOpaqueMask = -1;
 	/** 
 	 * The default alignment of native image rows to memory.
 	 * this means that all row start an an address that: ptrRow%defaultAlignment=0
@@ -53,9 +61,10 @@ public class NativeImage extends AbstractReferenceCountedDisposeable
 	public static int compatibleAlignment=4;
 	/**
 	 * Create a native image from existing data.
-	 * @param buffer
-	 * @param size
-	 * @param componentOrder
+	 * @param buffer see getBuffer()
+	 * @param size see getSize()
+	 * @param componentOrder see getComponentOrder()
+	 * @param alignemnt see getAlignment()
 	 */
 	public NativeImage(INativeMemory buffer, SizeInt size, ENativeImageComponentOrder componentOrder, int alignment) {
 		super();
@@ -66,62 +75,70 @@ public class NativeImage extends AbstractReferenceCountedDisposeable
 		this.buffer = buffer;
 		this.size=size;
 		this.componentOrder=componentOrder;
-		this.nChannels=getNChannels(componentOrder);
+		this.nChannels=componentOrder.getNCHannels();
 		this.width=size.getWidth();
 		this.alignment=alignment;
 		this.step=getStep(this.width, componentOrder, alignment);
 		this.nbuffer=buffer.getJavaAccessor();
 	}
+	/**
+	 * Get the memory buffer that contains image pixel data.
+	 * @return
+	 */
 	public INativeMemory getBuffer() {
 		return buffer;
 	}
+	/**
+	 * Get the width of the image in pixels.
+	 * @return
+	 */
 	public int getWidth() {
 		return size.getWidth();
 	}
+	/**
+	 * Get the height of the image in pixels.
+	 * @return
+	 */
 	public int getHeight() {
 		return size.getHeight();
 	}
+	/**
+	 * Get the pixel data storage format of the image.
+	 * @return
+	 */
 	public ENativeImageComponentOrder getComponentOrder() {
 		return componentOrder;
 	}
+	/**
+	 * Get the size of the image in pixels.
+	 * @return
+	 */
 	public SizeInt getSize() {
 		return size;
 	}
+	/**
+	 * Get the image pixel data of the given pixel and channel.
+	 * @param x
+	 * @param y
+	 * @param channel
+	 * @return pixel data value of the channel
+	 */
 	public byte getChannel(int x, int y, int channel)
 	{
 		return nbuffer.get(y*step+x*nChannels+channel);
 	}
+	/**
+	 * Set the image pixel data of the given channel.
+	 * @param x
+	 * @param y
+	 * @param channel
+	 * @param value
+	 * @return
+	 */
 	public NativeImage setChannel(int x, int y, int channel, byte value)
 	{
 		nbuffer.put(y*step+x*nChannels+channel, value);
 		return this;
-	}
-	/**
-	 * Use ENativeImageComponentOrder.getNChannels instead!
-	 * @param componentOrder
-	 * @return
-	 */
-	@Deprecated
-	public static int getNChannels(
-			ENativeImageComponentOrder componentOrder) {
-		return componentOrder.getNCHannels();
-/*		switch(componentOrder)
-		{
-		case ALPHA:
-		case MONO:
-			return 1;
-		case RGB:
-			return 3;
-		case RGBA:
-			return 4;
-		case BGR:
-			return 3;
-		case BGRA:
-		case ARGB:
-			return 4;
-		}
-		throw new RuntimeException("Unknown image format: "+componentOrder);
-	*/
 	}
 	/**
 	 * Create a native image that has the specified size, component order 
@@ -158,6 +175,13 @@ public class NativeImage extends AbstractReferenceCountedDisposeable
 		INativeMemory buffer=allocator.allocateNativeMemory(step*size.getHeight());
 		return new NativeImage(buffer, size, componentOrder, alignment);
 	}
+	/**
+	 * Get the length of a line of the image data in bytes.
+	 * @param width width of the image in pixels
+	 * @param co pixel data format
+	 * @param alignment storage alignment of the image.
+	 * @return
+	 */
 	public static int getStep(int width, ENativeImageComponentOrder co, int alignment)
 	{
 		int step=width*co.getNCHannels();
@@ -167,10 +191,6 @@ public class NativeImage extends AbstractReferenceCountedDisposeable
 			step+=alignment-mod;
 		}
 		return step;
-	}
-	public double getChannelD(double x, double y, int channel) {
-		byte ret=getChannel((int)x, (int)y, channel);
-		return ((double)(((int)ret)&0xff))/255.0;
 	}
 	/**
 	 * Copy the rectangular area from the source image into this image.
@@ -184,12 +204,27 @@ public class NativeImage extends AbstractReferenceCountedDisposeable
 	{
 		copyFromSource(src, x, y, 0, 0);
 	}
-	
+	/**
+	 * Copy the rectangular area from the source image into this image.
+	 * Target is this image at tgX, tgY
+	 * @param src
+	 * @param x the left corner of source
+	 * @param y the top corner of source
+	 * @param tgX
+	 * @param tgY
+	 */
 	public void copyFromSource(NativeImage src, int x, int y, int tgX, int tgY)
 	{
 		copyFromSource(src, x, y, tgX, tgY, false);
 	}
-	
+	/**
+	 * Do pixel copying from a source image using pixel data conversion.
+	 * @param src
+	 * @param x
+	 * @param y
+	 * @param tgX
+	 * @param tgY
+	 */
 	private void convertFromSource(NativeImage src, int x, int y, int tgX,
 			int tgY) {
 		int w=Math.min(src.getSize().getWidth()-x, getSize().getWidth()-tgX);
@@ -219,7 +254,7 @@ public class NativeImage extends AbstractReferenceCountedDisposeable
 	 *            if true, processing of data from the current position of the 
 	 *            source image's buffer will be performed instead of position 0
 	 */
-	public void copyFromSource(NativeImage src, int x, int y, int tgX, int tgY,
+	private void copyFromSource(NativeImage src, int x, int y, int tgX, int tgY,
 			boolean processFromPosition) {
 		if (!src.getComponentOrder().equals(getComponentOrder())) {
 			convertFromSource(src, x, y, tgX, tgY);
@@ -376,19 +411,25 @@ public class NativeImage extends AbstractReferenceCountedDisposeable
 		}
 		return (int)ret;
 	}
+	/**
+	 * Get the number of channels of the image format.
+	 * @return
+	 */
 	public int getnChannels() {
 		return nChannels;
 	}
-	public void setChannelD(int x, int y, int channel, double val) {
-		val=val>1?1:val<0?0:val;
-		setChannel(x, y, channel, (byte)(val*255));
-	}
+	/**
+	 * Get the storage alignment of image data.
+	 * Data of all lines are aligned to addresses with this alignment.
+	 * Some image manipulation libraries require that lines of data is aligned in memory.
+	 * @return 1, 2 and 4 are common values
+	 */
 	public int getAlignment() {
 		return alignment;
 	}
 	/**
 	 * Get the length of a stored row in bytes.
-	 * @return width*bytesperpixel+alignment
+	 * @return width*bytesperpixel+alignmentIfRequired
 	 */
 	public int getStep() {
 		return step;
@@ -424,28 +465,12 @@ public class NativeImage extends AbstractReferenceCountedDisposeable
 			buffer.decrementReferenceCounter();
 			buffer=null;
 		}
+		nbuffer=null;
 	}
-	
 	/**
-	 * Clear the contents of the image. Set all bytes to 0.
-	 * 
-	 * TODO optimize it with using memset
-	 * 
+	 * Get the alpha storage format of the image. See {@link ENativeImageAlphaStorageFormat}
+	 * @return
 	 */
-	/*
-	public void clear() {
-		ByteBuffer bb=getBuffer().getJavaAccessor();
-		{
-			// TODO memset may be faster!
-			bb.position(0);
-			for(int i=0;i<bb.limit();++i)
-			{
-				bb.put((byte)0);
-			}
-			bb.clear();
-		}
-	}
-	*/
 	public ENativeImageAlphaStorageFormat getAlphaStorageFormat() {
 		return alphaStorageFormat;
 	}
@@ -472,7 +497,7 @@ public class NativeImage extends AbstractReferenceCountedDisposeable
 		}
 	}
 	/**
-	 * Flip the image in the y coordinate.
+	 * Flip the image data in the y coordinate.
 	 */
 	public void flipY()
 	{
@@ -492,8 +517,11 @@ public class NativeImage extends AbstractReferenceCountedDisposeable
 	}
 
 	/**
-	 * 
-	 * @return transparency and opacity mask
+	 * Lazy init and return the transparent or opaque mask of the image.
+	 * This method finds transparency only in 4 byte image formats. In other cases the returned value will be 0.
+	 * In case of non alpha channel formats the returned value will be {@link opaqueBit}
+	 * The first time when this test is executed it will run slow because it reads the whole image data.
+	 * @return transparency and opacity mask see opaqueBit and transparentBit constants.
 	 */
 	public int getTransparentOrOpaqueMask() {
 		if (this.transparentOrOpaqueMask == -1) {		
@@ -501,21 +529,28 @@ public class NativeImage extends AbstractReferenceCountedDisposeable
 			
 			if(alphaChannelIdx!=-1)
 			{
-				int oMask=0xff<<(3-alphaChannelIdx)*8;
-				ByteBuffer bb=getBuffer().getJavaAccessor();
-				int c=bb.capacity()/4;
-				bb.clear();
-				boolean t=true;
-				boolean o=true;
-				for(int i=0;i<c;++i)
+				if(getComponentOrder().getNCHannels()==4
+					&& getAlignment()<=4)
 				{
-					int v=bb.getInt();
-					t&=v==0;
-					o&=((v&oMask)==oMask);
+					int oMask=0xff<<(3-alphaChannelIdx)*8;
+					ByteBuffer bb=getBuffer().getJavaAccessor();
+					int c=bb.capacity()/4;
+					bb.clear();
+					boolean t=true;
+					boolean o=true;
+					for(int i=0;i<c;++i)
+					{
+						int v=bb.getInt();
+						t&=v==0;
+						o&=((v&oMask)==oMask);
+					}
+					
+					bb.clear();
+					transparentOrOpaqueMask = (t?transparentBit:0)+(o?opaqueBit:0);
+				}else
+				{
+					transparentOrOpaqueMask=0;
 				}
-				
-				bb.clear();
-				transparentOrOpaqueMask = (t?transparentBit:0)+(o?opaqueBit:0);
 			} else {
 				transparentOrOpaqueMask = opaqueBit;
 			}
@@ -542,6 +577,13 @@ public class NativeImage extends AbstractReferenceCountedDisposeable
 				(pixel >> 8) & 0xFF,
 				pixel  & 0xFF
 		};
+	}
+	/**
+	 * This method is only to be used by UtilNativeImageIo class!
+	 * @param transparentOrOpaqueMask
+	 */
+	public void setTransparentOrOpaqueMask(int transparentOrOpaqueMask) {
+		this.transparentOrOpaqueMask=transparentOrOpaqueMask;
 	}
 	
 }

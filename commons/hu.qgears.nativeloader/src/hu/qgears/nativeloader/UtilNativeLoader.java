@@ -1,7 +1,6 @@
 package hu.qgears.nativeloader;
 
 import hu.qgears.commons.UtilFile;
-import hu.qgears.commons.UtilProcess;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -78,17 +77,6 @@ public class UtilNativeLoader {
 			throws NativeLoadException {
 		try {
 			Class<?> clazz = nativeLoader.getClass();
-			File overrideDir = null;
-			String overrrideDirKey = "com.rizsi.native.override.dir";
-			String dir = System.getProperty(overrrideDirKey);
-			if (dir != null) {
-				overrideDir = new File(dir);
-				info("Override dir is: "
-						+ overrideDir.getAbsolutePath());
-			} else {
-				info("native library override directory is not set (System property: "
-								+ overrrideDirKey + ")");
-			}
 
 			String archKey = "os.arch";
 			String oskey = "os.name";
@@ -99,11 +87,7 @@ public class UtilNativeLoader {
 					+ clazz.getName() + " arch: " + arch + " os: " + os);
 			NativesToLoad natives = nativeLoader.getNatives(arch, os);
 			for (NativeBinary libPath : natives.getBinaries()) {
-				loadNativeBinary(libPath, overrideDir, clazz, nativeLoader);
-			}
-			for(SourceFile sf:natives.getSources())
-			{
-				loadNativeSource(sf, overrideDir, clazz, nativeLoader);
+				loadNativeBinary(libPath, clazz, nativeLoader);
 			}
 		} catch (NativeLoadException e) {
 			throw e;
@@ -111,56 +95,8 @@ public class UtilNativeLoader {
 			throw new NativeLoadException(t);
 		}
 	}
-	private static void loadNativeSource(SourceFile sf, File overrideDir,
-			Class<?> clazz, INativeLoader nativeLoader) throws Throwable {
-		String installPath=sf.getInstallPath();
-		if(installPath!=null)
-		{
-			File f=new File(installPath);
-			if(f.exists())
-			{
-				info(" loading binary from: "+installPath);
-				nativeLoader.load(f);
-				return;
-			}
-		}
-		String fileName = sf.getOut();
-		File dir=new File(getDirectory(), fileName);
-		dir.mkdirs();
-		{
-			URL url = clazz.getResource(sf.getPath());
-			URL execUrl=clazz.getResource(sf.getExec());
-			if (url == null) {
-				throw new NativeLoadException("Native not found: " + sf.getPath());
-			}
-			if (execUrl == null) {
-				throw new NativeLoadException("Native compile exec not found: " + sf.getExec());
-			}
-			File execFile=new File(dir, sf.getExec());
-			byte[] execBs=loadFile(execUrl);
-			UtilFile.saveAsFile(execFile, execBs);
-			UtilFile.saveAsFile(new File(dir, sf.getPath()), loadFile(url));
-			execFile.setExecutable(true);
-			UtilProcess.execute(Runtime.getRuntime().exec(execFile.getAbsolutePath(), null, dir));
-			File f=new File(dir, sf.getOut());
-			info("-- Load native from temporary directory: " + f.getAbsolutePath());
-			nativeLoader.load(f);
-//			byte[] bs = loadFile(url);
-//			UtilFile.saveAsFile(g, bs);
-//			UtilProcess.execute("");
-//			String nativeName = fileName;
-//			g = new File(getDirectory(), nativeName);
-//			UtilFile.checkSaveAsFile(g, bs);
-//			info("Native is copied to temporary directory: "
-//							+ g.getAbsolutePath());
-		}
-		// TODO Auto-generated method stub
-		
-	}
-	private static void loadNativeBinary(NativeBinary nativeBinary,
-			File overrideDir, Class<?> clazz,
+	private static void loadNativeBinary(NativeBinary nativeBinary, Class<?> clazz,
 			INativeLoader nativeLoader) throws Throwable {
-		String libPath=nativeBinary.getLibPath();
 		File g = null;
 		if(nativeBinary.getInstallPath()!=null)
 		{
@@ -173,37 +109,17 @@ public class UtilNativeLoader {
 		}
 		if(g==null)
 		{
-			String fileName = libPath;
-			int idx = fileName.lastIndexOf("/");
-			if (idx >= 0) {
-				fileName = fileName.substring(idx + 1);
+			URL url = nativeBinary.getUrl(clazz);
+			if(url==null)
+			{
+				throw new NativeLoadException("Native not found: " + nativeBinary.getLibPath());
 			}
-			String defaultLibPath=libPath;
-			libPath = libPath.replaceAll("/", "_");
-			info("- Load native: " + libPath);
-			if (overrideDir != null) {
-				g = new File(overrideDir, fileName);
-			}
-			if (g == null || !g.exists()) {
-				URL url = clazz.getResource(libPath);
-				if (url == null) {
-					url=clazz.getResource(defaultLibPath);
-					if(url==null)
-					{
-						throw new NativeLoadException("Native not found: " + libPath+" "+defaultLibPath);
-					}
-				}
-				info("-- Load native from url: " + url);
-				byte[] bs = loadFile(url);
-				String nativeName = fileName;
-				g = new File(getDirectory(), nativeName);
-				UtilFile.checkSaveAsFile(g, bs);
-				info("Native is copied to temporary directory: "
-								+ g.getAbsolutePath());
-			} else {
-				info("-- Native is loaded form override dir: "
-						+ g.getAbsolutePath());
-			}
+			info("- Load native: " + nativeBinary.getLibPath()+" from: "+url);
+			byte[] bs = loadFile(url);
+			g = new File(getDirectory(), nativeBinary.getFileName());
+			UtilFile.checkSaveAsFile(g, bs);
+			info("Native is copied to temporary directory: "
+							+ g.getAbsolutePath());
 		}
 		nativeLoader.load(g);
 	}

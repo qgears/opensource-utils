@@ -1,8 +1,7 @@
 Manifest-Version: 1.0
-Require-Bundle: org.junit4;resolution:=optional
 Export-Package: hu.qgears.commons,hu.qgears.commons.mem,hu.qgears.comm
  ons.signal
-Bundle-Vendor: QGears
+Bundle-Vendor: Q-Gears
 Bundle-Version: 0.9.9.qualifier
 Bundle-Name: Commons
 Bundle-ManifestVersion: 2

@@ -46,22 +46,4 @@ public class UtilEscape {
 		}
 		return ret.toString();
 	}
-
-	/**
-	 * TODO nono, this should be implemented
-	 * @param string
-	 * @return
-	 */
-	public static String escapeHtml(String string) {
-		return string;
-	}
-
-	/**
-	 * TODO nono, this should be implemented
-	 * @param string
-	 * @return
-	 */
-	public static String escapeHtmlArgument(String string) {
-		return string;
-	}
 }

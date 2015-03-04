@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<implementations>
+	<implementation name="Linux" arch="amd64">
+		<lib path="libmirgl64.so" installPath="/opt/qgears/libmirgl64.so" />
+	</implementation>
+</implementations>
