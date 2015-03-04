@@ -164,21 +164,20 @@ public final class Sys {
 	 * @param url The URL. Ensure that the URL is properly encoded.
 	 * @return false if we are CERTAIN the call has failed
 	 */
-	@SuppressWarnings({ "unchecked" })
 	public static boolean openURL(String url) {
 		// Attempt to use Webstart if we have it available
 		try {
 			// Lookup the javax.jnlp.BasicService object
-			final Class serviceManagerClass = Class.forName("javax.jnlp.ServiceManager");
-			Method lookupMethod = (Method)AccessController.doPrivileged(new PrivilegedExceptionAction() {
+			final Class<?> serviceManagerClass = Class.forName("javax.jnlp.ServiceManager");
+			Method lookupMethod = (Method)AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
 				@Override
 				public Object run() throws Exception {
 					return serviceManagerClass.getMethod("lookup", new Class[] {String.class});
 				}
 			});
 			Object basicService = lookupMethod.invoke(serviceManagerClass, new Object[] {"javax.jnlp.BasicService"});
-			final Class basicServiceClass = Class.forName("javax.jnlp.BasicService");
-			Method showDocumentMethod = (Method)AccessController.doPrivileged(new PrivilegedExceptionAction() {
+			final Class<?> basicServiceClass = Class.forName("javax.jnlp.BasicService");
+			Method showDocumentMethod = (Method)AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
 				@Override
 				public Object run() throws Exception {
 					return basicServiceClass.getMethod("showDocument", new Class[] {URL.class});

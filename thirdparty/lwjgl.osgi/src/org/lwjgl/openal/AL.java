@@ -208,7 +208,7 @@ public final class AL {
 			context = null;
 		}
 		if (device != null) {
-			boolean result = ALC10.alcCloseDevice(device);
+			ALC10.alcCloseDevice(device);
 			device = null;
 		}
 		resetNativeStubs(AL10.class);
@@ -222,7 +222,7 @@ public final class AL {
 		created = false;
 	}
 
-	private static native void resetNativeStubs(Class clazz);
+	private static native void resetNativeStubs(Class<?> clazz);
 
 	/**
 	 * @return handle to the default AL context.
