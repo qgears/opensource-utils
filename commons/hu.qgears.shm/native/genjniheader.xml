@@ -1,0 +1,23 @@
+<project name="generate" default="jnigen" basedir=".">
+	<description>
+		Generate jni header
+	</description>
+	<target name="jnigen">
+		<javah class="hu.qgears.shm.SharedMemoryNative"
+			classpath="../bin"
+			destdir="./"
+			/>
+		<javah class="hu.qgears.shm.dlmalloc.DlMallocPoolNative"
+			classpath="../bin"
+			destdir="./"
+			/>
+		<javah class="hu.qgears.shm.sem.SemaphoreNative"
+			classpath="../bin"
+			destdir="./"
+			/>
+		<javah class="hu.qgears.shm.part.PartNativeMemoryNative"
+			classpath="../bin"
+			destdir="./"
+			/>
+	</target>
+</project>

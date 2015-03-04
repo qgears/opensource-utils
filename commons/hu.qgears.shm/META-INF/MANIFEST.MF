@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Shm
+Bundle-SymbolicName: hu.qgears.shm
+Bundle-Version: 0.9.9.qualifier
+Bundle-Vendor: Q-Gears
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Export-Package: hu.qgears.shm,
+ hu.qgears.shm.dlmalloc,
+ hu.qgears.shm.part,
+ hu.qgears.shm.sem
+Require-Bundle: hu.qgears.commons;bundle-version="0.9.9",
+ hu.qgears.nativeloader;bundle-version="0.9.9";visibility:=reexport
