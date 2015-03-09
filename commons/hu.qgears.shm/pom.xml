@@ -13,4 +13,74 @@
 	<artifactId>hu.qgears.shm</artifactId>
 	<version>0.9.9-SNAPSHOT</version>
 	<packaging>eclipse-plugin</packaging>
+
+	<profiles>
+		<profile>
+			<id>native-build</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>exec-maven-plugin</artifactId>
+						<version>1.2.1</version>
+						<!-- Inheritance must be disabled, because the exec plugin run in all submodules by default-->
+						<inherited>false</inherited>
+						<executions>
+							<execution>
+								<id>libshm-natives</id>
+								<phase>generate-resources</phase>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+								<configuration>
+									<executable>make</executable>
+									<workingDirectory>./native/linux</workingDirectory>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>cross-compile</id>
+			<activation>
+				<file>
+					<exists>${crosscompile-script}</exists>
+				</file>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>exec-maven-plugin</artifactId>
+						<version>1.2.1</version>
+						<!-- Inheritance must be disabled, because the exec plugin run in all submodules by default-->
+						<inherited>false</inherited>
+						<executions>
+							<execution>
+								<id>libshm-cross</id>
+								<phase>generate-resources</phase>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+								<configuration>
+									<executable>${crosscompile-script}</executable>
+									<workingDirectory>${project.build.directory}</workingDirectory>
+									<arguments>
+										<argument>${basedir}/native</argument>
+										<argument>linux</argument>
+										<argument>${basedir}/src/hu/qgears/shm/natives</argument>
+									</arguments>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>
