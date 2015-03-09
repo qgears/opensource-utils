@@ -14,51 +14,45 @@
 	<version>0.9.9-SNAPSHOT</version>
 	<packaging>eclipse-plugin</packaging>
 
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.2.1</version>
+				<!-- Inheritance must be disabled, because the exec plugin run in all submodules by default-->
+				<inherited>false</inherited>
+				<executions>
+					<!-- Compile libpng native libraries -->
+					<execution>
+						<id>libqpng-natives</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+						<configuration>
+							<executable>make</executable>
+							<workingDirectory>./native/libpng/linux</workingDirectory>
+						</configuration>
+					</execution>
+					<!-- Compiling tiff lib -->
+					<execution>
+						<id>qtiffloader-natives</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+						<configuration>
+							<executable>make</executable>
+							<workingDirectory>./native/tiff/linux</workingDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 
 	<profiles>
-		<profile>
-			<id>native-build</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>exec-maven-plugin</artifactId>
-						<version>1.2.1</version>
-						<!-- Inheritance must be disabled, because the exec plugin run in all submodules by default-->
-						<inherited>false</inherited>
-						<executions>
-							<!-- Compile libpng native libraries -->
-							<execution>
-								<id>libqpng-natives</id>
-								<phase>generate-resources</phase>
-								<goals>
-									<goal>exec</goal>
-								</goals>
-								<configuration>
-									<executable>make</executable>
-									<workingDirectory>./native/libpng/linux</workingDirectory>
-								</configuration>
-							</execution>
-							<!-- Compiling tiff lib -->
-							<execution>
-								<id>qtiffloader-natives</id>
-								<phase>generate-resources</phase>
-								<goals>
-									<goal>exec</goal>
-								</goals>
-								<configuration>
-									<executable>make</executable>
-									<workingDirectory>./native/tiff/linux</workingDirectory>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
 		<profile>
 			<id>cross-compile</id>
 			<activation>
