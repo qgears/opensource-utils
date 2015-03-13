@@ -162,8 +162,8 @@ public class VNCClient {
 		nextImage.dispose();
 	}
 	private void processServerMessages() throws IOException {
-		image.getImage(new SizeInt(width, height), componentOrder, new DefaultJavaNativeMemoryAllocator());
-		nextImage.getImage(new SizeInt(width, height), componentOrder, new DefaultJavaNativeMemoryAllocator());
+		image.getImage(new SizeInt(width, height), componentOrder, DefaultJavaNativeMemoryAllocator.getInstance());
+		nextImage.getImage(new SizeInt(width, height), componentOrder, DefaultJavaNativeMemoryAllocator.getInstance());
 		ByteBuffer bb=ByteBuffer.allocateDirect(4*width*height).order(ByteOrder.BIG_ENDIAN);
 		while(!exit)
 		{

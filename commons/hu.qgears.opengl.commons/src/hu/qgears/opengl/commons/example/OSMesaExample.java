@@ -32,7 +32,7 @@ public class OSMesaExample {
 		OSMesaInstance.getInstance();
 		OSMesa osMesa=new OSMesa();
 		osMesa.createContext();
-		NativeImage im=NativeImage.create(new SizeInt(1024, 768), ENativeImageComponentOrder.RGBA, new DefaultJavaNativeMemoryAllocator());
+		NativeImage im=NativeImage.create(new SizeInt(1024, 768), ENativeImageComponentOrder.RGBA, DefaultJavaNativeMemoryAllocator.getInstance());
 		osMesa.makeCurrent(im);
 		GLContext.useContext(osMesa);
 		UtilGl.drawMinimalScene();

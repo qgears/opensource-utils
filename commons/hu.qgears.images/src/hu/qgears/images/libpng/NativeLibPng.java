@@ -200,7 +200,7 @@ public class NativeLibPng {
 	 */
 	native private void closeSave();
 	public void saveImage(NativeImage im, File out) throws IOException {
-		INativeMemory mem=saveImage(im, new DefaultJavaNativeMemoryAllocator());
+		INativeMemory mem=saveImage(im, DefaultJavaNativeMemoryAllocator.getInstance());
 		UtilFile.saveAsFile(out, mem.getJavaAccessor());
 		mem.decrementReferenceCounter();
 	}

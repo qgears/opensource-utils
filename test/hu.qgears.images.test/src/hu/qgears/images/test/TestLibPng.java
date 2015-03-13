@@ -19,8 +19,8 @@ public class TestLibPng {
 		byte[] data=UtilFile.loadFile(getClass().getResource("1292.png"));
 		ByteBuffer imageData=ByteBuffer.allocateDirect(data.length);
 		imageData.put(data);
-		NativeImage im=new NativeLibPng().loadImage(imageData, new DefaultJavaNativeMemoryAllocator(), 4);
-		INativeMemory pngFile=new NativeLibPng().saveImage(im, new DefaultJavaNativeMemoryAllocator());
+		NativeImage im=new NativeLibPng().loadImage(imageData, DefaultJavaNativeMemoryAllocator.getInstance(), 4);
+		INativeMemory pngFile=new NativeLibPng().saveImage(im, DefaultJavaNativeMemoryAllocator.getInstance());
 		UtilFile.saveAsFile(new File("/tmp/a.png"), pngFile.getJavaAccessor());
 	}
 }

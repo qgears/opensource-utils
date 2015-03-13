@@ -190,7 +190,7 @@ public class UtilNativeImageIo {
 	 */
 	public static NativeImage loadImageFromFile(File f) throws IOException
 	{
-		INativeMemory nm=UtilFile.loadAsByteBuffer(f, new DefaultJavaNativeMemoryAllocator());
+		INativeMemory nm=UtilFile.loadAsByteBuffer(f, DefaultJavaNativeMemoryAllocator.getInstance());
 		nm.getJavaAccessor().order(ByteOrder.nativeOrder());
 		return wrapImageFromMemory(nm);
 	}
@@ -450,7 +450,7 @@ public class UtilNativeImageIo {
 	public static void saveImageToTiff(NativeImage im, File outputFile)throws IOException {
 		ENativeImageComponentOrder requiredPixelOrder = ENativeImageComponentOrder.RGB;
 		if(im.getComponentOrder() != requiredPixelOrder){
-			NativeImage n2 = NativeImage.create(im.getSize(),requiredPixelOrder, new DefaultJavaNativeMemoryAllocator());
+			NativeImage n2 = NativeImage.create(im.getSize(),requiredPixelOrder, DefaultJavaNativeMemoryAllocator.getInstance());
 			n2.copyFromSource(im, 0, 0);
 			NativeTiffLoader.getInstance().saveImageAsTiff(n2, outputFile);
 			n2.dispose();
