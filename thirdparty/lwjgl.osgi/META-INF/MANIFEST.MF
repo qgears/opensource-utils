@@ -1,13 +1,13 @@
 Manifest-Version: 1.0
-Require-Bundle: hu.qgears.nativeloader;visibility:=reexport
+Require-Bundle: hu.qgears.nativeloader;bundle-version="[1.0.0,2.0.0)";visibility:=reexport
 Export-Package: net.java.games.util.plugins,org.lwjgl.input,org.lwjgl,
  net.java.games.util.plugins.test,org.lwjgl.util,org.lwjgl.util.glu.te
  ssellation,lwjgl.standalone,org.lwjgl.openal,net.java.games.util,org.
  lwjgl.util.input,org.lwjgl.opengl,org.lwjgl.util.glu,net.java.games.i
  nput,org.lwjgl.util.vector,org.lwjgl.util.jinput
 Bundle-Classpath: ., classes/
-Bundle-Version: 2.5.0.qualifier
-Bundle-Name: lwjgl.osgi
+Bundle-Version: 1.0.0
+Bundle-Name: lwjgl.osgi version 2.5.0 repackaged as osgi bundle
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: lwjgl.osgi
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6

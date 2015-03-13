@@ -2,7 +2,7 @@
 <feature
       id="hu.qgears.utils.feature"
       label="Opensource utils"
-      version="0.9.9.qualifier">
+      version="1.0.0">
 
    <description url="https://github.com/qgears/opensource-utils">
       Utilities developed by Q-Gears.
@@ -20,91 +20,91 @@
          id="hu.qgears.commons"
          download-size="0"
          install-size="0"
-         version="0.9.9.qualifier"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="hu.qgears.commons.test"
          download-size="0"
          install-size="0"
-         version="0.9.9.qualifier"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="hu.qgears.opengl.commons"
          download-size="0"
          install-size="0"
-         version="0.9.9.qualifier"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="hu.qgears.opengl.commons.test"
          download-size="0"
          install-size="0"
-         version="0.9.9.qualifier"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="hu.qgears.emfcollab"
          download-size="0"
          install-size="0"
-         version="0.9.9.qualifier"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="hu.qgears.emfcollab.editor"
          download-size="0"
          install-size="0"
-         version="0.9.9.qualifier"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="hu.qgears.shm"
          download-size="0"
          install-size="0"
-         version="0.9.9.qualifier"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="hu.qgears.shm.test"
          download-size="0"
          install-size="0"
-         version="0.9.9.qualifier"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="hu.qgears.images"
          download-size="0"
          install-size="0"
-         version="0.9.9.qualifier"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="hu.qgears.images.test"
          download-size="0"
          install-size="0"
-         version="0.9.9.qualifier"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="hu.qgears.nativeloader"
          download-size="0"
          install-size="0"
-         version="0.9.9.qualifier"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="lwjgl.osgi"
          download-size="0"
          install-size="0"
-         version="2.5.0.qualifier"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="hu.qgears.coolrmi"
          download-size="0"
          install-size="0"
-         version="0.9.9.qualifier"
+         version="0.0.0"
          unpack="false"/>
 
 </feature>

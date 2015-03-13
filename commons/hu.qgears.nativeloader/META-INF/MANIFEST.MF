@@ -1,8 +1,8 @@
 Manifest-Version: 1.0
-Require-Bundle: hu.qgears.commons
+Require-Bundle: hu.qgears.commons;bundle-version="[1.0.0,2.0.0)"
 Export-Package: hu.qgears.nativeloader
 Bundle-ActivationPolicy: lazy
-Bundle-Version: 0.9.9.qualifier
+Bundle-Version: 1.0.0
 Bundle-Name: Nativeloader
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: hu.qgears.nativeloader

@@ -11,6 +11,6 @@
 	</parent>
 	<groupId>hu.qgears</groupId>
 	<artifactId>hu.qgears.emfcollab</artifactId>
-	<version>0.9.9-SNAPSHOT</version>
 	<packaging>eclipse-plugin</packaging>
+	<version>1.0.0</version>
 </project>
