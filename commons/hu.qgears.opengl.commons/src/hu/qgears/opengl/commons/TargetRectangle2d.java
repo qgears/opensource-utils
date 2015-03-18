@@ -23,4 +23,12 @@ public class TargetRectangle2d {
 	public String toString() {
 		return "["+x+","+y+":"+right+","+bottom+"]";
 	}
+
+	public TargetRectangle2d set(float x, float y, float right, float bottom) {
+		this.x = x;
+		this.y = y;
+		this.right = right;
+		this.bottom = bottom;
+		return this;
+	}
 }

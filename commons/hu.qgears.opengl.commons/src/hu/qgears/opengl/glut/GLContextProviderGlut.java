@@ -19,7 +19,6 @@ public class GLContextProviderGlut implements IGlContextProvider{
 	Glut glut;
 	private ByteBuffer messagesBuffer;
 	private SizeInt size;
-	private SizeInt fullScreenSize=new SizeInt(600, 480);
 	private SizeInt prevSize=new SizeInt(0, 0);
 	private boolean dirty;
 	@Override
@@ -39,28 +38,25 @@ public class GLContextProviderGlut implements IGlContextProvider{
 
 	@Override
 	public SizeInt getClientAreaSize() {
-		return fullScreenSize;
+		return prevSize;
 	}
 	private SizeInt getClientAreaSizePrivate()
 	{
 		// TODO optimize to execute native query only when something has changed
 		if(fullscreen)
 		{
-			fullScreenSize=new SizeInt(glut.getScreenWidth(), glut.getScreenHeight());
-			checkSizeChange();
-			return fullScreenSize;
+			checkSizeChange(glut.getScreenWidth(), glut.getScreenHeight());
 		}else
 		{
-			fullScreenSize=new SizeInt(glut.getWindowWidth(), glut.getWindowHeight());
-			checkSizeChange();
-			return fullScreenSize;
+			checkSizeChange(glut.getWindowWidth(), glut.getWindowHeight());
 		}
+		return prevSize;
 	}
-	private void checkSizeChange() {
-		if(!prevSize.equals(fullScreenSize))
+	private void checkSizeChange(int w, int h) {
+		if(prevSize.getWidth()!=w||prevSize.getHeight()!=h)
 		{
 			dirty=true;
-			prevSize=fullScreenSize;
+			prevSize=new SizeInt(w, h);
 		}
 	}
 

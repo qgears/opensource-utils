@@ -131,8 +131,8 @@ public class Texture implements IDisposeable {
 	@Override
 	public void dispose() {
 		if (!disposed) {
-			IntBuffer textureHandle = UtilGl.allocInts(1);
-			textureHandle.put(this.textureHandle).flip();
+			IntBuffer textureHandle=UtilGl.wrapTemp(this.textureHandle);
+			textureHandle.flip();
 			GL11.glDeleteTextures(textureHandle);
 			numberOfTextures--;
 			disposed = true;

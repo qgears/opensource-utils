@@ -31,7 +31,7 @@ public class PartNativeMemory extends AbstractReferenceCountedDisposeable implem
 		javaAccessor=nat.getByteBuffer(host.getJavaAccessor(), offset, size);
 		this.javaAccessor.order(ByteOrder.nativeOrder());
 		nativePointer1=nat.getNativePointer(javaAccessor, 1);
-		nativePointer1=nat.getNativePointer(javaAccessor, 2);
+		nativePointer2=nat.getNativePointer(javaAccessor, 2);
 	}
 
 	@Override

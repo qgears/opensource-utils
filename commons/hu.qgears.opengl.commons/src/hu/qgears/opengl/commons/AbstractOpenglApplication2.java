@@ -334,7 +334,7 @@ public abstract class AbstractOpenglApplication2 {
 	}
 	private Rectangle setViewPort(int width, int height)
 	{
-		return UtilGl.setViewPort(width, getSize().getHeight(), getClientAreaSize().getHeight());
+		return UtilGl.setViewPort(width, getSize().getHeight(), getClientAreaSize().getHeight(), null);
 	}
 	/**
 	 * Get the client area size.
