@@ -247,27 +247,34 @@ public class UtilFile {
 				// allocate a buffer, as big a chunk as we are willing to handle
 				// at a pop.
 				INativeMemory nm = allocator.allocateNativeMemory(l);
-				ByteBuffer buffer = nm.getJavaAccessor();
-				// read a chunk of raw bytes, up to 15K bytes long
-				// -1 means eof.
-
-				int bytesRead=0;
-				int sum=0;
-				while(bytesRead>=0&&buffer.hasRemaining())
+				try
 				{
-					bytesRead=fc.read(buffer);
-					if(bytesRead>0)
+					ByteBuffer buffer = nm.getJavaAccessor();
+					// read a chunk of raw bytes, up to 15K bytes long
+					// -1 means eof.
+	
+					int bytesRead=0;
+					int sum=0;
+					while(bytesRead>=0&&buffer.hasRemaining())
 					{
-						sum+=bytesRead;
+						bytesRead=fc.read(buffer);
+						if(bytesRead>0)
+						{
+							sum+=bytesRead;
+						}
 					}
-				}
-				if(sum!=l)
+					if(sum!=l)
+					{
+						throw new IOException("File length changed while loading: "+f.getAbsolutePath()+" "+l+" "+sum);
+					}
+					// flip from filling to emptying
+					buffer.flip();
+					nm.incrementReferenceCounter();
+					return nm;
+				}finally
 				{
-					throw new IOException("File length changed while loading: "+f.getAbsolutePath()+" "+l+" "+sum);
+					nm.decrementReferenceCounter();
 				}
-				// flip from filling to emptying
-				buffer.flip();
-				return nm;
 			} finally {
 				fc.close();
 			}

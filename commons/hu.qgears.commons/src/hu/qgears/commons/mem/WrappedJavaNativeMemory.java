@@ -14,23 +14,16 @@ public class WrappedJavaNativeMemory extends AbstractReferenceCountedDisposeable
 	 * when constructed
 	 * and decrement on disposal.
 	 * 
-	 * position, limit and mark of the hosting byte buffer will be ruined!
+	 * position, limit and mark of the hosting byte buffer will not be modified.
 	 * 
 	 * @param parent
 	 */
 	public WrappedJavaNativeMemory(INativeMemory parent, int position, int limit) {
 		super();
-		ByteBuffer bb=parent.getJavaAccessor();
+		ByteBuffer bb=parent.getJavaAccessor().duplicate();
 		bb.position(position);
 		bb.limit(limit);
-//		javaAccessor=ByteBuffer.allocateDirect(limit-position);
-//		javaAccessor.put(bb);
 		javaAccessor=bb.slice();
-/*		for(int i=0;i<javaAccessor.limit();++i)
-		{
-			javaAccessor.put((byte)0);
-		}
-*/
 		this.parent = parent;
 		parent.incrementReferenceCounter();
 	}

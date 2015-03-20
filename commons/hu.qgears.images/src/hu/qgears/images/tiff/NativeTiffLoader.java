@@ -1,13 +1,13 @@
 package hu.qgears.images.tiff;
 
 import hu.qgears.commons.UtilFile;
-import hu.qgears.commons.mem.DefaultJavaNativeMemory;
+import hu.qgears.commons.mem.DefaultJavaNativeMemoryAllocator;
 import hu.qgears.commons.mem.INativeMemory;
+import hu.qgears.commons.mem.INativeMemoryAllocator;
 import hu.qgears.commons.mem.WrappedJavaNativeMemory;
 import hu.qgears.images.ENativeImageComponentOrder;
 import hu.qgears.images.NativeImage;
 import hu.qgears.images.SizeInt;
-import hu.qgears.images.UtilNativeImageIo;
 import hu.qgears.nativeloader.UtilNativeLoader;
 
 import java.io.File;
@@ -23,7 +23,11 @@ import java.nio.channels.FileLockInterruptionException;
  *
  */
 public class NativeTiffLoader {
-
+	/**
+	 * Size of the TIFF header. Maximum size of the TIFF files is width*height*3+headerSize
+	 * Can be used to allocate buffers big enough to store a TIFF file
+	 */
+	public static final int maximumHeaderSize = 1024;
 	private static NativeTiffLoader tiffLoader;
 	
 	private NativeTiffLoader(){/*only single instance is available*/}
@@ -37,18 +41,34 @@ public class NativeTiffLoader {
 	}
 	
 	/**
-	 *  TODO proper ByteBuffer creating and disposal need to be done! Currently
-	 * for test purposes only.
-	 * 
 	 * Loads tiff image as {@link NativeImage} from
-	 * {@link FileLockInterruptionException}.
+	 * {@link FileLockInterruptionException}. Allocates memory for the image using {@link DefaultJavaNativeMemoryAllocator}
 	 * 
 	 * @param filePath
 	 * @return
 	 * @throws IOException
 	 */
 	public NativeImage loadImageFromTiff(File filePath) throws IOException{
-		return loadImageFromTiff(UtilFile.loadFile(filePath));
+		return loadImageFromTiff(filePath, DefaultJavaNativeMemoryAllocator.getInstance());
+	}
+	/**
+	 * Loads tiff image as {@link NativeImage} from
+	 * {@link FileLockInterruptionException}.
+	 * 
+	 * @param filePath
+	 * @param allocator
+	 * @return
+	 * @throws IOException
+	 */
+	public NativeImage loadImageFromTiff(File filePath, INativeMemoryAllocator allocator) throws IOException{
+		INativeMemory  mem=UtilFile.loadAsByteBuffer(filePath, allocator);
+		NativeImage ret;
+		try {
+			ret = loadImageFromTiff(mem);
+		} finally {
+			mem.decrementReferenceCounter();
+		}
+		return ret;
 	}
 	
 	/**
@@ -59,8 +79,8 @@ public class NativeTiffLoader {
 	 * @return
 	 */
 	public NativeImage loadImageFromTiff(byte[] fileData) throws NativeTiffLoaderException{
-		ByteBuffer wrap = ByteBuffer.allocateDirect(fileData.length);
-		wrap.put(fileData);
+		INativeMemory wrap=DefaultJavaNativeMemoryAllocator.getInstance().allocateNativeMemory(fileData.length);
+		wrap.getJavaAccessor().put(fileData);
 		return loadImageFromTiff(wrap) ;
 	}
 	
@@ -72,14 +92,20 @@ public class NativeTiffLoader {
 	 * @param fileBuffer
 	 * @return
 	 */
-	public NativeImage loadImageFromTiff(ByteBuffer fileBuffer) throws NativeTiffLoaderException{
+	public NativeImage loadImageFromTiff(INativeMemory fileBuffer) throws NativeTiffLoaderException{
 		ImageData image = new ImageData();
-		INativeMemory nm = new DefaultJavaNativeMemory( fileBuffer);
-		loadTiffImagePrimitive(nm.getJavaAccessor(),image);
-		INativeMemory buffer =new  WrappedJavaNativeMemory(nm,ImageData.getPixelDataOffset(),fileBuffer.capacity());
-		SizeInt size = new SizeInt(image.getWidth(),image.getHeight());
-		NativeImage ni =new NativeImage(buffer, size, ENativeImageComponentOrder.RGB, 1);
-		return ni;
+		try
+		{
+			loadTiffImagePrimitive(fileBuffer.getJavaAccessor(),image);
+			int offset=ImageData.getPixelDataOffset();
+			INativeMemory buffer =new  WrappedJavaNativeMemory(fileBuffer, offset, fileBuffer.getJavaAccessor().capacity());
+			SizeInt size = new SizeInt(image.getWidth(),image.getHeight());
+			NativeImage ni =new NativeImage(buffer, size, ENativeImageComponentOrder.RGB, 1);
+			return ni;
+		}finally
+		{
+			image.dispose();
+		}
 	}
 	
 
