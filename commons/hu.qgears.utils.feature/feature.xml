@@ -2,7 +2,7 @@
 <feature
       id="hu.qgears.utils.feature"
       label="Opensource utils"
-      version="1.0.0">
+      version="1.0.1">
 
    <description url="https://github.com/qgears/opensource-utils">
       Utilities developed by Q-Gears.
