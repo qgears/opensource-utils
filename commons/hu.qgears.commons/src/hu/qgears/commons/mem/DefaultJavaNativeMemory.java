@@ -12,7 +12,7 @@ import java.nio.ByteBuffer;
  *
  */
 public class DefaultJavaNativeMemory extends AbstractReferenceCountedDisposeable implements INativeMemory {
-	ByteBuffer ptr;
+	private ByteBuffer ptr;
 	public DefaultJavaNativeMemory(long size) {
 		if(((int)size)!=size)
 		{

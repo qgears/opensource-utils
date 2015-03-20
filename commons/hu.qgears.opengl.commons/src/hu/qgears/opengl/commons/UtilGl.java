@@ -10,7 +10,6 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.HashMap;
-import java.util.List;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.DisplayMode;
@@ -25,64 +24,46 @@ import org.lwjgl.util.vector.Vector4f;
 
 
 /**
- * Segédfüggvények az openGL API használatához.
- * 
- * Részben az itt található példaprogramokból indulva készült: http://potatoland.org/code/gl/
+ * Helper methods for using OpenGL API.
  * 
  * @author rizsi
  *
  */
 public class UtilGl {
+	static ByteBuffer tempByteBuffer=UtilGl.allocBytes(512);
+	static IntBuffer tempIntBuffer=UtilGl.allocInts(16);
 	// will be populated by extensionExists()
-	HashMap<String, String> OpenGLextensions;
-    /**
-     * Return true if the OpenGL context supports the given OpenGL extension.
-     */
-    public boolean extensionExists(String extensionName) {
-    	if (OpenGLextensions == null) {
-    		String[] GLExtensions = GL11.glGetString(GL11.GL_EXTENSIONS).split(" ");
-    		OpenGLextensions = new HashMap<String, String>();
-    		for (int i=0; i < GLExtensions.length; i++) {
-    			OpenGLextensions.put(GLExtensions[i].toUpperCase(),"");
-    		}
-    	}
-    	return (OpenGLextensions.get(extensionName.toUpperCase()) != null);
-    }
-    // Byte size of data types: Used when allocating native buffers
-    public static final int SIZE_DOUBLE = 8;
-    public static final int SIZE_FLOAT = 4;
-    public static final int SIZE_INT = 4;
-    public static final int SIZE_BYTE = 1;
-
-    /**
-     * Allocate integers an a direct buffer.
-     * 
-     * @param howmany
-     * @return
-     */
-    public static IntBuffer allocInts(int howmany) {
-    	return BufferUtils.createIntBuffer(howmany);
-    }
-    /**
-     * Allocate floats in a direct buffer.
-     * @param howmany
-     * @return
-     */
-    public static FloatBuffer allocFloats(int howmany) {
-    	return BufferUtils.createFloatBuffer(howmany);
-    }
-    /**
-	 * Same function as in GLApp.java. Allocates a ByteBuffer to hold the given
-	 * array of bytes.
-	 * 
-	 * @param bytearray
-	 * @return ByteBuffer containing the contents of the byte array
+	private HashMap<String, String> OpenGLextensions;
+	/**
+	 * Return true if the OpenGL context supports the given OpenGL extension.
 	 */
-	public static ByteBuffer allocBytes(byte[] bytearray) {
-		ByteBuffer bb = ByteBuffer.allocateDirect(bytearray.length).order(
-				ByteOrder.nativeOrder());
-		bb.put(bytearray).flip();
-		return bb;
+	public boolean extensionExists(String extensionName) {
+		if (OpenGLextensions == null) {
+			String[] GLExtensions = GL11.glGetString(GL11.GL_EXTENSIONS).split(" ");
+			OpenGLextensions = new HashMap<String, String>();
+			for (int i=0; i < GLExtensions.length; i++) {
+				OpenGLextensions.put(GLExtensions[i].toUpperCase(),"");
+			}
+		}
+		return (OpenGLextensions.get(extensionName.toUpperCase()) != null);
+	}
+
+	/**
+	 * Allocate integers an a direct buffer.
+	 * 
+	 * @param howmany
+	 * @return
+	 */
+	private static IntBuffer allocInts(int howmany) {
+		return BufferUtils.createIntBuffer(howmany);
+	}
+	/**
+	 * Allocate floats in a direct buffer.
+	 * @param howmany
+	 * @return
+	 */
+	private static FloatBuffer allocFloats(int howmany) {
+		return BufferUtils.createFloatBuffer(howmany);
 	}
 	public static ByteBuffer allocBytes(int length) {
 		ByteBuffer bb = ByteBuffer.allocateDirect(length).order(
@@ -93,9 +74,6 @@ public class UtilGl {
 	 * Allocate bytes aligned with memory addresses.
 	 * Aligned memory is required for some openCV methods.
 	 * 
-	 * TODO current implementation does nothing to be aligned. Seems that Java implementation
-	 * default is to receive aligned pointers.
-	 * 
 	 * @param length
 	 * @param align
 	 * @return
@@ -105,67 +83,13 @@ public class UtilGl {
 				ByteOrder.nativeOrder());
 		return bb;
 	}
-    /**
-	 * Same function as in GLApp.java. Allocates a ByteBuffer to hold the given
-	 * array of bytes.
-	 * 
-	 * @param bytearray
-	 * @return ByteBuffer containing the contents of the byte array
-	 */
-	public static IntBuffer allocInts(int[] ints) {
-		IntBuffer bb = IntBuffer.allocate(ints.length);
-		bb.put(ints).flip();
-		return bb;
-	}
-	public static String formatMode(DisplayMode mode2) {
-		return ""+mode2.getWidth()+"X"+mode2.getHeight()+" "+mode2.getFrequency()+"Hz"+" "+mode2.getBitsPerPixel()+"bpp";
-	}
 	/**
-	 * Draw rectangle. Uses pushAttrib - may effect synchronization with GPU that is not desired.
-	 * 
-	 * @param bottomLeft
-	 * @param bottomRight
-	 * @param topRight
-	 * @param topLeft
-	 * @param r
-	 * @param g
-	 * @param b
-	 * @param a
+	 * Format display mode to user readable format.
+	 * @param mode
+	 * @return
 	 */
-	@Deprecated
-	public static void drawRectangle(
-			Vector3f bottomLeft,
-			Vector3f bottomRight,
-			Vector3f topRight,
-			Vector3f topLeft,
-			byte r, byte g, byte b, byte a)
-	{
-		// preserve settings
-		GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
-		// tweak settings
-		GL11.glDisable(GL11.GL_TEXTURE_2D); // be sure textures are off
-		GL11.glColor4ub(r,g,b,a); // set desired color
-		GL11.glDisable(GL11.GL_LIGHTING); // no lighting
-		GL11.glDisable(GL11.GL_DEPTH_TEST); // no depth test
-		GL11.glDisable(GL11.GL_BLEND); // disable blending and transparency
-//		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		// activate the image texture
-//		GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureHandle);
-		// draw a textured quad
-		GL11.glBegin(GL11.GL_QUADS);
-		{
-			loadVertex(bottomLeft);
-
-			loadVertex(bottomRight);
-
-			loadVertex(topRight);
-
-			loadVertex(topLeft);
-		}
-		GL11.glEnd();
-		// return to previous settings
-		GL11.glPopAttrib();
-
+	public static String formatMode(DisplayMode mode) {
+		return ""+mode.getWidth()+"X"+mode.getHeight()+" "+mode.getFrequency()+"Hz"+" "+mode.getBitsPerPixel()+"bpp";
 	}
 	public static void drawRectangle(
 			RGlContext rgl,
@@ -378,8 +302,6 @@ public class UtilGl {
 	public static FloatBuffer getTempFloatBuffer() {
 		return tempFloatBuffer;
 	}
-	static ByteBuffer tempByteBuffer=UtilGl.allocBytes(512);
-	static IntBuffer tempIntBuffer=UtilGl.allocInts(16);
 	/**
 	 * Transformation that moves us to an other coordinate system
 	 * @param matrixMode load the transformation into this opengl matrix
@@ -565,27 +487,6 @@ public class UtilGl {
 		tempIntBuffer.put(fbId);
 		return tempIntBuffer;
 	}
-	public static FloatBuffer wrap3f(List<Vector3f> vertexCoos) {
-		FloatBuffer ret=allocFloats(3*vertexCoos.size());
-		for(Vector3f v:vertexCoos)
-		{
-			ret.put(v.x);
-			ret.put(v.y);
-			ret.put(v.z);
-		}
-		ret.flip();
-		return ret;
-	}
-	public static FloatBuffer wrap2f(List<Vector2f> vertexCoos) {
-		FloatBuffer ret=allocFloats(2*vertexCoos.size());
-		for(Vector2f v:vertexCoos)
-		{
-			ret.put(v.x);
-			ret.put(v.y);
-		}
-		ret.flip();
-		return ret;
-	}
 	public static void addTexture(Vector2f textCoo) {
 		GL11.glTexCoord2f(textCoo.x, textCoo.y);
 	}
@@ -752,7 +653,7 @@ public class UtilGl {
 		GL11.glLoadIdentity();
 		if(ctx!=null)
 		{
-			ctx.setDefaultViewPort(setViewPort(appWidth, appHeight, clientAreaHeight));
+			ctx.setDefaultViewPort(setViewPort(appWidth, appHeight, clientAreaHeight, ctx.getStoredViewPort()));
 		}
 	}
 	/**
@@ -764,13 +665,19 @@ public class UtilGl {
 	 * @param clientAreaHeight
 	 * @return
 	 */
-	public static Rectangle setViewPort(int width, int height, int clientAreaHeight)
+	public static Rectangle setViewPort(int width, int height, int clientAreaHeight, Rectangle ret)
 	{
 		int y0=clientAreaHeight-height;
 		int xadd=0;
 		int yadd=0;
 		GL11.glViewport(xadd, yadd+y0, width, height);
-		Rectangle ret=new Rectangle(xadd,yadd+y0,width, height);
+		if(ret!=null)
+		{
+			ret.setX(xadd);
+			ret.setY(yadd+y0);
+			ret.setWidth(width);
+			ret.setHeight(height);
+		}
 		return ret;
 	}
 	public static void applyBlendFunc(EBlendFunc blendFunc) {

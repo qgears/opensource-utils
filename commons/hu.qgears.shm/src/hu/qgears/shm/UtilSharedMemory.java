@@ -20,6 +20,13 @@ public class UtilSharedMemory {
 	{
 		UtilNativeLoader.loadNatives(new  Accessor());
 	}
+	/**
+	 * Loads native libraries required by this bundle.
+	 * Must be called once before using any classes in this bundle.
+	 * Multiple calls don't cause problem.
+	 * @return
+	 * @throws NativeLoadException
+	 */
 	public synchronized static UtilSharedMemory getInstance() throws NativeLoadException {
 		if(instance==null)
 		{

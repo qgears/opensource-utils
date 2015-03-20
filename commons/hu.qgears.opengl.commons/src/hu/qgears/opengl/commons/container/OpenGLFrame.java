@@ -7,7 +7,9 @@ import java.util.List;
 
 abstract public class OpenGLFrame extends AbstractOpenglApplication2 {
 
-	List<OpenGLAppContainer> containers = new ArrayList<OpenGLAppContainer>();
+	private List<OpenGLAppContainer> containers = new ArrayList<OpenGLAppContainer>();
+	private List<OpenGLAppContainer> copyOfContainers=new ArrayList<OpenGLAppContainer>();
+
 	private OpenGLAppContainer current;
 
 	public IOGLContainer createContainer() {
@@ -19,6 +21,7 @@ abstract public class OpenGLFrame extends AbstractOpenglApplication2 {
 		synchronized (this) {
 			containers = new ArrayList<OpenGLAppContainer>(containers);
 			containers.add(openGLAppContainer);
+			copyOfContainers=null;
 			if (current == null) {
 				setCurrent(openGLAppContainer);
 			}
@@ -70,10 +73,11 @@ abstract public class OpenGLFrame extends AbstractOpenglApplication2 {
 			current.render();
 		}
 	}
-
 	@Override
 	protected void logic() {
-		for (OpenGLAppContainer c : getContainers()) {
+		List<OpenGLAppContainer> containers=getCopyOfContainers();
+		for (int i=0;i<containers.size();++i) {
+			OpenGLAppContainer c=containers.get(i);
 			try {
 				if (!c.isInitialized()) {
 					try {
@@ -92,10 +96,14 @@ abstract public class OpenGLFrame extends AbstractOpenglApplication2 {
 		}
 	}
 
-	private List<OpenGLAppContainer> getContainers() {
-		List<OpenGLAppContainer> ret;
-		synchronized (this) {
-			ret = containers;
+	private List<OpenGLAppContainer> getCopyOfContainers() {
+		List<OpenGLAppContainer> ret=copyOfContainers;
+		if(ret==null)
+		{
+			synchronized (this) {
+				copyOfContainers=new ArrayList<OpenGLAppContainer>(containers);
+				ret=copyOfContainers;
+			}
 		}
 		return ret;
 	}
@@ -153,11 +161,13 @@ abstract public class OpenGLFrame extends AbstractOpenglApplication2 {
 	}
 
 	private void setCurrent(OpenGLAppContainer curr) {
-		current=curr;
-		current.requireRedraw();
-		for(OpenGLAppContainer c: containers)
-		{
-			c.setActive(c==curr);
+		synchronized (this) {
+			current=curr;
+			current.requireRedraw();
+			for(OpenGLAppContainer c: containers)
+			{
+				c.setActive(c==curr);
+			}
 		}
 	}
 
@@ -171,6 +181,7 @@ abstract public class OpenGLFrame extends AbstractOpenglApplication2 {
 		synchronized (this) {
 			containers = new ArrayList<OpenGLAppContainer>(containers);
 			containers.remove(openGLAppContainer);
+			copyOfContainers=null;
 			if (current == openGLAppContainer) {
 				current=null;
 				nextApplication();

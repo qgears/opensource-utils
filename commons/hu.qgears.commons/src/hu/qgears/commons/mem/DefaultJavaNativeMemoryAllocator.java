@@ -6,7 +6,7 @@ package hu.qgears.commons.mem;
  *
  */
 public class DefaultJavaNativeMemoryAllocator implements INativeMemoryAllocator {
-	int align=1;
+	private static final int align=1;
 	private static final DefaultJavaNativeMemoryAllocator instance=new DefaultJavaNativeMemoryAllocator();
 	
 	private DefaultJavaNativeMemoryAllocator() {
@@ -22,11 +22,13 @@ public class DefaultJavaNativeMemoryAllocator implements INativeMemoryAllocator 
 		return instance;
 	}
 
+	/**
+	 * Maximum alignment is 16.
+	 */
 	@Override
 	public INativeMemory allocateNativeMemory(long size, int align) {
 		if(align>16)
 		{
-			// TODO check alignment features of Java allocator!
 			throw new NativeMemoryException("Alignment > 16 is not supported");
 		}
 		return new DefaultJavaNativeMemory(size);

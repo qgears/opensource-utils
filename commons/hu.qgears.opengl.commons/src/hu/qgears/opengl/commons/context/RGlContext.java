@@ -4,7 +4,8 @@ package hu.qgears.opengl.commons.context;
 import hu.qgears.opengl.commons.IRenderOnTexture;
 import hu.qgears.opengl.commons.UtilGl;
 
-import java.util.Stack;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.Rectangle;
@@ -22,14 +23,41 @@ import org.lwjgl.util.Rectangle;
  *
  */
 final public class RGlContext implements Cloneable {
-	Stack<RGlContext> stack=new Stack<RGlContext>();
-	public void doSomething(){}
-	ECullState cullState=ECullState.off;
-	ECullState cullStateReq=ECullState.off;
-	boolean lightEnabledReq;
-	boolean lightEnabled;
-	boolean texture2d, texture2dReq;
-	boolean depthTestReq, depthTest;
+	static class Save
+	{
+		ECullState cullState=ECullState.off;
+		boolean lightEnabled;
+		boolean texture2d;
+		boolean depthTest;
+		EBlendFunc blendFunc=EBlendFunc.off;
+		public void save(RGlContext context) {
+				lightEnabled=context.lightEnabled;
+				texture2d=context.texture2d;
+				cullState=context.cullState;
+				blendFunc=context.blendFunc;
+				depthTest=context.depthTest;
+		}
+		public void reset(RGlContext context)
+		{
+			context.lightEnabledReq=lightEnabled;
+			context.texture2dReq=texture2d;
+			context.cullStateReq=cullState;
+			context.blendFuncReq=blendFunc;
+			context.depthTestReq=depthTest;
+		}
+	}
+	private List<Save> saves=new ArrayList<Save>();
+	private int nSaves=0;
+	private ECullState cullState=ECullState.off;
+	private ECullState cullStateReq=ECullState.off;
+	private boolean lightEnabledReq;
+	private boolean lightEnabled;
+	private boolean texture2d, texture2dReq;
+	private boolean depthTestReq, depthTest;
+	private EBlendFunc blendFunc=EBlendFunc.off;
+	private EBlendFunc blendFuncReq=EBlendFunc.off;
+	private Rectangle defaultViewport=new Rectangle();
+	
 	public RGlContext()
 	{
 		
@@ -43,10 +71,7 @@ final public class RGlContext implements Cloneable {
 	 * Push the current state and clear all state to default.
 	 */
 	public void pushAndClear() {
-		try {
-			stack.push((RGlContext)this.clone());
-		} catch (CloneNotSupportedException e) {
-		}
+		push();
 		setLightEnabled(false);
 		setCullState(ECullState.off);
 		setTexture2d(false);
@@ -57,22 +82,22 @@ final public class RGlContext implements Cloneable {
 	 * Push the current state.
 	 */
 	public void push() {
-		try {
-			stack.push((RGlContext)this.clone());
-		} catch (CloneNotSupportedException e) {
+		if(nSaves>=saves.size())
+		{
+			saves.add(new Save());
 		}
+		Save save=saves.get(nSaves);
+		save.save(this);
+		nSaves++;
 	}
 	/**
 	 * Reset the state to the last pushed one.
 	 */
 	public void pop()
 	{
-		RGlContext toReset=stack.pop();
-		lightEnabledReq=toReset.lightEnabled;
-		texture2dReq=toReset.texture2d;
-		cullStateReq=toReset.cullState;
-		blendFuncReq=toReset.blendFunc;
-		depthTestReq=toReset.depthTest;
+		nSaves--;
+		Save toReset=saves.get(nSaves);
+		toReset.reset(this);
 		apply(false);
 	}
 	public void setDepthTest(boolean b) {
@@ -148,14 +173,15 @@ final public class RGlContext implements Cloneable {
 			UtilGl.applyBlendFunc(blendFunc);
 		}
 	}
-	EBlendFunc blendFunc=EBlendFunc.off;
-	EBlendFunc blendFuncReq=EBlendFunc.off;
 	public void setBlendFunc(EBlendFunc newBlendFunc) {
 		blendFuncReq=newBlendFunc;
 	}
-	Rectangle defaultViewport;
+	/**
+	 * Get the default viewport of this GL context.
+	 * @return The returned object is a copy of the stored one so it may be overwritten.
+	 */
 	public Rectangle getDefaultViewport() {
-		return defaultViewport;
+		return new Rectangle(defaultViewport);
 	}
 	public void setDefaultViewPort(Rectangle setViewPort) {
 		defaultViewport=setViewPort;
@@ -170,5 +196,8 @@ final public class RGlContext implements Cloneable {
 	}
 	public void setCurrentRenderOnTexture(IRenderOnTexture renderOnTexture) {
 		currentRenderOnTexture=renderOnTexture;
+	}
+	public Rectangle getStoredViewPort() {
+		return defaultViewport;
 	}
 }

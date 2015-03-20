@@ -467,7 +467,18 @@ public class UtilNativeImageIo {
 	 * @throws IOException
 	 */
 	public static NativeImage loadImageFromTiff(File tiffFile) throws IOException{
-		return NativeTiffLoader.getInstance().loadImageFromTiff(tiffFile);
+		return NativeTiffLoader.getInstance().loadImageFromTiff(tiffFile, DefaultJavaNativeMemoryAllocator.getInstance());
+	}
+	/**
+	 * Loads a {@link NativeImage} from tiff fileformat.
+	 * 
+	 * @param tiffFile
+	 * @param allocator
+	 * @return
+	 * @throws IOException
+	 */
+	public static NativeImage loadImageFromTiff(File tiffFile, INativeMemoryAllocator allocator) throws IOException{
+		return NativeTiffLoader.getInstance().loadImageFromTiff(tiffFile, allocator);
 	}
 
 	/**
