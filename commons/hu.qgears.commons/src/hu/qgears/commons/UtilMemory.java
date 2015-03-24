@@ -36,7 +36,6 @@ public class UtilMemory {
 				try {
 					Thread.sleep(1000/FPS);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -122,7 +121,6 @@ public class UtilMemory {
 				ret = GCTypes.UseParNewGC;
 			}
 		} catch (Throwable e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return ret;
@@ -177,7 +175,6 @@ public class UtilMemory {
 					}
 					Thread.sleep(pause);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -212,6 +209,11 @@ public class UtilMemory {
 	{
 		startGcThread(pause, null);
 	}
+	/**
+	 * Start a thread that forces garbage collection on a regular basis.
+	 * @param pause
+	 * @param log callback that is called before and after garbage collection. May be null.
+	 */
 	public static void startGcThread(long pause, GCLogger log)
 	{
 		if(gcThread==null)
