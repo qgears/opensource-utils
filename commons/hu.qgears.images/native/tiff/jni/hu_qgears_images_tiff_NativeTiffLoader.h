@@ -7,6 +7,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#undef hu_qgears_images_tiff_NativeTiffLoader_maximumHeaderSize
+#define hu_qgears_images_tiff_NativeTiffLoader_maximumHeaderSize 1024L
 /*
  * Class:     hu_qgears_images_tiff_NativeTiffLoader
  * Method:    loadTiffImagePrimitive
