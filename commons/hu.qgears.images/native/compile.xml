@@ -6,7 +6,6 @@
 	</description>
 	<property environment="env"/>
 	<target name="make-c" depends="jnigen">
-<!-- TODO fix		<exec dir="./ffmpeg" executable="make"/> -->
 		<exec dir="./devIL/linux" executable="make"/>
 		<exec dir="./libpng/linux" executable="make"/>
 		<exec dir="./tiff/linux" executable="make"/>
@@ -14,10 +13,6 @@
 	</target>
 	<target name="jnigen">
 		<mkdir dir="generated"/>
-<!-- TODO fix		<javah class="com.rizsi.video.ffmpeg.NativeVideo"
-			classpath="../bin"
-			destdir="./generated"
-			/> -->
 		<javah class="hu.qgears.images.devil.NativeDevIL"
 			classpath="../bin:${env.QGEARSDEPS}"
 			destdir="./devIL"
