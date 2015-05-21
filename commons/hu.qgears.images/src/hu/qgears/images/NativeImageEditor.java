@@ -1,6 +1,6 @@
 package hu.qgears.images;
 
-import hu.qgears.images.text.TextColor;
+import hu.qgears.images.text.RGBAColor;
 
 /**
  * Utility methods that support editing a native image from Java code. Basic
@@ -44,7 +44,7 @@ public class NativeImageEditor {
 	 * @param backgroundColor
 	 * @return
 	 */
-	public NativeImageEditor fillWithColor(TextColor backgroundColor){
+	public NativeImageEditor fillWithColor(RGBAColor backgroundColor){
 		ENativeImageComponentOrder co = imageToEdit.getComponentOrder();
 		switch (co) {
 		case BGR :

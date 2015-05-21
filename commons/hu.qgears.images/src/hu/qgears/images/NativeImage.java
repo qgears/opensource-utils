@@ -3,6 +3,7 @@ package hu.qgears.images;
 import hu.qgears.commons.AbstractReferenceCountedDisposeable;
 import hu.qgears.commons.mem.INativeMemory;
 import hu.qgears.commons.mem.INativeMemoryAllocator;
+import hu.qgears.images.text.RGBAColor;
 
 import java.nio.ByteBuffer;
 
@@ -561,22 +562,22 @@ public class NativeImage extends AbstractReferenceCountedDisposeable
 
 	
 	/**
-	 * Returns the color of specified pixel as a int array, that contains the
-	 * values of channels in RGBA order. The length of returned array is always
-	 * 4.
+	 * Returns the color of specified pixel.
 	 * 
 	 * @param x X coordinate of pixel
 	 * @param y Y coordinate of pixel
-	 * @return
+	 * @return The pixel color as a {@link RGBAColor}
+	 * 
+	 * @since 3.0
 	 */
-	public int[] getRGBA(int x, int y){
+	public RGBAColor getRGBA(int x, int y){
 		int pixel = getPixel(x, y);
-		return new int[]{
+		return new RGBAColor(
 				(pixel  >> 24) & 0xFF,
 				(pixel >> 16) & 0xFF,
 				(pixel >> 8) & 0xFF,
 				pixel  & 0xFF
-		};
+		);
 	}
 	/**
 	 * This method is only to be used by UtilNativeImageIo class!

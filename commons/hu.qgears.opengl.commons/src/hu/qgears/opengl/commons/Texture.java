@@ -6,6 +6,7 @@ import hu.qgears.images.ENativeImageAlphaStorageFormat;
 import hu.qgears.images.ENativeImageComponentOrder;
 import hu.qgears.images.NativeImage;
 import hu.qgears.images.SizeInt;
+import hu.qgears.images.text.RGBAColor;
 import hu.qgears.opengl.commons.context.EBlendFunc;
 import hu.qgears.opengl.commons.context.RGlContext;
 
@@ -247,6 +248,14 @@ public class Texture implements IDisposeable {
 
 	public void setColor(Vector4f color) {
 		this.color = color;
+	}
+
+	/**
+	 * @since 3.0
+	 */
+	public void setColor(RGBAColor color) {
+		float[] c = color.toFloatVector();
+		this.color = new Vector4f(c[0],c[1],c[2],c[3]);
 	}
 
 	/**

@@ -5,5 +5,5 @@ Bundle-SymbolicName: hu.qgears.opengl.commons.test
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: QGears
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Require-Bundle: hu.qgears.opengl.commons;bundle-version="[2.0.0,3.0.0)",
+Require-Bundle: hu.qgears.opengl.commons;bundle-version="2.0.0",
  org.junit;bundle-version="4.8.2"

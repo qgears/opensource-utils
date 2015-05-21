@@ -502,7 +502,7 @@ public class UtilNativeImageIo {
 	public static boolean hasTransparentPixel(NativeImage image) {
 		for (int i = 0; i< image.getWidth(); i++){
 			for(int j = 0; j< image.getHeight(); j++){
-				if (image.getRGBA(i, j)[3] != 255){
+				if (image.getRGBA(i, j).a != 255){
 					return true;
 				}
 			}
