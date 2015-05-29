@@ -3,41 +3,125 @@ package hu.qgears.images.text;
 import hu.qgears.commons.UtilString;
 
 /**
+ * This class represents a color defined by r,g,b,a color components (each
+ * component is represented by a 0-255 integer value).
+ * <p>
+ * Defines conversion methods for getting multiple representation of the same
+ * color (CSS, hexa, 0..1 floating point coordinates).
+ * <p>
+ * Also defines constants for the most frequently used colors.
+ * 
+ * @author agostoni
  * @since 3.0
  */
 public class RGBAColor {
+	/**
+	 * Color constant of white.
+	 */
 	public static final RGBAColor WHITE = new RGBAColor(255, 255, 255, 255);
 
+	/**
+	 * Color constant of black.
+	 */
 	public static final RGBAColor BLACK = new RGBAColor(0, 0, 0, 255);
 
+	/**
+	 * Color constant of black.
+	 */
 	public static final RGBAColor BLUE = new RGBAColor(0, 0, 255,255);
+	/**
+	 * Color constant of red.
+	 */
 	public static final RGBAColor RED = new RGBAColor(255, 0, 0,255);
 
+	/**
+	 * Color constant of yellow.
+	 */
 	public static final RGBAColor YELLOW = new RGBAColor(255, 255, 0,255);
 
+	/**
+	 * Color constant of green.
+	 */
 	public static final RGBAColor GREEN = new RGBAColor(0, 255, 0,255);
+	/**
+	 * Color constant of purple.
+	 */
 	public static final RGBAColor PURPLE = new RGBAColor(255, 0, 255,255);
+	/**
+	 * Color constant of anthracite gray.
+	 */
 	public static final RGBAColor ANTHRACITE = new RGBAColor(30,30,30,255);
 	
 	
 	private static final float TO_FLOAT_MULTIPLIER =  1.0f / 255.0f;
 
-	public final int r, g, b, a;
+	/**
+	 * The red component of the color in 0-255 range.
+	 */
+	public final int r;
+	/**
+	 * The green component of the color in 0-255 range.
+	 */
+	public final int g;
+	/**
+	 * The blue component of the color in 0-255 range.
+	 */
+	public final int b;
+	/**
+	 * The alpha component of the color in 0-255 range. 0 means full
+	 * transparent, while 255 means full opaque color.
+	 */
+	public final int a;
 
+	/**
+	 * Creates a new color instance with specified color components.
+	 * 
+	 * @param r see {@link #r}
+	 * @param g see {@link #g}
+	 * @param b see {@link #b}
+	 * @param a see {@link #a}
+	 * 
+	 * @throws IllegalArgumentException if color component values are out of range [0,255]
+	 */
 	public RGBAColor(int r, int g, int b, int a) {
 		super();
+		assertValidInt(r);
+		assertValidInt(g);
+		assertValidInt(b);
+		assertValidInt(a);
 		this.r = r;
 		this.g = g;
 		this.b = b;
 		this.a = a;
 	}
 	/**
-	 * @since 3.0
+	 * Creates a new opaque color instance with specified color components.
+	 * 
+	 * @param r see {@link #r}
+	 * @param g see {@link #g}
+	 * @param b see {@link #b}
+	 * 
+	 * @throws IllegalArgumentException if color component values are out of range [0,255]
 	 */
 	public RGBAColor(int r, int g, int b) {
 		this(r,g,b,255);
 	}
 	
+	/**
+	 * Utility for crating a new color from float values.
+	 * 
+	 * @param r_f
+	 *            The red component of the color in 0.0-1.0 range.
+	 * @param g_f
+	 *            The green component of the color in 0.0-1.0 range.
+	 * @param b_f
+	 *            The blue component of the color in 0.0-1.0 range.
+	 * @param a_f
+	 *            The alpha component of the color in 0.0-1.0 range. 0.0 means
+	 *            full transparent, while 1.0 means full opaque color.
+	 * @return
+	 * @throws IllegalArgumentException if color components are out of range.
+	 */
 	public static final RGBAColor fromFloats(float r_f,float g_f,float b_f,float a_f) {
 		int r = toInt(r_f);
 		int g = toInt(g_f);
@@ -61,8 +145,8 @@ public class RGBAColor {
 	}
 
 	/**
-	 * Converts this color to 'rgba(r,g,b,a)' format. If a == 255, then the
-	 * simplified 'rgb(r,g,b)' format will be used.
+	 * Converts this color to 'rgba(r,g,b,a)' format (css notation). If a ==
+	 * 255, then the simplified 'rgb(r,g,b)' format will be used.
 	 * 
 	 * @return
 	 */
@@ -79,8 +163,7 @@ public class RGBAColor {
 	 * array is always 4, and contains the values of red, green ,blue and alpha
 	 * channels (in this order).
 	 * <p>
-	 * The channel values will be in range [0f .. 1f], if the original DTO was
-	 * valid (rgba values from 0 to 255).
+	 * The channel values will be in range [0f .. 1f].
 	 * 
 	 * @return
 	 * @see #updateFromFloatVector(float, float, float, float)
@@ -93,31 +176,15 @@ public class RGBAColor {
 		vector[3] = ((float)a) * TO_FLOAT_MULTIPLIER;
 		return vector;
 	}
-//	/**
-//	 * Updates this DTO based on specified float color coordinates.
-//	 * 
-//	 * @param r_f Value of red channel (0f .. 1f)
-//	 * @param g_f Value of green channel (0f .. 1f)
-//	 * @param b_f Value of blue channel (0f .. 1f)
-//	 * @param a_f Value of alpha channel (0f .. 1f)
-//	 * 
-//	 * @throws IllegalArgumentException if one of the the specified values are out of range.
-//	 * @see #toFloatVector()
-//	 */
-//	public void updateFromFloatVector(float r_f,float g_f,float b_f,float a_f){
-//		assertValidFloat(r_f);
-//		assertValidFloat(g_f);
-//		assertValidFloat(b_f);
-//		assertValidFloat(a_f);
-//		this.r = Math.round(r_f / TO_FLOAT_MULTIPLIER);
-//		this.g = Math.round(g_f / TO_FLOAT_MULTIPLIER);
-//		this.b = Math.round(b_f / TO_FLOAT_MULTIPLIER);
-//		this.a = Math.round(a_f / TO_FLOAT_MULTIPLIER);
-//	}
 
 	private static void assertValidFloat(float a_f) {
 		if (a_f < 0f || a_f > 1f){
 			throw new IllegalArgumentException("Color coordinate is out of range [0,1] : "+a_f);
+		}
+	}
+	private static void assertValidInt(int c) {
+		if (c < 0 || c > 255){
+			throw new IllegalArgumentException("Color coordinate is out of range [0,255] : "+c);
 		}
 	}
 	
@@ -215,7 +282,7 @@ public class RGBAColor {
 	 * @return
 	 */
 	public RGBAColor newWithAlpha(int newAlpha) {
-		assertValidFloat(TO_FLOAT_MULTIPLIER * newAlpha);
+		assertValidInt(newAlpha);
 		return new RGBAColor(r, g, b,newAlpha);
 	}
 }
