@@ -43,6 +43,7 @@ public class NativeImageEditor {
 	 * 
 	 * @param backgroundColor
 	 * @return
+	 * @since 3.0
 	 */
 	public NativeImageEditor fillWithColor(RGBAColor backgroundColor){
 		ENativeImageComponentOrder co = imageToEdit.getComponentOrder();
