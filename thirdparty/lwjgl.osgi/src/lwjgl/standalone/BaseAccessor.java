@@ -39,7 +39,7 @@ public class BaseAccessor extends XmlNativeLoader {
 						Runtime.getRuntime().load(mawt.getAbsolutePath());
 					}catch(Throwable t)
 					{
-						if(t.getMessage().indexOf("already loaded")<0)
+						if((t.getMessage()!=null)&&t.getMessage().indexOf("already loaded")<0)
 						{
 							// Do not log already loaded exception!
 							t.printStackTrace();
