@@ -2,12 +2,17 @@
 <natives-def>
 	<platform name="Linux">
 		<platform arch="(amd|x86_)64">
-			<lib path="libqpng64.so" 
-				installPath="/opt/qgears/libqpng64.so"/>
+			<lib path="libqpng64.so" installPath="/opt/qgears/libqpng64.so" />
 		</platform>
 		<platform arch="(i386)">
-			<lib path="libqpng.so" 
-				installPath="/opt/qgears/libqpng.so" />
+			<lib path="libqpng.so" installPath="/opt/qgears/libqpng.so" />
+		</platform>
+	</platform>
+	<platform name="Windows 7">
+		<platform arch="(i386)">
+			<lib path="zlib1.dll" installPath="C:\opt\qgears\zlib1.dll" />
+			<lib path="libpng3.dll" installPath="C:\opt\qgears\libpng3.dll" />
+			<lib path="libqpng32.dll" installPath="C:\opt\qgears\libqpng32.dll" />
 		</platform>
 	</platform>
 </natives-def>
