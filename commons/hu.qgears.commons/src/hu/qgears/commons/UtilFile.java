@@ -18,6 +18,7 @@ import java.math.BigInteger;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -76,6 +77,24 @@ public class UtilFile {
 		FileOutputStream fos = new FileOutputStream(targetFile);
 		try {
 			OutputStreamWriter osw = new OutputStreamWriter(fos, "UTF-8");
+			osw.write(s);
+			osw.close();
+		} finally {
+			fos.close();
+		}
+	}
+	/**
+	 * Save the string into the file. The created file is {charset} encoded.
+	 * 
+	 * @param targetFile
+	 * @param charset
+	 * @param s
+	 * @throws IOException
+	 */
+	public static void saveAsFile(File targetFile, Charset charset, String s) throws IOException {
+		FileOutputStream fos = new FileOutputStream(targetFile);
+		try {
+			OutputStreamWriter osw = new OutputStreamWriter(fos, charset);
 			osw.write(s);
 			osw.close();
 		} finally {
