@@ -95,6 +95,22 @@ public class UtilString {
 		return ret.toString();
 	}
 	/**
+	 * Concatenate a list of strings into a 
+	 * single string
+	 * @param list strings in the list will be concatenated
+	 * @param commaProvider this comma provider is used to insert a separator before each element output
+	 * @return A single string that contains the input list concatenated with delimiters in between
+	 */
+	public static String concat(List<String> list, UtilComma commaProvider) {
+		StringBuilder ret=new StringBuilder();
+		for(String s:list)
+		{
+			ret.append(commaProvider.getSeparator());
+			ret.append(s);
+		}
+		return ret.toString();
+	}
+	/**
 	 * Concatenate a list of objects into a 
 	 * single string. Objects are represented by their toString method
 	 * @param list objects toString() representation in the list will be concatenated

@@ -524,7 +524,7 @@ public class EscapeString {
 		}
 		return sw.toString();
 	}
-	public static void escapeHtml(Writer out, String str) throws IOException
+	public static void escapeHtml(Appendable out, String str) throws IOException
 	{
 		for(int i=0;i<str.length();++i)
 		{
