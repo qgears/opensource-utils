@@ -155,8 +155,9 @@ public class UtilString {
 	 * Convert the input to a string that's first letter is uppercase
 	 * (same letter as in input)
 	 * @param name
-	 * @return name with first letter uppercase or "UNKNOWN" in case input is null
+	 * @return name with first letter uppercase or "UNKNOWN" in case input is null or empty
 	 */
+	@Deprecated
 	public static String firstUpperCase(String name)
 	{
 		if(name!=null&&name.length()>0)
@@ -166,6 +167,23 @@ public class UtilString {
 		}else
 		{
 			return "UNKNOWN";
+		}
+	}
+	/**
+	 * Convert the input to a string that's first letter is uppercase
+	 * (same letter as in input)
+	 * @param name
+	 * @return name with first letter uppercase or "" in case input is null
+	 */
+	public static String firstUpperCaseAllowEmpty(String name)
+	{
+		if(name!=null&&name.length()>0)
+		{
+			String s=name;
+			return s.substring(0,1).toUpperCase()+s.substring(1);
+		}else
+		{
+			return "";
 		}
 	}
 	/**
