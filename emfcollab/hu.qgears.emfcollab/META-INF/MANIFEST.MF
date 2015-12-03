@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Require-Bundle: org.eclipse.emf;bundle-version="2.4.0";visibility:=reexport,
  org.eclipse.emf.ecore;bundle-version="2.4.0";visibility:=reexport,
  org.eclipse.emf.ecore.xmi;bundle-version="2.4.0";visibility:=reexport,
- hu.qgears.commons;bundle-version="[2.0.0,3.0.0)";visibility:=reexport,
+ hu.qgears.commons;bundle-version="[2.0.0,4.0.0)";visibility:=reexport,
  org.eclipse.osgi
 Export-Package: hu.qgears.emfcollab,hu.qgears.emfcollab.exceptions,hu.
  qgears.emfcollab.impl,hu.qgears.emfcollab.load,hu.qgears.emfcollab.sr

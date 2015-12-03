@@ -90,6 +90,7 @@ public class UtilFile {
 	 * @param charset
 	 * @param s
 	 * @throws IOException
+	 * @since 3.0
 	 */
 	public static void saveAsFile(File targetFile, Charset charset, String s) throws IOException {
 		FileOutputStream fos = new FileOutputStream(targetFile);

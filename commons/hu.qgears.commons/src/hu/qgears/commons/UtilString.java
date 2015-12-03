@@ -100,6 +100,7 @@ public class UtilString {
 	 * @param list strings in the list will be concatenated
 	 * @param commaProvider this comma provider is used to insert a separator before each element output
 	 * @return A single string that contains the input list concatenated with delimiters in between
+	 * @since 3.0
 	 */
 	public static String concat(List<String> list, UtilComma commaProvider) {
 		StringBuilder ret=new StringBuilder();
@@ -174,6 +175,7 @@ public class UtilString {
 	 * (same letter as in input)
 	 * @param name
 	 * @return name with first letter uppercase or "" in case input is null
+	 * @since 3.0
 	 */
 	public static String firstUpperCaseAllowEmpty(String name)
 	{

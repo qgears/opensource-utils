@@ -47,6 +47,7 @@ public class UtilEquals {
 	 * @param objA
 	 * @param objB
 	 * @return
+	 * @since 3.0
 	 */
 	public static boolean safeEquals(Object objA, Object objB) {
 		try {
