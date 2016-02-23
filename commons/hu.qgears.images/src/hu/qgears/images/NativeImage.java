@@ -586,5 +586,13 @@ public class NativeImage extends AbstractReferenceCountedDisposeable
 	public void setTransparentOrOpaqueMask(int transparentOrOpaqueMask) {
 		this.transparentOrOpaqueMask=transparentOrOpaqueMask;
 	}
-	
+	/**
+	 * Set the given pixel to the given color.
+	 * @param x
+	 * @param y
+	 * @param c
+	 */
+	public void setPixel(int x, int y, RGBAColor c) {
+		setPixel(x, y, c.r<<24|c.g<<16|c.b<<8|c.a);
+	}
 }
