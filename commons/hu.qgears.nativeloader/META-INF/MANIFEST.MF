@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Require-Bundle: hu.qgears.commons;bundle-version="[2.0.0,4.0.0)"
+Require-Bundle: hu.qgears.commons;bundle-version="2.0.0"
 Export-Package: hu.qgears.nativeloader
 Bundle-ActivationPolicy: lazy
 Bundle-Version: 5.0.0.qualifier

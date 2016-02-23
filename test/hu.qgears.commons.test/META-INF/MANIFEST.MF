@@ -5,4 +5,4 @@ Bundle-SymbolicName: hu.qgears.commons.test
 Bundle-Version: 5.0.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: org.junit;bundle-version="4.8.2",
- hu.qgears.commons;bundle-version="[2.0.0,4.0.0)"
+ hu.qgears.commons;bundle-version="2.0.0"

@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Require-Bundle: hu.qgears.nativeloader;bundle-version="[1.0.0,2.0.0)";visibility:=reexport
+Require-Bundle: hu.qgears.nativeloader;bundle-version="1.0.0";visibility:=reexport
 Export-Package: lwjgl.standalone,
  net.java.games.input,
  net.java.games.util,
