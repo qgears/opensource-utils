@@ -48,7 +48,11 @@ public abstract class AbstractOpenglApplication2 {
 			try {
 				initialize();
 				mainLoop();
-			} catch (Exception e) {
+				/*
+				 * we intend to package Throwables into Exceptions (catch for
+				 * instance exceptions during native lib loading)
+				 */
+			} catch (Exception e) {//NOSONAR
 				LOG.error("Unexpected exception during execute", e);
 				throw e;
 			} catch (Throwable e) {
@@ -92,6 +96,7 @@ public abstract class AbstractOpenglApplication2 {
 				try {
 					Thread.sleep(100);
 				} catch (InterruptedException inte) {
+					//silent intentionally
 				}
 			}
 		}
@@ -150,6 +155,7 @@ public abstract class AbstractOpenglApplication2 {
 			try {
 				Thread.sleep(1000/60);
 			} catch (InterruptedException e) {
+				//silent intentionally
 			}
 		}
 		return needRedraw;
@@ -209,6 +215,9 @@ public abstract class AbstractOpenglApplication2 {
 				LOG.info("Wireframe toggled!");
 			}
 			wireFrame=!wireFrame;
+			break;
+		default:
+			//nothing to do
 			break;
 		}
 	}
@@ -305,14 +314,6 @@ public abstract class AbstractOpenglApplication2 {
 	public void setInitFullscreen(boolean initFullscreen) {
 		this.initFullscreen = initFullscreen;
 	}
-//	public void setFullscreenResolution(SizeInt fullscreenresolution)
-//	{
-//		fullscreenSize=fullscreenresolution;
-//	}
-//	public SizeInt getFullscreenResolution()
-//	{
-//		return fullscreenSize;
-//	}
 	/**
 	 * Initializes matrixes for ortho rendering
 	 */

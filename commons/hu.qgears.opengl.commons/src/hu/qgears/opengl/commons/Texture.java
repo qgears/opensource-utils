@@ -351,7 +351,6 @@ public class Texture implements IDisposeable {
 		float minU = sourceRectangle.getTopLeft().getX();
 		float minV = sourceRectangle.getBottomRight().getY();
 		// preserve settings
-		// GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
 		rglContext.push();
 		// tweak settings
 		rglContext.setTexture2d(true);
@@ -424,7 +423,6 @@ public class Texture implements IDisposeable {
 		float minU = sourceRectangle.getTopLeft().getX();
 		float minV = sourceRectangle.getBottomRight().getY();
 		// preserve settings
-		// GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
 		rglContext.push();
 		// tweak settings
 		rglContext.setTexture2d(true);
@@ -441,12 +439,11 @@ public class Texture implements IDisposeable {
 	public void drawTextureOnRectangle(RGlContext rglContext,
 			TargetRectangle2d targetRectangle, TargetRectangle2d sourceRectangle,
 			EBlendFunc blendFunc, Vector4f[] colors) {
-		float maxU = sourceRectangle.right;//getBottomRight().getX();
-		float maxV = sourceRectangle.y;//getTopLeft().getY();
-		float minU = sourceRectangle.x;//getTopLeft().getX();
-		float minV = sourceRectangle.bottom;//getBottomRight().getY();
+		float maxU = sourceRectangle.right;
+		float maxV = sourceRectangle.y;
+		float minU = sourceRectangle.x;
+		float minV = sourceRectangle.bottom;
 		// preserve settings
-		// GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
 		rglContext.push();
 		// tweak settings
 		rglContext.setTexture2d(true);
@@ -749,8 +746,6 @@ public class Texture implements IDisposeable {
 		GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, internal_format, width, height,
 				0, pixel_format, dataformat, newimage.getBuffer().getJavaAccessor());
 		switch (mtype) {
-		case none:
-			break;
 		case standard:
 			// Using GL_GENERATE_MIPMAP instead causes my NVidia to process about 100%
 			// CPU! Seems to use CPU to generate mipmap levels
@@ -761,6 +756,10 @@ public class Texture implements IDisposeable {
 			{
 				EXTFramebufferObject.glGenerateMipmapEXT(GL11.GL_TEXTURE_2D);
 			}
+			break;
+		case none:
+		default:
+			//nothing to do
 			break;
 		}
 		// Reset the default behaviour
