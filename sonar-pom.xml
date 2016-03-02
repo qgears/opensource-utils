@@ -14,7 +14,6 @@
 		<module>commons/hu.qgears.nativeloader</module>
 		<module>commons/hu.qgears.opengl.commons</module>
 		<module>commons/hu.qgears.shm</module>
-		<module>coolrmi/hu.qgears.coolrmi</module>
 		<module>test/hu.qgears.commons.test</module>
 		<module>test/hu.qgears.images.test</module>
 		<module>test/hu.qgears.opengl.commons.test</module>
