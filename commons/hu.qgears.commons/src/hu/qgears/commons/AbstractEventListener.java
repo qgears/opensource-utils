@@ -8,7 +8,7 @@ package hu.qgears.commons;
  *
  * @param <T>
  */
-abstract public class AbstractEventListener<T> implements UtilEventListener<T>, IDisposeable {
+public abstract class AbstractEventListener<T> implements UtilEventListener<T>, IDisposeable {
 	private UtilEvent<T> host;
 	public AbstractEventListener(UtilEvent<T> host) {
 		this.host=host;

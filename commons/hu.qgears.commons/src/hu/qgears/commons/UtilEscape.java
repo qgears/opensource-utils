@@ -1,6 +1,11 @@
 package hu.qgears.commons;
 
 public class UtilEscape {
+
+	private UtilEscape() {
+		// disable constructor of utility class
+	}
+
 	/**
 	 * Escape the input to be writable into a Java string.
 	 * 

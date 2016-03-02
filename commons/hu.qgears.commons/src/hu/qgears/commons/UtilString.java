@@ -12,6 +12,10 @@ import java.util.StringTokenizer;
  *
  */
 public class UtilString {
+	
+	private UtilString() {
+		// disable constructor of utility class
+	}
 	/**
 	 * Pad the input string so that its length is <code>length</code>.
 	 * Padding characters are written before the input string
@@ -225,7 +229,8 @@ public class UtilString {
 				{
 					ret.add(curr.toString());
 					curr=new StringBuilder();
-					i+=delim.length()-1;
+					//modifying i is OK here
+					i+=delim.length()-1;//NOSONAR
 					continue outer; 
 				}
 			}

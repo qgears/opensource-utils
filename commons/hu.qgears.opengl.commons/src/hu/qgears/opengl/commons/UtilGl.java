@@ -721,7 +721,7 @@ public class UtilGl {
 	 * @param sfactorAlpha
 	 * @param dfactorAlpha
 	 */
-	static final private void glBlendFuncSeparate(int sfactorRGB, int dfactorRGB,
+	static private final void glBlendFuncSeparate(int sfactorRGB, int dfactorRGB,
 			int sfactorAlpha, int dfactorAlpha) {
 		GL14.glBlendFuncSeparate(sfactorRGB, dfactorRGB, sfactorAlpha, dfactorAlpha);
 //		EXTBlendFuncSeparate.glBlendFuncSeparateEXT(sfactorRGB, dfactorRGB, sfactorAlpha, dfactorAlpha);

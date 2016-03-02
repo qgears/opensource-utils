@@ -26,17 +26,21 @@ public class PixelFormat {
 	public String toString() {
 		return "bpp: "+bitsPerPixel+" depth: "+depth+" bigendian: "+bigEndianFlag+" truecolor: "+trueColorFlag+" redmax: "+redMax+" redshift: "+redShift+"greenmax: "+greenMax+" greenshift: "+greenShift+"bluemax: "+blueMax+ " blueshift: "+blueShift;
 	}
-	public void init()
-	{
-		bitsPerPixel=32;
-		depth=24;
-		bigEndianFlag=0;
-		trueColorFlag=1;
-		redMax=blueMax=greenMax=255;
-		redShift=0;
-		greenShift=8;
-		blueShift=16;
-		padding0=padding1=padding2=0;
+
+	public void init() {
+		bitsPerPixel = 32;
+		depth = 24;
+		bigEndianFlag = 0;
+		trueColorFlag = 1;
+		redMax = 255;
+		blueMax = 255;
+		greenMax = 255;
+		redShift = 0;
+		greenShift = 8;
+		blueShift = 16;
+		padding0 = 0;
+		padding1 = 0;
+		padding2 = 0;
 	}
 	public void parse(ByteBuffer bb)
 	{

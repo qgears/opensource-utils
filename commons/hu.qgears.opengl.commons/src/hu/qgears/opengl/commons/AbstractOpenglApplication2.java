@@ -110,7 +110,7 @@ public abstract class AbstractOpenglApplication2 {
 	 * the isDirty flag on the call at once. 
 	 * @return
 	 */
-	abstract protected boolean isDirty();
+	protected abstract boolean isDirty();
 	private void doFrame(boolean needRedraw) throws Exception {
 		afterBufferSwap();
 		needRedraw=doCycle(needRedraw);
@@ -184,7 +184,7 @@ public abstract class AbstractOpenglApplication2 {
 			}
 		}
 	}
-	abstract protected void logError(String message, Exception e);
+	protected abstract void logError(String message, Exception e);
 	/**
 	 * Akkor hívjuk meg a metódust, amikor egy billentyű lenyomást érzékel
 	 * az alkalmazás.

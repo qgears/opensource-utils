@@ -2,6 +2,8 @@ package hu.qgears.commons;
 
 import java.util.concurrent.Callable;
 
+import org.apache.log4j.Logger;
+
 /**
  * Singleton timer service to execute tasks after a timeout.
  * 
@@ -14,11 +16,20 @@ import java.util.concurrent.Callable;
  *
  */
 public class UtilTimer {
-	static UtilTimer instance=new UtilTimer();
-	public static UtilTimer getInstance()
-	{
-		return instance;
+	
+	private static Logger LOG = Logger.getLogger(UtilTimer.class);
+	
+	private static final UtilTimer INSTANCE = new UtilTimer();
+	
+	private UtilTimer() {
+		// disable constructor of singleton class
 	}
+
+	public static UtilTimer getInstance() {
+		return INSTANCE;
+	}
+	
+	
 	/**
 	 * Execute callable when timeout expires.
 	 * @param <T>
@@ -34,8 +45,7 @@ public class UtilTimer {
 					Thread.sleep(timeoutMillis);
 					callable.call();
 				} catch (Throwable e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					LOG.error(e);
 				}
 			};
 		}.start();

@@ -10,8 +10,8 @@ import java.io.ObjectStreamClass;
  *
  */
 public class UtilObjectInputStream extends ObjectInputStream{
-	ClassLoader classLoader;
-	ClassLoader clientClassLoader;
+	private ClassLoader classLoader;
+	private ClassLoader clientClassLoader;
 	public UtilObjectInputStream(
 			ClassLoader classLoader, java.io.InputStream is) throws IOException
 	{
@@ -23,16 +23,23 @@ public class UtilObjectInputStream extends ObjectInputStream{
 			ClassNotFoundException {
 		if(clientClassLoader!=null)
 		{
-			try
-			{
+			try {
 				return Class.forName(desc.getName(), true, clientClassLoader);
-			}catch(ClassNotFoundException e){}
+			} catch (ClassNotFoundException e) {
+				// silent intentionally
+			}
 		}
 		return Class.forName(desc.getName(), true, classLoader);
 	}
+
+	protected ClassLoader getClassLoader() {
+		return classLoader;
+	}
+	
 	public ClassLoader getClientClassLoader() {
 		return clientClassLoader;
 	}
+
 	public void setClientClassLoader(ClassLoader clientClassLoader) {
 		this.clientClassLoader = clientClassLoader;
 	}

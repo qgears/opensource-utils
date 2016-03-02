@@ -1,5 +1,5 @@
 /**
- * DevIL package integration into OpenGL commons:
+ * DevIL package integration into OpenGL commons.
  *  * DevIL Loads many types of images and performs better than java.awt.ImageIO
  *  * Images must be loaded on a DevIL worker thread:
  *   * DevIL must be accessed on a single thread :-(

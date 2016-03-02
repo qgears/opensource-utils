@@ -64,13 +64,6 @@ public class TextParameters {
 	 */
 	public RGBAColor c = DEFAULT_COLOR;
 
-//	/**
-//	 * The height of the text container.
-//	 * 
-//	 * TODO is dimension relevant in this DTO???
-//	 */
-//	public int height = 0;
-//	public int width = 0;
 	/**
 	 * The character data content of the label
 	 */
@@ -95,11 +88,6 @@ public class TextParameters {
 	 * The decoration on label. See {@link ETextDecoration}
 	 */
 	public ETextDecoration textDecoration = ETextDecoration.none;
-//	/**
-//	 * TODO : this field should be removed -> a new FlowTextParameters DTO
-//	 * should be created for rendering flowTexts.
-//	 */
-//	public boolean richText = false;
 	/**
 	 * The distance between adjacent characters in HTML pixels.
 	 */
@@ -111,12 +99,10 @@ public class TextParameters {
 			TextParameters other = (TextParameters) obj;
 			return eq(other.fontFamily, fontFamily)
 					&& other.fontSize == fontSize && other.c.equals(c)
-//					&& other.height == height && other.width == width
 					&& eq(other.text, text) && other.fontWeight == fontWeight
 					&& other.fontStyle == fontStyle && other.hAlign == hAlign
 					&& other.vAlign == vAlign
 					&& other.textDecoration == textDecoration
-//					&& other.richText == richText
 					&& other.letterSpacing == letterSpacing;
 		}
 		return false;
@@ -159,15 +145,12 @@ public class TextParameters {
 		this.fontFamily = toCopy.fontFamily;
 		this.fontSize = toCopy.fontSize;
 		this.c  = new RGBAColor(toCopy.c.r,toCopy.c.g,toCopy.c.b,toCopy.c.a);
-//		this.height = toCopy.height;
-//		this.width = toCopy.width;
 		this.text = toCopy.text;
 		this.fontWeight = toCopy.fontWeight;
 		this.fontStyle= toCopy.fontStyle;
 		this.hAlign = toCopy.hAlign;
 		this.vAlign = toCopy.vAlign;
 		this.textDecoration = toCopy.textDecoration;
-//		this.richText= toCopy.richText;
 		this.letterSpacing = toCopy.letterSpacing;
 	}
 	
@@ -191,8 +174,7 @@ public class TextParameters {
 				}
 				bld.append(f.getName()).append("=").append(value).append(";");
 			} catch (Exception e) {
-				// should not happen
-				e.printStackTrace();
+				// should not happen, and toString is used only during debugging
 			}
 		}
 		return bld.toString();

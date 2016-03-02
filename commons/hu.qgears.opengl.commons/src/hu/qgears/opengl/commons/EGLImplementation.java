@@ -31,5 +31,5 @@ public enum EGLImplementation {
 		}
 	};
 
-	abstract public IGlContextProvider createProvider();
+	public abstract IGlContextProvider createProvider();
 }

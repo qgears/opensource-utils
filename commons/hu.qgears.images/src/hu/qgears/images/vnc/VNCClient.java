@@ -17,6 +17,8 @@ import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.apache.log4j.Logger;
+
 /**
  * In memory VNC client implementation. Can be attached to
  * GUI technology easily.
@@ -30,6 +32,8 @@ import java.util.concurrent.locks.ReentrantLock;
  *
  */
 public class VNCClient {
+	private static Logger LOG = Logger.getLogger(VNCClient.class);
+	
 	private ENativeImageComponentOrder componentOrder;
 	private long retryTimeoutMillis=1000;
 	private LazyNativeImage image=new LazyNativeImage();
@@ -61,8 +65,7 @@ public class VNCClient {
 				try {
 					VNCClient.this.run();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-//					e.printStackTrace();
+					LOG.error(e);
 				}
 			};
 		}.start();
@@ -79,8 +82,7 @@ public class VNCClient {
 				try {
 					channel.close();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					LOG.error(e);
 				}
 			}
 		}
@@ -134,8 +136,7 @@ public class VNCClient {
 				}
 			}catch(Exception e)
 			{
-				// TODO
-			//	e.printStackTrace();
+				LOG.error(e);
 			}
 			channel=null;
 			if(!exit)
@@ -143,8 +144,7 @@ public class VNCClient {
 				try {
 					Thread.sleep(retryTimeoutMillis);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					LOG.error(e);
 				}
 			}
 		}
@@ -397,7 +397,7 @@ public class VNCClient {
 		sendByteBuffer.flip();
 		UtilChannel.writeNBytes(channel, sendByteBuffer);
 	}
-	static final private String parseString(ByteBuffer params, int length)
+	static private final String parseString(ByteBuffer params, int length)
 	{
 		byte[] bs=new byte[length];
 		params.get(bs);
@@ -411,7 +411,7 @@ public class VNCClient {
 		}
 		return new String(bs, 0, i, Charset.forName("UTF-8"));
 	}
-	final private static void writeString(ByteBuffer bb, String string, int length) {
+	private static final void writeString(ByteBuffer bb, String string, int length) {
 		byte[] bs=new byte[length];
 		byte[] src=string.getBytes(Charset.forName("UTF-8"));
 		int i=0;

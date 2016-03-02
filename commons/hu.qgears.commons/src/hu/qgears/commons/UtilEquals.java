@@ -36,6 +36,7 @@ public class UtilEquals {
 				return true;
 			}
 		} catch (Exception e) {
+			//every exceptional case is treated as not equal parameters
 		}
 		return false;
 	}
@@ -75,6 +76,7 @@ public class UtilEquals {
 				return true;
 			}
 		} catch (Exception e) {
+			//every exceptional case is treated as not equal parameters
 		}
 		return false;
 	}

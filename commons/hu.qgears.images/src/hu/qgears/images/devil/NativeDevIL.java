@@ -16,15 +16,9 @@ public class NativeDevIL implements IDisposeable {
 	private int width;
 	private int height;
 	protected NativeDevIL() {
+		//default ctor
 	}
 	protected native void initDevIL();
-	/**
-	 * Load an image into BGRA format
-	 * @param content
-	 * @param ext
-	 * @return
-	 */
-//	private native ByteBuffer loadImage(ByteBuffer content, String ext);
 	private native int bindImage();
 	private native int getTypeId(String ext);
 	private native int loadImage(ByteBuffer content, int typeId);
@@ -78,7 +72,8 @@ public class NativeDevIL implements IDisposeable {
 		if(ptr!=0)
 		{
 			nativeDispose();
-			width=height=0;
+			width = 0;
+			height = 0;
 			decoded=null;
 		}
 		ptr=0;

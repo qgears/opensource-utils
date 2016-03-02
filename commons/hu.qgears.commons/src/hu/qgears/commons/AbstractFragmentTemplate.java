@@ -7,24 +7,30 @@ import java.io.StringWriter;
  * @author rizsi
  *
  */
-abstract public class AbstractFragmentTemplate implements ITemplate {
+public abstract class AbstractFragmentTemplate implements ITemplate {
 	protected StringWriter out, rtout, rtcout;
+
 	public AbstractFragmentTemplate(ITemplate parent) {
-		out=rtout=rtcout=parent.getWriter();
+		rtcout = parent.getWriter();
+		out = rtcout;
+		rtout = rtcout;
 	}
 	public AbstractFragmentTemplate() {
+		//default constructor for subclasses
 	}
 	public AbstractFragmentTemplate setParent(ITemplate parent)
 	{
-		out=rtout=rtcout=parent.getWriter();
+		rtcout = parent.getWriter();
+		out = rtcout;
+		rtout = rtcout;
 		return this;
 	}
-	final public String generate()
+	public final String generate()
 	{
 		doGenerate();
 		return out.toString();
 	}
-	abstract  protected void doGenerate();
+	protected abstract void doGenerate();
 	@Override
 	public StringWriter getWriter() {
 		return out;

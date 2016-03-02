@@ -8,11 +8,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
- * This class implements the SignalFuture interface. Allows the user of this class
- * to execute a task when the signal is finished.
- * 
- * The class can also be used to block execution until an event happens
- *  (to use Future.get without an executor but with an event) 
+ * This class implements the SignalFuture interface. Allows the user of this
+ * class to execute a task when the signal is finished.
+ * <p>
+ * The class can also be used to block execution until an event happens (to use
+ * Future.get without an executor but with an event)
  * 
  * @author rizsi
  *

@@ -7,7 +7,7 @@ package hu.qgears.commons;
  * @author rizsi
  *
  */
-abstract public class AbstractReferenceCountedDisposeable implements IReferenceCountedDisposeable {
+public abstract class AbstractReferenceCountedDisposeable implements IReferenceCountedDisposeable {
 	private volatile int references=1;
 	@Override
 	public  void incrementReferenceCounter() {
@@ -31,7 +31,7 @@ abstract public class AbstractReferenceCountedDisposeable implements IReferenceC
 		return disposed;
 	}
 	@Override
-	final public synchronized void dispose() {
+	public final synchronized void dispose() {
 		if(!disposed)
 		{
 			singleDispose();
@@ -46,7 +46,7 @@ abstract public class AbstractReferenceCountedDisposeable implements IReferenceC
 	 * Implement dispose logic here. It is guaranteed to be called only once.
 	 * It is run in a synchronized block synced to the host obejct.
 	 */
-	abstract protected void singleDispose();
+	protected abstract void singleDispose();
 	/**
 	 * Throw exception in case the object is already disposed.
 	 */

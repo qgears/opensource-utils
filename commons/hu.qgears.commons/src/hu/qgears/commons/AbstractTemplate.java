@@ -7,12 +7,15 @@ import java.io.StringWriter;
  * @author rizsi
  *
  */
-abstract public class AbstractTemplate implements ITemplate {
+public abstract class AbstractTemplate implements ITemplate {
 	protected StringWriter out, rtout, rtcout;
+
 	public AbstractTemplate() {
-		out=rtout=rtcout=new StringWriter();
+		out = new StringWriter();
+		rtout = out;
+		rtcout = out;
 	}
-	final public String generate() throws Exception
+	public final String generate() throws Exception
 	{
 		doGenerate();
 		return out.toString();

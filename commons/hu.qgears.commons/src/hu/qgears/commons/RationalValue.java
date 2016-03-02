@@ -41,7 +41,6 @@ public class RationalValue {
 			a=b;
 			b=oldA;
 		}
-//		long div=a/b;
 		long mod=a%b;
 		if(mod==0)
 		{

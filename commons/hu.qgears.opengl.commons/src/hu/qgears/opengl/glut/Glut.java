@@ -21,7 +21,7 @@ public class Glut {
 		setWindowTitle(initTitle);
 		setupVSync2(1);
 	}
-	native private void nativeInit(boolean fullscreen, int width, int height);
+	private native void nativeInit(boolean fullscreen, int width, int height);
 	native public void setupVSync2(int n);
 	/// Initialize Glut and run a simple test application
 	native public void nativeTest();

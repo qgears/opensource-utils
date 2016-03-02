@@ -11,7 +11,7 @@ import java.util.Map;
  *
  */
 public class UtilTime {
-	static Map<String, UtilTime> globalTimers = new HashMap<String, UtilTime>();
+	private static Map<String, UtilTime> globalTimers = new HashMap<String, UtilTime>();
 	private long start;
 	private boolean disableLog=false;
 	public boolean isDisableLog() {
@@ -24,6 +24,14 @@ public class UtilTime {
 	{
 		start=System.nanoTime();
 	}
+
+	/**
+	 * Prints the elapsed time since creating to standard output.
+	 * 
+	 * @param label
+	 *            A user readable label, that will e included into message
+	 *            written to console.
+	 */
 	public void printElapsed(String label)
 	{
 		long now=System.nanoTime();
@@ -31,7 +39,8 @@ public class UtilTime {
 		start=now;
 		if(!disableLog)
 		{
-			System.out.println("Elapsed time - "+label+" "+elapsed/1000000);
+			//writing to std.out is OK, see the specification of this method 
+			System.out.println("Elapsed time - "+label+" "+elapsed/1000000);//NOSONAR
 			System.out.flush();
 		}
 	}

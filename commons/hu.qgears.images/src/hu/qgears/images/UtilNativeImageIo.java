@@ -31,6 +31,10 @@ public class UtilNativeImageIo {
 	 */
 	private static int headerSize=24;
 	
+	private UtilNativeImageIo() {
+		// disable constructor of utility class
+	}
+	
 	/**
 	 * Returns the size, that is required to save specified
 	 * {@link NativeImage} as QIMG image.
@@ -208,46 +212,39 @@ public class UtilNativeImageIo {
 	public static NativeImage wrapImageFromMemory(INativeMemory nm) throws IOException
 	{
 		long fsize=nm.getSize();
-		try
+		if(fsize>headerSize)
 		{
-			if(fsize>headerSize)
-			{
-				ByteBuffer bb=nm.getJavaAccessor();
-				check(bb.get(), 'Q');
-				check(bb.get(), 'I');
-				check(bb.get(), 'M');
-				check(bb.get(), 'G');
-				IntBuffer ib=bb.asIntBuffer();
-				int w=ib.get();
-				int h=ib.get();
-				SizeInt size=new SizeInt(w, h);
-				int coOrdinal=ib.get();
-				int afOrdinal=ib.get();
-				int transparentOrOpaqueMask=ib.get();
+			ByteBuffer bb=nm.getJavaAccessor();
+			check(bb.get(), 'Q');
+			check(bb.get(), 'I');
+			check(bb.get(), 'M');
+			check(bb.get(), 'G');
+			IntBuffer ib=bb.asIntBuffer();
+			int w=ib.get();
+			int h=ib.get();
+			SizeInt size=new SizeInt(w, h);
+			int coOrdinal=ib.get();
+			int afOrdinal=ib.get();
+			int transparentOrOpaqueMask=ib.get();
 
-				ENativeImageComponentOrder co=ENativeImageComponentOrder.values()[coOrdinal];
-				ENativeImageAlphaStorageFormat af=ENativeImageAlphaStorageFormat.values()[afOrdinal];
-				if(co.getNCHannels()*size.getNumberOfPixels()+headerSize!=fsize)
-				{
-					throw new IOException("File length does not match width, height and component order of image (" +
-							w+"x"+h+"("+co+") - "+fsize+
-							"). Image file is corrupted");
-				}
-				INativeMemory imMem=new WrappedJavaNativeMemory(nm, headerSize, (int)fsize);
-//				nm.decrementReferenceCounter();
-				NativeImage ret=new NativeImage(imMem, new SizeInt(w, h), co, 1);
-				ret.setAlphaStorageFormat(af);
-				ret.setTransparentOrOpaqueMask(transparentOrOpaqueMask);
-
-				return ret;
-			}
-			else
+			ENativeImageComponentOrder co=ENativeImageComponentOrder.values()[coOrdinal];
+			ENativeImageAlphaStorageFormat af=ENativeImageAlphaStorageFormat.values()[afOrdinal];
+			if(co.getNCHannels()*size.getNumberOfPixels()+headerSize!=fsize)
 			{
-				throw new IOException("File length is smaller than "+headerSize+" bytes. Image file is corrupted");
+				throw new IOException("File length does not match width, height and component order of image (" +
+						w+"x"+h+"("+co+") - "+fsize+
+						"). Image file is corrupted");
 			}
-		}finally
+			INativeMemory imMem=new WrappedJavaNativeMemory(nm, headerSize, (int)fsize);
+			NativeImage ret=new NativeImage(imMem, new SizeInt(w, h), co, 1);
+			ret.setAlphaStorageFormat(af);
+			ret.setTransparentOrOpaqueMask(transparentOrOpaqueMask);
+
+			return ret;
+		}
+		else
 		{
-//			nm.decrementReferenceCounter();
+			throw new IOException("File length is smaller than "+headerSize+" bytes. Image file is corrupted");
 		}
 	}
 
@@ -312,8 +309,12 @@ public class UtilNativeImageIo {
 
 	private static byte corrigate(byte r, float mul) {
 		int v=(int)(mul*(r&0xFF));
-		if(v>255) v=255;
-		if(v<0) v=0;
+		if (v > 255) {
+			v = 255;
+		}
+		if (v < 0) {
+			v = 0;
+		}
 		return (byte)v;
 	}
 

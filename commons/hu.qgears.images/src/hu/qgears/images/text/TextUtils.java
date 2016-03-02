@@ -1,10 +1,14 @@
 package hu.qgears.images.text;
 
+import org.apache.log4j.Logger;
+
 /**
  * @since 3.0
  */
 public class TextUtils {
 
+	private static Logger LOG = Logger.getLogger(TextUtils.class);
+	
 	/**
 	 * Returns the necessary disposition of 'y' coordinate, to get the specified alignment.
 	 * 

@@ -29,14 +29,22 @@ import java.util.List;
 import java.util.Set;
 import java.util.jar.Manifest;
 
+import org.apache.log4j.Logger;
+
 /**
  * Static methods for handling files.
  * 
  * @author rizsi
  * 
  */
-public class UtilFile {
+public final class UtilFile {
 
+	private static Logger LOG = Logger.getLogger(UtilFile.class);
+	
+	private UtilFile() {
+		// disable constructor of utility class
+	}
+	
 	/**
 	 * Create the parent directories of the file. Then create the file and fill
 	 * its content from the given URL.
@@ -46,12 +54,13 @@ public class UtilFile {
 	 * @throws IOException
 	 */
 	public static void copyFileFromUrl(File trg, URL url) throws IOException {
-		trg.getParentFile().mkdirs();
+		mkdirParents(trg);
 		InputStream is = url.openStream();
 		try {
 			FileOutputStream fos = new FileOutputStream(trg);
 			try {
-				BufferedInputStream bis = new BufferedInputStream(is, 16384);
+				//is is closed in outer finally block
+				BufferedInputStream bis = new BufferedInputStream(is, 16384);//NOSONAR
 				BufferedOutputStream bos = new BufferedOutputStream(fos, 16384);
 				int c;
 				while ((c = bis.read()) >= 0) {
@@ -132,7 +141,9 @@ public class UtilFile {
 					deleteRecursive(f);
 				}
 			}
-			dir.delete();
+			if (!dir.delete()){
+				LOG.error("Cannot delete file: "+dir);
+			}
 		}
 	}
 
@@ -150,7 +161,7 @@ public class UtilFile {
 			m.update(bytes);
 			return "" + new BigInteger(1, m.digest()).toString(16);
 		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
+			LOG.error(e);
 			return null;
 		}
 	}
@@ -439,7 +450,11 @@ public class UtilFile {
 	 *            is a file path
 	 */
 	public static void mkdirParents(File f) {
-		f.getParentFile().mkdirs();
+		if (!f.getParentFile().exists()) {
+			if (!f.getParentFile().mkdirs()) {
+				LOG.error("Cannot create parent folder of file: " + f);
+			}
+		}
 	}
 
 	public static void copyContentsRecursive(File srcDir, final File toDir)
@@ -457,7 +472,6 @@ public class UtilFile {
 						File trg = new File(toDir, localPath);
 						mkdirParents(trg);
 						UtilFile.copyFileFromUrl(trg, dir.toURI().toURL());
-						// System.out.println("Copy to: "+trg+" from: "+ dir);
 					}
 					return true;
 				}
@@ -508,7 +522,7 @@ public class UtilFile {
 			if (input != null){
 				if (input.isFile()){
 					if (useFileName){
-						dig.update(input.getName().getBytes());
+						dig.update(input.getName().getBytes("UTF-8"));
 					}
 					digest = dig.digest(loadFile(input));
 				} else if (input.isDirectory()){
@@ -517,7 +531,7 @@ public class UtilFile {
 					for (File f : listAllFiles){
 						if (useFileName){
 							String relative =input.toURI().relativize(f.toURI()).getPath(); 
-							dig.update(relative.getBytes());
+							dig.update(relative.getBytes("UTF-8"));
 						}
 						dig.update((loadFile(f)));
 					}
@@ -526,7 +540,7 @@ public class UtilFile {
 			}
 		} catch (NoSuchAlgorithmException e) {
 			//this should not happen
-			e.printStackTrace();
+			LOG.error(e);
 		}
 		if (digest != null){
 			BigInteger bigInt = new BigInteger(1, digest);

@@ -6,12 +6,21 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 
+import org.apache.log4j.Logger;
+
 /**
  * Helper class for accessing Java nio channels.
  * @author rizsi
  *
  */
 public class UtilChannel {
+	
+	private static Logger LOG = Logger.getLogger(UtilChannel.class);
+	
+	private UtilChannel() {
+		//ctor of utility class
+	}
+	
 	/**
 	 * Read N bytes from a channel into the beginning of a byte buffer
 	 * @param channel should be in blocking mode
@@ -36,6 +45,7 @@ public class UtilChannel {
 				try {
 					Thread.sleep(0, 10000);
 				} catch (InterruptedException e) {
+					LOG.error(e);
 				}
 			}
 			else
@@ -54,6 +64,7 @@ public class UtilChannel {
 				try {
 					Thread.sleep(0, 1000000);
 				} catch (InterruptedException e) {
+					LOG.error(e);
 				}
 			}
 		}

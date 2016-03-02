@@ -11,6 +11,12 @@ import java.io.ObjectOutputStream;
  *
  */
 public class UtilSerializator {
+	
+	
+	private UtilSerializator() {
+		// disable constructor of utility class
+	}
+	
 	/**
 	 * Serialize the object to an array of bytes
 	 * @param o

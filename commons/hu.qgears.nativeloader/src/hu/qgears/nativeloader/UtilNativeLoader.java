@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
+import org.apache.log4j.Logger;
+
 
 /**
  * Helper to load native libraries on multiple platforms.
@@ -29,7 +31,8 @@ import java.net.URL;
  * @author rizsi
  */
 public class UtilNativeLoader {
-//	static Logger log = Logger.getLogger(UtilNativeLoader.class.getName());
+	
+	private static Logger LOG = Logger.getLogger(UtilNativeLoader.class);
 	
 	/**
 	 * Tells whether the running JVM is 32 or 64 bit, allowing to properly
@@ -51,11 +54,14 @@ public class UtilNativeLoader {
 	 */
 	public static final String dataModelSysProp = System.getProperty("sun.arch.data.model");
 
-	public static boolean VERBOSE = true;
+	/*
+	 * Variable name is ok here
+	 */
+	public static boolean VERBOSE = true;//NOSONAR
 	
 	static {
 		if (dataModelSysProp == null) {
-			System.out.println("JVM architecture cannot be determined by " +
+			info("JVM architecture cannot be determined by " +
 					"querying 'sun.arch.data.model' system property; falling " +
 					"back to the value of 'os.arch'");
 		}
@@ -64,7 +70,7 @@ public class UtilNativeLoader {
 	private static void info(String message)
 	{
 		if (VERBOSE) {
-			System.out.println("UtilNativeLoader: " + message);
+			LOG.info(message);
 		}
 	}
 	/**
@@ -90,7 +96,8 @@ public class UtilNativeLoader {
 				loadNativeBinary(libPath, clazz, nativeLoader);
 			}
 		} catch (NativeLoadException e) {
-			throw e;
+			//rethrowing is OK
+			throw e;//NOSONAR
 		} catch (Throwable t) {
 			throw new NativeLoadException(t);
 		}
@@ -134,10 +141,14 @@ public class UtilNativeLoader {
 		{
 			// Use current working directory/nativesTmp
 			directory=File.createTempFile("nativesTmp", "");
-			directory.delete();
-			directory.mkdirs();
-//			directory=new File("nativesTmp");
-//			directory.mkdirs();
+			//empty file, the delete must return true!
+			if (!directory.delete()) {
+				throw new IOException("Cannot create temp directory");
+			}
+			//a new directory on this path must be created
+			if (!directory.mkdirs()){
+				throw new IOException("Cannot create temp directory");
+			}
 		}
 		return directory;
 	}

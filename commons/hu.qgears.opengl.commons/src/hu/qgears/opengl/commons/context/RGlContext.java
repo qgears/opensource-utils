@@ -22,7 +22,7 @@ import org.lwjgl.util.Rectangle;
  * @author rizsi
  *
  */
-final public class RGlContext implements Cloneable {
+public final class RGlContext implements Cloneable {
 	static class Save
 	{
 		ECullState cullState=ECullState.off;

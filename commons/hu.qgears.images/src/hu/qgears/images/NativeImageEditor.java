@@ -95,8 +95,10 @@ public class NativeImageEditor {
 	private void doFill(byte first, byte second, byte third, byte fourth){
 		doFill(first, second, third, fourth,0,0,imageToEdit.getWidth(), imageToEdit.getHeight());
 	}
-	
-	private void doFill(byte first, byte second, byte third, byte fourth, int x, int y, int width, int height){
+	/*
+	 * too many parameters is OK here
+	 */
+	private void doFill(byte first, byte second, byte third, byte fourth, int x, int y, int width, int height){//NOSONAR
 		for (int i = x; i< x+width; i++){
 			for(int j = y; j< y+height; j++){
 				imageToEdit.setChannel(i, j, 0, first);

@@ -15,14 +15,18 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.ByteBuffer;
 
+import org.apache.log4j.Logger;
+
 public class NativeLibPng {
+	private static Logger LOG = Logger.getLogger(NativeLibPng.class);
+	
 	private long ptr;
 	public NativeLibPng()
 	{
 		try {
 			NativeLibPngManager.getInstance();
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOG.error("Cannot initialize LibPng connector",e);
 		}
 	}
 	public NativeImage loadImage(byte[] imageData, INativeMemoryAllocator allocator, int alignment)
@@ -87,39 +91,44 @@ public class NativeLibPng {
 	 *  * 4 - ARGB image
 	 * @return
 	 */
-	native private int getNumberOfChannels();
-	native private void loadImage(ByteBuffer javaAccessor, int rowBytes);
+	private native int getNumberOfChannels();
+	private native void loadImage(ByteBuffer javaAccessor, int rowBytes);
 	/**
 	 * Free all resources that were allocated in the current load image process.
 	 */
-	native private void closeLoad();
+	private native void closeLoad();
 	/**
 	 * Parse the header of the image file.
 	 * State change: in all cases (even if the method throws exception)
 	 * the closeLoad method must be called finally to release all allocated resources 
 	 * @param imageData contains all bytes of the PNG image
 	 */
-	native private void beginLoad(ByteBuffer imageData) throws NativeLibPngException;
+	private native void beginLoad(ByteBuffer imageData) throws NativeLibPngException;
 	/**
 	 * Get the size of the image that is to be loaded.
 	 * Returns valid data after beginLoad returned without error.
 	 * @return
 	 */
-	native private int getHeight();
+	private native int getHeight();
 	/**
 	 * Get the size of the image that is to be loaded.
 	 * Returns valid data after beginLoad returned without error.
 	 * @return
 	 */
-	native private int getWidth();
-	native private int getRowBytes();
-	native private void beginSave(int width, int height, int rowBytes,
+	private native int getWidth();
+	private native int getRowBytes();
+
+	/*
+	 * NOSONAR : too many parameters is OK. passing primitive parameters is
+	 * easier in JNI
+	 */
+	private native void beginSave(int width, int height, int rowBytes,//NOSONAR
 			int nChannel,
 			boolean swapAplha,
 			boolean swapBGR,
 			boolean premultipliedAlpha,
 			ByteBuffer pixelData);
-	native private int getFileSize();
+	private native int getFileSize();
 	/**
 	 * Save image to PNG format.
 	 * @param im image to be saved
@@ -194,11 +203,11 @@ public class NativeLibPng {
 			closeSave();
 		}
 	}
-	native private void saveImage(ByteBuffer file);
+	private native void saveImage(ByteBuffer file);
 	/**
 	 * Release all resources that were allocated in the current save process.
 	 */
-	native private void closeSave();
+	private native void closeSave();
 	public void saveImage(NativeImage im, File out) throws IOException {
 		INativeMemory mem=saveImage(im, DefaultJavaNativeMemoryAllocator.getInstance());
 		UtilFile.saveAsFile(out, mem.getJavaAccessor());

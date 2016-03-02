@@ -9,7 +9,16 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 public class UtilMemory {
+
+	private static Logger LOG = Logger.getLogger(UtilMemory.class);
+	
+	private UtilMemory() {
+		// disable constructor of utility class
+	}
+
 	/**
 	 * Generates load for garbage collector measurements
 	 * @author rizsi
@@ -36,7 +45,7 @@ public class UtilMemory {
 				try {
 					Thread.sleep(1000/FPS);
 				} catch (InterruptedException e) {
-					e.printStackTrace();
+					LOG.error(e);
 				}
 			}
 		};
@@ -72,7 +81,7 @@ public class UtilMemory {
 		t0=System.nanoTime()-t0;
 		long mem = Runtime.getRuntime().totalMemory()
 				- Runtime.getRuntime().freeMemory();
-		System.out.println("Memory used: " + mem + " at: " + where+" 2xGC nanos: "+t0);
+		LOG.info("Memory used: " + mem + " at: " + where+" 2xGC nanos: "+t0);
 	}
 
 	/**
@@ -121,7 +130,7 @@ public class UtilMemory {
 				ret = GCTypes.UseParNewGC;
 			}
 		} catch (Throwable e) {
-			e.printStackTrace();
+			LOG.error(e);
 		}
 		return ret;
 	}
@@ -145,7 +154,7 @@ public class UtilMemory {
 	{
 		if(!GCTypes.UseConcMarkSweepGC.equals(queryGCType()))
 		{
-			System.err.println("Low latency GC is required! Use: -XX:+UseConcMarkSweepGC");
+			LOG.error("Low latency GC is required! Use: -XX:+UseConcMarkSweepGC");
 		}
 	}
 	private static Thread gcThread;
@@ -175,7 +184,7 @@ public class UtilMemory {
 					}
 					Thread.sleep(pause);
 				} catch (InterruptedException e) {
-					e.printStackTrace();
+					LOG.error(e);
 				}
 			}
 		}
@@ -197,7 +206,7 @@ public class UtilMemory {
 		@Override
 		public void after() {
 			long diff=System.currentTimeMillis()-t;
-			System.out.println("GC at: "+t+" lasts: "+diff+" (millis)");
+			LOG.info("GC at: "+t+" lasts: "+diff+" (millis)");
 		}
 		
 	}
@@ -209,18 +218,23 @@ public class UtilMemory {
 	{
 		startGcThread(pause, null);
 	}
+
 	/**
-	 * Start a thread that forces garbage collection on a regular basis.
+	 * Start a thread that forces garbage collection on a regular basis. This
+	 * call is not designed to us in multithread environment!
+	 * 
 	 * @param pause
-	 * @param log callback that is called before and after garbage collection. May be null.
+	 * @param log
+	 *            callback that is called before and after garbage collection.
+	 *            May be null.
 	 */
-	public static void startGcThread(long pause, GCLogger log)
-	{
-		if(gcThread==null)
-		{
-			forceGc=new ForceGcRunnable(pause, log);
-			gcThread=new NamedThreadFactory("Force Garbage collector").setDaemon(true)
-				.setPriority(Thread.MIN_PRIORITY).newThread(forceGc);
+	public static void startGcThread(long pause, GCLogger log) {
+		//this class is should not be used in multihread env
+		if (gcThread == null) {//NOSONAR
+			forceGc = new ForceGcRunnable(pause, log);
+			gcThread = new NamedThreadFactory("Force Garbage collector")
+					.setDaemon(true).setPriority(Thread.MIN_PRIORITY)
+					.newThread(forceGc);
 			gcThread.start();
 		}
 	}

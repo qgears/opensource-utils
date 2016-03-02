@@ -5,7 +5,7 @@ import hu.qgears.opengl.commons.AbstractOpenglApplication2;
 import java.util.ArrayList;
 import java.util.List;
 
-abstract public class OpenGLFrame extends AbstractOpenglApplication2 {
+public abstract class OpenGLFrame extends AbstractOpenglApplication2 {
 
 	private List<OpenGLAppContainer> containers = new ArrayList<OpenGLAppContainer>();
 	private List<OpenGLAppContainer> copyOfContainers=new ArrayList<OpenGLAppContainer>();

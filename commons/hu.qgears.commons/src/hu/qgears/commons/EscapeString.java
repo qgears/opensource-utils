@@ -22,6 +22,8 @@ import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 /**
  * <p>
  * Escapes and unescapes <code>String</code>s for Java, Java Script, HTML, XML,
@@ -43,28 +45,11 @@ import java.util.Map;
  */
 public class EscapeString {
 
-	/**
-	 * <p>
-	 * <code>StringEscapeUtils</code> instances should NOT be constructed in
-	 * standard programming.
-	 * </p>
-	 * 
-	 * <p>
-	 * Instead, the class should be used as:
-	 * 
-	 * <pre>
-	 * StringEscapeUtils.escapeJava(&quot;foo&quot;);
-	 * </pre>
-	 * 
-	 * </p>
-	 * 
-	 * <p>
-	 * This constructor is public to permit tools that require a JavaBean
-	 * instance to operate.
-	 * </p>
-	 */
-	public EscapeString() {
-		super();
+	private static Map<String,Character> htmlEscapeChars;
+	private static Logger LOG = Logger.getLogger(EscapeString.class);
+
+	private EscapeString() {
+		//disable ctor of utility class
 	}
 
 	// Java and JavaScript
@@ -216,7 +201,7 @@ public class EscapeString {
 			return writer.toString();
 		} catch (IOException ioe) {
 			// this should never ever happen while writing to a StringWriter
-			ioe.printStackTrace();
+			LOG.error(ioe);
 			return null;
 		}
 	}
@@ -301,11 +286,7 @@ public class EscapeString {
 					out.write('\\');
 					out.write('\\');
 					break;
-					// Fixed by SA
-				// case '/':
-				// out.write('\\');
-				// out.write('/');
-				// break;
+				// Handling '/' is fixed by SA
 				default:
 					out.write(ch);
 					break;
@@ -350,7 +331,7 @@ public class EscapeString {
 			return writer.toString();
 		} catch (IOException ioe) {
 			// this should never ever happen while writing to a StringWriter
-			ioe.printStackTrace();
+			LOG.error(ioe);
 			return null;
 		}
 	}
@@ -520,7 +501,7 @@ public class EscapeString {
 			escapeHtml(sw, str);
 		} catch (IOException e) {
 			// Exception is never thrown
-			e.printStackTrace();
+			LOG.error(e);
 		}
 		return sw.toString();
 	}
@@ -552,7 +533,6 @@ public class EscapeString {
 		}
 	}
 	
-	private static Map<String,Character> htmlEscapeChars;
 	static {
 		htmlEscapeChars = new HashMap<String, Character>();
 		htmlEscapeChars.put("&lt;",'<');
@@ -571,7 +551,9 @@ public class EscapeString {
 			char ch=str.charAt(i);
 			w.append(ch);
 			switch (ch) {
-				case '&' : lastAmpIndex = w.length()-1; break;
+				case '&' :
+					lastAmpIndex = w.length()-1;
+					break;
 				case ';': {
 					if (lastAmpIndex >= 0){
 						mem = w.substring(lastAmpIndex, w.length());
@@ -582,7 +564,9 @@ public class EscapeString {
 					}
 					break;
 				}
-				
+				default :
+					//nothing to do
+					break;
 			}
 		}
 		return w.toString();

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
+import org.apache.log4j.Logger;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -19,6 +20,8 @@ import org.xml.sax.helpers.XMLReaderFactory;
  */
 public abstract class XmlNativeLoader2 implements INativeLoader {
 
+	private static Logger LOG = Logger.getLogger(XmlNativeLoader2.class);
+	
 	public static final String IMPLEMENTATIONS = "implementations.xml";
 
 	protected class ImplementationsHandler extends DefaultHandler
@@ -47,7 +50,7 @@ public abstract class XmlNativeLoader2 implements INativeLoader {
 							}
 						}catch(Exception e)
 						{
-							e.printStackTrace();
+							LOG.error(e);
 						}
 					}
 				}else
@@ -174,11 +177,7 @@ public abstract class XmlNativeLoader2 implements INativeLoader {
 				istream.close();
 			}
 		} catch (SAXException e) {
-			if (e.getException() != null) {
-				throw new NativeLoadException(e.getException());
-			} else {
-				throw new NativeLoadException(e);
-			}
+			throw new NativeLoadException(e);
 		} catch (IOException e) {
 			throw new NativeLoadException(e);
 		}

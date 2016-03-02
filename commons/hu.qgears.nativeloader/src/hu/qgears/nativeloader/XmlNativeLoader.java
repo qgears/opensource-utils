@@ -156,7 +156,7 @@ public abstract class XmlNativeLoader implements INativeLoader {
 		@Override
 		public void startElement(String uri, String localName, String qName,
 				Attributes attributes) throws SAXException {
-			if (uri == NAMESPACE) {
+			if (NAMESPACE.equals(uri)) {
 				if (EL_NATIVESDEF.equals(localName)) { // <natives-def>
 					listening.push(true);
 
@@ -241,7 +241,7 @@ public abstract class XmlNativeLoader implements INativeLoader {
 		@Override
 		public void endElement(String uri, String localName, String qName)
 				throws SAXException {
-			if (uri == NAMESPACE) {
+			if (NAMESPACE.equals(uri)) {
 				if (EL_NATIVESDEF.equals(localName) // </natives-def>
 						|| EL_PLATFORM.equals(localName) // </platform>
 						|| EL_LIBGROUP.equals(localName)) { // </libs>
@@ -301,11 +301,7 @@ public abstract class XmlNativeLoader implements INativeLoader {
 			reader.setContentHandler(handler);
 			reader.parse(isource);
 		} catch (SAXException e) {
-			if (e.getException() != null) {
-				throw new NativeLoadException(e.getException());
-			} else {
-				throw new NativeLoadException(e);
-			}
+			throw new NativeLoadException(e);
 		} catch (IOException e) {
 			throw new NativeLoadException(e);
 		}

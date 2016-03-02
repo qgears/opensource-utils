@@ -8,7 +8,7 @@ import java.io.File;
  *
  */
 public class UtilFileVisitor {
-	final public void visit(File dir) throws Exception
+	public final void visit(File dir) throws Exception
 	{
 		visit(dir, "");
 	}
