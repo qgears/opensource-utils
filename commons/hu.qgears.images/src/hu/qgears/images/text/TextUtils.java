@@ -7,8 +7,11 @@ import org.apache.log4j.Logger;
  */
 public class TextUtils {
 
-	private static Logger LOG = Logger.getLogger(TextUtils.class);
+	private static final Logger LOG = Logger.getLogger(TextUtils.class);
 	
+	private TextUtils() {
+		// disable constructor of utility class
+	}
 	/**
 	 * Returns the necessary disposition of 'y' coordinate, to get the specified alignment.
 	 * 

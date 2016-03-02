@@ -32,7 +32,7 @@ import org.apache.log4j.Logger;
  *
  */
 public class VNCClient {
-	private static Logger LOG = Logger.getLogger(VNCClient.class);
+	private static final Logger LOG = Logger.getLogger(VNCClient.class);
 	
 	private ENativeImageComponentOrder componentOrder;
 	private long retryTimeoutMillis=1000;
@@ -153,8 +153,7 @@ public class VNCClient {
 			try {
 				channel.close();
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LOG.error(e);
 			}
 			channel=null;
 		}

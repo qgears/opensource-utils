@@ -18,7 +18,7 @@ import java.nio.ByteBuffer;
 import org.apache.log4j.Logger;
 
 public class NativeLibPng {
-	private static Logger LOG = Logger.getLogger(NativeLibPng.class);
+	private static final Logger LOG = Logger.getLogger(NativeLibPng.class);
 	
 	private long ptr;
 	public NativeLibPng()

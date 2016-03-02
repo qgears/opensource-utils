@@ -370,7 +370,6 @@ public class UtilNativeImageIo {
 		bb.position(0);
 		bb.limit(bb.capacity());
 		MessageDigest md=MessageDigest.getInstance("MD5");
-//		md.update(nim.getAlphaStorageFormat().ordinal());
 		md.update(bb);
 		return md.digest();
 	}

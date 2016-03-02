@@ -297,7 +297,7 @@ public class NativeImage extends AbstractReferenceCountedDisposeable
 		int r=(rgba>>24)&0xFF;
 		int g=(rgba>>16)&0xFF;
 		int b=(rgba>>8)&0xFF;
-		int a=rgba&0xFF;;
+		int a=rgba&0xFF;
 		switch (componentOrder) {
 		case BGR:
 			nbuffer.put(pos  , (byte)b);
@@ -373,42 +373,44 @@ public class NativeImage extends AbstractReferenceCountedDisposeable
 			a=nbuffer.get(pos+3);
 			break;
 		case MONO:
-			r=b=g=nbuffer.get(pos);
+			g = nbuffer.get(pos);
+			r = g;
+			b = g;
 			a=255;
 			break;
 		default:
 			throw new RuntimeException("Unknown component order: "+componentOrder);
 		}
-		switch(alphaStorageFormat)
-		{
+		switch (alphaStorageFormat) {
 		case normal:
-		{
-			
-		}break;
-		case premultiplied:
-		{
+			//nothing to do
+			break;
+		case premultiplied: {
 			float f;
-			if(a==0)
-			{
-				f=0;
-			}else
-			{
-				a=a&0xFF;
-				f=255f/a;
-				r=clampMul(f,r);
-				g=clampMul(f,g);
-				b=clampMul(f,b);
+			if (a == 0) {
+				f = 0;
+			} else {
+				a = a & 0xFF;
+				f = 255f / a;
+				r = clampMul(f, r);
+				g = clampMul(f, g);
+				b = clampMul(f, b);
 			}
-		}break;
+			break;
+		}
+		default:
+			//nothing to do
+			break;
 		}
 		return ((r<<24)&0xFF000000)+((g<<16)&0x00FF0000)+((b<<8)&0x0000FF00)+(a&0xFF);
 	}
 	private static final int clampMul(float f, int r) {
 		float ret=f*(0xFF&r);
-		if(ret>255)ret=255;
-		if(ret<0)
-		{
-			ret=0;
+		if (ret > 255) {
+			ret = 255;
+		}
+		if (ret < 0) {
+			ret = 0;
 		}
 		return (int)ret;
 	}
