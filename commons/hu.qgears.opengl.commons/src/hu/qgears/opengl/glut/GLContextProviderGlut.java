@@ -3,6 +3,7 @@ package hu.qgears.opengl.glut;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import org.apache.log4j.Logger;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.GLContext;
 
@@ -16,7 +17,11 @@ import hu.qgears.opengl.commons.input.MouseImplCallback;
 import lwjgl.standalone.BaseAccessor;
 
 public class GLContextProviderGlut implements IGlContextProvider{
-	Glut glut;
+	
+	private static final Logger LOG = Logger
+			.getLogger(GLContextProviderGlut.class);
+	
+	private Glut glut;
 	private ByteBuffer messagesBuffer;
 	private SizeInt size;
 	private SizeInt prevSize=new SizeInt(0, 0);
@@ -112,16 +117,15 @@ public class GLContextProviderGlut implements IGlContextProvider{
 	}
 
 	private void processMessage(int type, int x, int y, int button, int state, int characterCode) {
-//		System.out.println("GLUT event: "+type+" "+x+" "+y+" "+button+" "+state+" "+Character.toString((char)button));
 		switch (type) {
 		case 5:	// EVENT MOUSE MOTION
 			button=-1;
 			state=1;
 		case 4:	// EVENT_MOUSE
 			EMouseButton eButton=convertButtonId(button);
-			if(OGlGlobalParameters.logMouseMessages)
+			if(OGlGlobalParameters.logMouseMessages && LOG.isInfoEnabled())
 			{
-				System.out.println("Glut Mouse: "+button);
+				LOG.info("Glut Mouse: "+button);
 			}
 			mouse.addEvent(type, x, y, eButton, state);
 			break;
@@ -142,16 +146,7 @@ public class GLContextProviderGlut implements IGlContextProvider{
 			//the 24th LSB is the special indicator bit ↑
 			long ev=button+(state<<16)+(1<<24);
 			keyboard.addEvent(ev);
-			if(button==7)
-			{
-				
-			}
-		case 3:
-//			System.out.println("Spec Button: "+button);
-			if(button==7)
-			{
-				
-			}
+			break;
 		default:
 			break;
 		}
@@ -170,8 +165,9 @@ public class GLContextProviderGlut implements IGlContextProvider{
 			return EMouseButton.WHEEL_UP;
 		case 4:
 			return EMouseButton.WHEEL_DOWN;
+		default:
+			return null;
 		}
-		return null;
 	}
 
 	@Override

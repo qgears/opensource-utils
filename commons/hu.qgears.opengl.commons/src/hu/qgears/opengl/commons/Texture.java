@@ -13,6 +13,7 @@ import hu.qgears.opengl.commons.context.RGlContext;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
+import org.apache.log4j.Logger;
 import org.lwjgl.opengl.APPLEClientStorage;
 import org.lwjgl.opengl.ContextCapabilities;
 import org.lwjgl.opengl.EXTFramebufferObject;
@@ -37,6 +38,9 @@ import org.lwjgl.util.vector.Vector4f;
  *
  */
 public class Texture implements IDisposeable {
+	
+	private static final Logger LOG = Logger.getLogger(Texture.class);
+	
 	private boolean samplingNear;
 	private int textureHandle;
 	private EBlendFunc blendFunc=EBlendFunc.off;
@@ -160,12 +164,9 @@ public class Texture implements IDisposeable {
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T,
 				GL11.GL_REPEAT);
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER,
-				GL11.GL_LINEAR); // GL11.
-		// GL_NEAREST
-		// );
+				GL11.GL_LINEAR); 
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER,
-				GL11.GL_LINEAR); // GL11.
-		// GL_NEAREST
+				GL11.GL_LINEAR);
 		int openGLtype = getOpenGLType(componentOrder);
 		GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, // level of detail
 				GL11.GL_RGBA8, // internal format for texture is RGB with
@@ -191,9 +192,9 @@ public class Texture implements IDisposeable {
 			return GL11.GL_RGB;
 		case RGBA:
 			return GL11.GL_RGBA;
-
+		default:
+			return GL11.GL_RGB;
 		}
-		return GL11.GL_RGB;
 	}
 	/**
 	 * Implement finalizer to detect textures not disposed.
@@ -209,7 +210,7 @@ public class Texture implements IDisposeable {
 	protected void finalize() throws Throwable {
 		if(!disposed)
 		{
-			System.err.println("ERROR! Texture not disposed before garbage collected!");
+			LOG.error("Texture not disposed before garbage collected!");
 		}
 		super.finalize();
 	}
@@ -271,24 +272,13 @@ public class Texture implements IDisposeable {
 		float maxV = sourceRectangle.getTopLeft().getY();
 		float minU = sourceRectangle.getTopLeft().getX();
 		float minV = sourceRectangle.getBottomRight().getY();
-		// preserve settings
-		// GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
-//		rglContext.push();
-		// tweak settings
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
-//		GL11.glDisable(GL11.)
 		UtilGl.applyBlendFunc(blendFunc);
-//		rglContext.setTexture2d(true);
-//		rglContext.setLightEnabled(false);
-//		rglContext.setDepthTest(false);
-//		rglContext.setBlendFunc(blendFunc);
-//		rglContext.apply();
 		UtilGl.setColor(color);
 		// activate the image texture
 		bindThisTexture();
 		// draw a textured quad
 		drawTextureOnRectangle(targetRectangle, maxU, maxV, minU, minV);
-//		rglContext.pop();
 	}
 	/**
 	 * Render the ractangle using its self settings of color and blendfunc.
@@ -299,17 +289,13 @@ public class Texture implements IDisposeable {
 	public void drawTextureOnRectangle(RGlContext rglContext,
 			TargetRectangle2d targetRectangle,
 			TargetRectangle2d sourceRectangle) {
-		float maxU = sourceRectangle.right;//getBottomRight().getX();
-		float maxV = sourceRectangle.y;//getTopLeft().getY();
-		float minU = sourceRectangle.x;//getTopLeft().getX();
-		float minV = sourceRectangle.bottom;//getBottomRight().getY();
+		float maxU = sourceRectangle.right;
+		float maxV = sourceRectangle.y;
+		float minU = sourceRectangle.x;
+		float minV = sourceRectangle.bottom;
 		// preserve settings
-		// GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
 		rglContext.push();
 		// tweak settings
-//		GL11.glEnable(GL11.GL_TEXTURE_2D);
-//		GL11.glDisable(GL11.)
-//		UtilGl.applyBlendFunc(blendFunc);
 		rglContext.setTexture2d(true);
 		rglContext.setLightEnabled(false);
 		rglContext.setDepthTest(false);
@@ -383,12 +369,11 @@ public class Texture implements IDisposeable {
 	public void drawTextureOnRectangle(RGlContext rglContext,
 			TargetRectangle2d targetRectangle, TargetRectangle2d sourceRectangle,
 			EBlendFunc blendFunc) {
-		float maxU = sourceRectangle.right; //getBottomRight().getX();
-		float maxV = sourceRectangle.y; //getTopLeft().getY();
-		float minU = sourceRectangle.x; //getTopLeft().getX();
-		float minV = sourceRectangle.bottom; //getBottomRight().getY();
+		float maxU = sourceRectangle.right;
+		float maxV = sourceRectangle.y;
+		float minU = sourceRectangle.x;
+		float minV = sourceRectangle.bottom;
 		// preserve settings
-		// GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
 		rglContext.push();
 		// tweak settings
 		rglContext.setTexture2d(true);
@@ -486,27 +471,10 @@ public class Texture implements IDisposeable {
 		float maxV = 0.0f;
 		float minU = 0.0f;
 		float minV = 1.0f;
-		// preserve settings
-		// GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
-		// tweak settings
-
-		// save current GL state
-//		boolean _text = GL11.glGetBoolean(GL11.GL_TEXTURE_2D);
-//		boolean _light = GL11.glGetBoolean(GL11.GL_LIGHTING);
-//		boolean _depth = GL11.glGetBoolean(GL11.GL_DEPTH_TEST);
-//		boolean _blend = GL11.glGetBoolean(GL11.GL_BLEND);
-//		int _blendSrc = GL11.glGetInteger(GL11.GL_BLEND_SRC);
-//		int _blendDst = GL11.glGetInteger(GL11.GL_BLEND_DST);
-//		ByteBuffer _colors = ByteBuffer.allocateDirect(16 * 4); // 16 * 32 bits
-		// ^ of course we need only 4 * 4 bits, but LWJGL thinks it otherwise
-//		FloatBuffer _colorsF = _colors.asFloatBuffer();
-//		_colorsF.put(new float[] { 1, 1, 1, 1}); _colorsF.rewind();
-//		GL11.glGetFloat(GL11.GL_CURRENT_COLOR, _colorsF);
 
 		GL11.glEnable(GL11.GL_TEXTURE_2D); // be sure textures are on
 		UtilGl.setColor(color);
 		GL11.glDisable(GL11.GL_LIGHTING); // no lighting
-		//GL11.glDisable(GL11.GL_DEPTH_TEST); // no depth test
 		if (blend) {
 			GL11.glEnable(GL11.GL_BLEND); // enable transparency
 			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
@@ -518,21 +486,6 @@ public class Texture implements IDisposeable {
 		// draw a textured quad
 		drawTextureOnRectangle(rectangle, maxU, maxV, minU, minV);
 		// return to previous settings
-		// GL11.glPopAttrib();
-
-		// clean up after ourselves
-//		if (!_text) GL11.glDisable(GL11.GL_TEXTURE_2D);
-//		if (_light) GL11.glEnable(GL11.GL_LIGHTING);
-//		if (_depth) GL11.glEnable(GL11.GL_DEPTH_TEST);
-//		if (_blend) {
-//			GL11.glEnable(GL11.GL_BLEND);
-//		} else {
-//			GL11.glDisable(GL11.GL_BLEND);
-//		}
-//		GL11.glBlendFunc(_blendSrc, _blendDst);
-//		_colorsF.rewind();
-//		GL11.glColor4f(_colorsF.get(), _colorsF.get(),
-//				_colorsF.get(), _colorsF.get());
 	}
 
 	/**
@@ -625,24 +578,18 @@ public class Texture implements IDisposeable {
 			UtilGl.setColor(colors[2]);
 			GL11.glTexCoord2f(minU, minV);
 			GL11.glVertex2f(rectangle.x, rectangle.bottom);
-//			UtilGl.loadVertex(rectangle.getBottomLeft());
 
 			UtilGl.setColor(colors[3]);
 			GL11.glTexCoord2f(maxU, minV);
 			GL11.glVertex2f(rectangle.right, rectangle.bottom);
-//			UtilGl.loadVertex(rectangle.getBottomRight());
 
 			UtilGl.setColor(colors[1]);
 			GL11.glTexCoord2f(maxU, maxV);
 			GL11.glVertex2f(rectangle.right, rectangle.y);
 
-//			UtilGl.loadVertex(rectangle.getTopRight());
-
 			UtilGl.setColor(colors[0]);
 			GL11.glTexCoord2f(minU, maxV);
 			GL11.glVertex2f(rectangle.x, rectangle.y);
-//
-//			UtilGl.loadVertex(rectangle.getTopLeft());
 		}
 		GL11.glEnd();
 	}
@@ -677,19 +624,15 @@ public class Texture implements IDisposeable {
 		{
 			GL11.glTexCoord2f(minU, minV);
 			GL11.glVertex2f(rectangle.x, rectangle.bottom);
-//			UtilGl.loadVertex(rectangle.getBottomLeft());
 
 			GL11.glTexCoord2f(maxU, minV);
 			GL11.glVertex2f(rectangle.right, rectangle.bottom);
-//			UtilGl.loadVertex(rectangle.getBottomRight());
 
 			GL11.glTexCoord2f(maxU, maxV);
 			GL11.glVertex2f(rectangle.right, rectangle.y);
-//			UtilGl.loadVertex(rectangle.getTopRight());
 
 			GL11.glTexCoord2f(minU, maxV);
 			GL11.glVertex2f(rectangle.x, rectangle.y);
-//			UtilGl.loadVertex(rectangle.getTopLeft());
 		}
 		GL11.glEnd();
 	}
@@ -782,9 +725,6 @@ public class Texture implements IDisposeable {
 					GL11.GL_LINEAR);
 			GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER,
 					GL11.GL_LINEAR_MIPMAP_LINEAR);
-			// In GL 3.x, GL_GENERATE_MIPMAP is deprecated. You must use glGenerateMipmap.
-//				GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL14.GL_GENERATE_MIPMAP,
-//					GL11.GL_TRUE);
 			break;
 		default:
 			throw new RuntimeException("mipmapping type is not implemented: "+mtype);
@@ -801,7 +741,6 @@ public class Texture implements IDisposeable {
 			ContextCapabilities cc=GLContext.getCapabilities();
 			if(cc.GL_APPLE_client_storage)
 			{
-				System.out.println("Apple client storage!");
 				GL11.glPixelStorei(APPLEClientStorage.GL_UNPACK_CLIENT_STORAGE_APPLE, GL11.GL_TRUE);
 				undoClientStorage=true;
 			}
@@ -825,8 +764,6 @@ public class Texture implements IDisposeable {
 			break;
 		}
 		// Reset the default behaviour
-//		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL14.GL_GENERATE_MIPMAP,
-//				GL11.GL_FALSE);
 		GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 1);
 		if(undoClientStorage)
 		{

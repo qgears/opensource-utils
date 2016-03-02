@@ -3,15 +3,20 @@ package hu.qgears.opengl.commons;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
 
+import org.apache.log4j.Logger;
 import org.lwjgl.opengl.ContextCapabilities;
 import org.lwjgl.opengl.GLContext;
 
+
 public class QueryCaps extends AbstractOpenglApplication2 {
+	
+	private static final Logger LOG = Logger.getLogger(QueryCaps.class);
+	
 	public static void main(String[] args) {
 		try {
 			new QueryCaps().execute();
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOG.error("Error executing QueryCaps",e);
 		}
 	}
 	@Override
@@ -19,29 +24,23 @@ public class QueryCaps extends AbstractOpenglApplication2 {
 		ContextCapabilities cc=GLContext.getCapabilities();
 		Field[] fs=ContextCapabilities.class.getFields();
 		StringWriter sw=new StringWriter();
-//		File file=new File("opengl-caps.txt");
 		for(Field f:fs)
 		{
 			try {
 				Object value=f.get(cc);
 				sw.write(f.getName()+" : "+value);
 				sw.write("\n");
-			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			} catch (Exception e) {
+				LOG.error("Error reading capabilities",e);
 			}
 		}
-		System.out.println(sw.toString());
+		LOG.info(sw.toString());
 		exit();
 	}
 
 	@Override
 	protected void render() {
-		// TODO Auto-generated method stub
-		
+		//nothing to do
 	}
 	@Override
 	protected boolean isDirty() {
@@ -49,7 +48,7 @@ public class QueryCaps extends AbstractOpenglApplication2 {
 	}
 	@Override
 	protected void logError(String message, Exception e) {
-		e.printStackTrace();
+		LOG.error(message,e);
 	}
 
 }

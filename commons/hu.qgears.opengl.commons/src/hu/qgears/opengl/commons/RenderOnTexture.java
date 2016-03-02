@@ -41,9 +41,7 @@ public class RenderOnTexture extends AbstarctRenderOnTexture implements IRenderO
 	private void init(SizeInt size) throws LWJGLException
 	{
 		this.size=size;
-//		IntBuffer fbIds=UtilGl.wrapTemp(1);
 		fbId=GL30.glGenFramebuffers();
-//		fbId=fbIds.get();
 		if(depthRequired)
 		{
 			bind(true);
@@ -77,9 +75,7 @@ public class RenderOnTexture extends AbstarctRenderOnTexture implements IRenderO
 	private int rbId;
 	private void createDepthBuffer()
 	{
-//		IntBuffer rbIds=UtilGl.wrapTemp(1);
 		rbId=GL30.glGenRenderbuffers();
-//		rbId=rbIds.get();
 		// Bind renderbuffer
 		GL30.glBindRenderbuffer(GL30.GL_RENDERBUFFER, rbId);
 
@@ -136,18 +132,8 @@ public class RenderOnTexture extends AbstarctRenderOnTexture implements IRenderO
 	 * @throws LWJGLException
 	 */
 	public static IRenderOnTexture create(Texture targetTexture) throws LWJGLException {
-//		ContextCapabilities cc=GLContext.getCapabilities();
 		// We use the old-style API. It works on all drivers.
 		return new RenderOnTextureFBO(targetTexture, false);
-//		if(!cc.OpenGL30||true)
-//		{
-//			// TODO render to texture object leaks GPU memory (and malloc memory) in case of
-//			// create-dispose cycles
-//			return new RenderOnTextureFBO(targetTexture, false);
-//		}
-		// TODO GL 3.0 render to texture object leaks GPU memory (and malloc memory) in case of
-		// create-dispose cycles
-		//return new RenderOnTexture(targetTexture);
 	}
 	@Override
 	protected void stealImageData(RGlContext ctx, NativeImage out) {

@@ -10,8 +10,9 @@ import org.lwjgl.util.vector.Vector3f;
 
 /**
  * Tér minden irányába mozgatható kamera.
- * 
+ * <p>
  * Can also be used as a context of an element.
+ * 
  * @author rizsi
  *
  */
@@ -62,19 +63,12 @@ public class Camera {
 		// A projekciós mátrixot szorozzuk jobbról
 		// (tehát a projektció előtt fogjuk végrehajtani)
 		// azzal a transzformációval, ami a kamerát a kívánt pozícióba viszi
-//		UtilGl.rotate(GL11.GL_PROJECTION, leftRightAngle, new Vector3f(0,1,0));
-//		UtilGl.rotate(GL11.GL_PROJECTION, upDownAngle, new Vector3f(1,0,0));
-//		GL11.glMultMatrix(m);
 		UtilGl.rotate(GL11.GL_PROJECTION,
 				90,
 				new Vector3f(0,0,1));
 		UtilGl.rotate(GL11.GL_PROJECTION,
 				-90,
 				new Vector3f(1,0,0));
-//		up		=new Vector3f( 1.0f, 0.0f, 0.0f); 
-//		forward	=new Vector3f( 0.0f, 1.0f, 0.0f);
-//		turnRight(5f);
-//		turnUp(0f);
 		up.normalise();
 		forward.normalise();
 		UtilGl.transformToCoordinateSystem(GL11.GL_PROJECTION, up, forward);
@@ -126,7 +120,6 @@ public class Camera {
 	}
 
 	public void processKeyboard(IKeyboard keyboard,
-//			IMouse mouse, 
 			boolean invertmouse, long time)
 	{
 			float speed = 60;
@@ -135,12 +128,6 @@ public class Camera {
 			speed*=timeMultiplier;
 			if (lastProcessKeyboard > 0) {
 				// Csak akkor mozgatjuk egérrel a kamerát ha mienk az egér
-//				if (mouse.isGrabbed()) {
-//					int dx = mouse.getDX();
-//					int dy = mouse.getDY();
-//					turnUp((invertmouse ? -1f : 1f) * mouseSpeed * dy);
-//					turnRight(mouseSpeed * dx);
-//				}
 				if (Keyboard.isKeyDown(Keyboard.KEY_D)) {
 					moveRight(speed);
 				}
@@ -175,12 +162,7 @@ public class Camera {
 		Vector3f crowBarPos=UtilGl.add(position, UtilGl.mul(forward, distance));
 		Vector3f left=UtilGl.cross(up, forward);
 		GL11.glDisable(GL11.GL_LIGHTING);
-//		GL11.glMatrixMode(GL11.GL_MODELVIEW);
-//		GL11.glPushMatrix();
 		{
-//			UtilGl.translate(GL11.GL_MODELVIEW, (Vector3f) new Vector3f(
-//					crowBarPos));
-//			UtilGl.rotate(GL11.GL_MODELVIEW, angle, axis);
 			UtilGl.setColor(new Vector3f(1,1,1));
 			GL11.glBegin(GL11.GL_LINES);
 			{
@@ -192,15 +174,10 @@ public class Camera {
 						UtilGl.mul(up, r)));
 				UtilGl.addVertex(UtilGl.add(crowBarPos,
 					UtilGl.mul(up, -r)));
-//				GL11.glVertex3f(0,0,0);
-//				GL11.glVertex3f(1,1,1);
 			}
 			// Befejeztük a háromszögek koordinátáit
 			GL11.glEnd();
 		}
-//		GL11.glMatrixMode(GL11.GL_MODELVIEW);
-//		GL11.glPopMatrix();
-
 	}
 	public Vector3f getLeft() {
 		return UtilGl.cross(up, forward);

@@ -12,8 +12,6 @@ public interface IOGLContainer {
 
 	void setInitTitle(String string);
 
-//	void initialize();
-
 	SizeInt getClientAreaSize();
 
 	SizeInt getSize();

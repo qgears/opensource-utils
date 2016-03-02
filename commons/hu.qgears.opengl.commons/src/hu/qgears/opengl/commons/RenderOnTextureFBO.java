@@ -26,24 +26,17 @@ public class RenderOnTextureFBO extends AbstarctRenderOnTexture implements IRend
 	private boolean depthBuffer=false;
 	private int rbId=-1;
 	private int fbId=-1;
-	public static int numberOfROT;
-	public static int rotCreated;
 
 	public RenderOnTextureFBO(Texture target, boolean needDephBuffer) throws LWJGLException
 	{
 		this.target=target;
 		this.depthBuffer=needDephBuffer;
 		init(target.getSize());
-		numberOfROT++;
-		rotCreated++;
 	}
 	private void init(SizeInt size) throws LWJGLException
 	{
 		this.size=size;
-//		IntBuffer fbIds=UtilGl.allocInts(1);
 		fbId=EXTFramebufferObject.glGenFramebuffersEXT();
-//		GL30.glGenFramebuffers(fbIds);
-//		fbId=fbIds.get();
 		if(depthBuffer)
 		{
 			bind(true);
@@ -54,7 +47,6 @@ public class RenderOnTextureFBO extends AbstarctRenderOnTexture implements IRend
 	@Override
 	protected void bind(boolean allowNull)
 	{
-//		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, fbId);
 		EXTFramebufferObject.glBindFramebufferEXT(EXTFramebufferObject.GL_FRAMEBUFFER_EXT, fbId);
 		if(target==null)
 		{
@@ -68,9 +60,6 @@ public class RenderOnTextureFBO extends AbstarctRenderOnTexture implements IRend
 				EXTFramebufferObject.GL_COLOR_ATTACHMENT0_EXT, 
 				GL11.GL_TEXTURE_2D, 
 				target.getTextureHandle(), 0);
-//		GL30.glFramebufferTexture2D(GL30.GL_FRAMEBUFFER, 
-//				GL30.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D,
-//				target.getTextureHandle(), 0);
 	}
 	@Override
 	protected void unbind()
@@ -81,40 +70,29 @@ public class RenderOnTextureFBO extends AbstarctRenderOnTexture implements IRend
 				0, 0);
 		
 		EXTFramebufferObject.glBindFramebufferEXT(EXTFramebufferObject.GL_FRAMEBUFFER_EXT, 0);
-//		GL30.glFramebufferTexture2D(GL30.GL_FRAMEBUFFER, 
-//				GL30.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, 0, 0);
-//		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
 	}
-	private void createDepthBuffer()
-	{
-		if(depthBuffer)
-		{
-//			IntBuffer rbIds=UtilGl.allocInts(1);
-//		GL30.glGenRenderbuffers(rbIds);
-			rbId=EXTFramebufferObject.glGenRenderbuffersEXT();
-		// Bind renderbuffer
-//		GL30.glBindRenderbuffer(GL30.GL_RENDERBUFFER, rbId);
-			EXTFramebufferObject.glBindRenderbufferEXT(EXTFramebufferObject.GL_RENDERBUFFER_EXT, rbId);
-		
-		// Init as a depth buffer
-//		GL30.glRenderbufferStorage( GL30.GL_RENDERBUFFER, GL30.GL_DEPTH_COMPONENT32F, size.getWidth(), size.getHeight());
-			EXTFramebufferObject.glRenderbufferStorageEXT(EXTFramebufferObject.GL_RENDERBUFFER_EXT, 
-				GL30.GL_DEPTH_COMPONENT32F,
-//				EXTFramebufferObject.GL_DEPTH_ATTACHMENT_EXT, 
-				size.getWidth(), size.getHeight());
-		// Attach to the FBO for depth
-//		GL30.glFramebufferRenderbuffer(GL30.GL_FRAMEBUFFER, GL30.GL_DEPTH_ATTACHMENT,
-//				GL30.GL_RENDERBUFFER, rbId);
-			EXTFramebufferObject.glFramebufferRenderbufferEXT(EXTFramebufferObject.GL_FRAMEBUFFER_EXT, 
-				EXTFramebufferObject.GL_DEPTH_ATTACHMENT_EXT, 
-				EXTFramebufferObject.GL_RENDERBUFFER_EXT, 
-				rbId);
+
+	private void createDepthBuffer() {
+		if (depthBuffer) {
+			rbId = EXTFramebufferObject.glGenRenderbuffersEXT();
+			// Bind renderbuffer
+			EXTFramebufferObject.glBindRenderbufferEXT(
+					EXTFramebufferObject.GL_RENDERBUFFER_EXT, rbId);
+
+			// Init as a depth buffer
+			EXTFramebufferObject.glRenderbufferStorageEXT(
+					EXTFramebufferObject.GL_RENDERBUFFER_EXT,
+					GL30.GL_DEPTH_COMPONENT32F, size.getWidth(),
+					size.getHeight());
+			// Attach to the FBO for depth
+			EXTFramebufferObject.glFramebufferRenderbufferEXT(
+					EXTFramebufferObject.GL_FRAMEBUFFER_EXT,
+					EXTFramebufferObject.GL_DEPTH_ATTACHMENT_EXT,
+					EXTFramebufferObject.GL_RENDERBUFFER_EXT, rbId);
 		}
 	}
 	public void dispose()
 	{
-//		GL30.glDeleteRenderbuffers(UtilGl.wrapTemp(rbId));
-//		GL30.glDeleteFramebuffers(UtilGl.wrapTemp(fbId));
 		if(rbId!=-1)
 		{
 			EXTFramebufferObject.glDeleteRenderbuffersEXT(rbId);
@@ -124,10 +102,6 @@ public class RenderOnTextureFBO extends AbstarctRenderOnTexture implements IRend
 		{
 			EXTFramebufferObject.glDeleteFramebuffersEXT(fbId);
 			fbId=-1;
-		}
-		if(!disposed)
-		{
-			numberOfROT--;
 		}
 		disposed=true;
 	}

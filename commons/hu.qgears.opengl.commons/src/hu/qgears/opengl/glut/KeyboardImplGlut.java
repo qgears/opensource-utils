@@ -36,7 +36,7 @@ public class KeyboardImplGlut implements IKeyboard {
 		int p=(readPtr+events.length-1)%events.length;
 		return events[p];
 	}
-	int[] fs=new int[]{Keyboard.KEY_F1,
+	private int[] fs=new int[]{Keyboard.KEY_F1,
 			Keyboard.KEY_F2,
 			Keyboard.KEY_F3,
 			Keyboard.KEY_F4,
@@ -50,7 +50,7 @@ public class KeyboardImplGlut implements IKeyboard {
 			Keyboard.KEY_F12,
 	};
 
-	int[] arrows = new int[]{
+	private int[] arrows = new int[]{
 		Keyboard.KEY_LEFT,
 		Keyboard.KEY_UP,
 		Keyboard.KEY_RIGHT,
@@ -116,11 +116,6 @@ public class KeyboardImplGlut implements IKeyboard {
 	@Override
 	public char getEventCharacter() {
 		long ev= getEvent();
-//		System.out.println();
-//		System.out.println("Ctrl " + isCtrl());
-//		System.out.println("Alt " + isAlt());
-//		System.out.println("Shift " + isShift());
-//		System.out.println("Char "+(char)ev+ "("+(int)((char)ev) + ")");
 		if(isSpecialKey(ev))
 		{
 			return 0;

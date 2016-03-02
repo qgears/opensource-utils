@@ -6,6 +6,7 @@ import hu.qgears.opengl.commons.input.IKeyboard;
 import hu.qgears.opengl.commons.input.IMouse;
 import hu.qgears.opengl.lwjgl.GLContextProviderLwjgl;
 
+import org.apache.log4j.Logger;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.Rectangle;
@@ -19,6 +20,10 @@ import org.lwjgl.util.glu.GLU;
  *
  */
 public abstract class AbstractOpenglApplication2 {
+	
+	private static final Logger LOG = Logger
+			.getLogger(AbstractOpenglApplication2.class);
+	
 	private EGLImplementation implementation=EGLImplementation.lwjgl;
 	protected FpsCounter fpsCounter=new FpsCounter();
 	private SizeInt windowSize=new SizeInt(640, 480);
@@ -39,28 +44,22 @@ public abstract class AbstractOpenglApplication2 {
 	 * @throws Exception 
 	 */
 	public void execute() throws Exception {
-		try
-		{
-			try
-			{
+		try {
+			try {
 				initialize();
 				mainLoop();
-			}catch(Exception e)
-			{
-				e.printStackTrace();
+			} catch (Exception e) {
+				LOG.error("Unexpected exception during execute", e);
 				throw e;
-			}catch(Throwable e)
-			{
-				e.printStackTrace();
+			} catch (Throwable e) {
+				LOG.error("Unexpected exception during execute", e);
 				throw new Exception(e);
 			}
-		}finally
-		{
+		} finally {
 			cleanup();
 		}
 	}
 	private IGlContextProvider glprovider=new GLContextProviderLwjgl();
-//	private IGlContextProvider glprovider=new GLContextProviderGlut();
 	private IKeyboard keyboard;
 	/**
 	 * Az alkalmazás inicializálása.
@@ -71,10 +70,6 @@ public abstract class AbstractOpenglApplication2 {
 		glprovider.loadNatives();
 		glprovider.init();
 		keyboard=glprovider.getKeyboard();
-//		if(fullscreenSize==null)
-//		{
-//			fullscreenSize=glprovider.getFullScreenSize();
-//		}
 		size=windowSize;
 		glprovider.openWindow(initFullscreen, initTitle, size);
 	}
@@ -210,7 +205,9 @@ public abstract class AbstractOpenglApplication2 {
 			setFullScreen(false);
 			break;
 		case 'v':
-			System.out.println("Wireframe toggled!");
+			if (LOG.isInfoEnabled()) {
+				LOG.info("Wireframe toggled!");
+			}
 			wireFrame=!wireFrame;
 			break;
 		}

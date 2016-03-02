@@ -4,6 +4,7 @@ import hu.qgears.commons.UtilFile;
 import hu.qgears.opengl.commons.AbstractOpenglApplication2;
 import hu.qgears.opengl.commons.UtilGl;
 
+import org.apache.log4j.Logger;
 import org.lwjgl.opengl.ARBFragmentProgram;
 import org.lwjgl.opengl.ARBProgram;
 import org.lwjgl.opengl.GL11;
@@ -15,6 +16,9 @@ import org.lwjgl.opengl.GL11;
  */
 public class ExampleFragmentProgram extends AbstractOpenglApplication2{
 
+	private static final Logger LOG = Logger
+			.getLogger(ExampleFragmentProgram.class);
+	
 	public static void main(String[] args) throws Exception {
 		new ExampleFragmentProgram().execute();
 	}
@@ -22,7 +26,6 @@ public class ExampleFragmentProgram extends AbstractOpenglApplication2{
 	protected boolean isDirty() {
 		return true;
 	}
-//	Shader shader;
 	@Override
 	protected void initialize() throws Exception {
 		super.initialize();
@@ -36,24 +39,21 @@ public class ExampleFragmentProgram extends AbstractOpenglApplication2{
 		ARBFragmentProgram.glProgramStringARB(program, ARBProgram.GL_PROGRAM_FORMAT_ASCII_ARB, prog);
 		if(!ARBFragmentProgram.glIsProgramARB(program)) {
 			String err=GL11.glGetString(ARBFragmentProgram.GL_PROGRAM_ERROR_STRING_ARB);
-			System.out.println(""+prog+" "+err);
-//			throw new RuntimeException("Can compile fragment program: "+err);
+			LOG.info(""+prog+" "+err);
 		}
 	}
 	@Override
 	protected void render() {
-//		shader.activate();
 		UtilGl.drawMinimalScene();
-//		shader.deActivate();
 	}
 
 	@Override
 	protected void logic() {
-		
+		//nothing to do
 	}
 	@Override
 	protected void logError(String message, Exception e) {
-		e.printStackTrace();
+		LOG.error(message,e);
 	}
 	
 }
