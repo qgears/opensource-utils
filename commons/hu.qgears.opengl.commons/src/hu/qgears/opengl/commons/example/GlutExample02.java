@@ -16,24 +16,21 @@ import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
 
 public class GlutExample02 {
-	static Camera camera=new Camera();
-	private static int width=1024;
-	private static int height=768;
+	private static Camera camera=new Camera();
+	private static final int WIDTH=1024;
+	private static final int HEIGHT=768;
 	public static void main(String[] args) throws LWJGLException {
 		GlutInstance.getInstance();
 		BaseAccessor.initLwjglNatives();
 		Glut glut=new Glut();
 		glut.init();
-		glut.openWindow(false, width, height, "example 2");
+		glut.openWindow(false, WIDTH, HEIGHT, "example 2");
 		GLContext.useContext(glut);
 		doBunchOfLoop(glut);
-		glut.setFullScreen(true, width, height);
-		int w=glut.getScreenWidth();
-		int h=glut.getScreenHeight();
+		glut.setFullScreen(true, WIDTH, HEIGHT);
 		doBunchOfLoop(glut);
-		glut.setFullScreen(false, width, height);
+		glut.setFullScreen(false, WIDTH, HEIGHT);
 		doBunchOfLoop(glut);
-		System.out.println("Fullscreen width and height: ["+w+", "+h+"]");
 	}
 
 	private static void doBunchOfLoop(Glut glut) {
@@ -53,7 +50,7 @@ public class GlutExample02 {
 		// Beállítjuk a kamera pozícióját.
 		// Innentől mindent úgy rajzol az OpenGL, hogy a megadott
 		// Pozícióba képzeli a kamerát
-		UtilGl.init3D(width, height, 30.0f, 1.0f);
+		UtilGl.init3D(WIDTH, HEIGHT, 30.0f, 1.0f);
 		camera.setCamera();
 		// háttér törlése
 		GL11.glClearColor(0,0,1,1);
@@ -67,8 +64,8 @@ public class GlutExample02 {
 		GL11.glClearColor(0,1,0,.3f);
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
 		
-		int sizeX=1024;
-		int sizeY=768;
+		float sizeX=1024;
+		float sizeY=768;
 		float scale=.2f;
 		UtilGl.setColor(new Vector3f(1,0,0));
 		UtilGl.translate(GL11.GL_MODELVIEW, new Vector3f(0,0,-10));
