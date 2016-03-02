@@ -18,7 +18,7 @@ Export-Package: lwjgl.standalone,
  org.lwjgl.util.vector
 Bundle-Classpath: .,
  classes/
-Bundle-Version: 5.0.1.qualifier
+Bundle-Version: 6.0.0.qualifier
 Bundle-Name: lwjgl.osgi version 2.5.0 repackaged as osgi bundle
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: lwjgl.osgi

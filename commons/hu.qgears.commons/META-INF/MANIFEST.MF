@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Export-Package: hu.qgears.commons,hu.qgears.commons.mem,hu.qgears.comm
  ons.signal
 Bundle-Vendor: Q-Gears
-Bundle-Version: 5.0.1.qualifier
+Bundle-Version: 6.0.0.qualifier
 Bundle-Name: Commons
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: hu.qgears.commons
