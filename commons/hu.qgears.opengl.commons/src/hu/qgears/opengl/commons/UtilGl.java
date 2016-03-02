@@ -610,11 +610,13 @@ public class UtilGl {
 	 * x is directed right, y is directed up
 	 */
 	public static void initOrtho2d(SizeInt size) {
-		GL11.glViewport(0, 0, size.getWidth(), size.getHeight());
+		int width = size.getWidth();
+		int height = size.getHeight();
+		GL11.glViewport(0, 0, width, height);
 		GL11.glMatrixMode(GL11.GL_PROJECTION);
 		GL11.glLoadIdentity();
-		GLU.gluOrtho2D(0, size.getWidth(), 0, size.getHeight());
-		GL11.glTranslatef((float)size.getWidth()/2, (float)size.getHeight()/2, 0);
+		GLU.gluOrtho2D(0, width, 0, height);
+		GL11.glTranslatef((float)width/2, (float)height/2, 0);
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);
 		GL11.glLoadIdentity();
 	}
@@ -694,7 +696,7 @@ public class UtilGl {
 		double distance=-(appHeight)/heightDivDistance;
 		GL11.glTranslatef(0,0, (float)distance);
 		// 0,0 is the middle of the screen
-		GL11.glTranslatef((float)-appWidth/2,(float)-appHeight/2, 0f);
+		GL11.glTranslatef(-w/2,-h/2, 0f);
 
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);
 		GL11.glLoadIdentity();
