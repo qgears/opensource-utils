@@ -602,6 +602,7 @@ public class UtilGl {
 	private static float toFloat(int channel){
 		return (channel & 0xFF) / 255f;
 	}
+	
 	/**
 	 * Initialize a 2d mapping to the view:
 	 *
@@ -616,7 +617,8 @@ public class UtilGl {
 		GL11.glMatrixMode(GL11.GL_PROJECTION);
 		GL11.glLoadIdentity();
 		GLU.gluOrtho2D(0, width, 0, height);
-		GL11.glTranslatef((float)width/2, (float)height/2, 0);
+		/*for now, this is the intended behavior*/
+		GL11.glTranslatef(width/2, height/2, 0); //NOSONAR 
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);
 		GL11.glLoadIdentity();
 	}
