@@ -9,6 +9,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 
 import org.lwjgl.BufferUtils;
@@ -30,8 +31,9 @@ import org.lwjgl.util.vector.Vector4f;
  *
  */
 public class UtilGl {
-	static ByteBuffer tempByteBuffer=UtilGl.allocBytes(512);
-	static IntBuffer tempIntBuffer=UtilGl.allocInts(16);
+	private static final Charset CHARSET_UTF8 = Charset.forName("UTF-8");
+	private static ByteBuffer tempByteBuffer=UtilGl.allocBytes(512);
+	private static IntBuffer tempIntBuffer=UtilGl.allocInts(16);
 	// will be populated by extensionExists()
 	private HashMap<String, String> OpenGLextensions;
 	/**
@@ -91,7 +93,7 @@ public class UtilGl {
 	public static String formatMode(DisplayMode mode) {
 		return ""+mode.getWidth()+"X"+mode.getHeight()+" "+mode.getFrequency()+"Hz"+" "+mode.getBitsPerPixel()+"bpp";
 	}
-	public static void drawRectangle(
+	public static void drawRectangle( //NOSONAR method has 9 parameters but is still comprehensible
 			RGlContext rgl,
 			Vector3f bottomLeft,
 			Vector3f bottomRight,
@@ -156,16 +158,12 @@ public class UtilGl {
 		GL11.glBegin(GL11.GL_QUADS);
 		{
 			GL11.glVertex2f(rect.x, rect.bottom);
-//			loadVertex(rect.getBottomLeft());
 
 			GL11.glVertex2f(rect.right, rect.bottom);
-//			loadVertex(rect.getBottomRight());
 
 			GL11.glVertex2f(rect.right, rect.y);
-//			loadVertex(rect.getTopRight());
 
 			GL11.glVertex2f(rect.x, rect.y);
-//			loadVertex(rect.getTopLeft());
 		}
 		GL11.glEnd();
 		rgl.pop();
@@ -314,10 +312,27 @@ public class UtilGl {
 		Vector3f.cross(up, forward, left);
 		tempFloatBuffer.clear();
 		FloatBuffer fb=tempFloatBuffer;
-		fb.put(up.x);fb.put(forward.x);fb.put(left.x);fb.put(0);
-		fb.put(up.y);fb.put(forward.y);fb.put(left.y);fb.put(0);
-		fb.put(up.z);fb.put(forward.z);fb.put(left.z);fb.put(0);
-		fb.put(0);fb.put(0);fb.put(0);fb.put(1);
+		
+		fb.put(up.x);
+		fb.put(forward.x);
+		fb.put(left.x);
+		fb.put(0);
+		
+		fb.put(up.y);
+		fb.put(forward.y);
+		fb.put(left.y);
+		fb.put(0);
+		
+		fb.put(up.z);
+		fb.put(forward.z);
+		fb.put(left.z);
+		fb.put(0);
+		
+		fb.put(0);
+		fb.put(0);
+		fb.put(0);
+		fb.put(1);
+		
 		fb.flip();
 		GL11.glMatrixMode(matrixMode);
 		GL11.glMultMatrix(fb);
@@ -335,10 +350,27 @@ public class UtilGl {
 		Vector3f.cross(up, forward, left);
 		tempFloatBuffer.clear();
 		FloatBuffer fb=tempFloatBuffer;
-		fb.put(up.x);fb.put(up.y);fb.put(up.z);fb.put(0);
-		fb.put(forward.x);fb.put(forward.y);fb.put(forward.z);fb.put(0);
-		fb.put(left.x);fb.put(left.y);fb.put(left.z);fb.put(0);
-		fb.put(0);fb.put(0);fb.put(0);fb.put(1);
+		
+		fb.put(up.x);
+		fb.put(up.y);
+		fb.put(up.z);
+		fb.put(0);
+		
+		fb.put(forward.x);
+		fb.put(forward.y);
+		fb.put(forward.z);
+		fb.put(0);
+		
+		fb.put(left.x);
+		fb.put(left.y);
+		fb.put(left.z);
+		fb.put(0);
+		
+		fb.put(0);
+		fb.put(0);
+		fb.put(0);
+		fb.put(1);
+		
 		fb.flip();
 		GL11.glMatrixMode(matrixMode);
 		GL11.glMultMatrix(fb);
@@ -442,11 +474,20 @@ public class UtilGl {
 			GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
 		}
 	}
+	
+	/**
+	 * Decode the ByteBuffer into an UTF-8 String. The length of the ByteBuffer
+	 * to read is determined by the first int in the supplied IntBuffer.
+	 * 
+	 * @param shaderInfoLogBuffer the ByteBuffer that contains textual information
+	 * @param size the first int in this buffer represents the size of shaderInfoLogBuffer
+	 * @return the UTF-8 contents of shaderInfoLogBuffer
+	 */
 	public static String decodeToString(ByteBuffer shaderInfoLogBuffer, IntBuffer size) {
 		int s=size.get(0);
 		byte[] bs=new byte[s];
 		shaderInfoLogBuffer.get(bs, 0, bs.length);
-		return new String(bs);
+		return new String(bs,CHARSET_UTF8);
 	}
 	public static FloatBuffer wrapTemp(float[] fs) {
 		tempFloatBuffer.clear();
@@ -475,9 +516,14 @@ public class UtilGl {
 		tempFloatBuffer.flip();
 		return tempFloatBuffer;
 	}
+	/**
+	 * Returns the String wrapped in a ByteBuffer in UTF-8 encoding.
+	 * @param string
+	 * @return
+	 */
 	public static ByteBuffer wrapTemp(String string) {
 		tempByteBuffer.clear();
-		tempByteBuffer.put(string.getBytes());
+		tempByteBuffer.put(string.getBytes(CHARSET_UTF8));
 		tempByteBuffer.put((byte)0);
 		tempByteBuffer.flip();
 		return tempByteBuffer;
@@ -568,7 +614,7 @@ public class UtilGl {
 		GL11.glMatrixMode(GL11.GL_PROJECTION);
 		GL11.glLoadIdentity();
 		GLU.gluOrtho2D(0, size.getWidth(), 0, size.getHeight());
-		GL11.glTranslatef(size.getWidth()/2, size.getHeight()/2, 0);
+		GL11.glTranslatef((float)size.getWidth()/2, (float)size.getHeight()/2, 0);
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);
 		GL11.glLoadIdentity();
 	}
@@ -606,9 +652,16 @@ public class UtilGl {
 		GL11.glPushMatrix();
 		GL11.glRotatef( theta, 0.0f, 0.0f, 1.0f );
 		GL11.glBegin( GL11.GL_TRIANGLES );
-		GL11.glColor3f( 1.0f, 0.0f, 0.0f ); GL11.glVertex2f( 0.0f, 1.0f );
-		GL11.glColor3f( 0.0f, 1.0f, 0.0f ); GL11.glVertex2f( 0.87f, -0.5f );
-		GL11.glColor3f( 0.0f, 0.0f, 1.0f ); GL11.glVertex2f( -0.87f, -0.5f );
+		
+		GL11.glColor3f( 1.0f, 0.0f, 0.0f );
+		GL11.glVertex2f( 0.0f, 1.0f );
+		
+		GL11.glColor3f( 0.0f, 1.0f, 0.0f );
+		GL11.glVertex2f( 0.87f, -0.5f );
+		
+		GL11.glColor3f( 0.0f, 0.0f, 1.0f );
+		GL11.glVertex2f( -0.87f, -0.5f );
+		
 		GL11.glEnd();
 		GL11.glPopMatrix();
 	}
@@ -627,7 +680,6 @@ public class UtilGl {
 		// Go into 3D projection mode.
 		GL11.glMatrixMode(GL11.GL_PROJECTION);
 		GL11.glLoadIdentity();
-//		GLU.gluOrtho2D(0, width, 0, height);
 		double fov=30.0;
 		double heightDivDistance=Math.tan(fov*Math.PI/180.0/2.0)*2.0;
 		double big=1;
@@ -640,15 +692,10 @@ public class UtilGl {
 		// We have to push the layer backwards so we form a
 		// equal side triangle
 		double distance=-(appHeight)/heightDivDistance;
-//		distance=(-height*Math.sqrt(3)/2);
 		GL11.glTranslatef(0,0, (float)distance);
 		// 0,0 is the middle of the screen
-		int translateYToFixWindow=appHeight-appHeight;
-//		translateYToFixWindow=0;
-		GL11.glTranslatef(-appWidth/2,-appHeight/2+translateYToFixWindow, 0f);
-//		GL11.glTranslatef(0, clientAreaHeight-appHeight, 0);
+		GL11.glTranslatef((float)-appWidth/2,(float)-appHeight/2, 0f);
 
-//		GLU.gluPerspective(fovy, aspect, zNear, zFar);
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);
 		GL11.glLoadIdentity();
 		if(ctx!=null)
@@ -687,24 +734,17 @@ public class UtilGl {
 			break;
 		case SRC_ALPHA__ONE_MINUS_SRC_ALPHA:
 			GL11.glEnable(GL11.GL_BLEND); // enable transparency
-//			GL11.glTexEnvi(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_REPLACE);
-//			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 			glBlendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA,
 				GL11.GL_ONE, GL11.GL_ONE_MINUS_SRC_ALPHA);
 			break;
 		case ALPHA:
 			GL11.glEnable(GL11.GL_BLEND); // enable transparency
-//			GL11.glTexEnvi(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_MODULATE);
-//			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 			
 			glBlendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA,
 					GL11.GL_ONE, GL11.GL_ONE_MINUS_SRC_ALPHA);
 			break;
 		case ALPHA_PREMULTIPLIED:
 			GL11.glEnable(GL11.GL_BLEND); // enable transparency
-//			GL11.glTexEnvi(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_MODULATE);
-//			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-//			GL_DST_ALPHA, GL_ONE, GL_ZERO, GL_SRC_ALPHA
 			glBlendFuncSeparate(GL11.GL_ONE,
 					GL11.GL_ONE_MINUS_SRC_ALPHA,
 					GL11.GL_ONE, GL11.GL_ONE_MINUS_SRC_ALPHA);
@@ -724,6 +764,5 @@ public class UtilGl {
 	static private final void glBlendFuncSeparate(int sfactorRGB, int dfactorRGB,
 			int sfactorAlpha, int dfactorAlpha) {
 		GL14.glBlendFuncSeparate(sfactorRGB, dfactorRGB, sfactorAlpha, dfactorAlpha);
-//		EXTBlendFuncSeparate.glBlendFuncSeparateEXT(sfactorRGB, dfactorRGB, sfactorAlpha, dfactorAlpha);
 	}
 }
