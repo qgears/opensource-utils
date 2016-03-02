@@ -29,18 +29,25 @@ public class RenderOnTextureFBO extends AbstarctRenderOnTexture implements IRend
 	private static int numberOfROT;
 	private static int rotCreated;
 
-	public static void textureCreated() {
+	private static void textureCreated() {
 		numberOfROT++;
 		rotCreated++;
 	}
-	public static void textureDisposed() {
+	private static void textureDisposed() {
 		numberOfROT--;
 	}
 	
+	
+	/**
+	 * @since 6.0
+	 */
 	public static int getNumberOfROT() {
 		return numberOfROT;
 	}
 	
+	/**
+	 * @since 6.0 
+	 */
 	public static int getRotCreated() {
 		return rotCreated;
 	}
