@@ -5,7 +5,11 @@ import hu.qgears.opengl.commons.AbstractOpenglApplication2;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 public abstract class OpenGLFrame extends AbstractOpenglApplication2 {
+
+	private static final Logger LOG = Logger.getLogger(OpenGLFrame.class);
 
 	private List<OpenGLAppContainer> containers = new ArrayList<OpenGLAppContainer>();
 	private List<OpenGLAppContainer> copyOfContainers=new ArrayList<OpenGLAppContainer>();
@@ -45,23 +49,15 @@ public abstract class OpenGLFrame extends AbstractOpenglApplication2 {
 		try {
 			execute();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.error("Error executing OpenGLFrame",e);
 		}
-		System.exit(0);
-	}
-
-	@Override
-	protected void initialize() throws Exception {
-		super.initialize();
+		System.exit(0); // NOSONAR intentional return value
 	}
 
 	@Override
 	protected boolean isDirty() {
 		if (current != null) {
 			boolean ret = current.isDirty();
-			// System.err.println("dirty: "+ret);
-			// new RuntimeException().printStackTrace();
 			return ret;
 		}
 		return false;
@@ -83,29 +79,25 @@ public abstract class OpenGLFrame extends AbstractOpenglApplication2 {
 					try {
 						c.initialize();
 					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						LOG.error("Error initializin container:"+c,e);
 					}
 					c.setInitialized(true);
 				}
 				c.logic();
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LOG.error("Error while calling logic of container:"+c,e);
 			}
 		}
 	}
 
 	private List<OpenGLAppContainer> getCopyOfContainers() {
-		List<OpenGLAppContainer> ret=copyOfContainers;
-		if(ret==null)
-		{
-			synchronized (this) {
-				copyOfContainers=new ArrayList<OpenGLAppContainer>(containers);
-				ret=copyOfContainers;
+		synchronized (this) {
+			if(copyOfContainers==null)
+			{
+					copyOfContainers=new ArrayList<OpenGLAppContainer>(containers);
 			}
+			return copyOfContainers;
 		}
-		return ret;
 	}
 
 	@Override
@@ -182,7 +174,7 @@ public abstract class OpenGLFrame extends AbstractOpenglApplication2 {
 			containers = new ArrayList<OpenGLAppContainer>(containers);
 			containers.remove(openGLAppContainer);
 			copyOfContainers=null;
-			if (current == openGLAppContainer) {
+			if (openGLAppContainer.equals(current)) {
 				current=null;
 				nextApplication();
 			}
