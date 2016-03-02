@@ -106,46 +106,21 @@ public final class AL {
 	public static void create(String deviceArguments, int contextFrequency, int contextRefresh, boolean contextSynchronized, boolean openDevice)
 		throws LWJGLException {
 
-		if (created)
+		if (created){
 			throw new IllegalStateException("Only one OpenAL context may be instantiated at any one time.");
-//		String libname;
-//		String[] library_names;
-//		switch (LWJGLUtil.getPlatform()) {
-//			case LWJGLUtil.PLATFORM_WINDOWS:
-//				libname = "OpenAL32";
-//				library_names = new String[]{"OpenAL64.dll", "OpenAL32.dll"};
-//				break;
-//			case LWJGLUtil.PLATFORM_LINUX:
-//				libname = "openal";
-//				library_names = new String[]{"libopenal64.so", "libopenal.so", "libopenal.so.0"};
-//				break;
-//			case LWJGLUtil.PLATFORM_MACOSX:
-//				libname = "openal";
-//				library_names = new String[]{"openal.dylib"};
-//				break;
-//			default:
-//				throw new LWJGLException("Unknown platform: " + LWJGLUtil.getPlatform());
-//		}
-//		String[] oalPaths = LWJGLUtil.getLibraryPaths(libname, library_names, AL.class.getClassLoader());
-//		LWJGLUtil.log("Found " + oalPaths.length + " OpenAL paths");
-//		for ( String oalPath : oalPaths ) {
-//			try {
-				nCreate(alLib.getAbsolutePath());
-				created = true;
-				init(deviceArguments, contextFrequency, contextRefresh, contextSynchronized, openDevice);
-//				break;
-//			} catch (LWJGLException e) {
-//				LWJGLUtil.log("Failed to load " + oalPath + ": " + e.getMessage());
-//			}
-//		}
+		}
+		nCreate(alLib.getAbsolutePath());
+		created = true;
+		init(deviceArguments, contextFrequency, contextRefresh, contextSynchronized, openDevice);
 		if (!created && LWJGLUtil.getPlatform() == LWJGLUtil.PLATFORM_MACOSX) {
 			// Try to load OpenAL from the framework instead
 			nCreateDefault();
 			created = true;
 			init(deviceArguments, contextFrequency, contextRefresh, contextSynchronized, openDevice);
 		}
-		if (!created)
+		if (!created){
 			throw new LWJGLException("Could not locate OpenAL library.");
+		}
 	}
 
 	private static void init(String deviceArguments, int contextFrequency, int contextRefresh, boolean contextSynchronized, boolean openDevice) throws LWJGLException {
@@ -217,8 +192,9 @@ public final class AL {
 		resetNativeStubs(ALC11.class);
 		resetNativeStubs(EFX10.class);
 
-		if (created)
+		if (created){
 			nDestroy();
+		}
 		created = false;
 	}
 

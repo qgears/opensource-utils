@@ -1,5 +1,5 @@
 /**
- * Semaphore binding through JNI
+ * Semaphore binding through JNI.
  */
 package hu.qgears.shm.sem;
 

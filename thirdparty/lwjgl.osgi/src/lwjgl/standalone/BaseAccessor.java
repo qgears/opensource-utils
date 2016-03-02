@@ -7,7 +7,12 @@ import hu.qgears.nativeloader.XmlNativeLoader;
 import java.awt.Frame;
 import java.io.File;
 
+import org.apache.log4j.Logger;
+
 public class BaseAccessor extends XmlNativeLoader {
+	
+	private static final Logger LOG = Logger.getLogger(BaseAccessor.class);
+	
 	private static boolean inited = false;
 
 	@Override
@@ -42,7 +47,7 @@ public class BaseAccessor extends XmlNativeLoader {
 						if((t.getMessage()!=null)&&t.getMessage().indexOf("already loaded")<0)
 						{
 							// Do not log already loaded exception!
-							t.printStackTrace();
+							LOG.error(t);
 						}
 						// Try fallback mawt loading techniqe: create and dispose a frame:
 						new Frame().dispose();
@@ -53,7 +58,7 @@ public class BaseAccessor extends XmlNativeLoader {
 					System.loadLibrary("jawt");					
 				}catch(Throwable e)
 				{
-					System.err.println("Java version does not support jawt manual load");
+					LOG.error("Java version does not support jawt manual load");
 				}
 			}
 			UtilNativeLoader.loadNatives(new BaseAccessor());

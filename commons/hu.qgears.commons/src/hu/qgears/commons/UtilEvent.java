@@ -16,7 +16,7 @@ import org.apache.log4j.Logger;
  */
 public class UtilEvent<T> implements UtilEventListener<T> {
 	
-	private static Logger LOG = Logger.getLogger(UtilEvent.class);
+	private static final Logger LOG = Logger.getLogger(UtilEvent.class);
 	
 	private List<UtilEventListener<T>> listeners=new ArrayList<UtilEventListener<T>>();
 	/**

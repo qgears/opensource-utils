@@ -2,6 +2,8 @@ package hu.qgears.shm;
 
 import java.io.File;
 
+import org.apache.log4j.Logger;
+
 import hu.qgears.nativeloader.NativeLoadException;
 import hu.qgears.nativeloader.UtilNativeLoader;
 import hu.qgears.shm.natives.Accessor;
@@ -15,6 +17,9 @@ import hu.qgears.shm.sem.Semaphore;
  *
  */
 public class UtilSharedMemory {
+	
+	private static final Logger LOG = Logger.getLogger(UtilSharedMemory.class);
+
 	private static UtilSharedMemory instance;
 	private UtilSharedMemory() throws NativeLoadException
 	{
@@ -90,6 +95,8 @@ public class UtilSharedMemory {
 			Semaphore sem=createSemaphore(id, ECreateType.use);
 			sem.deleteSemaphore();
 		} catch (Exception e) {
+			//ignore exception if semaphore is already deleted
+			LOG.warn("Attempt to delete an already deleted semaphore",e);
 		}
 	}
 }

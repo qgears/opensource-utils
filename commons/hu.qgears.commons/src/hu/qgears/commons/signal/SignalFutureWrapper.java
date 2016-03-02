@@ -140,6 +140,11 @@ public class SignalFutureWrapper<T> implements SignalFuture<T>, Callable<T>
 
 	@Override
 	public T getSimple() {
-		return ret;
+		/*
+		 * It is not guaranteed, that the returned object is valid, so the
+		 * synchronization is the responsibility of the caller. See the
+		 * specification of the method.
+		 */
+		return ret;//NOSONAR
 	}
 }

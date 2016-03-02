@@ -59,9 +59,10 @@ public final class Sys {
 
 		int native_jni_version = implementation.getJNIVersion();
 		int required_version = implementation.getRequiredJNIVersion();
-		if (native_jni_version != required_version)
+		if (native_jni_version != required_version){
 			throw new LinkageError("Version mismatch: jar version is '" + required_version +
-                             "', native libary version is '" + native_jni_version + "'");
+					"', native libary version is '" + native_jni_version + "'");
+		}
 		implementation.setDebug(LWJGLUtil.DEBUG);
 	}
 
@@ -141,10 +142,12 @@ public final class Sys {
 		if (grabbed) {
 			Mouse.setGrabbed(false);
 		}
-		if (title == null)
+		if (title == null){
 			title = "";
-		if (message == null)
+		}
+		if (message == null){
 			message = "";
+		}
 		implementation.alert(title, message);
 		if (grabbed) {
 			Mouse.setGrabbed(true);

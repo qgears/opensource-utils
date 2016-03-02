@@ -20,7 +20,7 @@ import org.xml.sax.helpers.XMLReaderFactory;
  */
 public abstract class XmlNativeLoader2 implements INativeLoader {
 
-	private static Logger LOG = Logger.getLogger(XmlNativeLoader2.class);
+	private static final Logger LOG = Logger.getLogger(XmlNativeLoader2.class);
 	
 	public static final String IMPLEMENTATIONS = "implementations.xml";
 

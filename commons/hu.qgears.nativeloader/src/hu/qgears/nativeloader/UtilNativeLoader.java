@@ -32,7 +32,11 @@ import org.apache.log4j.Logger;
  */
 public class UtilNativeLoader {
 	
-	private static Logger LOG = Logger.getLogger(UtilNativeLoader.class);
+	private static final Logger LOG = Logger.getLogger(UtilNativeLoader.class);
+	
+	private UtilNativeLoader() {
+		// disable constructor of utility class
+	}
 	
 	/**
 	 * Tells whether the running JVM is 32 or 64 bit, allowing to properly
@@ -95,9 +99,9 @@ public class UtilNativeLoader {
 			for (NativeBinary libPath : natives.getBinaries()) {
 				loadNativeBinary(libPath, clazz, nativeLoader);
 			}
-		} catch (NativeLoadException e) {
+		} catch (NativeLoadException e) {//NOSONAR
 			//rethrowing is OK
-			throw e;//NOSONAR
+			throw e;
 		} catch (Throwable t) {
 			throw new NativeLoadException(t);
 		}
