@@ -26,22 +26,22 @@ public class RenderOnTextureFBO extends AbstarctRenderOnTexture implements IRend
 	private boolean depthBuffer=false;
 	private int rbId=-1;
 	private int fbId=-1;
-	public static int numberOfROT;
-	public static int rotCreated;
+	private static int numberOfROT;
+	private static int rotCreated;
 
-	public static void textureCreated(){
+	public static void textureCreated() {
 		numberOfROT++;
 		rotCreated++;
 	}
-	public static void textureDisposed(){
+	public static void textureDisposed() {
 		numberOfROT--;
 	}
 	
-	public static int getNumberOfROT(){
+	public static int getNumberOfROT() {
 		return numberOfROT;
 	}
 	
-	public static int getRotCreated(){
+	public static int getRotCreated() {
 		return rotCreated;
 	}
 	
