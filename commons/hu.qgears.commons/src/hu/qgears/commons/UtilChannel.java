@@ -45,7 +45,7 @@ public class UtilChannel {
 				try {
 					Thread.sleep(0, 10000);
 				} catch (InterruptedException e) {
-					LOG.error(e);
+					LOG.error("ReadNBytes",e);
 				}
 			}
 			else
@@ -64,7 +64,7 @@ public class UtilChannel {
 				try {
 					Thread.sleep(0, 1000000);
 				} catch (InterruptedException e) {
-					LOG.error(e);
+					LOG.error("WriteNBytes",e);
 				}
 			}
 		}

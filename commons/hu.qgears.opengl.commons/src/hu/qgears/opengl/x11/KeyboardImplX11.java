@@ -3,9 +3,13 @@ package hu.qgears.opengl.x11;
 import hu.qgears.opengl.commons.OGlGlobalParameters;
 import hu.qgears.opengl.commons.input.IKeyboard;
 
+import org.apache.log4j.Logger;
 import org.lwjgl.input.Keyboard;
 
 public class KeyboardImplX11 implements IKeyboard {
+	
+	private static final Logger LOG = Logger.getLogger(KeyboardImplX11.class);
+
 	/**
 	 * keyboard events stored as the bits of a 'long'. Keycodes are LWJGL keycodes
 	 * in case of special characters. 1 in case of unicode characters.
@@ -155,12 +159,12 @@ public class KeyboardImplX11 implements IKeyboard {
 			{
 				m=decodeKeyCode(keyCode);
 			}
-			if(OGlGlobalParameters.logKeyMessages)
+			if(OGlGlobalParameters.logKeyMessages && LOG.isDebugEnabled())
 			{
 				char ch=(char)unicode;
-				System.out.println("kev: p: "+press+" keycode: "+keyCode+" st: "+state+" "+decodeState(state)+" "+(
-						specialKey?("mapping: "+(m==null?"null":m.name)):
-								(""+unicode+" '"+ch+"'")));
+				LOG.debug("kev: p: "+press+" keycode: "+keyCode+" st: "+state+" "
+						+decodeState(state)+" "+
+						getMapping(unicode, specialKey, m, ch));
 			}
 			long lwjglKeyCode;
 			if(specialKey)
@@ -178,6 +182,23 @@ public class KeyboardImplX11 implements IKeyboard {
 			long ev=(state<<16)|((0xFFFFl&unicode)<<32)|((specialKey?1l:0l)<<24)|lwjglKeyCode;
 			addEvent(ev);
 		}
+	}
+
+	private String getMapping(int unicode, boolean specialKey, KeyCodeMapping m,
+			char ch) {
+		String retval;
+		if(specialKey){
+			retval = "mapping: ";
+			if(m==null){
+				retval+="null";
+			}else{
+				retval+=m.name;	
+			}
+				
+		}else{
+			retval = ""+unicode+" '"+ch+"'";
+		}
+		return retval;
 	}
 
 	private String decodeState(int state) {

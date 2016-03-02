@@ -56,7 +56,7 @@ public class UtilEvent<T> implements UtilEventListener<T> {
 				l.eventHappened(msg);
 			}catch(Throwable t)
 			{
-				LOG.error(t);
+				LOG.error("eventHappened",t);
 			}
 		}
 	}

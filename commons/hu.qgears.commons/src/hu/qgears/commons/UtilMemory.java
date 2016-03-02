@@ -45,7 +45,7 @@ public class UtilMemory {
 				try {
 					Thread.sleep(1000/FPS);
 				} catch (InterruptedException e) {
-					LOG.error(e);
+					LOG.error("Interrupted",e);
 				}
 			}
 		};
@@ -130,7 +130,7 @@ public class UtilMemory {
 				ret = GCTypes.UseParNewGC;
 			}
 		} catch (Throwable e) {
-			LOG.error(e);
+			LOG.error("GC",e);
 		}
 		return ret;
 	}
@@ -184,7 +184,7 @@ public class UtilMemory {
 					}
 					Thread.sleep(pause);
 				} catch (InterruptedException e) {
-					LOG.error(e);
+					LOG.error("Interrupt",e);
 				}
 			}
 		}

@@ -47,7 +47,7 @@ public class BaseAccessor extends XmlNativeLoader {
 						if((t.getMessage()!=null)&&t.getMessage().indexOf("already loaded")<0)
 						{
 							// Do not log already loaded exception!
-							LOG.error(t);
+							LOG.error("Loading MAWT",t);
 						}
 						// Try fallback mawt loading techniqe: create and dispose a frame:
 						new Frame().dispose();

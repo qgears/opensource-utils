@@ -86,7 +86,8 @@ public class GlMouseEvent {
 	 */
 	public void clear()
 	{
-		x=y=0;
+		x=0;
+		y=0;
 		button=null;
 		nanoseconds=0;
 		buttonState=false;

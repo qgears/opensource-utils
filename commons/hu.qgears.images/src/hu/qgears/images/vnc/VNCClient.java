@@ -65,7 +65,7 @@ public class VNCClient {
 				try {
 					VNCClient.this.run();
 				} catch (IOException e) {
-					LOG.error(e);
+					LOG.error("Error in method run",e);
 				}
 			};
 		}.start();
@@ -82,7 +82,7 @@ public class VNCClient {
 				try {
 					channel.close();
 				} catch (IOException e) {
-					LOG.error(e);
+					LOG.error("Error dispose",e);
 				}
 			}
 		}
@@ -136,7 +136,7 @@ public class VNCClient {
 				}
 			}catch(Exception e)
 			{
-				LOG.error(e);
+				LOG.error("Exception in VNC",e);
 			}
 			channel=null;
 			if(!exit)
@@ -144,7 +144,7 @@ public class VNCClient {
 				try {
 					Thread.sleep(retryTimeoutMillis);
 				} catch (InterruptedException e) {
-					LOG.error(e);
+					LOG.error("Interrupt",e);
 				}
 			}
 		}
@@ -153,7 +153,7 @@ public class VNCClient {
 			try {
 				channel.close();
 			} catch (Exception e) {
-				LOG.error(e);
+				LOG.error("Closing channel",e);
 			}
 			channel=null;
 		}

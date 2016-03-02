@@ -16,10 +16,15 @@ import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
 
 public class GlutExample02 {
-	private static Camera camera=new Camera();
+	private Camera camera=new Camera();
 	private static final int WIDTH=1024;
 	private static final int HEIGHT=768;
+	
 	public static void main(String[] args) throws LWJGLException {
+		new GlutExample02().run();
+	}
+
+	private void run() throws LWJGLException {
 		GlutInstance.getInstance();
 		BaseAccessor.initLwjglNatives();
 		Glut glut=new Glut();
@@ -33,7 +38,7 @@ public class GlutExample02 {
 		doBunchOfLoop(glut);
 	}
 
-	private static void doBunchOfLoop(Glut glut) {
+	private void doBunchOfLoop(Glut glut) {
 		int ctr=0;
 		while(ctr<200)
 		{
@@ -44,7 +49,7 @@ public class GlutExample02 {
 		}
 	}
 
-	private static void drawScene() {
+	private void drawScene() {
 		// A kép rajzolásának elkezdését jelezzük ezzel a paranccsal
 		GL11.glRenderMode(GL11.GL_RENDER);
 		// Beállítjuk a kamera pozícióját.
@@ -58,7 +63,7 @@ public class GlutExample02 {
 		// fehér háromszög rajzolása
 		renderVideo();
 	}
-	private static void renderVideo() {
+	private void renderVideo() {
 		RGlContext glContext=new RGlContext();
 		// háttér törlése
 		GL11.glClearColor(0,1,0,.3f);

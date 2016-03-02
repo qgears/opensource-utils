@@ -27,17 +27,23 @@ import org.lwjgl.opengl.GLContext;
  *
  */
 public class OSMesaExample {
+	private static final int WIDTH = 1024;
+	private static final int HEIGHT = 768;
 	public static void main(String[] args) throws Exception {
+		new OSMesaExample().run();
+	}
+	private void run() throws Exception {
 		BaseAccessor.initLwjglNatives();
 		OSMesaInstance.getInstance();
 		OSMesa osMesa=new OSMesa();
 		osMesa.createContext();
-		NativeImage im=NativeImage.create(new SizeInt(1024, 768), ENativeImageComponentOrder.RGBA, DefaultJavaNativeMemoryAllocator.getInstance());
+		NativeImage im=NativeImage.create(new SizeInt(WIDTH, HEIGHT), ENativeImageComponentOrder.RGBA, DefaultJavaNativeMemoryAllocator.getInstance());
 		osMesa.makeCurrent(im);
 		GLContext.useContext(osMesa);
 		UtilGl.drawMinimalScene();
 		GL11.glFinish();
 		osMesa.disposeContext();
 		new NativeLibPng().saveImage(im, new File("/tmp/gl.png"));
+		
 	}
 }

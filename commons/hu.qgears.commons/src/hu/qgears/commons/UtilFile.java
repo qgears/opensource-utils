@@ -161,7 +161,7 @@ public final class UtilFile {
 			m.update(bytes);
 			return "" + new BigInteger(1, m.digest()).toString(16);
 		} catch (NoSuchAlgorithmException e) {
-			LOG.error(e);
+			LOG.error("MD5",e);
 			return null;
 		}
 	}
@@ -540,7 +540,7 @@ public final class UtilFile {
 			}
 		} catch (NoSuchAlgorithmException e) {
 			//this should not happen
-			LOG.error(e);
+			LOG.error("MD5",e);
 		}
 		if (digest != null){
 			BigInteger bigInt = new BigInteger(1, digest);

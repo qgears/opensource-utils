@@ -1,5 +1,6 @@
 package hu.qgears.opengl.lwjgl;
 
+import org.apache.log4j.Logger;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
@@ -12,7 +13,21 @@ import hu.qgears.opengl.commons.input.IKeyboard;
 import lwjgl.standalone.BaseAccessor;
 
 public class GLContextProviderLwjgl implements IGlContextProvider{
+	private static final Logger LOG = Logger
+			.getLogger(GLContextProviderLwjgl.class);
+	
+
 	private boolean fullscreen;
+
+	private DisplayMode mode;
+
+
+	private SizeInt fullscreenSize;
+
+
+	private DisplayMode windowMode;
+
+	private MouseImplLwjgl mouse;
 
 	@Override
 	public void loadNatives() {
@@ -40,9 +55,6 @@ public class GLContextProviderLwjgl implements IGlContextProvider{
 	public void init() {
 		
 	}
-	private DisplayMode mode;
-	SizeInt fullscreenSize;
-	private DisplayMode windowMode;
 	@Override
 	public void openWindow(boolean initFullscreen, String initTitle,
 			SizeInt size) throws LWJGLException {
@@ -70,7 +82,9 @@ public class GLContextProviderLwjgl implements IGlContextProvider{
 	 */
 	protected void switchToWindowMode() throws LWJGLException {
 		mode = getWindowMode();
-		System.out.println("Switch to window: "+UtilGl.formatMode(mode));
+		if(LOG.isDebugEnabled()){
+			LOG.debug("Switch to window: "+UtilGl.formatMode(mode));
+		}
 		Display.setFullscreen(false);
 		Display.setDisplayMode(mode);
 	}
@@ -86,7 +100,9 @@ public class GLContextProviderLwjgl implements IGlContextProvider{
 	 */
 	protected void switchToFullScreen() throws LWJGLException {
 		mode = findDisplayMode(fullscreenSize.getWidth(), fullscreenSize.getHeight(), Display.getDisplayMode().getBitsPerPixel());
-		System.out.println("Switch to fullscreen: "+UtilGl.formatMode(mode));
+		if(LOG.isDebugEnabled()){
+			LOG.debug("Switch to fullscreen: "+UtilGl.formatMode(mode));
+		}
 		Display.setDisplayMode(mode);
 		Display.setFullscreen(true);
 	}
@@ -162,7 +178,6 @@ public class GLContextProviderLwjgl implements IGlContextProvider{
 		}
 		this.fullscreen=fullscreen;
 	}
-	MouseImplLwjgl mouse;
 	@Override
 	public MouseImplLwjgl getMouse() {
 		if(mouse==null)

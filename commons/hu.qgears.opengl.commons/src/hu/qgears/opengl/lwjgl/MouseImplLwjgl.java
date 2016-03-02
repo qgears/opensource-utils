@@ -6,12 +6,16 @@ import hu.qgears.opengl.commons.input.EMouseButton;
 import hu.qgears.opengl.commons.input.GlMouseEvent;
 import hu.qgears.opengl.commons.input.IMouse;
 
+import org.apache.log4j.Logger;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Mouse;
 
 public class MouseImplLwjgl implements IMouse
 {
-	GLContextProviderLwjgl provider;
+	private static final Logger LOG = Logger.getLogger(MouseImplLwjgl.class);
+	private GLContextProviderLwjgl provider;
+	private GlMouseEvent event=new GlMouseEvent();
+	private GlMouseEvent wheelReleaseEvent=null;
 	public MouseImplLwjgl(GLContextProviderLwjgl provider) throws LWJGLException {
 		Mouse.create();
 		this.provider=provider;
@@ -37,17 +41,15 @@ public class MouseImplLwjgl implements IMouse
 		return Mouse.getY();
 	}
 
-	GlMouseEvent event=new GlMouseEvent();
-	GlMouseEvent wheelReleaseEvent=null;
 	@Override
 	public GlMouseEvent getNextEvent() {
 		if(wheelReleaseEvent!=null)
 		{
 			GlMouseEvent ret=wheelReleaseEvent;
 			wheelReleaseEvent=null;
-			if(OGlGlobalParameters.logMouseMessages)
+			if(OGlGlobalParameters.logMouseMessages && LOG.isDebugEnabled())
 			{
-				System.out.println("LWJGL event wheel release: "+ret);
+				LOG.debug("LWJGL event wheel release: "+ret);
 			}
 			return ret;
 		}
@@ -76,9 +78,9 @@ public class MouseImplLwjgl implements IMouse
 				}
 				wheelReleaseEvent.button=event.button;
 			}
-			if(OGlGlobalParameters.logMouseMessages)
+			if(OGlGlobalParameters.logMouseMessages && LOG.isDebugEnabled())
 			{
-				System.out.println("LWJGL event: "+event+" button: "+Mouse.getEventButton()+" dwheel: "+Mouse.getEventDWheel());
+				LOG.debug("LWJGL event: "+event+" button: "+Mouse.getEventButton()+" dwheel: "+Mouse.getEventDWheel());
 			}
 			return event;
 		}
@@ -108,7 +110,8 @@ public class MouseImplLwjgl implements IMouse
 			return 1;
 		case MIDDLE:
 			return 2;
+		default:
+			return -1;
 		}
-		return -1;
 	}
 }

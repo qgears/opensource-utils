@@ -1,5 +1,7 @@
 package hu.qgears.opengl.commons.input;
 
+import org.apache.log4j.Logger;
+
 import hu.qgears.opengl.commons.OGlGlobalParameters;
 
 /**
@@ -9,6 +11,8 @@ import hu.qgears.opengl.commons.OGlGlobalParameters;
  *
  */
 public class MouseImplCallback implements IMouse {
+	private static final Logger LOG = Logger.getLogger(MouseImplCallback.class);
+
 	private int globalState=0;
 	private int x;
 	private int y;
@@ -63,9 +67,9 @@ public class MouseImplCallback implements IMouse {
 		currEv.clear();
 		currEv.x=x;
 		currEv.y=y;
-		if(OGlGlobalParameters.logMouseMessages)
+		if(OGlGlobalParameters.logMouseMessages && LOG.isDebugEnabled())
 		{
-			System.out.println("Mouse ev: t: "+type+" b: "+button+" button down: "+buttonDown+" ("+x+","+y+")");
+			LOG.debug("Mouse ev: t: "+type+" b: "+button+" button down: "+buttonDown+" ("+x+","+y+")");
 		}
 		if(type==4&&button!=null)
 		{

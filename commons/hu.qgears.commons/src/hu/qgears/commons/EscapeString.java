@@ -201,7 +201,7 @@ public class EscapeString {
 			return writer.toString();
 		} catch (IOException ioe) {
 			// this should never ever happen while writing to a StringWriter
-			LOG.error(ioe);
+			LOG.error("Escape",ioe);
 			return null;
 		}
 	}
@@ -331,7 +331,7 @@ public class EscapeString {
 			return writer.toString();
 		} catch (IOException ioe) {
 			// this should never ever happen while writing to a StringWriter
-			LOG.error(ioe);
+			LOG.error("Unescape",ioe);
 			return null;
 		}
 	}
@@ -501,7 +501,7 @@ public class EscapeString {
 			escapeHtml(sw, str);
 		} catch (IOException e) {
 			// Exception is never thrown
-			LOG.error(e);
+			LOG.error("escapeHtml",e);
 		}
 		return sw.toString();
 	}

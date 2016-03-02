@@ -4,10 +4,11 @@ public class FpsCounter {
 	private long lastTime;
 	private int ctr=0;
 	private double fps;
+	private boolean logToScreen=false;
+
 	public double getFps() {
 		return fps;
 	}
-	boolean logToScreen=false;
 	public boolean isLogToScreen() {
 		return logToScreen;
 	}
@@ -27,7 +28,8 @@ public class FpsCounter {
 				fps=((double)ctr)/elapsed*1000000000.0;
 				if(logToScreen)
 				{
-					System.out.println("FPS: "+fps);
+					//debug tool
+					System.out.println("FPS: "+fps);//NOSONAR
 				}
 			}
 			lastTime=curr;

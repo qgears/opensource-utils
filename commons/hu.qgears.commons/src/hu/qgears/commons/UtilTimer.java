@@ -45,7 +45,7 @@ public class UtilTimer {
 					Thread.sleep(timeoutMillis);
 					callable.call();
 				} catch (Throwable e) {
-					LOG.error(e);
+					LOG.error("Interrupt",e);
 				}
 			};
 		}.start();

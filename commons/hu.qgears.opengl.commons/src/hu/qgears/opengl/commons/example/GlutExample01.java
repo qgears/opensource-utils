@@ -5,6 +5,10 @@ import hu.qgears.opengl.glut.GlutInstance;
 
 public class GlutExample01 {
 	public static void main(String[] args) {
+		new GlutExample01().run();
+	}
+
+	private void run() {
 		GlutInstance.getInstance();
 		Glut glut=new Glut();
 		glut.init();
@@ -16,10 +20,11 @@ public class GlutExample01 {
 		doBunchOfLoop(glut);
 		glut.setFullScreen(false, 1024, 768);
 		doBunchOfLoop(glut);
-		System.out.println("Fullscreen width and height: ["+w+", "+h+"]");
+		/*For debug purposes*/
+		System.out.println("Fullscreen width and height: ["+w+", "+h+"]");//NOSONAR
 	}
 
-	private static void doBunchOfLoop(Glut glut) {
+	private void doBunchOfLoop(Glut glut) {
 		int ctr=0;
 		while(ctr<100)
 		{

@@ -18,16 +18,6 @@ class MirGl {
 	}
 	private int buttonMask;
 
-	private EMouseButton convertButtonId(int button) {
-		switch (button) {
-		case 1:
-			return EMouseButton.LEFT;
-		default:
-			break;
-		}
-		return null;
-	}
-
 	native protected void init();
 	native public void openWindow(boolean initFullscreen, String initTitle, int i,
 			int j, int width, int height);

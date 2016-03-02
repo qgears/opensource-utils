@@ -50,7 +50,7 @@ public abstract class XmlNativeLoader2 implements INativeLoader {
 							}
 						}catch(Exception e)
 						{
-							LOG.error(e);
+							LOG.error("checkAndParse",e);
 						}
 					}
 				}else
