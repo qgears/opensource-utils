@@ -9,10 +9,15 @@ import java.util.concurrent.ExecutorService;
  *
  */
 public class UtilSignalFuture {
+	
+	private UtilSignalFuture() {
+		// disable constructor of utility class
+	}
+
 	/**
 	 * Execute a Callable using an executor and return a SignalFuture.
-	 * 
-	 * See SignalFuture inerface!
+	 * <p>
+	 * See SignalFuture interface!
 	 * 
 	 * @param <T>
 	 * @param executor
@@ -22,7 +27,11 @@ public class UtilSignalFuture {
 	public static <T> SignalFuture<T> submit(ExecutorService executor, Callable<T> callable)
 	{
 		SignalFutureWrapper<T> ret=new SignalFutureWrapper<T>(callable);
-		executor.submit(ret);
+		/*
+		 * the return value is accessed via SignalFutureWrapper, the future
+		 * object created by submit is not relevant
+		 */
+		executor.submit(ret);//NOSONAR
 		return ret;
 	}
 }

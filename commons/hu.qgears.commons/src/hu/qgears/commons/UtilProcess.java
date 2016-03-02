@@ -8,7 +8,7 @@ import org.apache.log4j.Logger;
 
 public class UtilProcess {
 
-	private static Logger LOG = Logger.getLogger(UtilProcess.class);
+	private static final Logger LOG = Logger.getLogger(UtilProcess.class);
 	
 	private UtilProcess() {
 		// disable constructor of utility class

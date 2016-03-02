@@ -4,6 +4,9 @@ import java.lang.reflect.Field;
 
 public class UtilEquals {
 
+	private UtilEquals() {
+		// disable constructor of utility class
+	}
 	/**
 	 * Compare public fields.
 	 * @param objA

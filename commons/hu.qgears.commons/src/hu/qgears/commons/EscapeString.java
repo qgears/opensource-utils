@@ -46,7 +46,7 @@ import org.apache.log4j.Logger;
 public class EscapeString {
 
 	private static Map<String,Character> htmlEscapeChars;
-	private static Logger LOG = Logger.getLogger(EscapeString.class);
+	private static final Logger LOG = Logger.getLogger(EscapeString.class);
 
 	private EscapeString() {
 		//disable ctor of utility class

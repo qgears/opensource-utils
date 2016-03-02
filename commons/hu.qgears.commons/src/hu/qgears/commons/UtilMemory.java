@@ -13,7 +13,7 @@ import org.apache.log4j.Logger;
 
 public class UtilMemory {
 
-	private static Logger LOG = Logger.getLogger(UtilMemory.class);
+	private static final Logger LOG = Logger.getLogger(UtilMemory.class);
 	
 	private UtilMemory() {
 		// disable constructor of utility class

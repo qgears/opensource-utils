@@ -15,7 +15,7 @@ import org.apache.log4j.Logger;
  */
 public class UtilChannel {
 	
-	private static Logger LOG = Logger.getLogger(UtilChannel.class);
+	private static final Logger LOG = Logger.getLogger(UtilChannel.class);
 	
 	private UtilChannel() {
 		//ctor of utility class

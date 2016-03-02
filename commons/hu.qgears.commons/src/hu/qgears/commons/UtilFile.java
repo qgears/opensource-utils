@@ -39,7 +39,7 @@ import org.apache.log4j.Logger;
  */
 public final class UtilFile {
 
-	private static Logger LOG = Logger.getLogger(UtilFile.class);
+	private static final Logger LOG = Logger.getLogger(UtilFile.class);
 	
 	private UtilFile() {
 		// disable constructor of utility class

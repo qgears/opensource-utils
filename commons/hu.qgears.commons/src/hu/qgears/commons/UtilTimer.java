@@ -17,7 +17,7 @@ import org.apache.log4j.Logger;
  */
 public class UtilTimer {
 	
-	private static Logger LOG = Logger.getLogger(UtilTimer.class);
+	private static final Logger LOG = Logger.getLogger(UtilTimer.class);
 	
 	private static final UtilTimer INSTANCE = new UtilTimer();
 	
