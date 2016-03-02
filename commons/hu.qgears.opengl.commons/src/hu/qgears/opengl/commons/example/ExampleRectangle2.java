@@ -13,6 +13,7 @@ import hu.qgears.opengl.commons.UtilGl;
 import hu.qgears.opengl.commons.context.RGlContext;
 import hu.qgears.opengl.commons.input.IKeyboard;
 
+import org.apache.log4j.Logger;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
@@ -24,8 +25,10 @@ import org.lwjgl.util.vector.Vector4f;
  *
  */
 public class ExampleRectangle2 extends AbstractOpenglApplication2 {
-	Camera camera=new Camera();
-	IRenderOnTexture rot;
+	private static final Logger LOG = Logger.getLogger(ExampleRectangle2.class);
+
+	private Camera camera=new Camera();
+	private IRenderOnTexture rot;
 	public ExampleRectangle2() {
 		setImplementation(EGLImplementation.x11);
 	}
@@ -52,7 +55,6 @@ public class ExampleRectangle2 extends AbstractOpenglApplication2 {
 		GL11.glPushMatrix();
 		{
 			GL11.glTranslatef(0, 0, -100);
-//			UtilGl.rotate(GL11.GL_MODELVIEW, 90, 0, -100);
 			try{				
 				rot.render(new RGlContext(), new IOnTextureRenderer() {
 					
@@ -64,8 +66,8 @@ public class ExampleRectangle2 extends AbstractOpenglApplication2 {
 						GL11.glClearColor(0,1,0,.3f);
 						GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
 						
-						int sizeX=1024;
-						int sizeY=768;
+						float sizeX=1024;
+						float sizeY=768;
 						float scale=.2f;
 						TargetRectangle rect=new TargetRectangle(
 								(Vector2f)new Vector2f(-sizeX/2,sizeY/2).scale(scale),
@@ -79,8 +81,8 @@ public class ExampleRectangle2 extends AbstractOpenglApplication2 {
 						UtilGl.drawRectangle(glContext, rect, new Vector4f(1,0,0,1f));
 					}
 				});
-				int sizeX=getSize().getWidth();
-				int sizeY=getSize().getHeight();
+				float sizeX=getSize().getWidth();
+				float sizeY=getSize().getHeight();
 				float scale=.2f;
 				TargetRectangle drawRect=new TargetRectangle(
 						(Vector2f)new Vector2f(-sizeX/2,sizeY/2).scale(scale),
@@ -89,7 +91,7 @@ public class ExampleRectangle2 extends AbstractOpenglApplication2 {
 				rot.getTarget().drawTextureOnRectangle(drawRect);
 			}
 			catch (Throwable t) {
-				t.printStackTrace();
+				LOG.error("Error rendering example",t);
 			}
 		}
 		GL11.glPopMatrix();
@@ -101,17 +103,15 @@ public class ExampleRectangle2 extends AbstractOpenglApplication2 {
 		try {
 			ExampleRectangle2 fswTest = new ExampleRectangle2();
 			fswTest.execute();
-			System.exit(0);
+			System.exit(0); //NOSONAR intentional exit point
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.error("Error executing example",e);
 		}
 	}
 	@Override
 	protected void initialize() throws Exception {
 		setWindowSize(new SizeInt(1024, 768));
 		setInitTitle("Rectangle example");
-//		setDefaultFullscreen(true);
 		super.initialize();
 		try
 		{
@@ -136,6 +136,6 @@ public class ExampleRectangle2 extends AbstractOpenglApplication2 {
 	}
 	@Override
 	protected void logError(String message, Exception e) {
-		e.printStackTrace();
+		LOG.error(message, e);
 	}
 }

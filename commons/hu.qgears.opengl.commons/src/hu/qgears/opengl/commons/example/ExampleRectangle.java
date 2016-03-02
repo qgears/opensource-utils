@@ -146,7 +146,6 @@ public class ExampleRectangle extends AbstractOpenglApplication2 {
 	}
 	@Override
 	protected void logError(String message, Exception e) {
-		// TODO Auto-generated method stub
-		
+		LOG.error(message, e);
 	}
 }
