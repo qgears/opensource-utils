@@ -12,6 +12,7 @@ import hu.qgears.opengl.commons.UtilGl;
 import hu.qgears.opengl.commons.context.RGlContext;
 import hu.qgears.opengl.commons.input.IKeyboard;
 
+import org.apache.log4j.Logger;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
@@ -24,8 +25,9 @@ import org.lwjgl.util.vector.Vector4f;
  *
  */
 public class ExampleRectangle extends AbstractOpenglApplication2 {
-	Camera camera=new Camera();
-	IRenderOnTexture rot;
+	private Camera camera=new Camera();
+	private static final Logger LOG = Logger.getLogger(ExampleRectangle.class);
+	private IRenderOnTexture rot;
 	public ExampleRectangle() {
 		setWindowSize(new SizeInt(1024, 768));
 	}
@@ -52,7 +54,6 @@ public class ExampleRectangle extends AbstractOpenglApplication2 {
 		GL11.glPushMatrix();
 		{
 			GL11.glTranslatef(0, 0, -100);
-//			UtilGl.rotate(GL11.GL_MODELVIEW, 90, 0, -100);
 			try{				
 				rot.render(new RGlContext(), new IOnTextureRenderer() {
 					
@@ -64,8 +65,8 @@ public class ExampleRectangle extends AbstractOpenglApplication2 {
 						GL11.glClearColor(0,1,0,.3f);
 						GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
 						
-						int sizeX=640;
-						int sizeY=480;
+						float sizeX=640;
+						float sizeY=480;
 						float scale=.2f;
 						TargetRectangle rect=new TargetRectangle(
 								(Vector2f)new Vector2f(-sizeX/2,sizeY/2).scale(scale),
@@ -79,8 +80,8 @@ public class ExampleRectangle extends AbstractOpenglApplication2 {
 						UtilGl.drawRectangle(glContext, rect, new Vector4f(1,0,0,1f));
 					}
 				});
-				int sizeX=getClientAreaSize().getWidth();
-				int sizeY=getClientAreaSize().getHeight();
+				float sizeX=getClientAreaSize().getWidth();
+				float sizeY=getClientAreaSize().getHeight();
 				float scale=.2f;
 				TargetRectangle drawRect=new TargetRectangle(
 						(Vector2f)new Vector2f(-sizeX/2,sizeY/2).scale(scale),
@@ -89,7 +90,7 @@ public class ExampleRectangle extends AbstractOpenglApplication2 {
 				rot.getTarget().drawTextureOnRectangle(drawRect);
 			}
 			catch (Throwable t) {
-				t.printStackTrace();
+				LOG.error("Error while rendering",t);
 			}
 		}
 		GL11.glPopMatrix();
@@ -101,6 +102,8 @@ public class ExampleRectangle extends AbstractOpenglApplication2 {
 		case 'm':
 			// Az egeret eltüntetjük
 			Mouse.setGrabbed(!Mouse.isGrabbed());
+			break;
+		default:
 			break;
 		}
 	}
@@ -116,10 +119,9 @@ public class ExampleRectangle extends AbstractOpenglApplication2 {
 		try {
 			ExampleRectangle fswTest = new ExampleRectangle();
 			fswTest.execute();
-			System.exit(0);
+			System.exit(0); //NOSONAR intentional exit point
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.error("Error while executing application",e);
 		}
 	}
 	@Override
