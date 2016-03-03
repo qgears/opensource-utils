@@ -593,6 +593,8 @@ public class NativeImage extends AbstractReferenceCountedDisposeable
 	 * @param x
 	 * @param y
 	 * @param c
+	 * 
+	 * @since 5.0
 	 */
 	public void setPixel(int x, int y, RGBAColor c) {
 		setPixel(x, y, c.r<<24|c.g<<16|c.b<<8|c.a);
