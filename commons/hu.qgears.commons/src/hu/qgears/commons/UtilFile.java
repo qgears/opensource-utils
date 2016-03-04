@@ -5,6 +5,7 @@ import hu.qgears.commons.mem.INativeMemoryAllocator;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -241,6 +242,43 @@ public final class UtilFile {
 		} finally {
 			is.close();
 		}
+	}
+
+	/**
+	 * Load the content of <code>InputStream</code> into a string List. The
+	 * input must be UTF-8 encoded. The method automatically closes the stream
+	 * after operation is finished.
+	 * 
+	 * @param is
+	 * @return
+	 * @throws IOException
+	 * @throws NullPointerException
+	 *             if is is <code>null</code>
+	 */
+	public static List<String> readLines(InputStream is) throws IOException {
+		try {
+			BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+			List<String> ret = new ArrayList<String>();
+			while (reader.ready()) {
+				ret.add(reader.readLine());
+			}
+			return ret;
+		} finally {
+			is.close();
+		}
+	}
+	/**
+	 * Load the content of given {@link File} into a string List. The
+	 * input must be UTF-8 encoded.
+	 * 
+	 * @param file the File
+	 * @return
+	 * @throws IOException
+	 * @throws NullPointerException
+	 *             if is is <code>null</code>
+	 */
+	public static List<String> readLines(File file) throws IOException {
+		return readLines(new FileInputStream(file));
 	}
 
 	/**
