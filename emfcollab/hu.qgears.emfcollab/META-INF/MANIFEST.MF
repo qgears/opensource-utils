@@ -8,7 +8,7 @@ Export-Package: hu.qgears.emfcollab,hu.qgears.emfcollab.exceptions,hu.
  qgears.emfcollab.impl,hu.qgears.emfcollab.load,hu.qgears.emfcollab.sr
  v,hu.qgears.emfcollab.util
 Bundle-Vendor: QGears
-Bundle-Version: 6.0.0.qualifier
+Bundle-Version: 6.1.0.qualifier
 Bundle-Name: Emfcollab Plug-in
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: hu.qgears.emfcollab

@@ -254,6 +254,7 @@ public final class UtilFile {
 	 * @throws IOException
 	 * @throws NullPointerException
 	 *             if is is <code>null</code>
+	 * @since 6.1
 	 */
 	public static List<String> readLines(InputStream is) throws IOException {
 		try {
@@ -276,6 +277,7 @@ public final class UtilFile {
 	 * @throws IOException
 	 * @throws NullPointerException
 	 *             if is is <code>null</code>
+	 * @since 6.1
 	 */
 	public static List<String> readLines(File file) throws IOException {
 		return readLines(new FileInputStream(file));

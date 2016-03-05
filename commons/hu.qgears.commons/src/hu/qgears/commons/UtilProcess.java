@@ -1,15 +1,84 @@
 package hu.qgears.commons;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.log4j.Logger;
 
 public class UtilProcess {
 
 	private static final Logger LOG = Logger.getLogger(UtilProcess.class);
+
+	private static class PairFuture implements Future<Pair<byte[], byte[]>>
+	{
 	
+		@Override
+		public boolean cancel(boolean mayInterruptIfRunning) {
+			return false;
+		}
+	
+		@Override
+		public boolean isCancelled() {
+			return false;
+		}
+		volatile private byte[] a;
+		volatile private byte[] b;
+		@Override
+		public boolean isDone() {
+			return a!=null&&b!=null;
+		}
+	
+		@Override
+		public Pair<byte[], byte[]> get() throws InterruptedException,
+				ExecutionException {
+			synchronized (this) {
+				while(a==null||b==null)
+				{
+					this.wait();
+				}
+			}
+			return new Pair<byte[], byte[]>(a,b);
+		}
+	
+		@Override
+		public Pair<byte[], byte[]> get(long timeout, TimeUnit unit)
+				throws InterruptedException, ExecutionException,
+				TimeoutException {
+			synchronized (this) {
+				if(a==null||b==null)
+				{
+					unit.timedWait(this, timeout);
+					this.wait();
+				}
+				if(a==null||b==null)
+				{
+					throw new TimeoutException();
+				}
+			}
+			return new Pair<byte[], byte[]>(a,b);
+		}
+	
+		public void setA(byte[] string) {
+			synchronized (this) {
+				a=string;
+				this.notifyAll();
+			}
+		}
+	
+		public void setB(byte[] string) {
+			synchronized (this) {
+				b=string;
+				this.notifyAll();
+			}
+		}
+		
+	}
 	private UtilProcess() {
 		// disable constructor of utility class
 	}
@@ -117,5 +186,46 @@ public class UtilProcess {
 				}
 			}
 		}.start();
+	}
+	
+	/**
+	 * Saves the ouput of given process as a {@link Future} object. Results will
+	 * be ready if the given process terminates, so {@link Future#get()} will
+	 * block until the given process is run.
+	 * 
+	 * @param p
+	 * @return
+	 * @since 6.1
+	 */
+	public static Future<Pair<byte[], byte[]>> saveOutputsOfProcess(final Process p)
+	{
+		final PairFuture retfut=new PairFuture();
+		new Thread(){
+			public void run() {
+				ByteArrayOutputStream ret=new ByteArrayOutputStream();
+				try {
+					UtilProcess.streamErrorOfProcess(p.getInputStream(), ret);
+				} catch (Exception e) {
+					LOG.error("Error streaming std out",e);
+				}finally
+				{
+					retfut.setA(ret.toByteArray());
+				}
+			};
+		}
+		.start();
+		new Thread(){public void run() {
+			ByteArrayOutputStream ret=new ByteArrayOutputStream();
+			try {
+				UtilProcess.streamErrorOfProcess(p.getErrorStream(), ret);
+			} catch (Exception e) {
+				LOG.error("Error streaming std err",e);
+			}finally
+			{
+				retfut.setB(ret.toByteArray());
+			}
+		};}
+		.start();
+		return retfut;
 	}
 }
