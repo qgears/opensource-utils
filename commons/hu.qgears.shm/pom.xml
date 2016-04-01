@@ -12,7 +12,7 @@
 	<groupId>hu.qgears</groupId>
 	<artifactId>hu.qgears.shm</artifactId>
 	<packaging>eclipse-plugin</packaging>
-
+	<description>Custom effective shared memory implementation.</description>
 	<build>
 		<plugins>
 			<plugin>

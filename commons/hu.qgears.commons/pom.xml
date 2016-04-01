@@ -12,4 +12,5 @@
 	<groupId>hu.qgears</groupId>
 	<artifactId>hu.qgears.commons</artifactId>
 	<packaging>eclipse-plugin</packaging>
+	<description>Common helper classes and methods.</description>
 </project>

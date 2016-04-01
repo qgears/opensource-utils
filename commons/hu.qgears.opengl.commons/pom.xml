@@ -12,6 +12,7 @@
 	<groupId>hu.qgears</groupId>
 	<artifactId>hu.qgears.opengl.commons</artifactId>
 	<packaging>eclipse-plugin</packaging>
+	<description>OpenGL helper methods and object oriented abstraction layer over OpenGL API.</description>
 	<build>
 		<plugins>
 			<plugin>

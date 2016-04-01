@@ -12,4 +12,5 @@
 	<groupId>hu.qgears</groupId>
 	<artifactId>lwjgl.osgi</artifactId>
 	<packaging>eclipse-plugin</packaging>
+	<description>Java OpenGL bindings implementation library.</description>
 </project>

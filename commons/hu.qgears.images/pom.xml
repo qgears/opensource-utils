@@ -12,7 +12,7 @@
 	<groupId>hu.qgears</groupId>
 	<artifactId>hu.qgears.images</artifactId>
 	<packaging>eclipse-plugin</packaging>
-
+	<description>Java bindings to native image handling libraries. Only libpng is used by the application.</description>
 	<build>
 		<plugins>
 			<plugin>
