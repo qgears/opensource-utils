@@ -31,4 +31,12 @@
 		<module>test/hu.qgears.shm.test</module>
 		<module>thirdparty/lwjgl.osgi</module>
 	</modules>
+	<distributionManagement>
+		<site>
+			<id>opensource.site</id>
+			<name>Opensource utility site</name>
+			<url>${project_url}/modules/</url>
+		</site>
+	</distributionManagement>
+ 	<url>${project_url}/modules</url>
 </project>
