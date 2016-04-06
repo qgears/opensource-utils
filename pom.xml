@@ -3,13 +3,6 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>hu.qgears</groupId>
-		<artifactId>root</artifactId>
-		<version>1.0.0</version>
-		<relativePath>../parent-poms/root</relativePath>
-	</parent> 
-	
 	<groupId>hu.qgears</groupId>
 	<artifactId>opensource-utils</artifactId>
 	<version>6.1.0-SNAPSHOT</version>
@@ -31,12 +24,4 @@
 		<module>test/hu.qgears.shm.test</module>
 		<module>thirdparty/lwjgl.osgi</module>
 	</modules>
-	<distributionManagement>
-		<site>
-			<id>opensource.site</id>
-			<name>Opensource utility site</name>
-			<url>${project_url}/modules/</url>
-		</site>
-	</distributionManagement>
- 	<url>${project_url}/modules</url>
 </project>
