@@ -10,15 +10,13 @@ import java.io.FileNotFoundException;
 import org.junit.Ignore;
 import org.junit.Test;
 
-
+@Ignore
 public class TestDevil {
 
-	/*
-	 * TODO Fix this test case, remove endless loop
-	 * */
 	@Test@Ignore
 	public void testMemoryLeak() throws FileNotFoundException, Throwable
 	{
+		// TODO Fix this test case, remove endless loop
 		int N=2;
 		NativeDevILManager.getInstance();
 		Thread.sleep(1000);
