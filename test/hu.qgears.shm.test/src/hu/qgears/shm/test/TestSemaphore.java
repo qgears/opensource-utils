@@ -5,8 +5,8 @@ import hu.qgears.shm.ECreateType;
 import hu.qgears.shm.UtilSharedMemory;
 import hu.qgears.shm.sem.Semaphore;
 import hu.qgears.shm.sem.SemaphoreException;
-import junit.framework.Assert;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 
@@ -15,6 +15,15 @@ public class TestSemaphore extends TestBase {
 		new TestSemaphore().testSemaphore();
 	}
 	String id="testSem";
+	
+	/**
+	 * Scenario test for the {@link Semaphore} class. An OS-level semaphore is 
+	 * created and accessed by two threads, testing incrementing, decrementing
+	 * the value of the semaphore, and the timeout-limited variants of these
+	 * primitives.
+	 * @throws NativeLoadException thrown if required native libraries could not
+	 * be loaded - this is unexpected in this test
+	 */
 	@Test
 	public void testSemaphore() throws NativeLoadException
 	{
@@ -82,7 +91,6 @@ public class TestSemaphore extends TestBase {
 				sem.dispose();
 				log("semaphore refernece disposed on other thread");
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
