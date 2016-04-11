@@ -12,9 +12,15 @@ import org.junit.Test;
  */
 public class TestColor {
 	private static final RGBAColor DEF_C = RGBAColor.WHITE;
+	
+	/**
+	 * Tests parsing color descriptions from different formats of CSS notations,
+	 * and tests CSS notation parsing for being tolerant for inappropriate 
+	 * formatting, providing sane fallback values.
+	 * @see RGBAColor#fromCssNotation(String, RGBAColor) 
+	 */
 	@Test
-	public void testParseColor()
-	{
+	public void testParseColor() {
 		Assert.assertEquals(new RGBAColor(1,2,3), RGBAColor.fromCssNotation("rgb(1,2,3)",DEF_C));
 		Assert.assertEquals(new RGBAColor(1,2,3), RGBAColor.fromCssNotation("rgba(1,2,3,1)",DEF_C));
 		Assert.assertEquals(new RGBAColor(1,2,3), RGBAColor.fromCssNotation("rgba(1,2,3,1.0)",DEF_C));
@@ -37,6 +43,13 @@ public class TestColor {
 		Assert.assertEquals(8, c.a);
 		Assert.assertEquals(new RGBAColor(5,6,7,9), c.newWithAlpha(9));
 	}
+	/**
+	 * Verifies that converting an {@link RGBAColor} C to string, then parsing
+	 * it again, produces a result identical to C, in case of the 
+	 * '{@code rgb(...)}'-style CSS notation.
+	 * @see RGBAColor#fromCssNotation(String, RGBAColor)
+	 * @see RGBAColor#toCssParameter()
+	 */
 	@Test
 	public void testParseToString()
 	{
@@ -60,17 +73,20 @@ public class TestColor {
 		String toString=c.toString();
 		Assert.assertEquals(c, RGBAColor.fromCssNotation(toString,null));
 	}
+	
 	/**
-	 * Test hash code implementation of {@link RGBAColor}
+	 * Tests {@link RGBAColor#hashCode() hash code generation} of
+	 * {@link RGBAColor}. Invisibles and blacks are expected to have identical 
+	 * hash code even if they are described with different quadruplets.
 	 */
 	@Test
-	public void testHash()
-	{
+	public void testHash() {
 		Assert.assertEquals(new RGBAColor(0,0,0,0).hashCode(), new RGBAColor(0,0,0,0).hashCode());
 		Assert.assertEquals(new RGBAColor(1,0,0,0).hashCode(), new RGBAColor(1,0,0,0).hashCode());
 		Assert.assertEquals(new RGBAColor(0,1,0,0).hashCode(), new RGBAColor(0,1,0,0).hashCode());
 		Assert.assertEquals(new RGBAColor(0,0,1,0).hashCode(), new RGBAColor(0,0,1,0).hashCode());
 		Assert.assertEquals(new RGBAColor(0,0,0,1).hashCode(), new RGBAColor(0,0,0,1).hashCode());
+		
 		Assert.assertFalse(new RGBAColor(0,0,0,0).hashCode()==new RGBAColor(1,0,0,0).hashCode());
 		Assert.assertFalse(new RGBAColor(0,0,0,0).hashCode()==new RGBAColor(0,1,0,0).hashCode());
 		Assert.assertFalse(new RGBAColor(0,0,0,0).hashCode()==new RGBAColor(0,0,1,0).hashCode());
