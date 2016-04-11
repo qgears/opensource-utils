@@ -5,14 +5,14 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>hu.qgears</groupId>
-		<artifactId>opensource-utils</artifactId>
+		<artifactId>opensource-utils-parent</artifactId>
 		<version>6.1.0-SNAPSHOT</version>
-		<relativePath>../../</relativePath>
+		<relativePath>../../../parent-poms/opensource-utils-parent/</relativePath>
 	</parent>
 	<groupId>hu.qgears</groupId>
 	<artifactId>hu.qgears.shm</artifactId>
 	<packaging>eclipse-plugin</packaging>
-
+	<description>Custom effective shared memory implementation.</description>
 	<build>
 		<plugins>
 			<plugin>
