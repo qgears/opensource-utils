@@ -151,4 +151,5 @@
 			</build>
 		</profile>
 	</profiles>
+<version>6.1.1-SNAPSHOT</version>
 </project>

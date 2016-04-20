@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Test cases for hu.qgears.commons
 Bundle-SymbolicName: hu.qgears.commons.test
-Bundle-Version: 6.1.0.qualifier
+Bundle-Version: 6.1.1.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: org.junit;bundle-version="4.8.2",
  hu.qgears.commons;bundle-version="2.0.0"

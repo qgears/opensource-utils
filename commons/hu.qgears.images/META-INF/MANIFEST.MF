@@ -9,7 +9,7 @@ Export-Package: hu.qgears.images,
  hu.qgears.images.tiff,
  hu.qgears.images.vnc
 Bundle-Vendor: Q-Gears
-Bundle-Version: 6.1.0.qualifier
+Bundle-Version: 6.1.1.qualifier
 Bundle-Name: Images
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: hu.qgears.images
