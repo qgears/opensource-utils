@@ -19,6 +19,7 @@
 		<module>test/hu.qgears.opengl.commons.test</module>
 		<module>test/hu.qgears.shm.test</module>
 		<module>thirdparty/lwjgl.osgi</module>
+		<module>build/hu.qgears.opensource.target</module>
 	</modules>
 
 	<properties>
