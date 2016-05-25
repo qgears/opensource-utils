@@ -13,5 +13,5 @@
 	<artifactId>hu.qgears.coolrmi</artifactId>
 	<packaging>eclipse-plugin</packaging>
 	<description>Simple and effective RMI implementation for Java.</description>
-<version>6.1.1-SNAPSHOT</version>
+<version>6.1.2-SNAPSHOT</version>
 </project>
