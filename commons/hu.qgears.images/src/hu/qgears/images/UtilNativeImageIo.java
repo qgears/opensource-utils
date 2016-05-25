@@ -421,6 +421,7 @@ public class UtilNativeImageIo {
 	/**
 	 * Convert the type of the source image to the required type.
 	 * In case the source image already has the target type then return it.
+	 * In case the image is converted then the reference counter of the original image is decreased.
 	 * @param image
 	 * @return
 	 */
@@ -430,7 +431,7 @@ public class UtilNativeImageIo {
 		if (image.getComponentOrder() != order){
 			NativeImage n2 = NativeImage.create(image.getSize(),order, allocator);
 			n2.copyFromSource(image, 0, 0);
-			image.dispose();
+			image.decrementReferenceCounter();
 			image = n2;
 		}
 		return image;
