@@ -3,6 +3,7 @@ package hu.qgears.commons.signal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -33,18 +34,32 @@ public class SignalFutureWrapper<T> implements SignalFuture<T>, Callable<T>
 	 * @param ret
 	 * @param exc
 	 */
-	@SuppressWarnings("unchecked")
 	public void ready(Object ret, Throwable exc) {
+		ready(ret, exc, false);
+	}
+
+	@SuppressWarnings("unchecked")
+	private boolean ready(Object ret, Throwable exc, boolean cancel) {
+		boolean finishedNow=false;
 		synchronized (this) {
-			this.ret=(T)ret;
-			this.exc=exc;
-			done=true;
-			this.notifyAll();
+			if(!done)
+			{
+				finishedNow=true;
+				this.ret=(T)ret;
+				this.exc=exc;
+				done=true;
+				cancelled=cancel;
+				this.notifyAll();
+			}
 		}
-		for(Slot<SignalFuture<T>> listener:listeners)
+		if(finishedNow)
 		{
-			listener.signal(this);
+			for(Slot<SignalFuture<T>> listener:listeners)
+			{
+				listener.signal(this);
+			}
 		}
+		return finishedNow;
 	}
 
 	public SignalFutureWrapper(Callable<T> callable) {
@@ -58,8 +73,7 @@ public class SignalFutureWrapper<T> implements SignalFuture<T>, Callable<T>
 
 	@Override
 	public boolean cancel(boolean mayInterruptIfRunning) {
-		this.cancelled=true;
-		return false;
+		return ready(null, new CancellationException(), true);
 	}
 	@Override
 	public T get() throws InterruptedException, ExecutionException {
@@ -94,7 +108,9 @@ public class SignalFutureWrapper<T> implements SignalFuture<T>, Callable<T>
 
 	@Override
 	public boolean isCancelled() {
-		return cancelled;
+		synchronized (this) {
+			return cancelled;
+		}
 	}
 	@Override
 	public boolean isDone() {
