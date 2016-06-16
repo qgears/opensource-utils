@@ -166,26 +166,28 @@ public class UtilProcess {
 		new Thread() {
 			public void run() {
 				try {
-					doStream();
+					doStream(iStream,target);
 				} catch (IOException e) {
 					LOG.error("Exception during streaming error stream", e);
 				}
 			};
-			private void doStream() throws IOException {
-				try {
-					int n;
-					byte[] cbuf = new byte[1024];
-					while ((n = iStream.read(cbuf)) > -1) {
-						target.write(cbuf, 0, n);
-						target.flush();
-					}
-				} finally {
-					if (iStream != null) {
-						iStream.close();
-					}
-				}
-			}
 		}.start();
+	}
+	
+	private static void doStream(final InputStream iStream,
+			final OutputStream target) throws IOException {
+		try {
+			int n;
+			byte[] cbuf = new byte[1024];
+			while ((n = iStream.read(cbuf)) > -1) {
+				target.write(cbuf, 0, n);
+				target.flush();
+			}
+		} finally {
+			if (iStream != null) {
+				iStream.close();
+			}
+		}
 	}
 	
 	/**
@@ -204,7 +206,7 @@ public class UtilProcess {
 			public void run() {
 				ByteArrayOutputStream ret=new ByteArrayOutputStream();
 				try {
-					UtilProcess.streamErrorOfProcess(p.getInputStream(), ret);
+					doStream(p.getInputStream(), ret);
 				} catch (Exception e) {
 					LOG.error("Error streaming std out",e);
 				}finally
@@ -217,7 +219,7 @@ public class UtilProcess {
 		new Thread(){public void run() {
 			ByteArrayOutputStream ret=new ByteArrayOutputStream();
 			try {
-				UtilProcess.streamErrorOfProcess(p.getErrorStream(), ret);
+				doStream(p.getErrorStream(), ret);
 			} catch (Exception e) {
 				LOG.error("Error streaming std err",e);
 			}finally
