@@ -18,6 +18,7 @@
 		<module>coolrmi/hu.qgears.coolrmi</module>
 		<module>emfcollab/hu.qgears.emfcollab</module>
 		<module>emfcollab/hu.qgears.emfcollab.editor</module>
+		<module>emfcollab/hu.qgears.emfcollab.feature</module>
 		<module>test/hu.qgears.commons.test</module>
 		<module>test/hu.qgears.images.test</module>
 		<module>test/hu.qgears.opengl.commons.test</module>

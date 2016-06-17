@@ -45,20 +45,6 @@
          unpack="false"/>
 
    <plugin
-         id="hu.qgears.emfcollab"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="hu.qgears.emfcollab.editor"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="hu.qgears.shm"
          download-size="0"
          install-size="0"
