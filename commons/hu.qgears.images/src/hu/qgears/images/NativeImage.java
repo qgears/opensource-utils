@@ -334,7 +334,7 @@ public class NativeImage extends AbstractReferenceCountedDisposeable
 	 * @param j
 	 * @return
 	 */
-	private int getPixel(int i, int j) {
+	public int getPixel(int i, int j) {
 		int nc=getnChannels();
 		int pos=j*step+i*nc;
 		int b;
