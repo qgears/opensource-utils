@@ -18,7 +18,7 @@ public class QuantizeExample {
 	{
 		File dir=new File("/tmp/in.png");
 		NativeImage im=NativeLibPng.loadImage(dir);
-		Palette p=QuantizeOctTree.quantizeOctTree(im, 256);
+		Palette p=QuantizeOctTree.quantizeOctTree(im, 256, null);
 		p.reduceImageColorsToPalette(im);
 		new NativeLibPng().saveImage(im, new File("/tmp/quantized.png"));
 	}

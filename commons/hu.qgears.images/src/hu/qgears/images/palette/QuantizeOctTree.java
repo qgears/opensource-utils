@@ -327,11 +327,12 @@ public class QuantizeOctTree {
 	 * Create a palette from the colors of the image.
 	 * @param im input image to find a good fit palette. The image data is used read only.
 	 * @param maxColor maximum number of colors in the result palette (result is going to be in range: [maxColor-6, maxColor] or less in case the source image has less colors).
+	 * @param mask mask to skip pixels from the operation. May be null - then all pixels are used.
 	 * @return a palette that is a good fit for the image.
 	 */
-	public static Palette quantizeOctTree(NativeImage im, int maxColor)
+	public static Palette quantizeOctTree(NativeImage im, int maxColor, IMask mask)
 	{
-		return new QuantizeOctTree().quantizeOctTreePrivate(im, maxColor);
+		return new QuantizeOctTree().quantizeOctTreePrivate(im, maxColor, mask);
 	}
 	/**
 	 * This class is not intended to be instantiated outside this class. Use the static method.
@@ -342,7 +343,7 @@ public class QuantizeOctTree {
 	static private int square(int i) {
 		return i*i;
 	}
-	private Palette quantizeOctTreePrivate(NativeImage im, int maxColor)
+	private Palette quantizeOctTreePrivate(NativeImage im, int maxColor, IMask mask)
 	{
 		root.mid0=128;
 		root.mid1=128;
@@ -352,6 +353,10 @@ public class QuantizeOctTree {
 			for(int i=0;i<im.getWidth();++i)
 			{
 				int v=im.getPixel(i, j);
+				if(mask!=null && mask.skip(i, j, v))
+				{
+					continue;
+				}
 				int v0=(v>>24)&0xFF;
 				int v1=(v>>16)&0xFF;
 				int v2=(v>>8)&0xFF;

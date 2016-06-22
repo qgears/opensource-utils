@@ -66,4 +66,16 @@ public class Palette {
 			}
 		}
 	}
+	public int getNColor()
+	{
+		return colors.length;
+	}
+	/**
+	 * Get the color value by index.
+	 * @param index index of the color to get the color value from.
+	 * @return Color value in {@link NativeImage} format.
+	 */
+	public int getColor(int index) {
+		return colors[index];
+	}
 }
