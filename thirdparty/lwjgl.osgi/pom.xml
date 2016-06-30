@@ -13,5 +13,5 @@
 	<artifactId>lwjgl.osgi</artifactId>
 	<packaging>eclipse-plugin</packaging>
 	<description>Java OpenGL bindings implementation library.</description>
-<version>6.3.0-SNAPSHOT</version>
+<version>6.4.0-SNAPSHOT</version>
 </project>
