@@ -67,6 +67,8 @@
 										<argument>${basedir}/native</argument>
 										<argument>linux</argument>
 										<argument>${basedir}/src/hu/qgears/opengl/glut</argument>
+										<!-- The host is specified from Jenkins or from settings.xml -->
+										<argument>${cross-compile-host}</argument>
 									</arguments>
 								</configuration>
 							</execution>
