@@ -3,9 +3,9 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>hu.qgears</groupId>
-		<artifactId>root0</artifactId>
+		<artifactId>opensource-utils-parent</artifactId>
 		<version>1.0.0</version>
-		<relativePath>../../../parent-poms/root0/</relativePath>
+		<relativePath>../../build/opensource-utils-parent/</relativePath>
 	</parent>
 	
 	<groupId>hu.qgears</groupId>

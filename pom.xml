@@ -25,5 +25,6 @@
 		<module>test/hu.qgears.shm.test</module>
 		<module>thirdparty/lwjgl.osgi</module>
 		<module>build/hu.qgears.opensource.target</module>
+		<module>build/hu.qgears.opensource.utils.p2</module>
 	</modules>
 </project>

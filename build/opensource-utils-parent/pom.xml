@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>hu.qgears</groupId>
+		<artifactId>root</artifactId>
+		<version>1.0.0</version>
+		<relativePath>../repository-builder/parent-poms/root</relativePath>
+	</parent> 
+	
+	<groupId>hu.qgears</groupId>
+	<artifactId>opensource-utils-parent</artifactId>
+	<version>6.1.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<distributionManagement>
+		<site>
+			<id>opensource.site</id>
+			<name>Opensource utils website</name>
+			<url>${project_url}/modules/</url>
+		</site>
+	</distributionManagement>
+ 	<url>${project_url}/modules/</url>
+
+	<build>
+		<plugins>
+			<plugin>
+			   <groupId>org.eclipse.tycho</groupId>
+			   <artifactId>target-platform-configuration</artifactId>
+			   <version>${tycho-version}</version>
+			   <configuration>
+				  <target>
+					 <artifact>
+						<groupId>hu.qgears</groupId>
+						<artifactId>hu.qgears.opensource.target</artifactId>
+						<version>6.1.2-SNAPSHOT</version>
+					 </artifact>
+				  </target>
+			   </configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>
