@@ -23,5 +23,3 @@ hs_err_pid*
 #shared objects
 *.so
 
-#Ignoring repo builder temporary
-build/repository-builder
