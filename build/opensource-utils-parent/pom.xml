@@ -34,11 +34,29 @@
 					 <artifact>
 						<groupId>hu.qgears</groupId>
 						<artifactId>hu.qgears.opensource.target</artifactId>
-						<version>6.4.0-SNAPSHOT</version>
+						<version>${project.version}</version>
 					 </artifact>
 				  </target>
 			   </configuration>
 			</plugin>
 		</plugins>
 	</build>
+	<profiles>
+		<!-- This profile is activated when the version bump script is executed.
+			It adds each the aggregator pom of the component (../../) as a child module 
+			of this component, so the tycho-version-plugin will be able to detect parent-child 
+			relationships propertly, so also changes the version string in the parent pom reference.
+		--> 
+		<profile>
+			<id>versionbump</id>
+			<activation>
+				<property>
+					<name>newVersion</name>
+				</property>
+			</activation>
+			<modules>
+				<module>../../</module>
+			</modules>
+		</profile>
+	</profiles>
 </project>
