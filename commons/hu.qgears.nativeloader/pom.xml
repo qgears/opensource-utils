@@ -6,12 +6,12 @@
 	<parent>
 		<groupId>hu.qgears</groupId>
 		<artifactId>opensource-utils-parent</artifactId>
-		<version>6.4.1-SNAPSHOT</version>
+		<version>6.4.2-SNAPSHOT</version>
 		<relativePath>../../build/opensource-utils-parent/</relativePath>
 	</parent>
 	<groupId>hu.qgears</groupId>
 	<artifactId>hu.qgears.nativeloader</artifactId>
 	<packaging>eclipse-plugin</packaging>
 	<description>Generic native shared object loader implementation.</description>
-<version>6.4.1-SNAPSHOT</version>
+<version>6.4.2-SNAPSHOT</version>
 </project>
