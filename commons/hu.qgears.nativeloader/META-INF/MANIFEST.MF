@@ -3,7 +3,7 @@ Require-Bundle: hu.qgears.commons;bundle-version="2.0.0",
  org.apache.log4j;bundle-version="1.2.0"
 Export-Package: hu.qgears.nativeloader
 Bundle-ActivationPolicy: lazy
-Bundle-Version: 6.4.2.qualifier
+Bundle-Version: 6.4.3.qualifier
 Bundle-Name: Nativeloader
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: hu.qgears.nativeloader
