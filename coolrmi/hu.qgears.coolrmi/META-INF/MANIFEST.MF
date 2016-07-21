@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Export-Package: hu.qgears.coolrmi,hu.qgears.coolrmi.messages,hu.qgears
  .coolrmi.remoter
 Bundle-Vendor: Q-Gears
-Bundle-Version: 6.4.0.qualifier
+Bundle-Version: 6.4.1.qualifier
 Bundle-Name: CoolRmi Plug-in
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: hu.qgears.coolrmi
