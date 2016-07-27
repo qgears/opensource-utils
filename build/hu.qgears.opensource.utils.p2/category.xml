@@ -2,8 +2,8 @@
 <site>
 
 	<!-- Opensource utils category -->
-	<category-def name="Q-Gears lib tools" label="Q-Gears utilities" />
-	<category-def name="Q-Gears lib tools sources" label="Q-Gears utilities developer resources">
+	<category-def name="Q-Gears lib tools" label="Q-Gears lib utilities" />
+	<category-def name="Q-Gears lib tools sources" label="Q-Gears lib utilities developer resources">
 		<description>
 			Source bundles for Q-Gears lib tools
 		</description>
