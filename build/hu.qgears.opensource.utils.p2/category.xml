@@ -2,23 +2,23 @@
 <site>
 
 	<!-- Opensource utils category -->
-	<category-def name="Q-Gears tools" label="Q-Gears utilities" />
-	<category-def name="Q-Gears tools sources" label="Q-Gears utilities developer resources">
+	<category-def name="Q-Gears lib tools" label="Q-Gears utilities" />
+	<category-def name="Q-Gears lib tools sources" label="Q-Gears utilities developer resources">
 		<description>
-			Source bundles for Q-Gears tools
+			Source bundles for Q-Gears lib tools
 		</description>
 	</category-def>
 	<feature id="hu.qgears.utils.feature">
-		<category name="Q-Gears tools" />
+		<category name="Q-Gears lib tools" />
 	</feature>
 	<feature id="hu.qgears.utils.feature.source">
-		<category name="Q-Gears tools sources" />
+		<category name="Q-Gears lib tools sources" />
 	</feature>
 	<feature id="hu.qgears.emfcollab.feature">
-		<category name="Q-Gears tools" />
+		<category name="Q-Gears lib tools" />
 	</feature>
 	<feature id="hu.qgears.emfcollab.feature.source">
-		<category name="Q-Gears tools sources" />
+		<category name="Q-Gears lib tools sources" />
 	</feature>
 
 </site>
