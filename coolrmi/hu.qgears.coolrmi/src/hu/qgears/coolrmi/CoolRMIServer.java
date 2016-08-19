@@ -34,6 +34,10 @@ import java.net.SocketException;
  */
 public class CoolRMIServer {
 	private CoolRMIServiceRegistry serviceRegistry=new CoolRMIServiceRegistry();
+	private ClassLoader classLoader;
+	private SocketAddress socketAddress;
+	private boolean guaranteeOrdering;
+	private long timeout=30000;
 	public CoolRMIServiceRegistry getServiceRegistry() {
 		return serviceRegistry;
 	}
@@ -42,10 +46,6 @@ public class CoolRMIServer {
 		this.serviceRegistry = serviceRegistry;
 	}
 
-	private ClassLoader classLoader;
-	private SocketAddress socketAddress;
-	private boolean guaranteeOrdering;
-	private long timeout=30000;
 	public long getTimeout() {
 		return timeout;
 	}
@@ -107,7 +107,7 @@ public class CoolRMIServer {
 					CoolRMIServe serve=
 						new CoolRMIServe(this, sock, guaranteeOrdering);
 					serve.setTimeout(timeout);
-					serve.setServicesReg(getServiceRegistry());
+					serve.setServiceRegistry(getServiceRegistry());
 					serve.connect();;
 				}
 			} finally {

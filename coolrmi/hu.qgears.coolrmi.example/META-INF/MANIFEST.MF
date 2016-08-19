@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Example
+Bundle-SymbolicName: hu.qgears.coolrmi.example
+Bundle-Version: 1.0.0.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: hu.qgears.commons;bundle-version="6.4.1",
+ hu.qgears.coolrmi;bundle-version="6.4.1"

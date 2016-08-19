@@ -1,5 +1,17 @@
 package hu.qgears.coolrmi.remoter;
 
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.Socket;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import hu.qgears.commons.NamedThreadFactory;
 import hu.qgears.coolrmi.CoolRMIClose;
 import hu.qgears.coolrmi.CoolRMIException;
 import hu.qgears.coolrmi.CoolRMIService;
@@ -21,47 +33,38 @@ import hu.qgears.coolrmi.messages.CoolRMIRequestServiceReply;
 import hu.qgears.coolrmi.multiplexer.ISocketMultiplexerListener;
 import hu.qgears.coolrmi.multiplexer.SocketMultiplexer;
 
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.Socket;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 
+public class CoolRMIRemoter {
+	class SocketMultiplexerListener implements ISocketMultiplexerListener
+	{
 
-public class CoolRMIRemoter implements ISocketMultiplexerListener {
+		@Override
+		public void messageReceived(byte[] msg) {
+			CoolRMIRemoter.this.messageReceived(msg);
+		}
+
+		@Override
+		public void pipeBroken(Exception e) {
+			CoolRMIRemoter.this.pipeBroken(e);
+		}
+		
+	}
 	private SocketMultiplexer multiplexer;
-	long timeout=30000;
-	public void setTimeout(long timeout) {
-		this.timeout = timeout;
-	}
-
-	public long getTimeout() {
-		return timeout;
-	}
-
-	Socket sock;
+	private long timeout=30000;
+	private Socket sock;
 	private ClassLoader classLoader;
-	public ClassLoader getClassLoader() {
-		return classLoader;
-	}
-
 	private boolean connected = false;
 	private boolean closed = false;
 	private Executor serverSideExecutor = null;
 	private boolean guaranteeOrdering;
-
+	
 	public CoolRMIRemoter(ClassLoader classLoader, boolean guaranteeOrdering) {
 		this.classLoader = classLoader;
 		this.guaranteeOrdering=guaranteeOrdering;
 		if(guaranteeOrdering)
 		{
-			serverSideExecutor=Executors.newSingleThreadExecutor();
+			serverSideExecutor=Executors.newSingleThreadExecutor(new NamedThreadFactory("Cool RMI executor"));
 		}else
 		{
 			serverSideExecutor=new Executor()
@@ -75,11 +78,22 @@ public class CoolRMIRemoter implements ISocketMultiplexerListener {
 		}
 	}
 
+	public void setTimeout(long timeout) {
+		this.timeout = timeout;
+	}
+
+	public long getTimeout() {
+		return timeout;
+	}
+
+	public ClassLoader getClassLoader() {
+		return classLoader;
+	}
 	protected void connect(Socket sock) throws IOException {
 		this.sock = sock;
 		multiplexer = new SocketMultiplexer(
 				sock.getInputStream(), sock
-				.getOutputStream(), this, guaranteeOrdering);
+				.getOutputStream(), new SocketMultiplexerListener(), guaranteeOrdering);
 		connected = true;
 		multiplexer.start();
 	}
@@ -104,7 +118,7 @@ public class CoolRMIRemoter implements ISocketMultiplexerListener {
 	}
 
 	private void send(AbstractCoolRMIMessage message) throws IOException {
-		byte[] bs = UtilSerializator.serialize(message);
+		byte[] bs = UtilSerializator.serialize(servicesReg, message);
 		multiplexer.addMessageToSend(bs);
 	}
 
@@ -191,7 +205,7 @@ public class CoolRMIRemoter implements ISocketMultiplexerListener {
 		return servicesReg;
 	}
 
-	public void setServicesReg(CoolRMIServiceRegistry servicesReg) {
+	public void setServiceRegistry(CoolRMIServiceRegistry servicesReg) {
 		this.servicesReg = servicesReg;
 	}
 
@@ -343,7 +357,7 @@ public class CoolRMIRemoter implements ISocketMultiplexerListener {
 		try {
 			close();
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
+			// There is nothing to do when the connection can not be properly closed.
 			e1.printStackTrace();
 		}
 	}

@@ -7,4 +7,5 @@ Bundle-Name: CoolRmi Plug-in
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: hu.qgears.coolrmi
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Require-Bundle: hu.qgears.commons;bundle-version="6.4.1"
 

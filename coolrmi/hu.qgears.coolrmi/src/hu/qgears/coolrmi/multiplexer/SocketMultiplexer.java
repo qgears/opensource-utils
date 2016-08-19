@@ -25,14 +25,14 @@ import java.util.Map;
  */
 public class SocketMultiplexer {
 	private boolean guaranteeOrdering;
-	ISocketMultiplexerListener messageListener;
-	InputStream is;
+	private ISocketMultiplexerListener messageListener;
+	private InputStream is;
+	private ObjectOutputStream oos;
 	public SocketMultiplexer(InputStream is, OutputStream os,
 			ISocketMultiplexerListener messageListener,
 			boolean guaranteeOrdering) throws IOException {
 		super();
 		this.is = is;
-		this.os = os;
 		this.messageListener=messageListener;
 		this.oos=new ObjectOutputStream(os);
 	}
@@ -41,8 +41,6 @@ public class SocketMultiplexer {
 		new ReadThread().start();
 		new WriteThread().start();
 	}
-	OutputStream os;
-	ObjectOutputStream oos;
 	public final static  int datagramMaxSize=2048;
 	class ReadThread extends Thread
 	{
@@ -54,17 +52,23 @@ public class SocketMultiplexer {
 		public void run() {
 			try {
 				CoolRMIObjectInputStream ois=new CoolRMIObjectInputStream(SocketMultiplexer.class.getClassLoader(), is);
-				while(!exit)
+				try
 				{
-					SocketMultiplexerDatagram datagram=(SocketMultiplexerDatagram) ois.readObject();
-					long id=datagram.getDatagramId();
-					ByteArrayOutputStream bos=getMessage(id);
-					bos.write(datagram.content);
-					if(datagram.isLastPiece())
+					while(!exit)
 					{
-						removeMessage(id);
-						messageListener.messageReceived(bos.toByteArray());
+						SocketMultiplexerDatagram datagram=(SocketMultiplexerDatagram) ois.readObject();
+						long id=datagram.getDatagramId();
+						ByteArrayOutputStream bos=getMessage(id);
+						bos.write(datagram.content);
+						if(datagram.isLastPiece())
+						{
+							removeMessage(id);
+							messageListener.messageReceived(bos.toByteArray());
+						}
 					}
+				}finally
+				{
+					ois.close();
 				}
 			} catch (Exception e) {
 				messageListener.pipeBroken(e);

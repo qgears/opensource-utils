@@ -1,19 +1,26 @@
 package hu.qgears.coolrmi.remoter;
 
-import hu.qgears.coolrmi.CoolRMIObjectInputStream;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
+
+import hu.qgears.coolrmi.CoolRMIObjectInputStream;
+import hu.qgears.coolrmi.CoolRMIObjectOutputStream;
 
 
 
 public class UtilSerializator {
-	public static byte[] serialize(Object o) throws IOException
+	/**
+	 * 
+	 * @param serviceReg used to look for object replaces.
+	 * @param o
+	 * @return
+	 * @throws IOException
+	 */
+	public static byte[] serialize(CoolRMIServiceRegistry serviceReg, Object o) throws IOException
 	{
 		ByteArrayOutputStream bos=new ByteArrayOutputStream();
-		ObjectOutputStream oos=new ObjectOutputStream(bos);
+		CoolRMIObjectOutputStream oos=new CoolRMIObjectOutputStream(serviceReg, bos);
 		oos.writeObject(o);
 		oos.close();
 		return bos.toByteArray();

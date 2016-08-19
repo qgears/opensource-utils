@@ -26,7 +26,7 @@ public class CoolRMIProxy implements InvocationHandler {
 	public ICoolRMIProxy getProxyObject() {
 		return proxyObject;
 	}
-	CoolRMIProxy(CoolRMIRemoter home, long id, Class<?> interface_)
+	public CoolRMIProxy(CoolRMIRemoter home, long id, Class<?> interface_)
 	{
 		this.home=home;
 		this.id=id;
@@ -84,6 +84,19 @@ public class CoolRMIProxy implements InvocationHandler {
 				throw new CoolRMIException("Exception doing the RMI", t);
 			}
 			if (reply.getException() != null) {
+				StackTraceElement[] stprev=reply.getException().getStackTrace();
+				StackTraceElement[] toadd=Thread.currentThread().getStackTrace();
+				StackTraceElement[] merged=new StackTraceElement[stprev.length+toadd.length];
+				int i=0;
+				for(StackTraceElement e:stprev)
+				{
+					merged[i++]=e;
+				}
+				for(StackTraceElement e:toadd)
+				{
+					merged[i++]=e;
+				}
+				reply.getException().setStackTrace(merged);
 				throw reply.getException();
 			} else {
 				throw new CoolRMIException("Internal error");
