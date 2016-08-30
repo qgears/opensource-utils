@@ -50,6 +50,7 @@ public class CoolRMIRemoter {
 		}
 		
 	}
+	private static final long NANOS_TO_MILLIS = 1000000l;
 	private SocketMultiplexer multiplexer;
 	private long timeout=30000;
 	private Socket sock;
@@ -58,6 +59,19 @@ public class CoolRMIRemoter {
 	private boolean closed = false;
 	private Executor serverSideExecutor = null;
 	private boolean guaranteeOrdering;
+	private Map<Long, AbstractCoolRMIReply> replies = new HashMap<Long, AbstractCoolRMIReply>();
+	/**
+	 * The client side proxy objects.
+	 */
+	private Map<Long, CoolRMIProxy> proxies = Collections
+			.synchronizedMap(new HashMap<Long, CoolRMIProxy>());
+	/**
+	 * The server side service objects that have proxies on the other side.
+	 */
+	private Map<Long, CoolRMIServerSideObject> services = Collections
+			.synchronizedMap(new HashMap<Long, CoolRMIServerSideObject>());
+	private long callCounter = 0;
+	private long proxyCounter = 0;
 	
 	public CoolRMIRemoter(ClassLoader classLoader, boolean guaranteeOrdering) {
 		this.classLoader = classLoader;
@@ -121,20 +135,6 @@ public class CoolRMIRemoter {
 		byte[] bs = UtilSerializator.serialize(servicesReg, message);
 		multiplexer.addMessageToSend(bs);
 	}
-
-	/**
-	 * The client side proxy objects.
-	 */
-	private Map<Long, CoolRMIProxy> proxies = Collections
-			.synchronizedMap(new HashMap<Long, CoolRMIProxy>());
-	/**
-	 * The server side service objects that have proxies on the other side.
-	 */
-	private Map<Long, CoolRMIServerSideObject> services = Collections
-			.synchronizedMap(new HashMap<Long, CoolRMIServerSideObject>());
-	private long callCounter = 0;
-	private long proxyCounter = 0;
-
 	/**
 	 * Send a message call to the other side. Send is asynchronous. Reply can be
 	 * waited by getReply() method.
@@ -153,8 +153,6 @@ public class CoolRMIRemoter {
 	private synchronized long getNextProxyId() {
 		return proxyCounter++;
 	}
-
-	private Map<Long, AbstractCoolRMIReply> replies = new HashMap<Long, AbstractCoolRMIReply>();
 
 	public void messageReceived(byte[] msg) {
 		try {
@@ -379,14 +377,20 @@ public class CoolRMIRemoter {
 		{
 			((ExecutorService) serverSideExecutor).shutdown();
 		}
+		synchronized (replies) {
+			// Queries waiting for replies must be notified to close at once.
+			replies.notifyAll();
+		}
 	}
-	/*
+	/**
 	 * Wait for the reply for a message sent.
-	 * TODO timeout!
+	 * @return the reply object
+	 * @throws CoolRMITimeoutException in case of timeout (see setTimeout)
+	 * @throws CoolRMIException in case of connection closed
 	 */
 	protected AbstractCoolRMIReply getAbstractReply(long callId) {
-		long t=getTimeout();
-		long start=System.currentTimeMillis();
+		long t=getTimeout()*NANOS_TO_MILLIS;
+		long startNano=System.nanoTime();
 		AbstractCoolRMIReply reply = null;
 		while (reply == null) {
 			synchronized (replies) {
@@ -399,13 +403,12 @@ public class CoolRMIRemoter {
 					if(t>0)
 					{
 						try {
-							replies.wait(t);
-							long t2=System.currentTimeMillis();
-							long elapsed=t2-start;
-							t=t-elapsed;
-							start=t2;
-						} catch (InterruptedException e) {
-					}
+							replies.wait(t/NANOS_TO_MILLIS, (int)(t%NANOS_TO_MILLIS));
+							long t2=System.nanoTime();
+							long elapsedNano=t2-startNano;
+							t=t-elapsedNano;
+							startNano=t2;
+						} catch (InterruptedException e) {}
 					}else
 					{
 						throw new CoolRMITimeoutException();
@@ -415,9 +418,6 @@ public class CoolRMIRemoter {
 		}
 		return reply;
 	}
-
-
-	boolean exit = false;
 
 	/**
 	 * Create a client proxy of the specified service. The method will not
