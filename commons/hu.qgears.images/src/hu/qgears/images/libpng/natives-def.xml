@@ -8,8 +8,8 @@
 			<lib path="libqpng.so" installPath="/opt/qgears/libqpng.so" />
 		</platform>
 	</platform>
-	<platform name="Windows 7">
-		<platform arch="(i386)">
+	<platform name=".*(W|w)indows.*">
+		<platform arch="(i386|i486|i586|i686|x86|x86_32)">
 			<lib path="zlib1.dll" installPath="C:\opt\qgears\zlib1.dll" />
 			<lib path="libpng3.dll" installPath="C:\opt\qgears\libpng3.dll" />
 			<lib path="libqpng32.dll" installPath="C:\opt\qgears\libqpng32.dll" />
