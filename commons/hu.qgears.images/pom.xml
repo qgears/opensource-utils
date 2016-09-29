@@ -120,14 +120,26 @@
 							</execution>
 							<!-- x compile libpng native to win32-->
 							<execution>
-								<id>libqpng-win-natives</id>
+								<id>libqpng-win32-natives</id>
 								<phase>generate-resources</phase>
 								<goals>
 									<goal>exec</goal>
 								</goals>
 								<configuration>
 									<executable>make</executable>
-									<workingDirectory>./native/libpng/win</workingDirectory>
+									<workingDirectory>./native/libpng/windows/win32</workingDirectory>
+								</configuration>
+							</execution>
+							<!-- x compile libpng native to win64-->
+							<execution>
+								<id>libqpng-win64-natives</id>
+								<phase>generate-resources</phase>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+								<configuration>
+									<executable>make</executable>
+									<workingDirectory>./native/libpng/windows/win64</workingDirectory>
 								</configuration>
 							</execution>
 							<!-- Compiling tiff lib -->
