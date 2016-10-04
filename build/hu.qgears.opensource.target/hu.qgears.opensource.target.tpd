@@ -2,10 +2,10 @@ target "Opensource utils target platform"
 
 with requirements
 
-location "http://192.168.1.116:8888/nexus/content/repositories/indigo/" indigo-repo {
-	org.apache.log4j [1.2.13.v200903072027,1.2.13.v200903072027]
-	org.eclipse.emf.sdk.feature.group [2.7.2.v20120130-0943,2.7.2.v20120130-0943]
+location "http://192.168.1.116:8888/nexus/content/repositories/eclipse-mars/" eclipse-mars-mirror {
+	org.apache.log4j [1.2.15.v201012070815,1.2.15.v201012070815]
+	org.eclipse.emf.sdk.feature.group [2.11.2.v20160208-0841,2.11.2.v20160208-0841]
 	//these plugins are required to execute JUnit tests	
-	org.junit [4.8.2.v4_8_2_v20110321-1705,4.8.2.v4_8_2_v20110321-1705]
-	org.eclipse.equinox.launcher [1.2.0.v20110502,1.2.0.v20110502]
+	org.junit [4.12.0.v201504281640,4.12.0.v201504281640]
+	org.eclipse.equinox.launcher [1.3.100.v20150511-1540,1.3.100.v20150511-1540]
 }
