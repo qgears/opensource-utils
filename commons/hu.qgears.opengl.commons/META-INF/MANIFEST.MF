@@ -9,7 +9,7 @@ Require-Bundle: lwjgl.osgi;bundle-version="1.0.0";visibility:=reexport,
  hu.qgears.images;bundle-version="2.0.0";visibility:=reexport,
  org.apache.log4j;bundle-version="1.2.0"
 Bundle-Vendor: Q-Gears
-Bundle-Version: 6.4.3.qualifier
+Bundle-Version: 6.5.0.qualifier
 Bundle-Name: Commons
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: hu.qgears.opengl.commons
