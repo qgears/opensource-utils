@@ -11,21 +11,12 @@ import java.io.File;
 import java.nio.ByteBuffer;
 
 
-public class NativeDevIL implements IDisposeable {
-	private long ptr;
+public class NativeDevIL extends NativeDevILConnector implements IDisposeable {
 	private int width;
 	private int height;
 	protected NativeDevIL() {
 		//default ctor
 	}
-	protected native void initDevIL();
-	private native int bindImage();
-	private native int getTypeId(String ext);
-	private native int loadImage(ByteBuffer content, int typeId);
-	private native ByteBuffer convertImage();
-	private native int getWidthPrivate();
-	private native int getHeightPrivate();
-	protected native void init();
 	private ByteBuffer decoded;
 	public void load(byte[] content, String ext) {
 		ByteBuffer bb=ByteBuffer.allocateDirect(content.length);
@@ -65,8 +56,6 @@ public class NativeDevIL implements IDisposeable {
 				.getJavaAccessor()
 				, outFile.getAbsolutePath(), image.getWidth(), image.getHeight());
 	}
-	private native void saveImage(ByteBuffer buffer, String outFile, int width,
-			int height);
 	@Override
 	public void dispose() {
 		if(ptr!=0)
@@ -78,7 +67,6 @@ public class NativeDevIL implements IDisposeable {
 		}
 		ptr=0;
 	}
-	private native void nativeDispose();
 	public int getWidth() {
 		return width;
 	}

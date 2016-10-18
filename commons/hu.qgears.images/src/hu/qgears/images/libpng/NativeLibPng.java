@@ -17,10 +17,10 @@ import java.nio.ByteBuffer;
 
 import org.apache.log4j.Logger;
 
-public class NativeLibPng {
+public class NativeLibPng extends NativeLibPngConnector
+{
 	private static final Logger LOG = Logger.getLogger(NativeLibPng.class);
 	
-	private long ptr;
 	public NativeLibPng()
 	{
 		try {
@@ -83,52 +83,6 @@ public class NativeLibPng {
 			closeLoad();
 		}
 	}
-	/**
-	 * Number of channels in the PNG image.
-	 * Valid values:
-	 *  * 1 - monochrome image or alpha mask
-	 *  * 3 - RGB image
-	 *  * 4 - ARGB image
-	 * @return
-	 */
-	private native int getNumberOfChannels();
-	private native void loadImage(ByteBuffer javaAccessor, int rowBytes);
-	/**
-	 * Free all resources that were allocated in the current load image process.
-	 */
-	private native void closeLoad();
-	/**
-	 * Parse the header of the image file.
-	 * State change: in all cases (even if the method throws exception)
-	 * the closeLoad method must be called finally to release all allocated resources 
-	 * @param imageData contains all bytes of the PNG image
-	 */
-	private native void beginLoad(ByteBuffer imageData) throws NativeLibPngException;
-	/**
-	 * Get the size of the image that is to be loaded.
-	 * Returns valid data after beginLoad returned without error.
-	 * @return
-	 */
-	private native int getHeight();
-	/**
-	 * Get the size of the image that is to be loaded.
-	 * Returns valid data after beginLoad returned without error.
-	 * @return
-	 */
-	private native int getWidth();
-	private native int getRowBytes();
-
-	/*
-	 * NOSONAR : too many parameters is OK. passing primitive parameters is
-	 * easier in JNI
-	 */
-	private native void beginSave(int width, int height, int rowBytes,//NOSONAR
-			int nChannel,
-			boolean swapAplha,
-			boolean swapBGR,
-			boolean premultipliedAlpha,
-			ByteBuffer pixelData);
-	private native int getFileSize();
 	/**
 	 * Save image to PNG format.
 	 * @param im image to be saved
@@ -203,11 +157,6 @@ public class NativeLibPng {
 			closeSave();
 		}
 	}
-	private native void saveImage(ByteBuffer file);
-	/**
-	 * Release all resources that were allocated in the current save process.
-	 */
-	private native void closeSave();
 	public void saveImage(NativeImage im, File out) throws IOException {
 		INativeMemory mem=saveImage(im, DefaultJavaNativeMemoryAllocator.getInstance());
 		UtilFile.saveAsFile(out, mem.getJavaAccessor());

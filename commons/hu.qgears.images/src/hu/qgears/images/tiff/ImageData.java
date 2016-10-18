@@ -8,44 +8,14 @@ import hu.qgears.commons.IDisposeable;
  * @author agostoni
  *
  */
-public class ImageData implements IDisposeable{
+public class ImageData extends ImageDataConnector implements IDisposeable{
 
-	/**
-	 * Pointer for native object represents this class.
-	 */
-	private long ptr;
-	
 	private boolean disposed = false;
 	
 	public ImageData() {
 		init();
 	}
 	
-	private native void init();
-
-	/**
-	 * Returns the image width in pixels.
-	 * 
-	 * @return
-	 */
-	public native int getWidth();
-
-	/**
-	 * Returns the image height in pixels.
-	 * 
-	 * @return
-	 */
-	public native int getHeight();
-
-	/**
-	 * Returns a pointer where the RGB image data begins.
-	 * 
-	 * @return
-	 */
-	public static native int getPixelDataOffset();
-
-	private native void disposePrimitive();
-
 	@Override
 	public void dispose() {
 		if (!isDisposed()){

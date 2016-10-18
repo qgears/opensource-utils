@@ -22,12 +22,7 @@ import java.nio.channels.FileLockInterruptionException;
  * @author agostoni
  *
  */
-public class NativeTiffLoader {
-	/**
-	 * Size of the TIFF header. Maximum size of the TIFF files is width*height*3+headerSize
-	 * Can be used to allocate buffers big enough to store a TIFF file
-	 */
-	public static final int maximumHeaderSize = 1024;
+public class NativeTiffLoader extends NativeTiffLoaderConnector {
 	private static NativeTiffLoader tiffLoader;
 	
 	private NativeTiffLoader(){/*only single instance is available*/}
@@ -116,9 +111,4 @@ public class NativeTiffLoader {
 			throw new NativeTiffLoaderException("Outputfile doesn't exist : "+filePath);
 		}
 	}
-	
-	private native void loadTiffImagePrimitive(ByteBuffer fileData, ImageData image) throws NativeTiffLoaderException;
-	
-	private native void saveImageAsTiffPrimitive(int width,int height,ByteBuffer data, String filePath) throws NativeTiffLoaderException;
-
 }

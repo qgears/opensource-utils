@@ -6,6 +6,7 @@ Export-Package: hu.qgears.images,
  hu.qgears.images.devil,
  hu.qgears.images.libpng,
  hu.qgears.images.palette,
+ hu.qgears.images.swing,
  hu.qgears.images.text,
  hu.qgears.images.tiff,
  hu.qgears.images.vnc

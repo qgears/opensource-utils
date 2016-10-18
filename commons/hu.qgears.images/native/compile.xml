@@ -13,21 +13,21 @@
 	</target>
 	<target name="jnigen">
 		<mkdir dir="generated"/>
-		<javah class="hu.qgears.images.devil.NativeDevIL"
+		<javah class="hu.qgears.images.devil.NativeDevILConnector"
 			classpath="../bin:${env.QGEARSDEPS}"
 			destdir="./devIL"
 			/>
-		<javah class="hu.qgears.images.libpng.NativeLibPng"
+		<javah class="hu.qgears.images.libpng.NativeLibPngConnector"
 			classpath="../bin:${env.QGEARSDEPS}"
 			destdir="./libpng"
 			/>
-	 	<javah class="hu.qgears.images.tiff.NativeTiffLoader"
+	 	<javah class="hu.qgears.images.tiff.NativeTiffLoaderConnector"
 			classpath="../bin:${env.QGEARSDEPS}"
 			destdir="./tiff/jni"
 			/> 
-	 	<javah class="hu.qgears.images.tiff.ImageData"
+	 	<javah class="hu.qgears.images.tiff.ImageDataConnector"
 			classpath="../bin:${env.QGEARSDEPS}"
 			destdir="./tiff/jni"
-			/> 
+			/>
 	</target>
 </project>

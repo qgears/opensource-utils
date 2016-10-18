@@ -1,6 +1,6 @@
 #include "nativeDevil.h"
-#include "hu_qgears_images_devil_NativeDevIL.h"
-#define DEVILCLASS Java_hu_qgears_images_devil_NativeDevIL_
+#include "hu_qgears_images_devil_NativeDevILConnector.h"
+#define DEVILCLASS Java_hu_qgears_images_devil_NativeDevILConnector_
 #include "jniutil.h"
 
 // Callback functions for allocation and deallocation

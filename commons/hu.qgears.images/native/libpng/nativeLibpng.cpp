@@ -1,9 +1,10 @@
 // #define PNG_DEBUG 3
 #include <png.h>
 #include "nativeLibpng.h"
-#include "hu_qgears_images_libpng_NativeLibPng.h"
-#define PNGCLASS Java_hu_qgears_images_libpng_NativeLibPng_
+#include "hu_qgears_images_libpng_NativeLibPngConnector.h"
+#define PNGCLASS Java_hu_qgears_images_libpng_NativeLibPngConnector_
 #include "jniutil.h"
+#include <string.h>
 
 void clearStruct(PngImage * str)
 {

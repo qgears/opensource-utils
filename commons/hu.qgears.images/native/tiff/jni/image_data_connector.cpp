@@ -1,5 +1,5 @@
-#include "hu_qgears_images_tiff_ImageData.h"
-#define CLASS Java_hu_qgears_images_tiff_ImageData_
+#include "hu_qgears_images_tiff_ImageDataConnector.h"
+#define CLASS Java_hu_qgears_images_tiff_ImageDataConnector_
 #define EXCCLASS "hu/qgears/images/tiff/NativeTiffLoaderException"
 #include "jniutil.h"
 #include "../tiffloader.h"
