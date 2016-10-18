@@ -574,12 +574,7 @@ public class NativeImage extends AbstractReferenceCountedDisposeable
 	 */
 	public RGBAColor getRGBA(int x, int y){
 		int pixel = getPixel(x, y);
-		return new RGBAColor(
-				(pixel  >> 24) & 0xFF,
-				(pixel >> 16) & 0xFF,
-				(pixel >> 8) & 0xFF,
-				pixel  & 0xFF
-		);
+		return RGBAColor.fromIntPixel(pixel);
 	}
 	/**
 	 * This method is only to be used by UtilNativeImageIo class!
@@ -597,6 +592,6 @@ public class NativeImage extends AbstractReferenceCountedDisposeable
 	 * @since 5.0
 	 */
 	public void setPixel(int x, int y, RGBAColor c) {
-		setPixel(x, y, c.r<<24|c.g<<16|c.b<<8|c.a);
+		setPixel(x, y, c.toIntPixel());
 	}
 }

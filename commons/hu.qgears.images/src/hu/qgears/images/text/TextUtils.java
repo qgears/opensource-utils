@@ -1,14 +1,10 @@
 package hu.qgears.images.text;
 
-import org.apache.log4j.Logger;
-
 /**
  * @since 3.0
  */
 public class TextUtils {
 
-	private static final Logger LOG = Logger.getLogger(TextUtils.class);
-	
 	private TextUtils() {
 		// disable constructor of utility class
 	}

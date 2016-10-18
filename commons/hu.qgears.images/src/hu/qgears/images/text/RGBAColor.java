@@ -1,6 +1,7 @@
 package hu.qgears.images.text;
 
 import hu.qgears.commons.UtilString;
+import hu.qgears.images.NativeImage;
 
 /**
  * This class represents a color defined by r,g,b,a color components (each
@@ -284,5 +285,19 @@ public class RGBAColor {
 	public RGBAColor newWithAlpha(int newAlpha) {
 		assertValidInt(newAlpha);
 		return new RGBAColor(r, g, b,newAlpha);
+	}
+	/**
+	 * The same 32 bit representation as {@link NativeImage} getPixel and setPixel
+	 * @return
+	 */
+	public int toIntPixel() {
+		return ((r<<24)&0xFF000000)+((g<<16)&0x00FF0000)+((b<<8)&0x0000FF00)+(a&0xFF);
+	}
+	/**
+	 * Parse the same 32 bit representation as {@link NativeImage} getPixel and setPixel
+	 * @return
+	 */
+	public static RGBAColor fromIntPixel(int value) {
+		return new RGBAColor((value>>24)&0xff, (value>>16)&0xff,(value>>8)&0xff,value&0xff);
 	}
 }
