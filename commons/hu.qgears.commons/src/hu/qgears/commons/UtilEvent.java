@@ -60,4 +60,14 @@ public class UtilEvent<T> implements UtilEventListener<T> {
 			}
 		}
 	}
+	/**
+	 * Get the current count of listeners added to this event.
+	 * @return the current number of listeners added to this event.
+	 */
+	public int getNListeners()
+	{
+		synchronized (listeners) {
+			return listeners.size();
+		}
+	}
 }
