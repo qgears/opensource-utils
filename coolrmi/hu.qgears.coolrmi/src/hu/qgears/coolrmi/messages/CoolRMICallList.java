@@ -38,7 +38,7 @@ public class CoolRMICallList extends AbstractCoolRMICall {
 			@Override
 			public void run() {
 				try {
-					CoolRMIReplyList ret=new CoolRMIReplyList();
+					CoolRMIReplyList ret=new CoolRMIReplyList(getQueryId());
 					for(CoolRMICall call: calls)
 					{
 						CoolRMIReply reply=call.executeOnExecutorThread(coolRMIRemoter);

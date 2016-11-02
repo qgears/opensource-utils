@@ -11,6 +11,15 @@ public class CoolRMIReplyList extends AbstractCoolRMIMethodCallReply
 	private static final long serialVersionUID = 1L;
 	private List<CoolRMIReply> replies=new ArrayList<CoolRMIReply>();
 
+	
+	private CoolRMIReplyList() {
+		super();
+	}
+
+	public CoolRMIReplyList(long queryId) {
+		super(queryId);
+	}
+
 	public void addReply(CoolRMIReply reply) {
 		replies.add(reply);
 	}
