@@ -1,8 +1,6 @@
 package hu.qgears.coolrmi.remoter;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.Socket;
 import java.util.Collections;
 import java.util.HashMap;
@@ -16,18 +14,16 @@ import hu.qgears.coolrmi.CoolRMIClose;
 import hu.qgears.coolrmi.CoolRMIException;
 import hu.qgears.coolrmi.CoolRMIService;
 import hu.qgears.coolrmi.CoolRMIShareableObject;
-import hu.qgears.coolrmi.CoolRMISocketStreams;
 import hu.qgears.coolrmi.CoolRMITimeoutException;
 import hu.qgears.coolrmi.ICoolRMIProxy;
 import hu.qgears.coolrmi.ICoolRMIServerSideProxy;
+import hu.qgears.coolrmi.messages.AbstractCoolRMICall;
 import hu.qgears.coolrmi.messages.AbstractCoolRMIMessage;
 import hu.qgears.coolrmi.messages.AbstractCoolRMIReply;
-import hu.qgears.coolrmi.messages.CoolRMICall;
 import hu.qgears.coolrmi.messages.CoolRMICreateProxy;
 import hu.qgears.coolrmi.messages.CoolRMICreateProxyReply;
 import hu.qgears.coolrmi.messages.CoolRMIDisposeProxy;
 import hu.qgears.coolrmi.messages.CoolRMIProxyPlaceHolder;
-import hu.qgears.coolrmi.messages.CoolRMIReply;
 import hu.qgears.coolrmi.messages.CoolRMIRequestServiceQuery;
 import hu.qgears.coolrmi.messages.CoolRMIRequestServiceReply;
 import hu.qgears.coolrmi.multiplexer.ISocketMultiplexerListener;
@@ -131,7 +127,7 @@ public class CoolRMIRemoter {
 		}
 	}
 
-	private void send(AbstractCoolRMIMessage message) throws IOException {
+	public void send(AbstractCoolRMIMessage message) throws IOException {
 		byte[] bs = UtilSerializator.serialize(servicesReg, message);
 		multiplexer.addMessageToSend(bs);
 	}
@@ -142,11 +138,11 @@ public class CoolRMIRemoter {
 	 * @param call
 	 * @throws IOException
 	 */
-	public void sendCall(CoolRMICall call) throws IOException {
+	public void sendCall(AbstractCoolRMICall call) throws IOException {
 		send(call);
 	}
 
-	protected synchronized long getNextCallId() {
+	public synchronized long getNextCallId() {
 		return callCounter++;
 	}
 
@@ -157,8 +153,8 @@ public class CoolRMIRemoter {
 	public void messageReceived(byte[] msg) {
 		try {
 			Object message = UtilSerializator.deserialize(msg, classLoader);
-			if (message instanceof CoolRMICall) {
-				CoolRMICall call = (CoolRMICall) message;
+			if (message instanceof AbstractCoolRMICall) {
+				AbstractCoolRMICall call = (AbstractCoolRMICall) message;
 				doCall(call);
 			} else if (message instanceof CoolRMIClose) {
 				close();
@@ -226,70 +222,55 @@ public class CoolRMIRemoter {
 			replies.notifyAll();
 		}
 	}
-
-	void execute() throws Exception {
-		try {
-			CoolRMISocketStreams streams = new CoolRMISocketStreams(getClass()
-					.getClassLoader(), sock);
-			Object message;
-			while (!isClosed()) {
-				message = streams.getOin().readObject();
-				if (message instanceof CoolRMICall) {
-				}
-			}
-		} finally {
-			sock.close();
-		}
-	}
-
-	private void doCall(final CoolRMICall call) throws IOException {
-		final long callId = call.getQueryId();
-		CoolRMIServerSideObject proxy = services.get(call.getProxyId());
-		if (proxy == null) {
-			CoolRMIReply reply = new CoolRMIReply(callId, null,
-					new CoolRMIException("Server side proxy does not exist"));
-			send(reply);
-		} else {
-			final Object service = proxy.getService();
-			Class<?> clazz = service.getClass();
-			final String reqMethod=call.getMethod();
-			Method[] methods = clazz.getMethods();
-			for (final Method m : methods) {
-				if (reqMethod.equals(m.getName())) {
-					final Object[] args=resolveProxyInParamersClientSide(call.getArgs());
-					serverSideExecutor.execute(new Runnable() {
-						@Override
-						public void run() {
-							try {
-								try {
-									Object ret = m.invoke(service, args);
-									ret=resolveProxyInParamerServerSide(ret);
-									CoolRMIReply reply = new CoolRMIReply(callId,
-											ret, null);
-									send(reply);
-								} catch (InvocationTargetException exc) {
-									send(new CoolRMIReply(callId, null, exc
-											.getCause()));
-								} catch (Throwable t) {
-									System.err.println("Err method: "+reqMethod);
-									send(new CoolRMIReply(callId, null, t));
-								}
-							} catch (IOException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-						}
-					});
-					return;
-				}
-			}
-			// method not found
-			CoolRMIReply reply = new CoolRMIReply(callId, null,
-					new CoolRMIException("No such method on service: "
-							+ proxy.getService() + " (callid " + callId + ") "
-							+ call.getMethod()));
-			send(reply);
-		}
+	private void doCall(final AbstractCoolRMICall abstarctCall) throws IOException {
+		abstarctCall.executeServerSide(this, serverSideExecutor);
+//		final long callId = call.getQueryId();
+//		CoolRMIServerSideObject proxy = services.get(call.getProxyId());
+//		if (proxy == null) {
+//			CoolRMIReply reply = new CoolRMIReply(callId, null,
+//					new CoolRMIException("Server side proxy does not exist"));
+//			send(reply);
+//		} else {
+//			final Object service = proxy.getService();
+//			Class<?> clazz = service.getClass();
+//			final String reqMethod=call.getMethod();
+//			Method[] methods = clazz.getMethods();
+//			for (final Method m : methods) {
+//				if (reqMethod.equals(m.getName())) {
+//					final Object[] args=resolveProxyInParamersClientSide(call.getArgs());
+//					serverSideExecutor.execute(new Runnable() {
+//						@Override
+//						public void run() {
+//							try {
+//								try {
+//									Object ret = m.invoke(service, args);
+//									ret=resolveProxyInParamerServerSide(ret);
+//									CoolRMIReply reply = new CoolRMIReply(callId,
+//											ret, null);
+//									send(reply);
+//								} catch (InvocationTargetException exc) {
+//									send(new CoolRMIReply(callId, null, exc
+//											.getCause()));
+//								} catch (Throwable t) {
+//									System.err.println("Err method: "+reqMethod);
+//									send(new CoolRMIReply(callId, null, t));
+//								}
+//							} catch (IOException e) {
+//								// TODO Auto-generated catch block
+//								e.printStackTrace();
+//							}
+//						}
+//					});
+//					return;
+//				}
+//			}
+//			// method not found
+//			CoolRMIReply reply = new CoolRMIReply(callId, null,
+//					new CoolRMIException("No such method on service: "
+//							+ proxy.getService() + " (callid " + callId + ") "
+//							+ call.getMethod()));
+//			send(reply);
+//		}
 	}
 
 	protected Object[] resolveProxyInParamersServerSide(Object[] args) throws IOException {
@@ -302,7 +283,7 @@ public class CoolRMIRemoter {
 		}
 		return args;
 	}
-	protected Object[] resolveProxyInParamersClientSide(Object[] args) {
+	public Object[] resolveProxyInParamersClientSide(Object[] args) {
 		if(args!=null)
 		{
 			for(int i=0;i<args.length;++i)
@@ -312,7 +293,7 @@ public class CoolRMIRemoter {
 		}
 		return args;
 	}
-	protected Object resolveProxyInParamerServerSide(Object arg) throws IOException {
+	public Object resolveProxyInParamerServerSide(Object arg) throws IOException {
 		CoolRMIServiceRegistry reg=getServiceRegistry();
 		if(arg!=null)
 		{
@@ -333,7 +314,7 @@ public class CoolRMIRemoter {
 		}
 		return arg;
 	}
-	protected Object resolveProxyInParamerClientSide(Object arg) {
+	public Object resolveProxyInParamerClientSide(Object arg) {
 		if(arg instanceof CoolRMIProxyPlaceHolder)
 		{
 			CoolRMIProxyPlaceHolder ph=(CoolRMIProxyPlaceHolder) arg;
@@ -472,5 +453,9 @@ public class CoolRMIRemoter {
 		send(req);
 		getAbstractReply(req.getQueryId());
 		return ret.getProxyObject();
+	}
+
+	public CoolRMIServerSideObject getProxyById(long proxyId) {
+		return services.get(proxyId);
 	}
 }

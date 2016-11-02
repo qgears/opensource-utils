@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 abstract public class AbstractCoolRMIMessage implements Serializable {
 	private static final long serialVersionUID = 1L;
-	private long queryId;
+	protected long queryId;
 	public AbstractCoolRMIMessage()
 	{
 		

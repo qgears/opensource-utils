@@ -16,7 +16,8 @@
  */
 package hu.qgears.coolrmi.messages;
 
-import java.io.Serializable;
+import hu.qgears.coolrmi.remoter.CoolRMIProxy;
+import hu.qgears.coolrmi.remoter.CoolRMIRemoter;
 
 
 /**
@@ -25,7 +26,8 @@ import java.io.Serializable;
  * @author rizsi
  *
  */
-public class CoolRMIReply extends AbstractCoolRMIReply implements Serializable{
+public class CoolRMIReply extends AbstractCoolRMIMethodCallReply
+{
 	private static final long serialVersionUID = 1L;
 	private Throwable exception;
 	public Throwable getException() {
@@ -43,5 +45,36 @@ public class CoolRMIReply extends AbstractCoolRMIReply implements Serializable{
 	@Override
 	public String toString() {
 		return "CoolRMIReply: "+getQueryId();
+	}
+	@Override
+	public Object evaluateOnClientSide(CoolRMIProxy coolRMIProxy, boolean returnLast) throws Throwable {
+		resolveArgumentsOnClient(coolRMIProxy.getRemoter());
+		if (getException() == null) {
+			return ret;
+		}else
+		{
+			throw getException();
+		}
+	}
+	public void resolveArgumentsOnClient(CoolRMIRemoter remoter)
+	{
+		if (getException() == null) {
+			ret=remoter.resolveProxyInParamerClientSide(getRet());
+		}else
+		{
+			StackTraceElement[] stprev=getException().getStackTrace();
+			StackTraceElement[] toadd=Thread.currentThread().getStackTrace();
+			StackTraceElement[] merged=new StackTraceElement[stprev.length+toadd.length];
+			int i=0;
+			for(StackTraceElement e:stprev)
+			{
+				merged[i++]=e;
+			}
+			for(StackTraceElement e:toadd)
+			{
+				merged[i++]=e;
+			}
+			getException().setStackTrace(merged);
+		}
 	}
 }

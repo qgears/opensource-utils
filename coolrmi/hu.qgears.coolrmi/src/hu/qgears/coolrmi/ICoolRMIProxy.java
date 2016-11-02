@@ -1,5 +1,6 @@
 package hu.qgears.coolrmi;
 
+import hu.qgears.coolrmi.remoter.CoolRMIProxy;
 import hu.qgears.coolrmi.remoter.CoolRMIRemoter;
 
 /**
@@ -25,4 +26,10 @@ public interface ICoolRMIProxy {
 	 * @return
 	 */
 	CoolRMIRemoter getProxyHome();
+	
+	/**
+	 * Get the proxy implementing object.
+	 * @return
+	 */
+	CoolRMIProxy getProxyObject();
 }

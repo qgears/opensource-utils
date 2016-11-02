@@ -1,13 +1,13 @@
 package hu.qgears.coolrmi.remoter;
 
-import hu.qgears.coolrmi.CoolRMIException;
-import hu.qgears.coolrmi.ICoolRMIProxy;
-import hu.qgears.coolrmi.messages.CoolRMICall;
-import hu.qgears.coolrmi.messages.CoolRMIReply;
-
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+
+import hu.qgears.coolrmi.CoolRMIException;
+import hu.qgears.coolrmi.ICoolRMIProxy;
+import hu.qgears.coolrmi.messages.AbstractCoolRMICall;
+import hu.qgears.coolrmi.messages.AbstractCoolRMIMethodCallReply;
 
 
 
@@ -19,19 +19,20 @@ import java.lang.reflect.Proxy;
  *
  */
 public class CoolRMIProxy implements InvocationHandler {
-	long id;
-	CoolRMIRemoter home;
-	boolean disposed=false;
+	private long id;
+	private CoolRMIRemoter remoter;
+	private boolean disposed=false;
 	private ICoolRMIProxy proxyObject;
+	private CallAggregatorClientSide callAggregator=new CallAggregatorClientSide(this);
 	public ICoolRMIProxy getProxyObject() {
 		return proxyObject;
 	}
-	public CoolRMIProxy(CoolRMIRemoter home, long id, Class<?> interface_)
+	public CoolRMIProxy(CoolRMIRemoter remoter, long id, Class<?> interface_)
 	{
-		this.home=home;
+		this.remoter=remoter;
 		this.id=id;
 		proxyObject=(ICoolRMIProxy)Proxy.newProxyInstance(
-				home.getClassLoader(),
+				remoter.getClassLoader(),
 				new Class<?>[]{interface_,
 				ICoolRMIProxy.class},
 				this);
@@ -41,7 +42,7 @@ public class CoolRMIProxy implements InvocationHandler {
 	}
 	public void dispose()
 	{
-		home.remove(this);
+		remoter.remove(this);
 		disposed=true;
 	}
 	public long getId() {
@@ -58,48 +59,62 @@ public class CoolRMIProxy implements InvocationHandler {
 			return disposed;
 		}else if(method.getName().equals("getProxyHome"))
 		{
-			return home;
+			return remoter;
+		}else if(method.getName().equals("getProxyObject"))
+		{
+			return this;
 		}else
 		{
 			if(disposed)
 			{
 				throw new CoolRMIException("Proxy is already disposed.");
 			}
-			CoolRMIReply reply=null;
 			try {
-				long callId=home.getNextCallId();
-//				TODO replaceProxiesInArgs(args);
-				args=home.resolveProxyInParamersServerSide(args);
-				CoolRMICall call = new CoolRMICall(callId,
-						id, method.getName(),
-						args);
-				home.sendCall(call);
-				reply=(CoolRMIReply) home.getAbstractReply(call.getQueryId());
-				if (reply.getException() == null) {
-					Object ret=reply.getRet();
-					ret=home.resolveProxyInParamerClientSide(ret);
-					return ret;
+				args=remoter.resolveProxyInParamersServerSide(args);
+				AbstractCoolRMICall call=callAggregator.createCall(method, args);
+				if(call!=null)
+				{
+					remoter.sendCall(call);
+					AbstractCoolRMIMethodCallReply reply=(AbstractCoolRMIMethodCallReply) remoter.getAbstractReply(call.getQueryId());
+					return reply.evaluateOnClientSide(this, true);
+				}else
+				{
+					return null;
 				}
 			} catch (Throwable t) {
 				throw new CoolRMIException("Exception doing the RMI", t);
 			}
-			if (reply.getException() != null) {
-				StackTraceElement[] stprev=reply.getException().getStackTrace();
-				StackTraceElement[] toadd=Thread.currentThread().getStackTrace();
-				StackTraceElement[] merged=new StackTraceElement[stprev.length+toadd.length];
-				int i=0;
-				for(StackTraceElement e:stprev)
-				{
-					merged[i++]=e;
-				}
-				for(StackTraceElement e:toadd)
-				{
-					merged[i++]=e;
-				}
-				reply.getException().setStackTrace(merged);
-				throw reply.getException();
-			} else {
-				throw new CoolRMIException("Internal error");
+		}
+	}
+	public CoolRMIRemoter getRemoter() {
+		return remoter;
+	}
+	public CallAggregatorClientSide getCallAggregator() {
+		return callAggregator;
+	}
+	/**
+	 * Set up the call aggregating mechanism. See {@link CallAggregatorClientSideCompress}
+	 * @param callAggregator
+	 */
+	public void setCallAggregator(CallAggregatorClientSide callAggregator) {
+		this.callAggregator = callAggregator;
+	}
+	/**
+	 * Force aggregated method calls to be sent to the server
+	 * in case all of them are void calls and thus aggregated. See {@link CallAggregatorClientSideCompress}
+	 */
+	public void flushAggregated()
+	{
+		AbstractCoolRMICall call=callAggregator.flush();
+		if(call!=null)
+		{
+			try {
+				remoter.sendCall(call);
+				AbstractCoolRMIMethodCallReply reply=(AbstractCoolRMIMethodCallReply) remoter.getAbstractReply(call.getQueryId());
+				reply.evaluateOnClientSide(this, false);
+			} catch (Throwable e) {
+				// Not possible in this case
+				e.printStackTrace();
 			}
 		}
 	}
