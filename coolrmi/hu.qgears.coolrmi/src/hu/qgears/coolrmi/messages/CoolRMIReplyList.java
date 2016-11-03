@@ -10,11 +10,8 @@ public class CoolRMIReplyList extends AbstractCoolRMIMethodCallReply
 {
 	private static final long serialVersionUID = 1L;
 	private List<CoolRMIReply> replies=new ArrayList<CoolRMIReply>();
-
 	
-	private CoolRMIReplyList() {
-		super();
-	}
+	private CoolRMIReply delegate;
 
 	public CoolRMIReplyList(long queryId) {
 		super(queryId);
@@ -25,7 +22,8 @@ public class CoolRMIReplyList extends AbstractCoolRMIMethodCallReply
 	}
 
 	@Override
-	public Object evaluateOnClientSide(CoolRMIProxy coolRMIProxy, boolean returnLast) throws Throwable {
+	public void evaluateOnClientSide(CoolRMIProxy coolRMIProxy, boolean returnLast)
+	{
 		// All but the last reply are processed using a callback for errors
 		CallAggregatorClientSide aggregator=coolRMIProxy.getCallAggregator();
 		for(int i=0;i<replies.size()-(returnLast?1:0);++i)
@@ -37,9 +35,19 @@ public class CoolRMIReplyList extends AbstractCoolRMIMethodCallReply
 		if(returnLast)
 		{
 			CoolRMIReply rep=replies.get(replies.size()-1);
-			return rep.evaluateOnClientSide(coolRMIProxy, true);
+			rep.evaluateOnClientSide(coolRMIProxy, true);
+			delegate=rep;
 		}
-		return null;
+	}
+
+	@Override
+	public Throwable getException() {
+		return delegate==null?null:delegate.getException();
+	}
+
+	@Override
+	public Object getRet() {
+		return delegate==null?null:delegate.getRet();
 	}
 
 }

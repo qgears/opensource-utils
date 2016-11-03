@@ -22,7 +22,7 @@ public class CallAggregatorClientSide {
 		long callId=owner.getRemoter().getNextCallId();
 		CoolRMICall call = new CoolRMICall(callId,
 				owner.getId(), method.getName(),
-				args);
+				args, false);
 		return call;
 	}
 

@@ -39,11 +39,13 @@ public class CoolRMICall
 	private String method;
 	private Object[] args;
 	private long proxyId;
-	public CoolRMICall(long callId, long proxyId, String method, Object[] args) {
+	private boolean stopOnException;
+	public CoolRMICall(long callId, long proxyId, String method, Object[] args, boolean stopOnException) {
 		super(callId);
 		this.proxyId = proxyId;
 		this.method = method;
 		this.args = args;
+		this.stopOnException=stopOnException;
 	}
 	public long getProxyId() {
 		return proxyId;
@@ -111,5 +113,9 @@ public class CoolRMICall
 							+ getMethod()));
 			return reply;
 		}
+	}
+	public boolean isStopOnException()
+	{
+		return stopOnException;
 	}
 }

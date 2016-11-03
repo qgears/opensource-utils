@@ -30,9 +30,11 @@ public class CoolRMIReply extends AbstractCoolRMIMethodCallReply
 {
 	private static final long serialVersionUID = 1L;
 	private Throwable exception;
+	@Override
 	public Throwable getException() {
 		return exception;
 	}
+	@Override
 	public Object getRet() {
 		return ret;
 	}
@@ -47,14 +49,8 @@ public class CoolRMIReply extends AbstractCoolRMIMethodCallReply
 		return "CoolRMIReply: "+getQueryId();
 	}
 	@Override
-	public Object evaluateOnClientSide(CoolRMIProxy coolRMIProxy, boolean returnLast) throws Throwable {
+	public void evaluateOnClientSide(CoolRMIProxy coolRMIProxy, boolean returnLast) {
 		resolveArgumentsOnClient(coolRMIProxy.getRemoter());
-		if (getException() == null) {
-			return ret;
-		}else
-		{
-			throw getException();
-		}
 	}
 	public void resolveArgumentsOnClient(CoolRMIRemoter remoter)
 	{

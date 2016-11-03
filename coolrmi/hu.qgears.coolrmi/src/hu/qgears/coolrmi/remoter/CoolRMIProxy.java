@@ -69,20 +69,27 @@ public class CoolRMIProxy implements InvocationHandler {
 			{
 				throw new CoolRMIException("Proxy is already disposed.");
 			}
+			AbstractCoolRMIMethodCallReply reply;
 			try {
 				args=remoter.resolveProxyInParamersServerSide(args);
 				AbstractCoolRMICall call=callAggregator.createCall(method, args);
 				if(call!=null)
 				{
 					remoter.sendCall(call);
-					AbstractCoolRMIMethodCallReply reply=(AbstractCoolRMIMethodCallReply) remoter.getAbstractReply(call.getQueryId());
-					return reply.evaluateOnClientSide(this, true);
+					reply=(AbstractCoolRMIMethodCallReply) remoter.getAbstractReply(call.getQueryId());
+					reply.evaluateOnClientSide(this, true);
 				}else
 				{
 					return null;
 				}
 			} catch (Throwable t) {
 				throw new CoolRMIException("Exception doing the RMI", t);
+			}
+			if (reply.getException() == null) {
+				return reply.getRet();
+			}else
+			{
+				throw reply.getException();
 			}
 		}
 	}

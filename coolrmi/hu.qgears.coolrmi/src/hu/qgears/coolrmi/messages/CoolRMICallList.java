@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 
+import hu.qgears.coolrmi.CoolRMIException;
 import hu.qgears.coolrmi.remoter.CoolRMIProxy;
 import hu.qgears.coolrmi.remoter.CoolRMIRemoter;
 
@@ -23,8 +24,8 @@ public class CoolRMICallList extends AbstractCoolRMICall {
 		super(queryId);
 	}
 
-	public void addMethodCall(CoolRMIProxy proxy, Method method, Object[] args) {
-		CoolRMICall call=new CoolRMICall(proxy.getRemoter().getNextCallId(), proxy.getId(), method.getName(), args);
+	public void addMethodCall(CoolRMIProxy proxy, Method method, Object[] args, boolean stopOnException) {
+		CoolRMICall call=new CoolRMICall(proxy.getRemoter().getNextCallId(), proxy.getId(), method.getName(), args, stopOnException);
 		calls.add(call);
 	}
 
@@ -37,11 +38,23 @@ public class CoolRMICallList extends AbstractCoolRMICall {
 		serverSideExecutor.execute(new Runnable() {
 			@Override
 			public void run() {
+				boolean error=false;
 				try {
 					CoolRMIReplyList ret=new CoolRMIReplyList(getQueryId());
 					for(CoolRMICall call: calls)
 					{
-						CoolRMIReply reply=call.executeOnExecutorThread(coolRMIRemoter);
+						CoolRMIReply reply;
+						if(error)
+						{
+							reply=new CoolRMIReply(call.getQueryId(), null, new CoolRMIException("Previous call in call list failed."));
+						}else
+						{
+							reply=call.executeOnExecutorThread(coolRMIRemoter);
+							if(call.isStopOnException() && reply.getException()!=null)
+							{
+								error=true;
+							}
+						}
 						ret.addReply(reply);
 					}
 					coolRMIRemoter.send(ret);
