@@ -108,7 +108,7 @@ public class CoolRMIServer {
 						new CoolRMIServe(this, sock, guaranteeOrdering);
 					serve.setTimeout(timeout);
 					serve.setServiceRegistry(getServiceRegistry());
-					serve.connect();;
+					serve.connect();
 				}
 			} finally {
 				socket.close();
