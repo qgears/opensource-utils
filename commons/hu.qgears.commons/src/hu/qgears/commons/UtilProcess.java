@@ -11,6 +11,9 @@ import java.util.concurrent.TimeoutException;
 
 import org.apache.log4j.Logger;
 
+/**
+ * Helper methods for communicating with external processes.
+ */
 public class UtilProcess {
 
 	private static final Logger LOG = Logger.getLogger(UtilProcess.class);
@@ -38,7 +41,7 @@ public class UtilProcess {
 		public Pair<byte[], byte[]> get() throws InterruptedException,
 				ExecutionException {
 			synchronized (this) {
-				while(a==null||b==null)
+				if(a==null||b==null)
 				{
 					this.wait();
 				}
@@ -54,7 +57,6 @@ public class UtilProcess {
 				if(a==null||b==null)
 				{
 					unit.timedWait(this, timeout);
-					this.wait();
 				}
 				if(a==null||b==null)
 				{
@@ -67,14 +69,20 @@ public class UtilProcess {
 		public void setA(byte[] string) {
 			synchronized (this) {
 				a=string;
-				this.notifyAll();
+				if(b!=null)
+				{
+					this.notifyAll();
+				}
 			}
 		}
 	
 		public void setB(byte[] string) {
 			synchronized (this) {
 				b=string;
-				this.notifyAll();
+				if(a!=null)
+				{
+					this.notifyAll();
+				}
 			}
 		}
 		
@@ -84,8 +92,9 @@ public class UtilProcess {
 	}
 	
 	/**
-	 * Execute a single command and collect its stdout into a String. The method
-	 * blocks the caller thread until the given program terminates.
+	 * Execute a single command and collect its stdout into a String.
+	 * The method blocks the
+	 * caller thread until the stdout of the program is closed (typically until the program terminates).
 	 * <p>
 	 * Use only for running short programs!
 	 * 
@@ -100,8 +109,9 @@ public class UtilProcess {
 	}
 
 	/**
-	 * Collects the stdout of given process into a String. The method blocks the
-	 * caller thread until the given program terminates.
+	 * Collects the stdout of given process into a String (using UTF-8 encoding).
+	 * The method blocks the
+	 * caller thread until the stdout of the program is closed (typically until the program terminates).
 	 * <p>
 	 * Use only for running short programs!
 	 * 
@@ -152,7 +162,7 @@ public class UtilProcess {
 	}
 
 	/**
-	 * Pipes the given input stream into given target ouput stream. The method
+	 * Pipes the given input stream into given target output stream. The method
 	 * starts a new thread that continuously writes the values into output. The
 	 * thread is terminated if iStream reaches EOF.
 	 * 
@@ -191,12 +201,14 @@ public class UtilProcess {
 	}
 	
 	/**
-	 * Saves the ouput of given process as a {@link Future} object. Results will
-	 * be ready if the given process terminates, so {@link Future#get()} will
-	 * block until the given process is run.
+	 * Saves the output of given process as a {@link Future} object. Results will
+	 * be ready after both stderr and stdout are closed by the process, so {@link Future#get()} will
+	 * block until the given process is being run.
+	 * 
+	 * Reading of the streams is done on separate processes. The method call itself returns at once.
 	 * 
 	 * @param p
-	 * @return
+	 * @return {@link Future} value to get the full output of the process as a pair of byte arrays. A is stdout, B is stderr.
 	 * @since 6.1
 	 */
 	public static Future<Pair<byte[], byte[]>> saveOutputsOfProcess(final Process p)
@@ -229,5 +241,40 @@ public class UtilProcess {
 		};}
 		.start();
 		return retfut;
+	}
+	/**
+	 * Stop the process (if it is still alive) and return the exit code after.
+	 * 
+	 * In some cases the process is still alive after the streams (stderr, stdout) are closed.
+	 * In some cases the exitValue throws {@link IllegalThreadStateException} after the process is destroyed.
+	 * 
+	 * Both problems are solved by a timeout when necessary. When timeout is not necessary this method does not wait but
+	 * returns immediately.
+	 * 
+	 * @param p the process to get the exit code from
+	 * @param timeoutBefore timeout to wait until the process becomes not alive
+	 * @param timeoutAfter timeout to wait until the exit value can be read
+	 * @return
+	 * @throws InterruptedException 
+	 */
+	public static int stopAndGetExitCode(Process p, long timeoutBefore, long timeoutAfter) throws InterruptedException
+	{
+		if (p.isAlive()){
+			Thread.sleep(timeoutBefore);
+			if(p.isAlive())
+			{
+				p.destroy();
+			}
+		}
+		try
+		{
+			p.exitValue();
+		}catch(IllegalThreadStateException itse)
+		{
+			p.destroy();
+			// Tolerate some timeout for exiting process.
+			Thread.sleep(timeoutAfter);
+		}
+		return p.exitValue();
 	}
 }
