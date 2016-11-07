@@ -1,17 +1,15 @@
 Manifest-Version: 1.0
-Export-Package: hu.qgears.opengl.commons,
- hu.qgears.opengl.commons.container,
- hu.qgears.opengl.commons.context,
- hu.qgears.opengl.commons.input,
- hu.qgears.opengl.osmesa
-Require-Bundle: lwjgl.osgi;bundle-version="1.0.0";visibility:=reexport,
- hu.qgears.commons;bundle-version="2.0.0";visibility:=reexport,
- hu.qgears.images;bundle-version="2.0.0";visibility:=reexport,
- org.apache.log4j;bundle-version="1.2.0"
-Bundle-Vendor: Q-Gears
+Export-Package: hu.qgears.opengl.commons,hu.qgears.opengl.commons.cont
+ ainer,hu.qgears.opengl.commons.context,hu.qgears.opengl.commons.input
+ ,hu.qgears.opengl.osmesa
+Bundle-SymbolicName: hu.qgears.opengl.commons
 Bundle-Version: 6.5.0.qualifier
 Bundle-Name: Commons
+Require-Bundle: lwjgl.osgi;bundle-version="1.0.0";visibility:=reexport
+ ,hu.qgears.commons;bundle-version="2.0.0";visibility:=reexport,hu.qge
+ ars.images;bundle-version="2.0.0";visibility:=reexport,org.apache.log
+ 4j;bundle-version="1.2.0"
 Bundle-ManifestVersion: 2
-Bundle-SymbolicName: hu.qgears.opengl.commons
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-Vendor: Q-Gears Kft.
 

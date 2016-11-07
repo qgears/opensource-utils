@@ -1,11 +1,12 @@
 Manifest-Version: 1.0
-Require-Bundle: hu.qgears.commons;bundle-version="2.0.0",
- org.apache.log4j;bundle-version="1.2.0"
 Export-Package: hu.qgears.nativeloader
-Bundle-ActivationPolicy: lazy
+Bundle-SymbolicName: hu.qgears.nativeloader
 Bundle-Version: 6.5.0.qualifier
 Bundle-Name: Nativeloader
+Require-Bundle: hu.qgears.commons;bundle-version="2.0.0",org.apache.lo
+ g4j;bundle-version="1.2.0"
+Bundle-ActivationPolicy: lazy
 Bundle-ManifestVersion: 2
-Bundle-SymbolicName: hu.qgears.nativeloader
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-Vendor: Q-Gears Kft.
 
