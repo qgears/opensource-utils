@@ -259,9 +259,9 @@ public class UtilProcess {
 	 */
 	public static int stopAndGetExitCode(Process p, long timeoutBefore, long timeoutAfter) throws InterruptedException
 	{
-		if (p.isAlive()){
+		if (isAlive(p)){
 			Thread.sleep(timeoutBefore);
-			if(p.isAlive())
+			if(isAlive(p))
 			{
 				p.destroy();
 			}
@@ -276,5 +276,21 @@ public class UtilProcess {
 			Thread.sleep(timeoutAfter);
 		}
 		return p.exitValue();
+	}
+	
+	/**
+	 * Uses Java 1.7 methods on Process to check if the Process is still alive.
+	 * 
+	 * @param p the Process to check
+	 * @return <code>true</code> if the Process is still alive
+	 */
+	public static boolean isAlive(Process p) {
+		boolean isAlive = false;
+		try {
+			p.exitValue();
+		} catch (IllegalThreadStateException ex) {
+			isAlive = true;
+		}
+		return isAlive;
 	}
 }
