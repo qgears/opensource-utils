@@ -16,11 +16,13 @@
  */
 package hu.qgears.coolrmi;
 
-import hu.qgears.coolrmi.remoter.CoolRMIRemoter;
-
 import java.io.IOException;
-import java.net.Socket;
 import java.net.SocketAddress;
+
+import hu.qgears.coolrmi.remoter.CoolRMIRemoter;
+import hu.qgears.coolrmi.streams.IConnection;
+import hu.qgears.coolrmi.streams.IClientConnectionFactory;
+import hu.qgears.coolrmi.streams.TCPClientConnectionFactory;
 
 
 
@@ -33,25 +35,40 @@ import java.net.SocketAddress;
  *
  */
 public class CoolRMIClient extends CoolRMIRemoter {
-	private SocketAddress socketAddress;
+	private IClientConnectionFactory connectionFactory;
 	/**
-	 * Create a client object that is parametered with server's
-	 * TCP address.
-	 * @param host
-	 * @param port
+	 * Create a client object that is parametered with server's TCP address.
+	 * After creation the client is already connected on TCP.
+	 * @param classLoader {@link ClassLoader} to use for serializing communication messages. Must see all of CoolRMI and the communication interfaces.
+	 * @param socketAddress Socket address of the server to connect to when starting the client.
+	 * @param guaranteeOrdering guarantee that the ordering of method calls is same on the client side as on the server side.
 	 * @throws IOException 
 	 */
 	public CoolRMIClient(ClassLoader classLoader,
 			SocketAddress socketAddress,
 			boolean guaranteeOrdering) throws IOException {
 		super(classLoader, guaranteeOrdering);
-		this.socketAddress=socketAddress;
+		this.connectionFactory=new TCPClientConnectionFactory(socketAddress);
+		connect();
+	}
+	/**
+	 * Create a client object that is parametered with a client connection factory.
+	 * After creation the client is already connected on TCP.
+	 * @param classLoader {@link ClassLoader} to use for serializing communication messages. Must see all of CoolRMI and the communication interfaces.
+	 * @param connectionFactory Connection factory that can connect to the RMI server.
+	 * @param guaranteeOrdering guarantee that the ordering of method calls is same on the client side as on the server side.
+	 * @throws IOException 
+	 */
+	public CoolRMIClient(ClassLoader classLoader,
+			IClientConnectionFactory connectionFactory,
+			boolean guaranteeOrdering) throws IOException {
+		super(classLoader, guaranteeOrdering);
+		this.connectionFactory=connectionFactory;
 		connect();
 	}
 	private void connect() throws IOException
 	{
-		Socket socket = new Socket();
-		socket.connect(socketAddress);
+		IConnection socket=connectionFactory.connect();
 		super.connect(socket);
 	}
 }

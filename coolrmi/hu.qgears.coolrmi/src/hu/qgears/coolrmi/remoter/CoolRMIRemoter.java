@@ -1,7 +1,6 @@
 package hu.qgears.coolrmi.remoter;
 
 import java.io.IOException;
-import java.net.Socket;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,6 +27,7 @@ import hu.qgears.coolrmi.messages.CoolRMIRequestServiceQuery;
 import hu.qgears.coolrmi.messages.CoolRMIRequestServiceReply;
 import hu.qgears.coolrmi.multiplexer.ISocketMultiplexerListener;
 import hu.qgears.coolrmi.multiplexer.SocketMultiplexer;
+import hu.qgears.coolrmi.streams.IConnection;
 
 
 
@@ -49,7 +49,7 @@ public class CoolRMIRemoter {
 	private static final long NANOS_TO_MILLIS = 1000000l;
 	private SocketMultiplexer multiplexer;
 	private long timeout=30000;
-	private Socket sock;
+	private IConnection sock;
 	private ClassLoader classLoader;
 	private boolean connected = false;
 	private boolean closed = false;
@@ -99,7 +99,7 @@ public class CoolRMIRemoter {
 	public ClassLoader getClassLoader() {
 		return classLoader;
 	}
-	protected void connect(Socket sock) throws IOException {
+	protected void connect(IConnection sock) throws IOException {
 		this.sock = sock;
 		multiplexer = new SocketMultiplexer(
 				sock.getInputStream(), sock

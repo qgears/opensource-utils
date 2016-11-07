@@ -16,10 +16,10 @@
  */
 package hu.qgears.coolrmi;
 
-import hu.qgears.coolrmi.remoter.CoolRMIRemoter;
-
 import java.io.IOException;
-import java.net.Socket;
+
+import hu.qgears.coolrmi.remoter.CoolRMIRemoter;
+import hu.qgears.coolrmi.streams.IConnection;
 
 
 
@@ -32,9 +32,9 @@ import java.net.Socket;
 public class CoolRMIServe
 	extends CoolRMIRemoter{
 	CoolRMIServer coolRMIServer;
-	Socket sock;
+	IConnection sock;
 	protected CoolRMIServe(CoolRMIServer coolRMIServer,
-			Socket sock, boolean guaranteeOrdering) throws IOException {
+			IConnection sock, boolean guaranteeOrdering) throws IOException {
 		super(coolRMIServer.getClassLoader(), guaranteeOrdering);
 		this.sock=sock;
 		this.coolRMIServer = coolRMIServer;
