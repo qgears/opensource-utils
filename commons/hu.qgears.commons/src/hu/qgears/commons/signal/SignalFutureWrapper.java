@@ -129,7 +129,7 @@ public class SignalFutureWrapper<T> implements SignalFuture<T>, Callable<T>
 	}
 	@Override
 	public T call() {
-		if(!cancelled)
+		if(!isCancelled())
 		{
 			try {
 				Object ret=callable.call();
