@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-SymbolicName: hu.qgears.commons.test
 Bundle-Name: Test cases for hu.qgears.commons
-Bundle-Version: 6.6.1.qualifier
+Bundle-Version: 6.6.2.qualifier
 Require-Bundle: org.junit;bundle-version="4.8.2",hu.qgears.commons;bun
  dle-version="2.0.0"
 Bundle-ManifestVersion: 2

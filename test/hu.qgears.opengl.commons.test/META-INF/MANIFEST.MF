@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-SymbolicName: hu.qgears.opengl.commons.test
 Bundle-Name: Test bundle for opengl.commons
-Bundle-Version: 6.6.1.qualifier
+Bundle-Version: 6.6.2.qualifier
 Require-Bundle: hu.qgears.opengl.commons;bundle-version="2.0.0",org.ju
  nit;bundle-version="4.8.2"
 Bundle-ManifestVersion: 2
