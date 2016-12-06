@@ -14,6 +14,45 @@ import org.apache.log4j.Logger;
 public class UtilMemory {
 
 	private static final Logger LOG = Logger.getLogger(UtilMemory.class);
+	/**
+	 * Snapshot of JVM memory status.
+	 */
+	public static class MemoryStatus
+	{
+		/**
+		 * Time of two GCs in nanoseconds.
+		 */
+		public final long gcNanos;
+		/**
+		 * Size of total memory in bytes.
+		 */
+		public final long totalMemory;
+		/**
+		 * Size of free memory in bytes.
+		 */
+		public final long freeMemory;
+		/**
+		 * Create JVM memory state snapshot object.
+		 * @param gcNanos Time of two GCs in nanoseconds before this snapshot.
+		 */
+		public MemoryStatus(long gcNanos) {
+			this.gcNanos=gcNanos;
+			totalMemory = Runtime.getRuntime().totalMemory();
+			freeMemory = Runtime.getRuntime().freeMemory();
+		}
+		/**
+		 * Size of allocated memory in bytes.
+		 * @return
+		 */
+		public long getAllocated()
+		{
+			return totalMemory-freeMemory;
+		}
+		@Override
+		public String toString() {
+			return "allocated: "+getAllocated()+" 2xGC nanos: "+gcNanos;
+		}
+	}
 	
 	private UtilMemory() {
 		// disable constructor of utility class
@@ -75,13 +114,21 @@ public class UtilMemory {
 		}
 	}
 	public static void printMemoryUsed(String where) {
+		MemoryStatus status=getMemoryUsed();
+		LOG.info("Memory used: " + status + " at: " + where);
+	}
+	/**
+	 * Do two garbage collections and create a JSM memory status object.
+	 * Use for debugging purposes only!
+	 * @return
+	 */
+	public static MemoryStatus getMemoryUsed() {
 		long t0=System.nanoTime();
 		System.gc();
 		System.gc();
 		t0=System.nanoTime()-t0;
-		long mem = Runtime.getRuntime().totalMemory()
-				- Runtime.getRuntime().freeMemory();
-		LOG.info("Memory used: " + mem + " at: " + where+" 2xGC nanos: "+t0);
+		MemoryStatus status=new MemoryStatus(t0);
+		return status;
 	}
 
 	/**

@@ -73,4 +73,8 @@ public class CoolRMIReply extends AbstractCoolRMIMethodCallReply
 			getException().setStackTrace(merged);
 		}
 	}
+	@Override
+	public String getName() {
+		return toString();
+	}
 }

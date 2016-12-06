@@ -33,4 +33,8 @@ public class CoolRMICreateProxy
 	public String toString() {
 		return "create proxy "+proxyId+" "+ifaceName;
 	}
+	@Override
+	public String getName() {
+		return "Create proxy: "+proxyId+" "+ifaceName;
+	}
 }

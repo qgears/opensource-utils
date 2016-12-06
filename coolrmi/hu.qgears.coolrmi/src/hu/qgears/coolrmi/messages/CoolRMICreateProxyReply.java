@@ -20,4 +20,8 @@ public class CoolRMICreateProxyReply
 	public String toString() {
 		return "proxy created";
 	}
+	@Override
+	public String getName() {
+		return toString();
+	}
 }

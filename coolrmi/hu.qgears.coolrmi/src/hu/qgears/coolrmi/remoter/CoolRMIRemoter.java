@@ -22,6 +22,7 @@ import hu.qgears.coolrmi.messages.AbstractCoolRMIReply;
 import hu.qgears.coolrmi.messages.CoolRMICreateProxy;
 import hu.qgears.coolrmi.messages.CoolRMICreateProxyReply;
 import hu.qgears.coolrmi.messages.CoolRMIDisposeProxy;
+import hu.qgears.coolrmi.messages.CoolRMIFutureReply;
 import hu.qgears.coolrmi.messages.CoolRMIProxyPlaceHolder;
 import hu.qgears.coolrmi.messages.CoolRMIRequestServiceQuery;
 import hu.qgears.coolrmi.messages.CoolRMIRequestServiceReply;
@@ -32,7 +33,7 @@ import hu.qgears.coolrmi.streams.IConnection;
 
 
 public class CoolRMIRemoter {
-	class SocketMultiplexerListener implements ISocketMultiplexerListener
+	private class SocketMultiplexerListener implements ISocketMultiplexerListener
 	{
 
 		@Override
@@ -46,7 +47,6 @@ public class CoolRMIRemoter {
 		}
 		
 	}
-	private static final long NANOS_TO_MILLIS = 1000000l;
 	private SocketMultiplexer multiplexer;
 	private long timeout=30000;
 	private IConnection sock;
@@ -55,7 +55,7 @@ public class CoolRMIRemoter {
 	private boolean closed = false;
 	private Executor serverSideExecutor = null;
 	private boolean guaranteeOrdering;
-	private Map<Long, AbstractCoolRMIReply> replies = new HashMap<Long, AbstractCoolRMIReply>();
+	private Map<Long, CoolRMIFutureReply> replies = new HashMap<Long, CoolRMIFutureReply>();
 	/**
 	 * The client side proxy objects.
 	 */
@@ -129,7 +129,7 @@ public class CoolRMIRemoter {
 
 	public void send(AbstractCoolRMIMessage message) throws IOException {
 		byte[] bs = UtilSerializator.serialize(servicesReg, message);
-		multiplexer.addMessageToSend(bs);
+		multiplexer.addMessageToSend(bs, message.getName());
 	}
 	/**
 	 * Send a message call to the other side. Send is asynchronous. Reply can be
@@ -217,60 +217,17 @@ public class CoolRMIRemoter {
 	}
 
 	private void handleReply(AbstractCoolRMIReply reply) {
+		CoolRMIFutureReply future;
 		synchronized (replies) {
-			replies.put(reply.getQueryId(), reply);
-			replies.notifyAll();
+			future=replies.remove(reply.getQueryId());
+		}
+		if(future!=null)
+		{
+			future.received(reply);
 		}
 	}
 	private void doCall(final AbstractCoolRMICall abstarctCall) throws IOException {
 		abstarctCall.executeServerSide(this, serverSideExecutor);
-//		final long callId = call.getQueryId();
-//		CoolRMIServerSideObject proxy = services.get(call.getProxyId());
-//		if (proxy == null) {
-//			CoolRMIReply reply = new CoolRMIReply(callId, null,
-//					new CoolRMIException("Server side proxy does not exist"));
-//			send(reply);
-//		} else {
-//			final Object service = proxy.getService();
-//			Class<?> clazz = service.getClass();
-//			final String reqMethod=call.getMethod();
-//			Method[] methods = clazz.getMethods();
-//			for (final Method m : methods) {
-//				if (reqMethod.equals(m.getName())) {
-//					final Object[] args=resolveProxyInParamersClientSide(call.getArgs());
-//					serverSideExecutor.execute(new Runnable() {
-//						@Override
-//						public void run() {
-//							try {
-//								try {
-//									Object ret = m.invoke(service, args);
-//									ret=resolveProxyInParamerServerSide(ret);
-//									CoolRMIReply reply = new CoolRMIReply(callId,
-//											ret, null);
-//									send(reply);
-//								} catch (InvocationTargetException exc) {
-//									send(new CoolRMIReply(callId, null, exc
-//											.getCause()));
-//								} catch (Throwable t) {
-//									System.err.println("Err method: "+reqMethod);
-//									send(new CoolRMIReply(callId, null, t));
-//								}
-//							} catch (IOException e) {
-//								// TODO Auto-generated catch block
-//								e.printStackTrace();
-//							}
-//						}
-//					});
-//					return;
-//				}
-//			}
-//			// method not found
-//			CoolRMIReply reply = new CoolRMIReply(callId, null,
-//					new CoolRMIException("No such method on service: "
-//							+ proxy.getService() + " (callid " + callId + ") "
-//							+ call.getMethod()));
-//			send(reply);
-//		}
 	}
 
 	protected Object[] resolveProxyInParamersServerSide(Object[] args) throws IOException {
@@ -364,40 +321,18 @@ public class CoolRMIRemoter {
 		}
 	}
 	/**
-	 * Wait for the reply for a message sent.
+	 * Create future reply object.
+	 * Must be called before sending the query!
 	 * @return the reply object
 	 * @throws CoolRMITimeoutException in case of timeout (see setTimeout)
 	 * @throws CoolRMIException in case of connection closed
 	 */
-	protected AbstractCoolRMIReply getAbstractReply(long callId) {
-		long t=getTimeout()*NANOS_TO_MILLIS;
-		long startNano=System.nanoTime();
-		AbstractCoolRMIReply reply = null;
-		while (reply == null) {
-			synchronized (replies) {
-				if(isClosed())
-				{
-					throw new CoolRMIException("Connection closed");
-				}
-				reply = (AbstractCoolRMIReply) replies.get(callId);
-				if (reply == null) {
-					if(t>0)
-					{
-						try {
-							replies.wait(t/NANOS_TO_MILLIS, (int)(t%NANOS_TO_MILLIS));
-							long t2=System.nanoTime();
-							long elapsedNano=t2-startNano;
-							t=t-elapsedNano;
-							startNano=t2;
-						} catch (InterruptedException e) {}
-					}else
-					{
-						throw new CoolRMITimeoutException();
-					}
-				}
-			}
+	protected CoolRMIFutureReply getAbstractReply(long callId) {
+		CoolRMIFutureReply ret=new CoolRMIFutureReply(this, callId);
+		synchronized (replies) {
+			replies.put((Long)callId, ret);
 		}
-		return reply;
+		return ret;
 	}
 
 	/**
@@ -427,9 +362,9 @@ public class CoolRMIRemoter {
 			throws IOException {
 		CoolRMIRequestServiceQuery query = new CoolRMIRequestServiceQuery(
 				getNextCallId(), serviceName);
+		CoolRMIFutureReply replyFuture=getAbstractReply(query.getQueryId());
 		send(query);
-		CoolRMIRequestServiceReply reply = (CoolRMIRequestServiceReply) getAbstractReply(query
-				.getQueryId());
+		CoolRMIRequestServiceReply reply = (CoolRMIRequestServiceReply) replyFuture.waitReply();
 		CoolRMIProxy proxy = new CoolRMIProxy(this, reply.getProxyId(), iface);
 		proxies.put(proxy.getId(), proxy);
 
@@ -450,12 +385,19 @@ public class CoolRMIRemoter {
 		CoolRMIServerSideObject sso = createProxyObject(service);
 		CoolRMIServerSideProxy ret=new CoolRMIServerSideProxy(this, sso);
 		CoolRMICreateProxy req=new CoolRMICreateProxy(getNextCallId(), sso.getProxyId(), sso.getIface().getName());
+		CoolRMIFutureReply replyFut=getAbstractReply(req.getQueryId());
 		send(req);
-		getAbstractReply(req.getQueryId());
+		replyFut.waitReply();
 		return ret.getProxyObject();
 	}
 
 	public CoolRMIServerSideObject getProxyById(long proxyId) {
 		return services.get(proxyId);
+	}
+
+	public void removeAwaitingReply(CoolRMIFutureReply coolRMIFutureReply) {
+		synchronized (replies) {
+			replies.remove(coolRMIFutureReply.getCallId());
+		}
 	}
 }

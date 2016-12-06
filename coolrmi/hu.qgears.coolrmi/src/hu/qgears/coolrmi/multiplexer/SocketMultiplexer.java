@@ -1,12 +1,9 @@
 package hu.qgears.coolrmi.multiplexer;
 
-import hu.qgears.coolrmi.CoolRMIObjectInputStream;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -27,14 +24,17 @@ public class SocketMultiplexer {
 	private boolean guaranteeOrdering;
 	private ISocketMultiplexerListener messageListener;
 	private InputStream is;
-	private ObjectOutputStream oos;
+	private OutputStream os;
+	private boolean exit=false;
+	private long counter=0;
+	private LinkedList<SocketMultiplexerSource> messagesToSend=new LinkedList<SocketMultiplexerSource>();
 	public SocketMultiplexer(InputStream is, OutputStream os,
 			ISocketMultiplexerListener messageListener,
 			boolean guaranteeOrdering) throws IOException {
 		super();
 		this.is = is;
 		this.messageListener=messageListener;
-		this.oos=new ObjectOutputStream(os);
+		this.os=os;
 	}
 	public void start()
 	{
@@ -51,15 +51,14 @@ public class SocketMultiplexer {
 		@Override
 		public void run() {
 			try {
-				CoolRMIObjectInputStream ois=new CoolRMIObjectInputStream(SocketMultiplexer.class.getClassLoader(), is);
 				try
 				{
 					while(!exit)
 					{
-						SocketMultiplexerDatagram datagram=(SocketMultiplexerDatagram) ois.readObject();
+						SocketMultiplexerDatagram datagram=SocketMultiplexerDatagram.readFromStream(is);
 						long id=datagram.getDatagramId();
 						ByteArrayOutputStream bos=getMessage(id);
-						bos.write(datagram.content);
+						bos.write(datagram.getContent());
 						if(datagram.isLastPiece())
 						{
 							removeMessage(id);
@@ -68,7 +67,7 @@ public class SocketMultiplexer {
 					}
 				}finally
 				{
-					ois.close();
+					is.close();
 				}
 			} catch (Exception e) {
 				messageListener.pipeBroken(e);
@@ -129,16 +128,13 @@ public class SocketMultiplexer {
 				if(source!=null)
 				{
 					lastSent=toSendIndex;
-					SocketMultiplexerDatagram datagram=new SocketMultiplexerDatagram();
 					int avail=source.getToSend().available();
 					byte[] content=new byte[Math.min(avail, datagramMaxSize)];
 					try {
 						source.getToSend().read(content);
 					} catch (IOException e) {/* bytearrayinputstream never fails*/ }
-					datagram.setContent(content);
-					datagram.setDatagramId(source.getId());
 					boolean lastPiece=source.getToSend().available()<1;
-					datagram.setLastPiece(lastPiece);
+					SocketMultiplexerDatagram datagram=new SocketMultiplexerDatagram(source.getId(), content, lastPiece);
 					if(lastPiece)
 					{
 						synchronized (messagesToSend) {
@@ -146,8 +142,8 @@ public class SocketMultiplexer {
 						}
 					}
 					try {
-						oos.writeObject(datagram);
-						oos.flush();
+						datagram.writeToStream(os);
+						os.flush();
 					} catch (IOException e) {
 						messageListener.pipeBroken(e);
 					}
@@ -155,13 +151,10 @@ public class SocketMultiplexer {
 			}
 		}
 	}
-	boolean exit=false;
-	long counter=0;
-	LinkedList<SocketMultiplexerSource> messagesToSend=new LinkedList<SocketMultiplexerSource>();
-	public void addMessageToSend(byte[] messageContent)
+	public void addMessageToSend(byte[] messageContent, String name)
 	{
 		synchronized (messagesToSend) {
-			messagesToSend.add(new SocketMultiplexerSource(counter++, new ByteArrayInputStream(messageContent)));
+			messagesToSend.add(new SocketMultiplexerSource(counter++, new ByteArrayInputStream(messageContent), name));
 			messagesToSend.notifyAll();
 		}
 	}

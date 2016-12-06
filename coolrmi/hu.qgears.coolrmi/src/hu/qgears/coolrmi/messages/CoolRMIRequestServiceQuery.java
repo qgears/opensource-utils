@@ -24,4 +24,9 @@ public class CoolRMIRequestServiceQuery
 	public String toString() {
 		return "Request service "+serviceName+" "+getQueryId();
 	}
+
+	@Override
+	public String getName() {
+		return toString();
+	}
 }

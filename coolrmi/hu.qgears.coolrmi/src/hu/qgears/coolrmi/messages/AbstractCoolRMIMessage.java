@@ -17,4 +17,5 @@ abstract public class AbstractCoolRMIMessage implements Serializable {
 	public long getQueryId() {
 		return queryId;
 	}
+	abstract public String getName();
 }

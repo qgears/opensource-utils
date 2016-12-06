@@ -50,4 +50,9 @@ public class CoolRMIReplyList extends AbstractCoolRMIMethodCallReply
 		return delegate==null?null:delegate.getRet();
 	}
 
+	@Override
+	public String getName() {
+		return "Reply list";
+	}
+
 }

@@ -26,4 +26,8 @@ public class CoolRMIDisposeProxy
 	public String toString() {
 		return "Dispose proxy "+proxyId;
 	}
+	@Override
+	public String getName() {
+		return toString();
+	}
 }

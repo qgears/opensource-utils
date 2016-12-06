@@ -18,4 +18,8 @@ abstract public class AbstractCoolRMICall extends AbstractCoolRMIMessage
 	}
 
 	abstract public void executeServerSide(CoolRMIRemoter coolRMIRemoter, Executor serverSideExecutor) throws IOException;
+	@Override
+	public String getName() {
+		return "RMI call";
+	}
 }

@@ -23,4 +23,8 @@ public class CoolRMIRequestServiceReply extends AbstractCoolRMIReply implements 
 	public long getProxyId() {
 		return proxyId;
 	}
+	@Override
+	public String getName() {
+		return "Request service reply";
+	}
 }

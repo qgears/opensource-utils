@@ -8,6 +8,7 @@ import hu.qgears.coolrmi.CoolRMIException;
 import hu.qgears.coolrmi.ICoolRMIProxy;
 import hu.qgears.coolrmi.messages.AbstractCoolRMICall;
 import hu.qgears.coolrmi.messages.AbstractCoolRMIMethodCallReply;
+import hu.qgears.coolrmi.messages.CoolRMIFutureReply;
 
 
 
@@ -75,8 +76,9 @@ public class CoolRMIProxy implements InvocationHandler {
 				AbstractCoolRMICall call=callAggregator.createCall(method, args);
 				if(call!=null)
 				{
+					CoolRMIFutureReply replyFuture=remoter.getAbstractReply(call.getQueryId());
 					remoter.sendCall(call);
-					reply=(AbstractCoolRMIMethodCallReply) remoter.getAbstractReply(call.getQueryId());
+					reply=(AbstractCoolRMIMethodCallReply)replyFuture.waitReply();
 					reply.evaluateOnClientSide(this, true);
 				}else
 				{
@@ -116,8 +118,9 @@ public class CoolRMIProxy implements InvocationHandler {
 		if(call!=null)
 		{
 			try {
+				CoolRMIFutureReply replyFut=remoter.getAbstractReply(call.getQueryId());
 				remoter.sendCall(call);
-				AbstractCoolRMIMethodCallReply reply=(AbstractCoolRMIMethodCallReply) remoter.getAbstractReply(call.getQueryId());
+				AbstractCoolRMIMethodCallReply reply=(AbstractCoolRMIMethodCallReply) replyFut.waitReply();
 				reply.evaluateOnClientSide(this, false);
 			} catch (Throwable e) {
 				// Not possible in this case
