@@ -1,0 +1,32 @@
+= Command line tools
+
+Selection of command line tools.
+
+== git-backup
+
+Back up git repositiories using git itself:
+
+ * Clone remote repositories by hand into a folder
+ * Run git-backup on the backup folder:
+    * Iterates all git clones
+    * git fetch (all new objects and update all remote refs)
+    * Tag all current tags and branches.
+    * The backups tags are not going to match any new tags in the server so they will not be overwritten.
+    * The backup tag names contain a salt so a remote attacker can not delete these tags (until he knows the salt)
+
+== git2zip
+
+Get all files from a git repsitory state (branch or tag) and zip them into a single file. Features:
+
+ * Works on a bare repository (eg. server side repo)
+ * Possible to zip a subfolder only
+ * Possible to add folder prefix
+ * Created zip file is binary reproducible when the same tag is used (timestamps are set to epoch)
+ * Uses JGit to access the repo
+
+== srvBackup
+
+Iterate all files within a folder which are not under gitignore. Collects all paths and creates a file (shell script)
+that stores the file modes (RWX, User, group, others).
+
+This tool can be used to back up /etc on a server using git (a clone of this feature of etckeeper).
