@@ -38,6 +38,8 @@ public class Tools {
 			{
 				System.out.println("Q-Gears command line tools");
 				System.out.println("Tool not specified.");
+				System.out.println("Available tools:");
+				System.out.println("");
 				for(ITool t: createTools())
 				{
 					System.out.println(""+t.getId()+": "+t.getDescription());
