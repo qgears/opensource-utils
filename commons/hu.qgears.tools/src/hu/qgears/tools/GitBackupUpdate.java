@@ -73,10 +73,10 @@ public class GitBackupUpdate extends AbstractTool
 							url=pr.get(a.timeoutMillis, timeoutUnit).getStdoutString();
 						}
 						{
+							addLog("\n== Updating: "+f.getName()+" from: "+url);
 							Process p=Runtime.getRuntime().exec("git fetch", null, f);
 							ProcessFuture pr=UtilProcess2.execute(p);
 							ProcessResult r=pr.get(a.timeoutMillis, timeoutUnit);
-							addLog("Updating: "+f.getName()+"from: "+url);
 							addLog(r.getStdoutString());
 							addError(r.getStderrString());
 							addExitCode("Fetch exit code: ", r);
@@ -129,6 +129,7 @@ public class GitBackupUpdate extends AbstractTool
 		if(a.backupLogFile!=null)
 		{
 			StringBuilder w=new StringBuilder();
+			w.append("= Backup of Git repos\n\n");
 			w.append("Date: "+df.format(c.getTime())+"\n");
 			w.append("Result: "+(error?"ERROR":"OK")+"\n\n");
 			w.append(log);
@@ -171,12 +172,12 @@ public class GitBackupUpdate extends AbstractTool
 		{
 			error=true;
 		}
-		addLog(string+code);
+		addLog(string+code+(code!=0?" ERROR":""));
 	}
 
 	private void createTag(File f, String src, String targetPre, String targetPost) throws Exception {
 		String cmd0="git tag "+targetPre+targetPost+" "+src;
-		addLog("$ "+cmd0);
+		addLog(" $ "+cmd0);
 		String cmd="git tag "+targetPre+a.salt+targetPost+" "+src;
 		Process p=Runtime.getRuntime().exec(cmd, null, f);
 		ProcessFuture pr=UtilProcess2.execute(p);
