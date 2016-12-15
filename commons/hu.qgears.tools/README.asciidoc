@@ -13,6 +13,16 @@ Back up git repositiories using git itself:
     * Tag all current tags and branches.
     * The backups tags are not going to match any new tags in the server so they will not be overwritten.
     * The backup tag names contain a salt so a remote attacker can not delete these tags (until he knows the salt)
+    
+Return value: Returns non 0 in case any of the gits could not be fetched or the log could not be uploaded.
+
+Logging:
+
+ * If backupLogFile is specified: then the result log is pushed into a git repository (in which the log file resides).
+ * If backupLogFile is not specified: Logs are written to stdout
+  
+Proposed configuration is to start backup by timer (eg. daily) and restart the process (eg. every hour) in case the of non 0 return value.
+
 
 == git2zip
 

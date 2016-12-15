@@ -12,12 +12,15 @@ import java.util.concurrent.TimeUnit;
 
 import hu.qgears.commons.UtilFile;
 import hu.qgears.commons.UtilString;
+import hu.qgears.rtemplate.runtime.DeferredTemplate;
+import hu.qgears.rtemplate.runtime.RQuickTemplate;
 import hu.qgears.tools.UtilProcess2.ProcessFuture;
 import hu.qgears.tools.UtilProcess2.ProcessResult;
 import joptsimple.annot.JOHelp;
 
 public class GitBackupUpdate extends AbstractTool
 {
+	private TemplateDelegate t=new TemplateDelegate();
 	public class Args implements IArgs{
 		@JOHelp("Repository backup folder - subfolders are repository backups. All are fetched and then all tags and branches are tagged (except the tags that are already local backups) so that they are not overwritten with next fetches.")
 		public File repos;
@@ -38,10 +41,10 @@ public class GitBackupUpdate extends AbstractTool
 	}
 	private TimeUnit timeoutUnit=TimeUnit.MILLISECONDS;
 
-	private StringBuilder log=new StringBuilder();
 	private SimpleDateFormat df=new SimpleDateFormat("yyyy.MM.dd.HH-mm-ss");
 	private Args a;
 	private boolean error;
+	private String currentUrl;
 
 	@Override
 	public String getId() {
@@ -50,7 +53,13 @@ public class GitBackupUpdate extends AbstractTool
 
 	@Override
 	public String getDescription() {
-		return "Freshen git backups to the latest version. Create a backup tag of all tags and branches.";
+		return new RQuickTemplate() {
+			
+			@Override
+			protected void doGenerate() {
+				write("Freshen git backups to the latest version. Create a backup tag of all tags and branches.\n\nReturn value: Returns non 0 in case any of the gits could not be fetched or the log could not be uploaded.\n\nLogging:\n\n * If backupLogFile is specified: then the result log is pushed into a git repository (in which the log file resides).\n * If backupLogFile is not specified: Logs are written to stdout\n  \nProposed configuration is to start backup by timer (eg. daily) and restart the process (eg. every hour) in case the of non 0 return value.\n\n");
+			}
+		}.generate();
 	}
 	@Override
 	protected IArgs createArgsObject() {
@@ -66,57 +75,74 @@ public class GitBackupUpdate extends AbstractTool
 				try {
 					if(!f.getName().startsWith(".") && f.isDirectory())
 					{
-						String url; 
+						currentUrl=null;
+						boolean errorState=error;
+						error=false;
+						write("\n== ");
+						DeferredTemplate errTempl=t.deferredDelegate(this::writeError);//NB
+						write(": ");
+						writeObject(f.getName());
+						DeferredTemplate fromTempl=t.deferredDelegate(this::writeFrom);//NB
+						write("\n\n....\n");
+						try
 						{
-							Process p=Runtime.getRuntime().exec("git remote get-url origin", null, f);
-							ProcessFuture pr=UtilProcess2.execute(p);
-							url=pr.get(a.timeoutMillis, timeoutUnit).getStdoutString();
-						}
-						{
-							addLog("\n== Updating: "+f.getName()+" from: "+url);
-							Process p=Runtime.getRuntime().exec("git fetch", null, f);
-							ProcessFuture pr=UtilProcess2.execute(p);
-							ProcessResult r=pr.get(a.timeoutMillis, timeoutUnit);
-							addLog(r.getStdoutString());
-							addError(r.getStderrString());
-							addExitCode("Fetch exit code: ", r);
-						}
-						List<String> tags=new ArrayList<>(); 
-						{
-							Process p=Runtime.getRuntime().exec("git tag --list", null, f);
-							ProcessFuture pr=UtilProcess2.execute(p);
-							ProcessResult r=pr.get(a.timeoutMillis, timeoutUnit);
-							String tagss=r.getStdoutString();
-							addExitCode("Get tags: ", r);
-							addError(r.getStderrString());
-							tags.addAll(UtilString.split(tagss, "\r\n"));
-						}
-						List<String> branches=new ArrayList<>(); 
-						{
-							Process p=Runtime.getRuntime().exec("git branch --list", null, f);
-							ProcessFuture pr=UtilProcess2.execute(p);
-							ProcessResult r=pr.get(a.timeoutMillis, timeoutUnit);
-							String branchess=r.getStdoutString();
-							addExitCode("Get Branches: ", r);
-							addError(r.getStderrString());
-							branches.addAll(UtilString.split(branchess, "\r\n"));
-							for(int i=0;i<branches.size();++i)
 							{
-								String b=branches.get(i);
-								b=b.substring(2);
-								branches.set(i, b);
+								Process p=Runtime.getRuntime().exec("git remote get-url origin", null, f);
+								ProcessFuture pr=UtilProcess2.execute(p);
+								currentUrl=pr.get(a.timeoutMillis, timeoutUnit).getStdoutString();
+								fromTempl.generate();
 							}
-						}
-						for(String tag: tags)
-						{
-							if(!tag.startsWith(a.backupTagPrefix))
 							{
-								createTag(f, tag, a.backupTagPrefix+df.format(c.getTime()), "-tag-"+tag);
+								Process p=Runtime.getRuntime().exec("git fetch", null, f);
+								ProcessFuture pr=UtilProcess2.execute(p);
+								ProcessResult r=pr.get(a.timeoutMillis, timeoutUnit);
+								addLog(r.getStdoutString());
+								addError(r.getStderrString());
+								addExitCode("Fetch exit code: ", r);
 							}
-						}
-						for(String branch: branches)
+							List<String> tags=new ArrayList<>(); 
+							{
+								Process p=Runtime.getRuntime().exec("git tag --list", null, f);
+								ProcessFuture pr=UtilProcess2.execute(p);
+								ProcessResult r=pr.get(a.timeoutMillis, timeoutUnit);
+								String tagss=r.getStdoutString();
+								addExitCode("Get tags: ", r);
+								addError(r.getStderrString());
+								tags.addAll(UtilString.split(tagss, "\r\n"));
+							}
+							List<String> branches=new ArrayList<>(); 
+							{
+								Process p=Runtime.getRuntime().exec("git branch --list", null, f);
+								ProcessFuture pr=UtilProcess2.execute(p);
+								ProcessResult r=pr.get(a.timeoutMillis, timeoutUnit);
+								String branchess=r.getStdoutString();
+								addExitCode("Get Branches: ", r);
+								addError(r.getStderrString());
+								branches.addAll(UtilString.split(branchess, "\r\n"));
+								for(int i=0;i<branches.size();++i)
+								{
+									String b=branches.get(i);
+									b=b.substring(2);
+									branches.set(i, b);
+								}
+							}
+							for(String tag: tags)
+							{
+								if(!tag.startsWith(a.backupTagPrefix))
+								{
+									createTag(f, tag, a.backupTagPrefix+df.format(c.getTime()), "-tag-"+tag);
+								}
+							}
+							for(String branch: branches)
+							{
+								createTag(f, branch, a.backupTagPrefix+df.format(c.getTime()), "-branch-"+branch);
+							}
+						}finally
 						{
-							createTag(f, branch, a.backupTagPrefix+df.format(c.getTime()), "-branch-"+branch);
+							write("....\n");
+							errTempl.generate();
+							error=error|errorState;
+							write("\n\n");
 						}
 					}
 				} catch (Exception e) {
@@ -128,14 +154,27 @@ public class GitBackupUpdate extends AbstractTool
 		}
 		if(a.backupLogFile!=null)
 		{
-			StringBuilder w=new StringBuilder();
-			w.append("= Backup of Git repos\n\n");
-			w.append("Date: "+df.format(c.getTime())+"\n");
-			w.append("Result: "+(error?"ERROR":"OK")+"\n\n");
-			w.append(log);
-			UtilFile.saveAsFile(a.backupLogFile, w.toString());
+			String log=t.getResult();
+			t=new TemplateDelegate();
+			write("= Backup of Git repos\n\nDate: ");
+			writeObject(df.format(c.getTime()));
+			write("\nResult: ");
+			writeObject((error?"ERROR":"OK"));
+			write("\n\n\n");
+			writeObject(log);
+			a.backupLogFile.getParentFile().mkdirs();
+			UtilFile.saveAsFile(a.backupLogFile, t.getResult());
 			{
-				String[] cmdarray=new String[]{"git", "commit", "-am", "Autobackup: "+df.format(c.getTime())};
+				String[] cmdarray=new String[]{"git", "add", "."};
+				Process p=Runtime.getRuntime().exec(cmdarray, null, a.backupLogFile.getParentFile());
+				ProcessFuture pr=UtilProcess2.execute(p);
+				ProcessResult r=pr.get(a.timeoutMillis, timeoutUnit);
+				addExitCode("Log git add results: ", r);
+				addLog(r.getStdoutString());
+				addError(r.getStderrString());
+			}
+			{
+				String[] cmdarray=new String[]{"git", "commit", "-m", "Autobackup: "+df.format(c.getTime())};
 				Process p=Runtime.getRuntime().exec(cmdarray, null, a.backupLogFile.getParentFile());
 				ProcessFuture pr=UtilProcess2.execute(p);
 				ProcessResult r=pr.get(a.timeoutMillis, timeoutUnit);
@@ -154,6 +193,16 @@ public class GitBackupUpdate extends AbstractTool
 		}
 		return error?1:0;
 	}
+	
+	private void writeError(Object o)
+	{
+		writeObject(error?"ERROR":"OK");
+	}
+	private void writeFrom(Object o)
+	{
+		write(" from: ");
+		writeObject(currentUrl);
+	}
 
 	private void addError(Exception e) {
 		error=true;
@@ -162,8 +211,8 @@ public class GitBackupUpdate extends AbstractTool
 		PrintWriter pw=new PrintWriter(sw); 
 		e.printStackTrace(pw);
 		pw.flush();
-		log.append(sw.toString());
-		log.append("\n");
+		writeObject(sw.toString());
+		write("\n\n");
 	}
 
 	private void addExitCode(String string, ProcessResult r) throws InterruptedException {
@@ -197,9 +246,8 @@ public class GitBackupUpdate extends AbstractTool
 		{
 			return;
 		}
-		System.err.println(string);
-		log.append(string);
-		log.append("\n");
+		writeObject(string);
+		write("\n");
 	}
 
 	private void addLog(String string) {
@@ -207,8 +255,22 @@ public class GitBackupUpdate extends AbstractTool
 		{
 			return;
 		}
-		System.out.println(string);
-		log.append(string);
-		log.append("\n");
+		writeObject(string);
+		write("\n");
+	}
+	protected void write(String s)
+	{
+		System.out.print(s);
+		t.writeDelegate(s);
+	}
+	protected void writeObject(Object o)
+	{
+		if(o!=null)
+		{
+			write(o.toString());
+		}else
+		{
+			write("null");
+		}
 	}
 }
