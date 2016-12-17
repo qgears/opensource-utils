@@ -92,7 +92,7 @@ public class GitToZip extends AbstractTool
 				    	{
 				    		p=a.addPrefix+p;
 				    	}
-				    	zos.putNextEntry(ReproducibleZipFile.fix(new ZipEntry(p)));
+				    	zos.putNextEntry(ReproducibleZipFile.fix(new ZipEntry(p), 0));
 				    	try
 				    	{
 				            ObjectId objectId = treeWalk.getObjectId(0);

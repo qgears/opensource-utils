@@ -1,7 +1,5 @@
 package hu.qgears.tools;
 
-import java.nio.file.attribute.FileTime;
-import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 
 /**
@@ -14,10 +12,10 @@ import java.util.zip.ZipEntry;
 public class ReproducibleZipFile {
 
 
-	public static ZipEntry fix(ZipEntry zipEntry) {
-		zipEntry.setCreationTime(FileTime.from(0, TimeUnit.MILLISECONDS));
-		zipEntry.setLastAccessTime(FileTime.from(0, TimeUnit.MILLISECONDS));
-		zipEntry.setTime(0);
+	public static ZipEntry fix(ZipEntry zipEntry, long t) {
+//		zipEntry.setCreationTime(FileTime.from(0, TimeUnit.MILLISECONDS));
+//		zipEntry.setLastAccessTime(FileTime.from(0, TimeUnit.MILLISECONDS));
+		zipEntry.setTime(t);
 		return zipEntry;
 	}
 

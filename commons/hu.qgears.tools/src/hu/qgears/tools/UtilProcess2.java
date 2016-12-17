@@ -96,7 +96,7 @@ public class UtilProcess2 {
 	public static class ProcessFuture implements Future<ProcessResult>
 	{
 		private Process p;
-		public ProcessFuture(Process p, OutputStream out, OutputStream err) {
+		public ProcessFuture(final Process p, final OutputStream out, final OutputStream err) {
 			this.p=p;
 			result=new ProcessResult(p, out, err);
 			new Thread("Process stream output"){

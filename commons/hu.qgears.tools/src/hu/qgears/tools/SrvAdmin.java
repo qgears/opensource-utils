@@ -46,10 +46,10 @@ public class SrvAdmin extends AbstractTool
 	}
 	@Override
 	protected int doExec(IArgs a) throws Exception {
-		Args args=(Args) a;
+		final Args args=(Args) a;
 		UtilFile.deleteRecursive(args.tg);
 		IgnoreNode ignore=new IgnoreNode();
-		StringWriter chmods=new StringWriter();
+		final StringWriter chmods=new StringWriter();
 		UtilGitignoreVisitor ufv=new UtilGitignoreVisitor()
 			{
 				@Override

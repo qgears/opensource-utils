@@ -13,12 +13,14 @@ public class Tools {
 		int ret=new Tools().exec(largs);
 		System.exit(ret);
 	}
+	private static List<ITool> tools=new ArrayList<>();
 	private List<ITool> createTools()
 	{
 		List<ITool> ret=new ArrayList<>();
 		ret.add(new SrvAdmin());
 		ret.add(new GitToZip());
 		ret.add(new GitBackupUpdate());
+		ret.addAll(tools);
 		return ret;
 	}
 	private int exec(List<String> args){
@@ -50,5 +52,8 @@ public class Tools {
 			e.printStackTrace();
 			return 1;
 		}
+	}
+	public static void registerTool(ITool tool) {
+		tools.add(tool);
 	}
 }
