@@ -4,7 +4,6 @@
 #include "hu_qgears_images_libpng_NativeLibPngConnector.h"
 #define PNGCLASS Java_hu_qgears_images_libpng_NativeLibPngConnector_
 #include "jniutil.h"
-#include <string.h>
 
 void clearStruct(PngImage * str)
 {
@@ -120,7 +119,7 @@ int clampMul(float f, int r) {
 
 /**
  * Converts images with premultiplied alpha pixel format to normal pixel
- * format (divedes rgb values with alpha). The input is a byte array, the
+ * format (divides rgb values with alpha). The input is a byte array, the
  * output will be placed into the given TemporaryImage object. If swapAlpha
  * == true, than method assumes that alpha value comes from the first
  * channel (0), otherwise it comes from last channel (3)
@@ -178,14 +177,23 @@ METHODPREFIX(PNGCLASS, void, beginSave)(ST_ARGS,
 	clearStruct(str);
 	str->readSize=env->GetDirectBufferCapacity(dataBuffer);
 	unsigned char * bufferContent = (unsigned char *)env->GetDirectBufferAddress(dataBuffer);
-	TemporaryImage tempImage;//destructor called automatically when this method.ends
+	TemporaryImage tempImage; // destructor called automatically when this method ends
+	
 	if (premultipliedAlpha){
 		tempImage.init(str->readSize);
+
+		if (!tempImage.getImageBuffer()) {
+			JNU_ThrowByName(env, "java/lang/OutOfMemoryError", "Could not "
+					"allocate memory for image conversion");
+			return;
+		}
+
 		convertToNormal(&tempImage,swapAlpha,bufferContent);
 		str->data =tempImage.getImageBuffer();
 	} else {
 		str->data= bufferContent;
 	}
+
 	str->png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 	if (!str->png_ptr)
 	{
@@ -210,15 +218,17 @@ METHODPREFIX(PNGCLASS, void, beginSave)(ST_ARGS,
 		defaultSize=1000;
 	}
 	str->destination=(char *)malloc(defaultSize);
+
+	if (!str->destination) {
+		JNU_ThrowByName(env, "java/lang/OutOfMemoryError", "Could not allocate "
+				"memory when saving image");
+		return;
+	}
+
 	str->writeSize=defaultSize;
 	str->writePosition=0;
 	str->writeError=0;
 	
-	if(str->destination==NULL)
-	{
-		str->writeError=1;
-	}
-
 	png_set_write_fn(str->png_ptr, str, write_data, write_flush);
 	int color_type;
 	switch(nChannel)
@@ -254,6 +264,19 @@ METHODPREFIX(PNGCLASS, void, beginSave)(ST_ARGS,
 		return;
 	}
 	str->row_pointers = (png_bytep*) malloc(sizeof(png_bytep) * height);
+
+	if (!str->row_pointers) {
+		JNU_ThrowByName(env, "java/lang/OutOfMemoryError", "Could not "
+				"allocate memory for row pointers when saving image");
+
+		// Freeing previously successfully allocated area
+		if (str->destination) {
+			free(str->destination);
+		}
+
+		return;
+	}
+
 	for (int y=0; y<height; y++)
 	{
 		str->row_pointers[y] = (png_byte*) str->data+rowBytes*y;
@@ -397,10 +420,19 @@ METHODPREFIX(PNGCLASS, void, loadImage)(ST_ARGS, jobject pixelData, jint rowByte
 	jlong size=env->GetDirectBufferCapacity(pixelData);
 	if(size<rowBytes*str->height)
 	{
-		JNU_ThrowByName(env, EXCCLASS, 255, "PNG read error: allocated pixel buffer is too small: %d", (int)size);
+		JNU_ThrowByName(env, EXCCLASS, 255, "PNG read error: allocated pixel "
+				"buffer is too small: %d", (int)size);
 		return;
 	}
 	str->row_pointers = (png_bytep*) malloc(sizeof(png_bytep) * str->height);
+
+	if (!str->row_pointers) {
+		JNU_ThrowByName(env, "java/lang/OutOfMemoryError", "Could not "
+				"allocate memory for row pointers when loading image");
+
+		return;
+	}
+
 	for (int y=0; y<str->height; y++)
 	{
 		str->row_pointers[y] = (png_byte*) raw_ptr+rowBytes*y;
