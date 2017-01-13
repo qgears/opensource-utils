@@ -96,7 +96,7 @@ public class SignalFutureWrapper<T> implements SignalFuture<T>, Callable<T>
 		synchronized (this) {
 			if(!this.done)
 			{
-				this.wait(unit.toMillis(timeout));
+				unit.timedWait(this, timeout);
 				if(!this.done)
 				{
 					throw new TimeoutException();
