@@ -123,16 +123,28 @@ public class QuantizeOctTree {
 		}
 		private int getV0()
 		{
+			if(nPixel==0)
+			{
+				return 0;
+			}
 			int v0=sum0/nPixel;
 			return v0;
 		}
 		private int getV1()
 		{
+			if(nPixel==0)
+			{
+				return 0;
+			}
 			int v1=sum1/nPixel;
 			return v1;
 		}
 		private int getV2()
 		{
+			if(nPixel==0)
+			{
+				return 0;
+			}
 			int v2=sum2/nPixel;
 			return v2;
 		}

@@ -40,7 +40,7 @@ public class CoolRMIServer {
 	private IConnectionServerFactory serverFactory;
 	private IConnectionServer socket;
 	private boolean guaranteeOrdering;
-	private long timeout=30000;
+	private long timeoutMillis=30000;
 	private boolean exit = false;
 	public CoolRMIServiceRegistry getServiceRegistry() {
 		return serviceRegistry;
@@ -50,16 +50,16 @@ public class CoolRMIServer {
 		this.serviceRegistry = serviceRegistry;
 	}
 
-	public long getTimeout() {
-		return timeout;
+	public long getTimeoutMillis() {
+		return timeoutMillis;
 	}
 
 	/**
 	 * Must be set before starting the server!
 	 * @param timeout
 	 */
-	public void setTimeout(long timeout) {
-		this.timeout = timeout;
+	public void setTimeoutMillis(long timeoutMillis) {
+		this.timeoutMillis = timeoutMillis;
 	}
 
 	/**
@@ -121,7 +121,7 @@ public class CoolRMIServer {
 					IConnection sock = socket.accept();
 					CoolRMIServe serve=
 						new CoolRMIServe(this, sock, guaranteeOrdering);
-					serve.setTimeout(timeout);
+					serve.setTimeoutMillis(timeoutMillis);
 					serve.setServiceRegistry(getServiceRegistry());
 					serve.connect();
 				}

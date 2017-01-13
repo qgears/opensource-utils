@@ -48,7 +48,7 @@ public class CoolRMIRemoter {
 		
 	}
 	private SocketMultiplexer multiplexer;
-	private long timeout=30000;
+	private long timeoutMillis=30000;
 	private IConnection sock;
 	private ClassLoader classLoader;
 	private boolean connected = false;
@@ -88,12 +88,12 @@ public class CoolRMIRemoter {
 		}
 	}
 
-	public void setTimeout(long timeout) {
-		this.timeout = timeout;
+	public void setTimeoutMillis(long timeout) {
+		this.timeoutMillis = timeout;
 	}
 
-	public long getTimeout() {
-		return timeout;
+	public long getTimeoutMillis() {
+		return timeoutMillis;
 	}
 
 	public ClassLoader getClassLoader() {

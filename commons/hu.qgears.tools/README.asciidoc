@@ -1,0 +1,46 @@
+= Command line tools
+
+Selection of command line tools.
+
+== git-backup
+
+Back up git repositiories using git itself:
+
+ * Clone remote repositories by hand into a folder
+ * Run git-backup on the backup folder:
+    * Iterates all git clones
+    * git fetch -p origin +refs/heads/*:refs/heads/* +refs/tags/*:refs/tags/* (all new refs in heads and tags, also delete remote deleted ones)
+    * (configurable which refs/XXX/* are fetched)
+    * Create a /refs/backup/timestamp/original/ref/path of all refs fetched
+    * The backup refs are local and are never updated from remote. So they will not be overwritten.
+    
+Return value: Returns non 0 in case any of the gits could not be fetched or the log could not be uploaded.
+
+URLs to be backed up:
+
+ * Can be specified to come from one of the backed up repositories. This is helpful to add repos without logging into the backup server
+ * Added urls are never removed (the backup folder has to be deleted by hand if backup must be disabled). So main server cracker can not delete anything on the backup.
+
+Logging:
+
+ * If backupLogFile is specified: then the result log is pushed into a git repository (in which the log file resides).
+ * If backupLogFile is not specified: Logs are written to stdout
+  
+Proposed configuration is to start backup by timer (eg. daily) and restart the process (eg. every hour) in case the of non 0 return value.
+
+== git2zip
+
+Get all files from a git repsitory state (branch or tag) and zip them into a single file. Features:
+
+ * Works on a bare repository (eg. server side repo)
+ * Possible to zip a subfolder only
+ * Possible to add folder prefix
+ * Created zip file is binary reproducible when the same tag is used (timestamps are set to epoch)
+ * Uses JGit to access the repo
+
+== srvBackup
+
+Iterate all files within a folder which are not under gitignore. Collects all paths and creates a file (shell script)
+that stores the file modes (RWX, User, group, others).
+
+This tool can be used to back up /etc on a server using git (a clone of this feature of etckeeper).
