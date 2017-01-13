@@ -267,7 +267,7 @@ public class EmfCollabEditorExtension {
 		SocketAddress socketAddress = new InetSocketAddress(host, port);
 		CoolRMIClient client = new CoolRMIClient(classLoader, socketAddress,
 				true);
-		client.setTimeout(EmfServer.defaultTimeout);
+		client.setTimeoutMillis(EmfServer.defaultTimeoutMillis);
 		IEmfMultiServer multiServer = (IEmfMultiServer) client.getService(
 				IEmfMultiServer.class, IEmfMultiServer.class.getName());
 		try {

@@ -44,7 +44,7 @@ public class EmfServer implements IEmfServer {
 	private List<EmfCommand> undoCommandStack=new ArrayList<EmfCommand>();
 	private List<EmfCommand> redoCommandStack=new ArrayList<EmfCommand>();
 	private EmfCommandExecutor commandExecutor=new EmfCommandExecutor();
-	public static final long defaultTimeout=60000;
+	public static final long defaultTimeoutMillis=60000;
 	Serializate log;
 
 	public EmfServer(EmfMultiServer parent, String resoruceName, File logFile) throws FileNotFoundException, UnsupportedEncodingException {
