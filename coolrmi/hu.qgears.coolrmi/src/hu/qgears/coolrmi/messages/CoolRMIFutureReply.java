@@ -24,7 +24,7 @@ public class CoolRMIFutureReply {
 
 	public AbstractCoolRMIReply waitReply() {
 		try {
-			return fut.get(remoter.getTimeout(), TimeUnit.NANOSECONDS);
+			return fut.get(remoter.getTimeoutMillis(), TimeUnit.MILLISECONDS);
 		} catch (TimeoutException e1) {
 			throw new CoolRMITimeoutException(e1);
 		} catch(ExecutionException e)
