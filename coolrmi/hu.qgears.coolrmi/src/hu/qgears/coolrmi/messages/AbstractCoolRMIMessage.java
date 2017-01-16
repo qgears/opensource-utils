@@ -18,4 +18,10 @@ abstract public class AbstractCoolRMIMessage implements Serializable {
 		return queryId;
 	}
 	abstract public String getName();
+	/**
+	 * Callback when the last piece of this message has been sent through the (TCP) channel.
+	 * Default implementation does nothing.
+	 */
+	public void sent() {
+	}
 }

@@ -19,6 +19,7 @@ package hu.qgears.coolrmi;
 import java.io.IOException;
 import java.net.SocketAddress;
 
+import hu.qgears.coolrmi.messages.CoolRMIDisconnect;
 import hu.qgears.coolrmi.remoter.CoolRMIRemoter;
 import hu.qgears.coolrmi.streams.IConnection;
 import hu.qgears.coolrmi.streams.IClientConnectionFactory;
@@ -70,5 +71,12 @@ public class CoolRMIClient extends CoolRMIRemoter {
 	{
 		IConnection socket=connectionFactory.connect();
 		super.connect(socket);
+	}
+	@Override
+	public void close() throws IOException {
+		CoolRMIDisconnect disconnect=new CoolRMIDisconnect();
+		send(disconnect);
+		disconnect.waitSent(getTimeoutMillis());
+		super.close();
 	}
 }

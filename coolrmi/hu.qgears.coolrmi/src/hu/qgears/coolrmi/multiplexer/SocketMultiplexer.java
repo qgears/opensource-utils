@@ -5,9 +5,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+
+import hu.qgears.coolrmi.messages.AbstractCoolRMIMessage;
 
 
 
@@ -26,6 +30,10 @@ public class SocketMultiplexer {
 	private InputStream is;
 	private OutputStream os;
 	private boolean exit=false;
+	/**
+	 * True means that the next messages can not be sent.
+	 */
+	private boolean disconnected;
 	private long counter=0;
 	private LinkedList<SocketMultiplexerSource> messagesToSend=new LinkedList<SocketMultiplexerSource>();
 	public SocketMultiplexer(InputStream is, OutputStream os,
@@ -145,24 +153,46 @@ public class SocketMultiplexer {
 						datagram.writeToStream(os);
 						os.flush();
 					} catch (IOException e) {
+						synchronized (messagesToSend) {
+							disconnected=true;
+						}
 						messageListener.pipeBroken(e);
+					}
+					if(lastPiece)
+					{
+						source.sent();
 					}
 				}
 			}
 		}
 	}
-	public void addMessageToSend(byte[] messageContent, String name)
+	public void addMessageToSend(byte[] messageContent, AbstractCoolRMIMessage message)
 	{
+		boolean b;
 		synchronized (messagesToSend) {
-			messagesToSend.add(new SocketMultiplexerSource(counter++, new ByteArrayInputStream(messageContent), name));
+			messagesToSend.add(new SocketMultiplexerSource(counter++, new ByteArrayInputStream(messageContent), message));
 			messagesToSend.notifyAll();
+			b=disconnected;
+		}
+		if(b)
+		{
+			message.sent();
 		}
 	}
 	public void stop()
 	{
 		exit=true;
+		List<SocketMultiplexerSource> toCancel=null;
 		synchronized (messagesToSend) {
 			messagesToSend.notifyAll();
+			toCancel=new ArrayList<SocketMultiplexerSource>(messagesToSend);
+		}
+		if(toCancel!=null)
+		{
+			for(SocketMultiplexerSource s: toCancel)
+			{
+				s.sent();
+			}
 		}
 	}
 }

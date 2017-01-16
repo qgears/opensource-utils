@@ -1,8 +1,10 @@
 package hu.qgears.coolrmi.remoter;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -14,6 +16,7 @@ import hu.qgears.coolrmi.CoolRMIException;
 import hu.qgears.coolrmi.CoolRMIService;
 import hu.qgears.coolrmi.CoolRMIShareableObject;
 import hu.qgears.coolrmi.CoolRMITimeoutException;
+import hu.qgears.coolrmi.ICoolRMILogger;
 import hu.qgears.coolrmi.ICoolRMIProxy;
 import hu.qgears.coolrmi.ICoolRMIServerSideProxy;
 import hu.qgears.coolrmi.messages.AbstractCoolRMICall;
@@ -21,6 +24,7 @@ import hu.qgears.coolrmi.messages.AbstractCoolRMIMessage;
 import hu.qgears.coolrmi.messages.AbstractCoolRMIReply;
 import hu.qgears.coolrmi.messages.CoolRMICreateProxy;
 import hu.qgears.coolrmi.messages.CoolRMICreateProxyReply;
+import hu.qgears.coolrmi.messages.CoolRMIDisconnect;
 import hu.qgears.coolrmi.messages.CoolRMIDisposeProxy;
 import hu.qgears.coolrmi.messages.CoolRMIFutureReply;
 import hu.qgears.coolrmi.messages.CoolRMIProxyPlaceHolder;
@@ -47,6 +51,12 @@ public class CoolRMIRemoter {
 		}
 		
 	}
+	private ICoolRMILogger log=new ICoolRMILogger() {
+		@Override
+		public void logError(Throwable e) {
+			e.printStackTrace();
+		}
+	};
 	private SocketMultiplexer multiplexer;
 	private long timeoutMillis=30000;
 	private IConnection sock;
@@ -129,7 +139,7 @@ public class CoolRMIRemoter {
 
 	public void send(AbstractCoolRMIMessage message) throws IOException {
 		byte[] bs = UtilSerializator.serialize(servicesReg, message);
-		multiplexer.addMessageToSend(bs, message.getName());
+		multiplexer.addMessageToSend(bs, message);
 	}
 	/**
 	 * Send a message call to the other side. Send is asynchronous. Reply can be
@@ -169,10 +179,15 @@ public class CoolRMIRemoter {
 			} else if (message instanceof CoolRMICreateProxy)
 			{
 				handleCreateProxy((CoolRMICreateProxy)message);
+			} else if (message instanceof CoolRMIDisconnect)
+			{
+				close();
+			}else
+			{
+				throw new RuntimeException("Unhandled message type: "+message);
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.logError(e);
 		}
 	}
 
@@ -224,6 +239,9 @@ public class CoolRMIRemoter {
 		if(future!=null)
 		{
 			future.received(reply);
+		}else
+		{
+			log.logError(new RuntimeException("Reply received but noone waits for it: "+reply+" "+reply.getQueryId()));
 		}
 	}
 	private void doCall(final AbstractCoolRMICall abstarctCall) throws IOException {
@@ -290,6 +308,11 @@ public class CoolRMIRemoter {
 	}
 
 	public void pipeBroken(Exception e) {
+		if(!isClosed())
+		{
+			// If socket is not closed by query then the exception is logged.
+			e.printStackTrace();
+		}
 		try {
 			close();
 		} catch (IOException e1) {
@@ -303,21 +326,30 @@ public class CoolRMIRemoter {
 	}
 
 	public boolean isClosed() {
-		return closed;
+		synchronized (this) {
+			return closed;
+		}
 	}
 
 	public void close() throws IOException {
-		connected = false;
-		closed = true;
+		synchronized (this) {
+			connected = false;
+			closed = true;
+		}
 		multiplexer.stop();
 		sock.close();
 		if(serverSideExecutor instanceof ExecutorService)
 		{
 			((ExecutorService) serverSideExecutor).shutdown();
 		}
+		List<CoolRMIFutureReply> cancelled=new ArrayList<CoolRMIFutureReply>();
 		synchronized (replies) {
-			// Queries waiting for replies must be notified to close at once.
-			replies.notifyAll();
+			cancelled.addAll(replies.values());
+			replies.clear();
+		}
+		for(CoolRMIFutureReply r: cancelled)
+		{
+			r.cancelled();
 		}
 	}
 	/**
@@ -399,5 +431,12 @@ public class CoolRMIRemoter {
 		synchronized (replies) {
 			replies.remove(coolRMIFutureReply.getCallId());
 		}
+	}
+	/**
+	 * Set up a global logger that logs protocol errors.
+	 * @param log
+	 */
+	public void setLog(ICoolRMILogger log) {
+		this.log = log;
 	}
 }

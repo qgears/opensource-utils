@@ -9,9 +9,10 @@ import hu.qgears.coolrmi.ICoolRMIProxy;
 
 public class Service implements IService
 {
-
+	private volatile int nCall;
 	@Override
 	public String echo(String s, int x) {
+		nCall++;
 		StringBuilder ret=new StringBuilder();
 		for(int i=0;i<x;++i)
 		{
@@ -22,6 +23,7 @@ public class Service implements IService
 	}
 	@Override
 	public void initTimer(ICallback cb, long timeoutMs) {
+		nCall++;
 		UtilTimer.getInstance().executeTimeout(timeoutMs, new Callable<Object>() {
 			@Override
 			public Object call() throws Exception {
@@ -38,10 +40,15 @@ public class Service implements IService
 	}
 	@Override
 	public String nonSerializableArgument(IntBuffer ib) {
+		nCall++;
 		return "First value in buffer: "+ib.get();
 	}
 	@Override
 	public void exceptionExample() throws RemoteException {
+		nCall++;
 		throw new RemoteException("This is thrown by the server. Stack traces on the server and the client are merged.");
+	}
+	public int getnCall() {
+		return nCall;
 	}
 }

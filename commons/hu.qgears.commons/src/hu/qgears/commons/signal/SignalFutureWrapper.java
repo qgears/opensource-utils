@@ -25,7 +25,7 @@ public class SignalFutureWrapper<T> implements SignalFuture<T>, Callable<T>
 	private Throwable exc;
 	private boolean done;
 	private boolean cancelled;
-	private List<Slot<SignalFuture<T>>> listeners=new ArrayList<Slot<SignalFuture<T>>>();
+	private List<Slot<SignalFuture<T>>> listeners=null;
 	private T ret;
 
 	/**
@@ -41,6 +41,7 @@ public class SignalFutureWrapper<T> implements SignalFuture<T>, Callable<T>
 	@SuppressWarnings("unchecked")
 	private boolean ready(Object ret, Throwable exc, boolean cancel) {
 		boolean finishedNow=false;
+		List<Slot<SignalFuture<T>>> ls;
 		synchronized (this) {
 			if(!done)
 			{
@@ -51,10 +52,12 @@ public class SignalFutureWrapper<T> implements SignalFuture<T>, Callable<T>
 				cancelled=cancel;
 				this.notifyAll();
 			}
+			ls=listeners;
+			listeners=null;
 		}
-		if(finishedNow)
+		if(finishedNow&&ls!=null)
 		{
-			for(Slot<SignalFuture<T>> listener:listeners)
+			for(Slot<SignalFuture<T>> listener:ls)
 			{
 				listener.signal(this);
 			}
@@ -84,6 +87,10 @@ public class SignalFutureWrapper<T> implements SignalFuture<T>, Callable<T>
 			}
 			if(exc!=null)
 			{
+				if(cancelled && exc instanceof CancellationException)
+				{
+					throw (CancellationException)exc;
+				}
 				throw new ExecutionException(exc);
 			}
 			return (T)ret;	
@@ -97,9 +104,11 @@ public class SignalFutureWrapper<T> implements SignalFuture<T>, Callable<T>
 			if(!this.done)
 			{
 				unit.timedWait(this, timeout);
-				if(!this.done)
-				{
-					throw new TimeoutException();
+				synchronized (this) {
+					if(!this.done)
+					{
+						throw new TimeoutException("Timeout: "+timeout+" "+unit);
+					}
 				}
 			}
 			return get();	
@@ -121,6 +130,10 @@ public class SignalFutureWrapper<T> implements SignalFuture<T>, Callable<T>
 		synchronized (this) {
 			if(!this.done)
 			{
+				if(listeners==null)
+				{
+					listeners=new ArrayList<Slot<SignalFuture<T>>>();
+				}
 				listeners.add(listener);
 				return;
 			}

@@ -26,13 +26,13 @@ public class CoolRMIFutureReply {
 		try {
 			return fut.get(remoter.getTimeoutMillis(), TimeUnit.MILLISECONDS);
 		} catch (TimeoutException e1) {
-			throw new CoolRMITimeoutException(e1);
+			throw new CoolRMITimeoutException("Timeout executing call: "+callId, e1);
 		} catch(ExecutionException e)
 		{
 			// Can not happen as we never set an exception on the future object
-			throw new CoolRMIException(e);
+			throw new CoolRMIException("Internal exception on call: "+callId, e);
 		} catch (InterruptedException e) {
-			throw new CoolRMIException(e);
+			throw new CoolRMIException("Interrupted exception on call: "+callId, e);
 		}
 		finally
 		{
@@ -42,5 +42,7 @@ public class CoolRMIFutureReply {
 	public long getCallId() {
 		return callId;
 	}
-
+	public void cancelled() {
+		fut.cancel(true);
+	}
 }

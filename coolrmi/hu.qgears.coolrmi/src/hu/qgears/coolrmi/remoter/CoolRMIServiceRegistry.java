@@ -15,8 +15,8 @@ import java.util.Map;
  * 
  * It also stores {@link CoolRMIReplaceEntry}s.
  * 
- * TODO configuration should not be changed after using the first service.
- *  (This is a limitation of the current implementation because it does not clear its caches on changes.)
+ * Configuration should not be changed after using the first service.
+ * (This is a limitation of the current implementation because it does not clear its caches on changes.)
  * 
  * @author rizsi
  *

@@ -12,13 +12,12 @@ import hu.qgears.coolrmi.messages.CoolRMICallList;
  * 
  * The semantics of method execution changes a little:
  * 
- *  * void (return) methods are not executed until a fush call or until a non-void method call
+ *  * void (return) methods are not executed until a flush call or until a non-void method call
  *  * In case a void method call throws an exception then it is not thrown by the call itself but is sent back to this object as a callback.
  *  * Execution of a call list can stop at exception or can go on executing the remaining calls (depending on global setting on this class).
  */
 public class CallAggregatorClientSideCompress extends CallAggregatorClientSide
 {
-	protected boolean stopOnException=false;
 	private CoolRMICallList currentList=new CoolRMICallList();
 	public CallAggregatorClientSideCompress(CoolRMIProxy owner) {
 		super(owner);

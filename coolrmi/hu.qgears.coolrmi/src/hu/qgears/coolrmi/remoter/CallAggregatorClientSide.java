@@ -33,7 +33,16 @@ public class CallAggregatorClientSide {
 	public void methodCallReplied(CoolRMIReply rep) {
 		if(rep.getException()!=null)
 		{
-			rep.getException().printStackTrace();
+			handleException(rep, rep.getException());
 		}
+	}
+	/**
+	 * Handle exception (when method is executed in an asynchronous aggregated way).
+	 * Default implementation logs to syserr. Subclasses may override. 
+	 * @param rep
+	 * @param exception
+	 */
+	protected void handleException(CoolRMIReply rep, Throwable exception) {
+		exception.printStackTrace();
 	}
 }
