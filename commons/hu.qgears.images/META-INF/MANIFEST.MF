@@ -3,7 +3,7 @@ Export-Package: hu.qgears.images,hu.qgears.images.devil,hu.qgears.imag
  es.libpng,hu.qgears.images.palette,hu.qgears.images.swing,hu.qgears.i
  mages.text,hu.qgears.images.tiff,hu.qgears.images.vnc
 Bundle-SymbolicName: hu.qgears.images
-Bundle-Version: 6.6.2.qualifier
+Bundle-Version: 6.7.0.qualifier
 Bundle-Name: Images
 Require-Bundle: hu.qgears.commons;bundle-version="2.0.0";visibility:=r
  eexport,hu.qgears.nativeloader;bundle-version="1.0.0",org.apache.log4
