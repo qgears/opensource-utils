@@ -1,6 +1,7 @@
 package hu.qgears.tools;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
@@ -12,7 +13,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import hu.qgears.commons.UtilFile;
 import hu.qgears.commons.UtilString;
@@ -272,6 +275,7 @@ public class GitBackupUpdate extends AbstractTool
 								{
 									String code=refs.get(ref);
 									createBackup(f, code, backupRefPrefix+df.format(c.getTime())+"/"+ref);
+									getCommitLogMessage(f, code);
 								}
 							}
 						}finally
@@ -408,6 +412,25 @@ public class GitBackupUpdate extends AbstractTool
 		{
 			error=true;
 			addError("Create tag error: '"+cmd0+"' "+ec);
+		}
+	}
+	private void getCommitLogMessage(File f, String code) throws IOException, InterruptedException, ExecutionException, TimeoutException {
+		String cmd0="git log --format=%B  -n 1 "+code;
+		addLog(" $ "+cmd0);
+		Process p=Runtime.getRuntime().exec(cmd0, null, f);
+		ProcessFuture pr=UtilProcess2.execute(p);
+		ProcessResult r=pr.get(a.timeoutMillis, timeoutUnit);
+		int ec=r.getExitCode();
+		String comment=r.getStdoutString();
+		if(comment.length()>1024)
+		{
+			comment=comment.substring(0, 1024)+"...";
+		}
+		addLog(comment);
+		if(ec!=0)
+		{
+			error=true;
+			addError("Get commit log message error: '"+cmd0+"' "+ec);
 		}
 	}
 
