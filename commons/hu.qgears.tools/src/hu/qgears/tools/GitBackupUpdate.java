@@ -416,7 +416,6 @@ public class GitBackupUpdate extends AbstractTool
 	}
 	private void getCommitLogMessage(File f, String code) throws IOException, InterruptedException, ExecutionException, TimeoutException {
 		String cmd0="git log --format=%B  -n 1 "+code;
-		addLog(" $ "+cmd0);
 		Process p=Runtime.getRuntime().exec(cmd0, null, f);
 		ProcessFuture pr=UtilProcess2.execute(p);
 		ProcessResult r=pr.get(a.timeoutMillis, timeoutUnit);
