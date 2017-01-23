@@ -123,7 +123,9 @@ public class SignalFutureWrapper<T> implements SignalFuture<T>, Callable<T>
 	}
 	@Override
 	public boolean isDone() {
-		return done;
+		synchronized (this) {
+			return done;
+		}
 	}
 	@Override
 	public void addOnReadyHandler(Slot<SignalFuture<T>> listener) {
@@ -159,21 +161,22 @@ public class SignalFutureWrapper<T> implements SignalFuture<T>, Callable<T>
 
 	@Override
 	public boolean isFailed() {
-		return exc!=null;
+		synchronized (this) {
+			return exc!=null;
+		}
 	}
 
 	@Override
 	public Throwable getThrowable() {
-		return exc;
+		synchronized (this) {
+			return exc;
+		}
 	}
 
 	@Override
 	public T getSimple() {
-		/*
-		 * It is not guaranteed, that the returned object is valid, so the
-		 * synchronization is the responsibility of the caller. See the
-		 * specification of the method.
-		 */
-		return ret;//NOSONAR
+		synchronized (this) {
+			return ret;
+		}
 	}
 }

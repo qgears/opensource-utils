@@ -1,10 +1,12 @@
 package hu.qgears.commons;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.function.Function;
 
 /**
  * Useful static methods for manipulating strings.
@@ -12,6 +14,7 @@ import java.util.StringTokenizer;
  *
  */
 public class UtilString {
+	private static final char[] hexChars=new char[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 	
 	private UtilString() {
 		// disable constructor of utility class
@@ -148,6 +151,10 @@ public class UtilString {
 	 * @return
 	 */
 	public static String fillLeft(String string, int targetLength, char fillChar) {
+		if(string.length()==targetLength)
+		{
+			return string;
+		}
 		StringBuilder ret=new StringBuilder();
 		for(int i=string.length(); i<targetLength;++i)
 		{
@@ -246,6 +253,38 @@ public class UtilString {
 	 */
 	public static String toHex(byte[] bytes) {
 		return new BigInteger(1,bytes).toString(16);
+	}
+	/**
+	 * Convert bytes to hexadecimal representation.
+	 * Pad left with zeroes if necessary
+	 * @param bytes
+	 * @return
+	 */
+	public static String toHexPadZero(byte[] bytes) {
+		StringBuilder ret=new StringBuilder(bytes.length*2);
+		for(byte b: bytes)
+		{
+			ret.append(hexChars[(b>>4)&0xF]);
+			ret.append(hexChars[b&0xF]);
+		}
+		return ret.toString();
+	}
+	public static <T> String concat(List<T> list, UtilComma utilComma, Function<T, String> nameProvider) {
+		StringBuilder ret=new StringBuilder();
+		try {
+			concat(ret, list, utilComma, nameProvider);
+		} catch (IOException e) {
+			// Never happens with StringBuilder
+		}
+		return ret.toString();
+	}
+	public static <T> void concat(Appendable ret, List<T> list, UtilComma utilComma, Function<T, String> nameProvider) throws IOException {
+		for(T t: list)
+		{
+			ret.append(utilComma.getSeparator());
+			ret.append(nameProvider.apply(t));
+		}
+		ret.append(utilComma.getPost());
 	}
 	
 }

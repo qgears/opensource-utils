@@ -26,4 +26,11 @@ public interface MultiMap<K,V> extends Map<K, Collection<V>> {
 	 * @param value
 	 */
 	void removeSingle(K key, V value);
+	/**
+	 * Get the collection associated with the element but allow null in case there was no element added to
+	 * this key yet.
+	 * @param key
+	 * @return
+	 */
+	Collection<V> getPossibleNull(K key);
 }

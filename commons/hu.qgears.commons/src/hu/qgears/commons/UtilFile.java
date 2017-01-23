@@ -20,6 +20,7 @@ import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -562,7 +563,7 @@ public final class UtilFile {
 			if (input != null){
 				if (input.isFile()){
 					if (useFileName){
-						dig.update(input.getName().getBytes("UTF-8"));
+						dig.update(input.getName().getBytes(StandardCharsets.UTF_8));
 					}
 					digest = dig.digest(loadFile(input));
 				} else if (input.isDirectory()){
@@ -571,7 +572,7 @@ public final class UtilFile {
 					for (File f : listAllFiles){
 						if (useFileName){
 							String relative =input.toURI().relativize(f.toURI()).getPath(); 
-							dig.update(relative.getBytes("UTF-8"));
+							dig.update(relative.getBytes(StandardCharsets.UTF_8));
 						}
 						dig.update((loadFile(f)));
 					}

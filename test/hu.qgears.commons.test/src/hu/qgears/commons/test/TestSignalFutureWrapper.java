@@ -2,6 +2,7 @@ package hu.qgears.commons.test;
 
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -180,25 +181,32 @@ public class TestSignalFutureWrapper {
 	@Test
 	public void test05() throws InterruptedException, ExecutionException, TimeoutException
 	{
+		final LinkedBlockingQueue<Object> queue=new LinkedBlockingQueue<Object>();
 		final Object value="value";
 		final SignalFutureWrapper<Object> ret=new SignalFutureWrapper<Object>();
 		Listener l=new Listener();
-		long t0=System.nanoTime();
 		Thread th=new Thread(){
 			public void run() {
 				try {
-					Thread.sleep(15);
+					// Make sure that we only raise ready after the listener is added.
+					queue.take();
+					ret.ready(value, null);
+					// After all listeners were fired this is called.
+					queue.put(new Object());
 				} catch (InterruptedException e) {
+					// Does not happen
 					e.printStackTrace();
 				}
-				ret.ready(value, null);
 			};
 		};
 		th.start();
 		ret.addOnReadyHandler(l);
+		// After adding the listener the other thread can go on.
+		queue.put(new Object());
 		Object o=ret.get();
-		long t=System.nanoTime();
-		Assert.assertTrue(((t-t0)/1000000)>14);
+		// Wait until all listeners are finished on the other thread 
+		// (without this it is possible that n is not incremented yet when it is asserted to be 1)
+		queue.take();
 		Assert.assertEquals(1, l.getN());
 		Assert.assertEquals(value, o);
 		Assert.assertEquals(value, l.getValue());

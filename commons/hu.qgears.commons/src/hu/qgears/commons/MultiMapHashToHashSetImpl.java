@@ -42,4 +42,9 @@ public class MultiMapHashToHashSetImpl<K, V> extends HashMap<K, Collection<V>> i
 			remove(key);
 		}
 	}
+	@Override
+	public HashSet<V> getPossibleNull(K key) {
+		HashSet<V> ret=(HashSet<V>)super.get(key);
+		return ret;
+	}
 }

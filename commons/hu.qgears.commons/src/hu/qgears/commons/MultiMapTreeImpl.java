@@ -43,4 +43,9 @@ public class MultiMapTreeImpl<K, V> extends TreeMap<K, Collection<V>> implements
 			remove(key);
 		}
 	}
+	@Override
+	public List<V> getPossibleNull(K key) {
+		List<V> ret=(List<V>)super.get(key);
+		return ret;
+	}
 }
