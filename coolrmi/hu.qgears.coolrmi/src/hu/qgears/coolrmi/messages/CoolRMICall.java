@@ -92,6 +92,7 @@ public class CoolRMICall
 				if (reqMethod.equals(m.getName())) {
 					final Object[] args=coolRMIRemoter.resolveProxyInParamersClientSide(getArgs());
 					try {
+						coolRMIRemoter.registerCurrentRemoter();
 						Object ret = m.invoke(service, args);
 						ret=coolRMIRemoter.resolveProxyInParamerServerSide(ret);
 						CoolRMIReply reply = new CoolRMIReply(callId,
@@ -103,6 +104,9 @@ public class CoolRMICall
 					} catch (Throwable t) {
 						System.err.println("Err method: "+reqMethod);
 						return new CoolRMIReply(callId, null, t);
+					} finally
+					{
+						coolRMIRemoter.unregisterCurrentRemoter();
 					}
 				}
 			}

@@ -72,11 +72,20 @@ public class CoolRMIClient extends CoolRMIRemoter {
 		IConnection socket=connectionFactory.connect();
 		super.connect(socket);
 	}
+	private boolean disconnectSent=false;
 	@Override
 	public void close() throws IOException {
-		CoolRMIDisconnect disconnect=new CoolRMIDisconnect();
-		send(disconnect);
-		disconnect.waitSent(getTimeoutMillis());
-		super.close();
+		boolean sendDisconnect;
+		synchronized (this) {
+			sendDisconnect=!disconnectSent;
+			disconnectSent=true;
+		}
+		if(sendDisconnect)
+		{
+			CoolRMIDisconnect disconnect=new CoolRMIDisconnect();
+			send(disconnect);
+			disconnect.waitSent(getTimeoutMillis());
+			super.close();
+		}
 	}
 }

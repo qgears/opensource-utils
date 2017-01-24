@@ -78,7 +78,7 @@ public class CoolRMIRemoter {
 			.synchronizedMap(new HashMap<Long, CoolRMIServerSideObject>());
 	private long callCounter = 0;
 	private long proxyCounter = 0;
-	
+	private static final ThreadLocal<CoolRMIRemoter> currentRemoter=new ThreadLocal<CoolRMIRemoter>();
 	public CoolRMIRemoter(ClassLoader classLoader, boolean guaranteeOrdering) {
 		this.classLoader = classLoader;
 		this.guaranteeOrdering=guaranteeOrdering;
@@ -438,5 +438,21 @@ public class CoolRMIRemoter {
 	 */
 	public void setLog(ICoolRMILogger log) {
 		this.log = log;
+	}
+	public static CoolRMIRemoter getCurrentRemoter()
+	{
+		return currentRemoter.get();
+	}
+
+	public void registerCurrentRemoter() {
+		currentRemoter.set(this);
+	}
+
+	public void unregisterCurrentRemoter() {
+		currentRemoter.set(null);
+	}
+	public IConnection getConnection()
+	{
+		return sock;
 	}
 }
