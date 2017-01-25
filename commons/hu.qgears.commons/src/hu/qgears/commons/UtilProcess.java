@@ -4,12 +4,15 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.apache.log4j.Logger;
+
+import hu.qgears.commons.signal.SignalFutureWrapper;
 
 /**
  * Helper methods for communicating with external processes.
@@ -169,37 +172,20 @@ public class UtilProcess {
 	 * @param iStream
 	 *            The input stream to pipe into given target output stream
 	 * @param target
-	 *            The target output stream
+	 *            The target output stream. It is not closed after input is consumed.
 	 */
 	public static void streamErrorOfProcess(final InputStream iStream,
 			final OutputStream target) {
 		new Thread() {
 			public void run() {
 				try {
-					doStream(iStream,target);
+					ConnectStreams.doStream(iStream,target);
 				} catch (IOException e) {
 					LOG.error("Exception during streaming error stream", e);
 				}
 			};
 		}.start();
 	}
-	
-	private static void doStream(final InputStream iStream,
-			final OutputStream target) throws IOException {
-		try {
-			int n;
-			byte[] cbuf = new byte[1024];
-			while ((n = iStream.read(cbuf)) > -1) {
-				target.write(cbuf, 0, n);
-				target.flush();
-			}
-		} finally {
-			if (iStream != null) {
-				iStream.close();
-			}
-		}
-	}
-	
 	/**
 	 * Saves the output of given process as a {@link Future} object. Results will
 	 * be ready after both stderr and stdout are closed by the process, so {@link Future#get()} will
@@ -218,7 +204,7 @@ public class UtilProcess {
 			public void run() {
 				ByteArrayOutputStream ret=new ByteArrayOutputStream();
 				try {
-					doStream(p.getInputStream(), ret);
+					ConnectStreams.doStream(p.getInputStream(), ret);
 				} catch (Exception e) {
 					LOG.error("Error streaming std out",e);
 				}finally
@@ -231,7 +217,7 @@ public class UtilProcess {
 		new Thread(){public void run() {
 			ByteArrayOutputStream ret=new ByteArrayOutputStream();
 			try {
-				doStream(p.getErrorStream(), ret);
+				ConnectStreams.doStream(p.getErrorStream(), ret);
 			} catch (Exception e) {
 				LOG.error("Error streaming std err",e);
 			}finally

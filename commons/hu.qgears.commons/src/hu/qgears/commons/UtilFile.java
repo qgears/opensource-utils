@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.jar.Manifest;
 
 import org.apache.log4j.Logger;
@@ -42,6 +43,7 @@ import org.apache.log4j.Logger;
 public final class UtilFile {
 
 	private static final Logger LOG = Logger.getLogger(UtilFile.class);
+	public static final AtomicInteger defaultBufferSize=new AtomicInteger(1024);
 	
 	private UtilFile() {
 		// disable constructor of utility class
@@ -179,7 +181,7 @@ public final class UtilFile {
 		InputStream is = resource.openStream();
 		try {
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			byte[] buffer = new byte[1024];
+			byte[] buffer = new byte[defaultBufferSize.get()];
 			int n;
 			while ((n = is.read(buffer)) > 0) {
 				bos.write(buffer, 0, n);
@@ -209,7 +211,7 @@ public final class UtilFile {
 	public static byte[] loadFile(InputStream is) throws IOException {
 		try {
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			byte[] buffer = new byte[1024];
+			byte[] buffer = new byte[defaultBufferSize.get()];
 			int n;
 			while ((n = is.read(buffer)) > 0) {
 				bos.write(buffer, 0, n);
@@ -233,7 +235,7 @@ public final class UtilFile {
 	public static String loadAsString(InputStream is) throws IOException {
 		try {
 			InputStreamReader reader = new InputStreamReader(is, "UTF-8");
-			char[] chars = new char[1024];
+			char[] chars = new char[defaultBufferSize.get()];
 			StringBuilder ret = new StringBuilder();
 			int count;
 			while ((count = reader.read(chars)) > 0) {

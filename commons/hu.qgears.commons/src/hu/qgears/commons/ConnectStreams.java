@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 
+import org.apache.log4j.Logger;
+
 /**
  * Connect two streams to each other by a thread that reads input and writes to 
  * output at once.
@@ -12,6 +14,7 @@ import java.io.PrintStream;
  *
  */
 public class ConnectStreams extends Thread {
+	private static final Logger LOG = Logger.getLogger(ConnectStreams.class);
 	private InputStream is;
 	private OutputStream os;
 	private PrintStream err=System.err;
@@ -55,17 +58,89 @@ public class ConnectStreams extends Thread {
 	}
 	public void runConnect() throws IOException
 	{
-		byte[] buffer=new byte[1024];
-		int c;
-		while((c=is.read(buffer))>=0)
+		doStream(is, os, closeOs, UtilFile.defaultBufferSize.get());
+	}
+	/**
+	 * Copy all data from input stream to the output stream using this thread.
+	 * Buffer size is the default specified in {@link UtilFile}
+	 * Target is not closed after consuming input.
+	 * @param source
+	 * @param target
+	 * @param bufferSize size of the buffer used when copying
+	 * @throws IOException
+	 */
+	public static void doStream(final InputStream source,
+			final OutputStream target) throws IOException {
+		doStream(source, target, false, UtilFile.defaultBufferSize.get());
+	}
+
+	/**
+	 * Copy all data from input stream to the output stream using this thread.
+	 * @param source
+	 * @param target
+	 * @param closeOutput target is closed after input was consumed if true
+	 * @param bufferSize size of the buffer used when copying
+	 * @throws IOException
+	 */
+	public static void doStream(final InputStream source,
+			final OutputStream target, boolean closeOutput, int bufferSize) throws IOException {
+		try
 		{
-			os.write(buffer, 0, c);
-			os.flush();
-		}
-		is.close();
-		if(closeOs)
+			try {
+				int n;
+				byte[] cbuf = new byte[bufferSize];
+				while ((n = source.read(cbuf)) > -1) {
+					target.write(cbuf, 0, n);
+					target.flush();
+				}
+			} finally {
+				if(source!=null)
+				{
+					source.close();
+				}
+			}
+		}finally
 		{
-			os.close();
+			if(closeOutput&&target!=null)
+			{
+				target.close();
+			}
 		}
+	}
+	/**
+	 * Start a new thread that streams data from input to output.
+	 * @param is
+	 * @param os
+	 */
+	public static void startStreamThread(final InputStream is, final OutputStream os)
+	{
+		new Thread() {
+			public void run() {
+				try {
+					ConnectStreams.doStream(is, os);
+				} catch (IOException e) {
+					LOG.error("Exception during streaming error stream", e);
+				}
+			};
+		}.start();
+	}
+	/**
+	 * Start a new thread that streams data from input to output.
+	 * @param is
+	 * @param os
+	 * @param closeOutput target is closed after input was consumed if true
+	 * @param bufferSize size of the buffer used when copying
+	 */
+	public static void startStreamThread(final InputStream is, final OutputStream os, final boolean closeOutput, final int bufferSize)
+	{
+		new Thread() {
+			public void run() {
+				try {
+					ConnectStreams.doStream(is, os, closeOutput, bufferSize);
+				} catch (IOException e) {
+					LOG.error("Exception during streaming error stream", e);
+				}
+			};
+		}.start();
 	}
 }
