@@ -279,4 +279,33 @@ public class UtilProcess {
 		}
 		return isAlive;
 	}
+	/**
+	 * Query the process every 1 second and return value when the process is terminated.
+	 * @param p
+	 * @return
+	 */
+	public static SignalFutureWrapper<Integer> getProcessReturnValueFuture(final Process p)
+	{
+		final SignalFutureWrapper<Integer> ret=new SignalFutureWrapper<Integer>();
+		Callable<Object> test=new Callable<Object>() {
+			@Override
+			public Object call() {
+				if(isAlive(p))
+				{
+					UtilTimer.getInstance().executeTimeout(1000, this);
+				}else
+				{
+					ret.ready(p.exitValue(), null);
+				}
+				return null;
+			}
+		};
+		try {
+			test.call();
+		} catch (Exception e) {
+			// Never happens
+			e.printStackTrace();
+		}
+		return ret;
+	}
 }
