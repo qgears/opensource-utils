@@ -21,14 +21,14 @@ import hu.qgears.coolrmi.messages.CoolRMIFutureReply;
  */
 public class CoolRMIProxy implements InvocationHandler {
 	private long id;
-	private CoolRMIRemoter remoter;
+	private GenericCoolRMIRemoter remoter;
 	private boolean disposed=false;
 	private ICoolRMIProxy proxyObject;
 	private CallAggregatorClientSide callAggregator=new CallAggregatorClientSide(this);
 	public ICoolRMIProxy getProxyObject() {
 		return proxyObject;
 	}
-	public CoolRMIProxy(CoolRMIRemoter remoter, long id, Class<?> interface_)
+	public CoolRMIProxy(GenericCoolRMIRemoter remoter, long id, Class<?> interface_)
 	{
 		this.remoter=remoter;
 		this.id=id;
@@ -95,7 +95,7 @@ public class CoolRMIProxy implements InvocationHandler {
 			}
 		}
 	}
-	public CoolRMIRemoter getRemoter() {
+	public GenericCoolRMIRemoter getRemoter() {
 		return remoter;
 	}
 	public CallAggregatorClientSide getCallAggregator() {

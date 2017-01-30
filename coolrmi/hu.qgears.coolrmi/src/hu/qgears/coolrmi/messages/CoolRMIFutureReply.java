@@ -7,13 +7,13 @@ import java.util.concurrent.TimeoutException;
 import hu.qgears.commons.signal.SignalFutureWrapper;
 import hu.qgears.coolrmi.CoolRMIException;
 import hu.qgears.coolrmi.CoolRMITimeoutException;
-import hu.qgears.coolrmi.remoter.CoolRMIRemoter;
+import hu.qgears.coolrmi.remoter.GenericCoolRMIRemoter;
 
 public class CoolRMIFutureReply {
 	private SignalFutureWrapper<AbstractCoolRMIReply> fut=new SignalFutureWrapper<AbstractCoolRMIReply>();
-	private CoolRMIRemoter remoter;
+	private GenericCoolRMIRemoter remoter;
 	private long callId;
-	public CoolRMIFutureReply(CoolRMIRemoter remoter, long callId)
+	public CoolRMIFutureReply(GenericCoolRMIRemoter remoter, long callId)
 	{
 		this.remoter=remoter;
 		this.callId=callId;

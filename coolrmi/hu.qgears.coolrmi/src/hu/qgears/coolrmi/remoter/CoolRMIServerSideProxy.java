@@ -1,10 +1,10 @@
 package hu.qgears.coolrmi.remoter;
 
-import hu.qgears.coolrmi.ICoolRMIServerSideProxy;
-
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+
+import hu.qgears.coolrmi.ICoolRMIServerSideProxy;
 
 
 
@@ -19,11 +19,11 @@ import java.lang.reflect.Proxy;
 public class CoolRMIServerSideProxy implements InvocationHandler {
 	private CoolRMIServerSideObject obj;
 	private ICoolRMIServerSideProxy proxyObject;
-//	private CoolRMIRemoter home;
+//	private GenericCoolRMIRemoter home;
 	public ICoolRMIServerSideProxy getProxyObject() {
 		return proxyObject;
 	}
-	CoolRMIServerSideProxy(CoolRMIRemoter home,
+	CoolRMIServerSideProxy(GenericCoolRMIRemoter home,
 			CoolRMIServerSideObject obj)
 	{
 //		this.home=home;

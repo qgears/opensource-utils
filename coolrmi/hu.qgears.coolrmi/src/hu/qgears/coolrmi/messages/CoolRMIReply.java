@@ -17,7 +17,7 @@
 package hu.qgears.coolrmi.messages;
 
 import hu.qgears.coolrmi.remoter.CoolRMIProxy;
-import hu.qgears.coolrmi.remoter.CoolRMIRemoter;
+import hu.qgears.coolrmi.remoter.GenericCoolRMIRemoter;
 
 
 /**
@@ -52,7 +52,7 @@ public class CoolRMIReply extends AbstractCoolRMIMethodCallReply
 	public void evaluateOnClientSide(CoolRMIProxy coolRMIProxy, boolean returnLast) {
 		resolveArgumentsOnClient(coolRMIProxy.getRemoter());
 	}
-	public void resolveArgumentsOnClient(CoolRMIRemoter remoter)
+	public void resolveArgumentsOnClient(GenericCoolRMIRemoter remoter)
 	{
 		if (getException() == null) {
 			ret=remoter.resolveProxyInParamerClientSide(getRet());

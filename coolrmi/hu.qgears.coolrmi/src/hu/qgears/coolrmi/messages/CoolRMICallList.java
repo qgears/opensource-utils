@@ -8,7 +8,7 @@ import java.util.concurrent.Executor;
 
 import hu.qgears.coolrmi.CoolRMIException;
 import hu.qgears.coolrmi.remoter.CoolRMIProxy;
-import hu.qgears.coolrmi.remoter.CoolRMIRemoter;
+import hu.qgears.coolrmi.remoter.GenericCoolRMIRemoter;
 
 /**
  * A list of remote calls that are sent to the server in a single transaction.
@@ -34,7 +34,7 @@ public class CoolRMICallList extends AbstractCoolRMICall {
 	}
 
 	@Override
-	public void executeServerSide(final CoolRMIRemoter coolRMIRemoter, Executor serverSideExecutor) throws IOException {
+	public void executeServerSide(final GenericCoolRMIRemoter coolRMIRemoter, Executor serverSideExecutor) throws IOException {
 		serverSideExecutor.execute(new Runnable() {
 			@Override
 			public void run() {
