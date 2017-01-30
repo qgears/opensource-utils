@@ -23,8 +23,8 @@ import java.lang.reflect.Method;
 import java.util.concurrent.Executor;
 
 import hu.qgears.coolrmi.CoolRMIException;
-import hu.qgears.coolrmi.remoter.CoolRMIRemoter;
 import hu.qgears.coolrmi.remoter.CoolRMIServerSideObject;
+import hu.qgears.coolrmi.remoter.GenericCoolRMIRemoter;
 
 
 /**
@@ -61,7 +61,7 @@ public class CoolRMICall
 		return "CoolRMICall: "+getQueryId()+" proxy: "+proxyId+"."+method;
 	}
 	@Override
-	public void executeServerSide(final CoolRMIRemoter coolRMIRemoter, Executor serverSideExecutor) throws IOException {
+	public void executeServerSide(final GenericCoolRMIRemoter coolRMIRemoter, Executor serverSideExecutor) throws IOException {
 		serverSideExecutor.execute(new Runnable() {
 			@Override
 			public void run() {
@@ -75,7 +75,7 @@ public class CoolRMICall
 			}
 		});
 	}
-	public CoolRMIReply executeOnExecutorThread(final CoolRMIRemoter coolRMIRemoter)
+	public CoolRMIReply executeOnExecutorThread(final GenericCoolRMIRemoter coolRMIRemoter)
 	{
 		final long callId = getQueryId();
 		CoolRMIServerSideObject proxy = coolRMIRemoter.getProxyById(getProxyId());
