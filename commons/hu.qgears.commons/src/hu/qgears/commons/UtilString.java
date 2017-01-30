@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.StringTokenizer;
-import java.util.function.Function;
 
 /**
  * Useful static methods for manipulating strings.
@@ -269,7 +268,7 @@ public class UtilString {
 		}
 		return ret.toString();
 	}
-	public static <T> String concat(List<T> list, UtilComma utilComma, Function<T, String> nameProvider) {
+	public static <T> String concat(List<T> list, UtilComma utilComma, CompatFunction<T, String> nameProvider) {
 		StringBuilder ret=new StringBuilder();
 		try {
 			concat(ret, list, utilComma, nameProvider);
@@ -278,7 +277,7 @@ public class UtilString {
 		}
 		return ret.toString();
 	}
-	public static <T> void concat(Appendable ret, List<T> list, UtilComma utilComma, Function<T, String> nameProvider) throws IOException {
+	public static <T> void concat(Appendable ret, List<T> list, UtilComma utilComma, CompatFunction<T, String> nameProvider) throws IOException {
 		for(T t: list)
 		{
 			ret.append(utilComma.getSeparator());
@@ -286,5 +285,4 @@ public class UtilString {
 		}
 		ret.append(utilComma.getPost());
 	}
-	
 }
