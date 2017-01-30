@@ -4,6 +4,8 @@ import java.util.concurrent.Callable;
 
 import org.apache.log4j.Logger;
 
+import hu.qgears.commons.signal.SignalFutureWrapper;
+
 /**
  * Singleton timer service to execute tasks after a timeout.
  * 
@@ -37,17 +39,21 @@ public class UtilTimer {
 	 * @param callable
 	 * @return
 	 */
-	public <T> void executeTimeout(final long timeoutMillis, final Callable<T> callable)
+	public <T> SignalFutureWrapper<T> executeTimeout(final long timeoutMillis, final Callable<T> callable)
 	{
+		final SignalFutureWrapper<T> ret=new SignalFutureWrapper<T>();
 		new Thread("Execute timeout"){
 			public void run() {
 				try {
 					Thread.sleep(timeoutMillis);
-					callable.call();
+					Object o=callable.call();
+					ret.ready(o, null);
 				} catch (Throwable e) {
 					LOG.error("Interrupt",e);
+					ret.ready(null, e);
 				}
 			};
 		}.start();
+		return ret;
 	}
 }

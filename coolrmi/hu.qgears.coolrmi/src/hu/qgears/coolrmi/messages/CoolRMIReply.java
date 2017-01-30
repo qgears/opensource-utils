@@ -77,4 +77,8 @@ public class CoolRMIReply extends AbstractCoolRMIMethodCallReply
 	public String getName() {
 		return toString();
 	}
+	public boolean isAsync()
+	{
+		return false;
+	}
 }

@@ -6,11 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
-import hu.qgears.commons.NamedThreadFactory;
 import hu.qgears.coolrmi.CoolRMIClose;
 import hu.qgears.coolrmi.CoolRMIException;
 import hu.qgears.coolrmi.CoolRMIService;
@@ -22,6 +18,7 @@ import hu.qgears.coolrmi.ICoolRMIServerSideProxy;
 import hu.qgears.coolrmi.messages.AbstractCoolRMICall;
 import hu.qgears.coolrmi.messages.AbstractCoolRMIMessage;
 import hu.qgears.coolrmi.messages.AbstractCoolRMIReply;
+import hu.qgears.coolrmi.messages.CoolRMICall;
 import hu.qgears.coolrmi.messages.CoolRMICreateProxy;
 import hu.qgears.coolrmi.messages.CoolRMICreateProxyReply;
 import hu.qgears.coolrmi.messages.CoolRMIDisconnect;
@@ -30,14 +27,13 @@ import hu.qgears.coolrmi.messages.CoolRMIFutureReply;
 import hu.qgears.coolrmi.messages.CoolRMIProxyPlaceHolder;
 import hu.qgears.coolrmi.messages.CoolRMIRequestServiceQuery;
 import hu.qgears.coolrmi.messages.CoolRMIRequestServiceReply;
+import hu.qgears.coolrmi.multiplexer.ISocketMultiplexer;
 import hu.qgears.coolrmi.multiplexer.ISocketMultiplexerListener;
-import hu.qgears.coolrmi.multiplexer.SocketMultiplexer;
-import hu.qgears.coolrmi.streams.IConnection;
 
 
 
-public class GenericCoolRMIRemoter {
-	private class SocketMultiplexerListener implements ISocketMultiplexerListener
+abstract public class GenericCoolRMIRemoter {
+	public class SocketMultiplexerListener implements ISocketMultiplexerListener
 	{
 
 		@Override
@@ -57,14 +53,12 @@ public class GenericCoolRMIRemoter {
 			e.printStackTrace();
 		}
 	};
-	private SocketMultiplexer multiplexer;
+	protected ISocketMultiplexer multiplexer;
 	private long timeoutMillis=30000;
-	private IConnection sock;
 	private ClassLoader classLoader;
-	private boolean connected = false;
+	protected boolean connected = false;
 	private boolean closed = false;
-	private Executor serverSideExecutor = null;
-	private boolean guaranteeOrdering;
+	protected boolean guaranteeOrdering;
 	private Map<Long, CoolRMIFutureReply> replies = new HashMap<Long, CoolRMIFutureReply>();
 	/**
 	 * The client side proxy objects.
@@ -82,20 +76,6 @@ public class GenericCoolRMIRemoter {
 	public GenericCoolRMIRemoter(ClassLoader classLoader, boolean guaranteeOrdering) {
 		this.classLoader = classLoader;
 		this.guaranteeOrdering=guaranteeOrdering;
-		if(guaranteeOrdering)
-		{
-			serverSideExecutor=Executors.newSingleThreadExecutor(new NamedThreadFactory("Cool RMI executor"));
-		}else
-		{
-			serverSideExecutor=new Executor()
-			{
-				@Override
-				public void execute(Runnable command) {
-					Thread th=new Thread(command, "Cool RMI executor");
-					th.start();
-				}
-			};
-		}
 	}
 
 	public void setTimeoutMillis(long timeout) {
@@ -108,14 +88,6 @@ public class GenericCoolRMIRemoter {
 
 	public ClassLoader getClassLoader() {
 		return classLoader;
-	}
-	protected void connect(IConnection sock) throws IOException {
-		this.sock = sock;
-		multiplexer = new SocketMultiplexer(
-				sock.getInputStream(), sock
-				.getOutputStream(), new SocketMultiplexerListener(), guaranteeOrdering);
-		connected = true;
-		multiplexer.start();
 	}
 
 	/**
@@ -204,7 +176,7 @@ public class GenericCoolRMIRemoter {
 		CoolRMIServerSideObject service = services.remove(message.getProxyId());
 		if(service!=null)
 		{
-			service.dispose(serverSideExecutor);
+			service.dispose(this);
 		}
 	}
 
@@ -245,7 +217,7 @@ public class GenericCoolRMIRemoter {
 		}
 	}
 	private void doCall(final AbstractCoolRMICall abstarctCall) throws IOException {
-		abstarctCall.executeServerSide(this, serverSideExecutor);
+		abstarctCall.executeServerSide(this);
 	}
 
 	protected Object[] resolveProxyInParamersServerSide(Object[] args) throws IOException {
@@ -337,11 +309,7 @@ public class GenericCoolRMIRemoter {
 			closed = true;
 		}
 		multiplexer.stop();
-		sock.close();
-		if(serverSideExecutor instanceof ExecutorService)
-		{
-			((ExecutorService) serverSideExecutor).shutdown();
-		}
+		closeConnection();
 		List<CoolRMIFutureReply> cancelled=new ArrayList<CoolRMIFutureReply>();
 		synchronized (replies) {
 			cancelled.addAll(replies.values());
@@ -352,6 +320,8 @@ public class GenericCoolRMIRemoter {
 			r.cancelled();
 		}
 	}
+	abstract protected void closeConnection() throws IOException;
+
 	/**
 	 * Create future reply object.
 	 * Must be called before sending the query!
@@ -441,18 +411,9 @@ public class GenericCoolRMIRemoter {
 	}
 	public static GenericCoolRMIRemoter getCurrentRemoter()
 	{
+		CoolRMICall.getCurrentCall().getRemoter();
 		return currentRemoter.get();
 	}
 
-	public void registerCurrentRemoter() {
-		currentRemoter.set(this);
-	}
-
-	public void unregisterCurrentRemoter() {
-		currentRemoter.set(null);
-	}
-	public IConnection getConnection()
-	{
-		return sock;
-	}
+	abstract public void execute(Runnable runnable);
 }
