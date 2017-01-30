@@ -1,7 +1,5 @@
 package hu.qgears.coolrmi.remoter;
 
-import java.util.concurrent.Executor;
-
 import hu.qgears.coolrmi.UtilEvent;
 
 /**
@@ -39,8 +37,8 @@ public class CoolRMIServerSideObject {
 	public Object getService() {
 		return service;
 	}
-	public void dispose(Executor serverSideExecutor) {
+	public void dispose(GenericCoolRMIRemoter genericCoolRMIRemoter) {
 		disposed=true;
-		getDisposedEvent().eventHappened(null, serverSideExecutor);
+		getDisposedEvent().eventHappened(null, genericCoolRMIRemoter);
 	}
 }
