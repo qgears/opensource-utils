@@ -22,7 +22,7 @@ public class CoolRMIReplyList extends AbstractCoolRMIMethodCallReply
 	}
 
 	@Override
-	public void evaluateOnClientSide(CoolRMIProxy coolRMIProxy, boolean returnLast)
+	public void evaluateOnClientSide(CoolRMIProxy coolRMIProxy, boolean returnLast) throws ClassNotFoundException
 	{
 		// All but the last reply are processed using a callback for errors
 		CallAggregatorClientSide aggregator=coolRMIProxy.getCallAggregator();

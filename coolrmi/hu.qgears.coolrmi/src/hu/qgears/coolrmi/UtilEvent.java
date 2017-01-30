@@ -2,7 +2,8 @@ package hu.qgears.coolrmi;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executor;
+
+import hu.qgears.coolrmi.remoter.GenericCoolRMIRemoter;
 
 /**
  * Class that's instances represent an event and manages the listeners and
@@ -35,7 +36,7 @@ public class UtilEvent<T> implements UtilEventListener<T> {
 			listeners.remove(l);
 		}
 	}
-	public void eventHappened(final T msg, Executor executor)
+	public void eventHappened(final T msg, GenericCoolRMIRemoter executor)
 	{
 		executor.execute(new Runnable(){
 			@Override

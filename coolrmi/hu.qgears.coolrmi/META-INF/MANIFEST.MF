@@ -1,6 +1,7 @@
 Manifest-Version: 1.0
 Export-Package: hu.qgears.coolrmi,
  hu.qgears.coolrmi.messages,
+ hu.qgears.coolrmi.multiplexer,
  hu.qgears.coolrmi.remoter,
  hu.qgears.coolrmi.streams
 Bundle-SymbolicName: hu.qgears.coolrmi

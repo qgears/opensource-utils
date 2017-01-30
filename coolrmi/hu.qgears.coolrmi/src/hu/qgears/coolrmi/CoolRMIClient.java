@@ -21,8 +21,8 @@ import java.net.SocketAddress;
 
 import hu.qgears.coolrmi.messages.CoolRMIDisconnect;
 import hu.qgears.coolrmi.remoter.CoolRMIRemoter;
-import hu.qgears.coolrmi.streams.IConnection;
 import hu.qgears.coolrmi.streams.IClientConnectionFactory;
+import hu.qgears.coolrmi.streams.IConnection;
 import hu.qgears.coolrmi.streams.TCPClientConnectionFactory;
 
 

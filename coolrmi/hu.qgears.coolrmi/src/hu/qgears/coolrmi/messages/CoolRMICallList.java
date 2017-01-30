@@ -4,11 +4,10 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executor;
 
 import hu.qgears.coolrmi.CoolRMIException;
 import hu.qgears.coolrmi.remoter.CoolRMIProxy;
-import hu.qgears.coolrmi.remoter.CoolRMIRemoter;
+import hu.qgears.coolrmi.remoter.GenericCoolRMIRemoter;
 
 /**
  * A list of remote calls that are sent to the server in a single transaction.
@@ -34,8 +33,8 @@ public class CoolRMICallList extends AbstractCoolRMICall {
 	}
 
 	@Override
-	public void executeServerSide(final CoolRMIRemoter coolRMIRemoter, Executor serverSideExecutor) throws IOException {
-		serverSideExecutor.execute(new Runnable() {
+	public void executeServerSide(final GenericCoolRMIRemoter coolRMIRemoter) throws IOException {
+		coolRMIRemoter.execute(new Runnable() {
 			@Override
 			public void run() {
 				boolean error=false;
@@ -60,6 +59,9 @@ public class CoolRMICallList extends AbstractCoolRMICall {
 					coolRMIRemoter.send(ret);
 				} catch (IOException e) {
 					// We can not do anything clever here.
+					e.printStackTrace();
+				} catch (ClassNotFoundException e) {
+					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}

@@ -1,9 +1,8 @@
 package hu.qgears.coolrmi.messages;
 
 import java.io.IOException;
-import java.util.concurrent.Executor;
 
-import hu.qgears.coolrmi.remoter.CoolRMIRemoter;
+import hu.qgears.coolrmi.remoter.GenericCoolRMIRemoter;
 
 abstract public class AbstractCoolRMICall extends AbstractCoolRMIMessage
 {
@@ -17,7 +16,7 @@ abstract public class AbstractCoolRMICall extends AbstractCoolRMIMessage
 		super(queryId);
 	}
 
-	abstract public void executeServerSide(CoolRMIRemoter coolRMIRemoter, Executor serverSideExecutor) throws IOException;
+	abstract public void executeServerSide(GenericCoolRMIRemoter coolRMIRemoter) throws IOException;
 	@Override
 	public String getName() {
 		return "RMI call";

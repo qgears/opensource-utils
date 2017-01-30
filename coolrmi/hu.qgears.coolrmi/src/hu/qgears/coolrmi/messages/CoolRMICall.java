@@ -20,11 +20,14 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.concurrent.Executor;
 
+import hu.qgears.commons.signal.SignalFuture;
+import hu.qgears.commons.signal.SignalFutureWrapper;
+import hu.qgears.commons.signal.Slot;
 import hu.qgears.coolrmi.CoolRMIException;
-import hu.qgears.coolrmi.remoter.CoolRMIRemoter;
+import hu.qgears.coolrmi.CoolRMIReplyHandler;
 import hu.qgears.coolrmi.remoter.CoolRMIServerSideObject;
+import hu.qgears.coolrmi.remoter.GenericCoolRMIRemoter;
 
 
 /**
@@ -35,7 +38,11 @@ import hu.qgears.coolrmi.remoter.CoolRMIServerSideObject;
 public class CoolRMICall
 	extends AbstractCoolRMICall
 	implements Serializable{
+	private static final ThreadLocal<CoolRMICall> currentCall=new ThreadLocal<CoolRMICall>();
 	private static final long serialVersionUID = 1L;
+	private transient GenericCoolRMIRemoter remoter;
+	private transient CoolRMIReplyAsync asyncReply;
+	private transient CoolRMIReplyHandler nextCallAsync;
 	private String method;
 	private Object[] args;
 	private long proxyId;
@@ -61,22 +68,26 @@ public class CoolRMICall
 		return "CoolRMICall: "+getQueryId()+" proxy: "+proxyId+"."+method;
 	}
 	@Override
-	public void executeServerSide(final CoolRMIRemoter coolRMIRemoter, Executor serverSideExecutor) throws IOException {
-		serverSideExecutor.execute(new Runnable() {
+	public void executeServerSide(final GenericCoolRMIRemoter coolRMIRemoter) throws IOException {
+		coolRMIRemoter.execute(new Runnable() {
 			@Override
 			public void run() {
 				try {
 					CoolRMIReply reply=executeOnExecutorThread(coolRMIRemoter);
-					coolRMIRemoter.send(reply);
-				} catch (IOException e) {
+					if(!reply.isAsync())
+					{
+						coolRMIRemoter.send(reply);
+					}
+				} catch (Exception e) {
 					// We can not do anything clever here.
 					e.printStackTrace();
 				}
 			}
 		});
 	}
-	public CoolRMIReply executeOnExecutorThread(final CoolRMIRemoter coolRMIRemoter)
+	public CoolRMIReply executeOnExecutorThread(final GenericCoolRMIRemoter coolRMIRemoter) throws ClassNotFoundException
 	{
+		remoter=coolRMIRemoter;
 		final long callId = getQueryId();
 		CoolRMIServerSideObject proxy = coolRMIRemoter.getProxyById(getProxyId());
 		if (proxy == null) {
@@ -92,12 +103,18 @@ public class CoolRMICall
 				if (reqMethod.equals(m.getName())) {
 					final Object[] args=coolRMIRemoter.resolveProxyInParamersClientSide(getArgs());
 					try {
-						coolRMIRemoter.registerCurrentRemoter();
+						registerCurrentCall();
 						Object ret = m.invoke(service, args);
 						ret=coolRMIRemoter.resolveProxyInParamerServerSide(ret);
-						CoolRMIReply reply = new CoolRMIReply(callId,
-								ret, null);
-						return reply;
+						if(asyncReply!=null)
+						{
+							return asyncReply;
+						}else
+						{
+							CoolRMIReply reply = new CoolRMIReply(callId,
+									ret, null);
+							return reply;
+						}
 					} catch (InvocationTargetException exc) {
 						return new CoolRMIReply(callId, null, exc
 								.getCause());
@@ -106,7 +123,7 @@ public class CoolRMICall
 						return new CoolRMIReply(callId, null, t);
 					} finally
 					{
-						coolRMIRemoter.unregisterCurrentRemoter();
+						unregisterCurrentCall();
 					}
 				}
 			}
@@ -121,5 +138,64 @@ public class CoolRMICall
 	public boolean isStopOnException()
 	{
 		return stopOnException;
+	}
+	/**
+	 * Get accessor to the CoolRMI system where asynchronous call 
+	 * or asynchronous return can be set up.
+	 * Never returns null.
+	 * @return
+	 */
+	public static CoolRMICall getCurrentCall()
+	{
+		CoolRMICall ret=currentCall.get();
+		if(ret==null)
+		{
+			ret=new CoolRMICall(-1, -1, "", null, false);
+			currentCall.set(ret);
+		}
+		return ret;
+	}
+
+	public void registerCurrentCall() {
+		currentCall.set(this);
+	}
+
+	public void unregisterCurrentCall() {
+		currentCall.set(null);
+	}
+	public GenericCoolRMIRemoter getRemoter() {
+		return remoter;
+	}
+	public CoolRMIReplyAsync createAsyncReply() {
+		asyncReply=new CoolRMIReplyAsync(remoter, getQueryId());
+		return asyncReply;
+	}
+	public void createAsyncReply(SignalFutureWrapper<Object> ret) {
+		asyncReply=new CoolRMIReplyAsync(remoter, getQueryId());
+		ret.addOnReadyHandler(new Slot<SignalFuture<Object>>() {
+			
+			@Override
+			public void signal(SignalFuture<Object> value) {
+				asyncReply.reply(value.getSimple(), value.getThrowable());
+			}
+		});
+	}
+	/**
+	 * Mark that the next method call is asynchronous.
+	 * @param handler The reply calls this handler. May be null. Null means that the call is asynchronous but the reply is not listened.
+	 */
+	public void asyncCall(CoolRMIReplyHandler handler) {
+		if(handler==null)
+		{
+			nextCallAsync=new CoolRMIReplyHandler();
+		}else
+		{
+			nextCallAsync=handler;
+		}
+	}
+	public CoolRMIReplyHandler removeCurrentAsynCall() {
+		CoolRMIReplyHandler ret=nextCallAsync;
+		nextCallAsync=null;
+		return ret;
 	}
 }

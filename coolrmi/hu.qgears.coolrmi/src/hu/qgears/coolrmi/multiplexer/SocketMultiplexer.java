@@ -24,7 +24,7 @@ import hu.qgears.coolrmi.messages.AbstractCoolRMIMessage;
  * @author rizsi
  *
  */
-public class SocketMultiplexer {
+public class SocketMultiplexer implements ISocketMultiplexer{
 	private boolean guaranteeOrdering;
 	private ISocketMultiplexerListener messageListener;
 	private InputStream is;

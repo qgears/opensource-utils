@@ -17,7 +17,7 @@
 package hu.qgears.coolrmi.messages;
 
 import hu.qgears.coolrmi.remoter.CoolRMIProxy;
-import hu.qgears.coolrmi.remoter.CoolRMIRemoter;
+import hu.qgears.coolrmi.remoter.GenericCoolRMIRemoter;
 
 
 /**
@@ -49,10 +49,10 @@ public class CoolRMIReply extends AbstractCoolRMIMethodCallReply
 		return "CoolRMIReply: "+getQueryId();
 	}
 	@Override
-	public void evaluateOnClientSide(CoolRMIProxy coolRMIProxy, boolean returnLast) {
+	public void evaluateOnClientSide(CoolRMIProxy coolRMIProxy, boolean returnLast) throws ClassNotFoundException {
 		resolveArgumentsOnClient(coolRMIProxy.getRemoter());
 	}
-	public void resolveArgumentsOnClient(CoolRMIRemoter remoter)
+	public void resolveArgumentsOnClient(GenericCoolRMIRemoter remoter) throws ClassNotFoundException
 	{
 		if (getException() == null) {
 			ret=remoter.resolveProxyInParamerClientSide(getRet());
@@ -76,5 +76,9 @@ public class CoolRMIReply extends AbstractCoolRMIMethodCallReply
 	@Override
 	public String getName() {
 		return toString();
+	}
+	public boolean isAsync()
+	{
+		return false;
 	}
 }

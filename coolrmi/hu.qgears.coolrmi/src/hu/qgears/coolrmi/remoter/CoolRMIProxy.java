@@ -5,9 +5,11 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
 import hu.qgears.coolrmi.CoolRMIException;
+import hu.qgears.coolrmi.CoolRMIReplyHandler;
 import hu.qgears.coolrmi.ICoolRMIProxy;
 import hu.qgears.coolrmi.messages.AbstractCoolRMICall;
 import hu.qgears.coolrmi.messages.AbstractCoolRMIMethodCallReply;
+import hu.qgears.coolrmi.messages.CoolRMICall;
 import hu.qgears.coolrmi.messages.CoolRMIFutureReply;
 
 
@@ -21,14 +23,14 @@ import hu.qgears.coolrmi.messages.CoolRMIFutureReply;
  */
 public class CoolRMIProxy implements InvocationHandler {
 	private long id;
-	private CoolRMIRemoter remoter;
+	private GenericCoolRMIRemoter remoter;
 	private boolean disposed=false;
 	private ICoolRMIProxy proxyObject;
 	private CallAggregatorClientSide callAggregator=new CallAggregatorClientSide(this);
 	public ICoolRMIProxy getProxyObject() {
 		return proxyObject;
 	}
-	public CoolRMIProxy(CoolRMIRemoter remoter, long id, Class<?> interface_)
+	public CoolRMIProxy(GenericCoolRMIRemoter remoter, long id, Class<?> interface_)
 	{
 		this.remoter=remoter;
 		this.id=id;
@@ -78,8 +80,17 @@ public class CoolRMIProxy implements InvocationHandler {
 				{
 					CoolRMIFutureReply replyFuture=remoter.getAbstractReply(call.getQueryId());
 					remoter.sendCall(call);
-					reply=(AbstractCoolRMIMethodCallReply)replyFuture.waitReply();
-					reply.evaluateOnClientSide(this, true);
+					CoolRMICall currentcall=CoolRMICall.getCurrentCall();
+					CoolRMIReplyHandler asyncCall=currentcall==null?null:currentcall.removeCurrentAsynCall();
+					if(asyncCall!=null)
+					{
+						replyFuture.registerListener(asyncCall);
+						return null;
+					}else
+					{
+						reply=(AbstractCoolRMIMethodCallReply)replyFuture.waitReply();
+						reply.evaluateOnClientSide(this, true);
+					}
 				}else
 				{
 					return null;
@@ -95,7 +106,7 @@ public class CoolRMIProxy implements InvocationHandler {
 			}
 		}
 	}
-	public CoolRMIRemoter getRemoter() {
+	public GenericCoolRMIRemoter getRemoter() {
 		return remoter;
 	}
 	public CallAggregatorClientSide getCallAggregator() {
