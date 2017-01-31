@@ -2,7 +2,7 @@ target "Opensource utils target platform"
 
 with requirements
 
-location "http://192.168.1.116:8888/nexus/content/repositories/eclipse-mars/" eclipse-mars-mirror {
+location "http://192.168.1.116/mirror/eclipse-mars-mirror/" eclipse-mars-mirror {
 	org.apache.log4j [1.2.15.v201012070815,1.2.15.v201012070815]
 	org.eclipse.emf.sdk.feature.group [2.11.2.v20160208-0841,2.11.2.v20160208-0841]
 	//these plugins are required to execute JUnit tests	
