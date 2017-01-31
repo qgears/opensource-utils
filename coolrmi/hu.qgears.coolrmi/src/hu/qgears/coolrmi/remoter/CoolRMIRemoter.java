@@ -6,11 +6,26 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import hu.qgears.commons.NamedThreadFactory;
+import hu.qgears.coolrmi.multiplexer.ISocketMultiplexerListener;
 import hu.qgears.coolrmi.multiplexer.SocketMultiplexer;
 import hu.qgears.coolrmi.streams.IConnection;
 
 public class CoolRMIRemoter extends GenericCoolRMIRemoter
 {
+	private class SocketMultiplexerListener implements ISocketMultiplexerListener
+	{
+
+		@Override
+		public void messageReceived(byte[] msg) {
+			CoolRMIRemoter.this.messageReceived(msg);
+		}
+
+		@Override
+		public void pipeBroken(Exception e) {
+			CoolRMIRemoter.this.pipeBroken(e);
+		}
+		
+	}
 	private IConnection sock;
 	private Executor serverSideExecutor = null;
 
