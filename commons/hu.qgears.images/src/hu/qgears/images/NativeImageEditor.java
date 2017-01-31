@@ -50,6 +50,7 @@ public class NativeImageEditor {
 		case RGBA: {
 			doFillGeneric(toByte(color.r), toByte(color.g), toByte(color.b), 
 					toByte(color.a), topLeftX, topLeftY, width, height);
+			break;
 		}
 		default:
 			throw new RuntimeException("color fill is not supported for this "
