@@ -49,10 +49,10 @@ public class CoolRMIReply extends AbstractCoolRMIMethodCallReply
 		return "CoolRMIReply: "+getQueryId();
 	}
 	@Override
-	public void evaluateOnClientSide(CoolRMIProxy coolRMIProxy, boolean returnLast) {
+	public void evaluateOnClientSide(CoolRMIProxy coolRMIProxy, boolean returnLast) throws ClassNotFoundException {
 		resolveArgumentsOnClient(coolRMIProxy.getRemoter());
 	}
-	public void resolveArgumentsOnClient(GenericCoolRMIRemoter remoter)
+	public void resolveArgumentsOnClient(GenericCoolRMIRemoter remoter) throws ClassNotFoundException
 	{
 		if (getException() == null) {
 			ret=remoter.resolveProxyInParamerClientSide(getRet());

@@ -5,9 +5,11 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
 import hu.qgears.coolrmi.CoolRMIException;
+import hu.qgears.coolrmi.CoolRMIReplyHandler;
 import hu.qgears.coolrmi.ICoolRMIProxy;
 import hu.qgears.coolrmi.messages.AbstractCoolRMICall;
 import hu.qgears.coolrmi.messages.AbstractCoolRMIMethodCallReply;
+import hu.qgears.coolrmi.messages.CoolRMICall;
 import hu.qgears.coolrmi.messages.CoolRMIFutureReply;
 
 
@@ -78,8 +80,17 @@ public class CoolRMIProxy implements InvocationHandler {
 				{
 					CoolRMIFutureReply replyFuture=remoter.getAbstractReply(call.getQueryId());
 					remoter.sendCall(call);
-					reply=(AbstractCoolRMIMethodCallReply)replyFuture.waitReply();
-					reply.evaluateOnClientSide(this, true);
+					CoolRMICall currentcall=CoolRMICall.getCurrentCall();
+					CoolRMIReplyHandler asyncCall=currentcall==null?null:currentcall.removeCurrentAsynCall();
+					if(asyncCall!=null)
+					{
+						replyFuture.registerListener(asyncCall);
+						return null;
+					}else
+					{
+						reply=(AbstractCoolRMIMethodCallReply)replyFuture.waitReply();
+						reply.evaluateOnClientSide(this, true);
+					}
 				}else
 				{
 					return null;

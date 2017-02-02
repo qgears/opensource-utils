@@ -4,8 +4,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import hu.qgears.commons.signal.SignalFuture;
 import hu.qgears.commons.signal.SignalFutureWrapper;
+import hu.qgears.commons.signal.Slot;
 import hu.qgears.coolrmi.CoolRMIException;
+import hu.qgears.coolrmi.CoolRMIReplyHandler;
 import hu.qgears.coolrmi.CoolRMITimeoutException;
 import hu.qgears.coolrmi.remoter.GenericCoolRMIRemoter;
 
@@ -13,6 +16,7 @@ public class CoolRMIFutureReply {
 	private SignalFutureWrapper<AbstractCoolRMIReply> fut=new SignalFutureWrapper<AbstractCoolRMIReply>();
 	private GenericCoolRMIRemoter remoter;
 	private long callId;
+	private CoolRMIReplyHandler handler;
 	public CoolRMIFutureReply(GenericCoolRMIRemoter remoter, long callId)
 	{
 		this.remoter=remoter;
@@ -44,5 +48,18 @@ public class CoolRMIFutureReply {
 	}
 	public void cancelled() {
 		fut.cancel(true);
+	}
+	public void registerListener(final CoolRMIReplyHandler handler) {
+		fut.addOnReadyHandler(new Slot<SignalFuture<AbstractCoolRMIReply>>() {
+			
+			@Override
+			public void signal(SignalFuture<AbstractCoolRMIReply> value) {
+				if(value.getSimple() instanceof CoolRMIReply)
+				{
+					CoolRMIReply r=(CoolRMIReply) value.getSimple();
+					handler.handle(r);
+				}
+			}
+		});
 	}
 }
