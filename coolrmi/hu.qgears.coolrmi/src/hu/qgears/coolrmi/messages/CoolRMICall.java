@@ -25,6 +25,7 @@ import hu.qgears.commons.signal.SignalFuture;
 import hu.qgears.commons.signal.SignalFutureWrapper;
 import hu.qgears.commons.signal.Slot;
 import hu.qgears.coolrmi.CoolRMIException;
+import hu.qgears.coolrmi.CoolRMIReplyHandler;
 import hu.qgears.coolrmi.remoter.CoolRMIServerSideObject;
 import hu.qgears.coolrmi.remoter.GenericCoolRMIRemoter;
 
@@ -40,7 +41,8 @@ public class CoolRMICall
 	private static final ThreadLocal<CoolRMICall> currentCall=new ThreadLocal<CoolRMICall>();
 	private static final long serialVersionUID = 1L;
 	private transient GenericCoolRMIRemoter remoter;
-	private transient CoolRMIReplyAsync asyncReply; 
+	private transient CoolRMIReplyAsync asyncReply;
+	private transient CoolRMIReplyHandler nextCallAsync;
 	private String method;
 	private Object[] args;
 	private long proxyId;
@@ -76,14 +78,14 @@ public class CoolRMICall
 					{
 						coolRMIRemoter.send(reply);
 					}
-				} catch (IOException e) {
+				} catch (Exception e) {
 					// We can not do anything clever here.
 					e.printStackTrace();
 				}
 			}
 		});
 	}
-	public CoolRMIReply executeOnExecutorThread(final GenericCoolRMIRemoter coolRMIRemoter)
+	public CoolRMIReply executeOnExecutorThread(final GenericCoolRMIRemoter coolRMIRemoter) throws ClassNotFoundException
 	{
 		remoter=coolRMIRemoter;
 		final long callId = getQueryId();
@@ -137,9 +139,21 @@ public class CoolRMICall
 	{
 		return stopOnException;
 	}
+	/**
+	 * Get accessor to the CoolRMI system where asynchronous call 
+	 * or asynchronous return can be set up.
+	 * Never returns null.
+	 * @return
+	 */
 	public static CoolRMICall getCurrentCall()
 	{
-		return currentCall.get();
+		CoolRMICall ret=currentCall.get();
+		if(ret==null)
+		{
+			ret=new CoolRMICall(-1, -1, "", null, false);
+			currentCall.set(ret);
+		}
+		return ret;
 	}
 
 	public void registerCurrentCall() {
@@ -165,5 +179,23 @@ public class CoolRMICall
 				asyncReply.reply(value.getSimple(), value.getThrowable());
 			}
 		});
+	}
+	/**
+	 * Mark that the next method call is asynchronous.
+	 * @param handler The reply calls this handler. May be null. Null means that the call is asynchronous but the reply is not listened.
+	 */
+	public void asyncCall(CoolRMIReplyHandler handler) {
+		if(handler==null)
+		{
+			nextCallAsync=new CoolRMIReplyHandler();
+		}else
+		{
+			nextCallAsync=handler;
+		}
+	}
+	public CoolRMIReplyHandler removeCurrentAsynCall() {
+		CoolRMIReplyHandler ret=nextCallAsync;
+		nextCallAsync=null;
+		return ret;
 	}
 }

@@ -24,8 +24,9 @@ abstract public class AbstractCoolRMIMethodCallReply extends AbstractCoolRMIRepl
 	 * @param coolRMIProxy 
 	 * @param remoter
 	 * @param returnLast when true then return the value returned by last method call.
+	 * @throws ClassNotFoundException 
 	 */
-	abstract public void evaluateOnClientSide(CoolRMIProxy coolRMIProxy, boolean returnLast);
+	abstract public void evaluateOnClientSide(CoolRMIProxy coolRMIProxy, boolean returnLast) throws ClassNotFoundException;
 	/**
 	 * The exception thrown on the server when executing the method.
 	 * @return

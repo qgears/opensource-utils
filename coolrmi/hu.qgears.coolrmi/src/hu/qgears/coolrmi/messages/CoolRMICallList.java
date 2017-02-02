@@ -60,6 +60,9 @@ public class CoolRMICallList extends AbstractCoolRMICall {
 				} catch (IOException e) {
 					// We can not do anything clever here.
 					e.printStackTrace();
+				} catch (ClassNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			}
 		});

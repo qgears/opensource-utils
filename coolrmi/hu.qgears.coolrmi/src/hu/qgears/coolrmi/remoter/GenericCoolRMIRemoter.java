@@ -18,8 +18,6 @@ import hu.qgears.coolrmi.messages.AbstractCoolRMICall;
 import hu.qgears.coolrmi.messages.AbstractCoolRMIMessage;
 import hu.qgears.coolrmi.messages.AbstractCoolRMIReply;
 import hu.qgears.coolrmi.messages.CoolRMICall;
-import hu.qgears.coolrmi.messages.CoolRMICreateProxy;
-import hu.qgears.coolrmi.messages.CoolRMICreateProxyReply;
 import hu.qgears.coolrmi.messages.CoolRMIDisconnect;
 import hu.qgears.coolrmi.messages.CoolRMIDisposeProxy;
 import hu.qgears.coolrmi.messages.CoolRMIFutureReply;
@@ -27,7 +25,6 @@ import hu.qgears.coolrmi.messages.CoolRMIProxyPlaceHolder;
 import hu.qgears.coolrmi.messages.CoolRMIRequestServiceQuery;
 import hu.qgears.coolrmi.messages.CoolRMIRequestServiceReply;
 import hu.qgears.coolrmi.multiplexer.ISocketMultiplexer;
-
 
 
 abstract public class GenericCoolRMIRemoter {
@@ -135,9 +132,6 @@ abstract public class GenericCoolRMIRemoter {
 				handleReply((AbstractCoolRMIReply) message);
 			} else if (message instanceof CoolRMIDisposeProxy) {
 				handleDisposeProxy((CoolRMIDisposeProxy) message);
-			} else if (message instanceof CoolRMICreateProxy)
-			{
-				handleCreateProxy((CoolRMICreateProxy)message);
 			} else if (message instanceof CoolRMIDisconnect)
 			{
 				close();
@@ -148,17 +142,6 @@ abstract public class GenericCoolRMIRemoter {
 		} catch (Exception e) {
 			log.logError(e);
 		}
-	}
-
-	private void handleCreateProxy(CoolRMICreateProxy message) throws ClassNotFoundException, IOException {
-		Class<?> ifaceClass=Class.forName(message.getIfaceName(), false, classLoader);
-		CoolRMIProxy proxy=new CoolRMIProxy(this,
-				message.getProxyId(),
-				ifaceClass);
-		synchronized (this) {
-			proxies.put(proxy.getId(), proxy);
-		}
-		send(new CoolRMICreateProxyReply(message.getQueryId()));
 	}
 
 	private void handleDisposeProxy(CoolRMIDisposeProxy message) {
@@ -222,7 +205,7 @@ abstract public class GenericCoolRMIRemoter {
 		}
 		return args;
 	}
-	public Object[] resolveProxyInParamersClientSide(Object[] args) {
+	public Object[] resolveProxyInParamersClientSide(Object[] args) throws ClassNotFoundException {
 		if(args!=null)
 		{
 			for(int i=0;i<args.length;++i)
@@ -241,25 +224,37 @@ abstract public class GenericCoolRMIRemoter {
 			{
 				ICoolRMIServerSideProxy ssop=createServerSideProxyObject(new CoolRMIShareableObject(iftype, arg));
 				CoolRMIServerSideObject sso=ssop.getCoolRMIServerSideProxyObject();
-				CoolRMIProxyPlaceHolder ph=new CoolRMIProxyPlaceHolder(sso.getProxyId());
+				CoolRMIProxyPlaceHolder ph=new CoolRMIProxyPlaceHolder(sso.getProxyId(), sso.getIface().getName());
 				return ph;
 			}
 		}
 		if(arg instanceof ICoolRMIServerSideProxy)
 		{
 			CoolRMIServerSideObject sso=((ICoolRMIServerSideProxy) arg).getCoolRMIServerSideProxyObject();
-			CoolRMIProxyPlaceHolder ph=new CoolRMIProxyPlaceHolder(sso.getProxyId());
+			CoolRMIProxyPlaceHolder ph=new CoolRMIProxyPlaceHolder(sso.getProxyId(), null);
 			return ph;
 		}
 		return arg;
 	}
-	public Object resolveProxyInParamerClientSide(Object arg) {
+	public Object resolveProxyInParamerClientSide(Object arg) throws ClassNotFoundException {
 		if(arg instanceof CoolRMIProxyPlaceHolder)
 		{
 			CoolRMIProxyPlaceHolder ph=(CoolRMIProxyPlaceHolder) arg;
 			CoolRMIProxy proxy;
-			synchronized (this) {
-				proxy=proxies.get(ph.getProxyId());
+			if(ph.getIfaceName()!=null)
+			{
+				Class<?> ifaceClass=Class.forName(ph.getIfaceName(), false, classLoader);
+				proxy=new CoolRMIProxy(this,
+						ph.getProxyId(),
+						ifaceClass);
+				synchronized (this) {
+					proxies.put(proxy.getId(), proxy);
+				}
+			}else
+			{
+				synchronized (this) {
+					proxy=proxies.get(ph.getProxyId());
+				}
 			}
 			if(proxy!=null)
 			{
@@ -387,10 +382,6 @@ abstract public class GenericCoolRMIRemoter {
 	{
 		CoolRMIServerSideObject sso = createProxyObject(service);
 		CoolRMIServerSideProxy ret=new CoolRMIServerSideProxy(this, sso);
-		CoolRMICreateProxy req=new CoolRMICreateProxy(getNextCallId(), sso.getProxyId(), sso.getIface().getName());
-		CoolRMIFutureReply replyFut=getAbstractReply(req.getQueryId());
-		send(req);
-		replyFut.waitReply();
 		return ret.getProxyObject();
 	}
 
