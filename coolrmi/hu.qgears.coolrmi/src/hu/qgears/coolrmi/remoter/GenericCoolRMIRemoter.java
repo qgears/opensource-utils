@@ -297,6 +297,10 @@ abstract public class GenericCoolRMIRemoter {
 		List<CoolRMIFutureReply> cancelled=new ArrayList<CoolRMIFutureReply>();
 		synchronized (this) {
 			connected = false;
+			if(closed)
+			{
+				return;
+			}
 			closed = true;
 			cancelled.addAll(replies.values());
 			replies.clear();
