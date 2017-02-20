@@ -78,4 +78,21 @@ public class TextUtils {
 		return dispositionX;
 	}
 
+	/**
+	 * Returns a shift of 'x' coordinate in pixels in order to fit the logical extent horizontally
+	 * @param inkX the left bearing of the rendered text
+	 * @param inkXWidth the horizontal width of the rendered text
+	 * @param textWidth The width of the rendered label
+	 * @return
+	 */
+	public static int shiftHorizontally(int inkX, int inkXWidth, int textWidth) {
+		if ((inkX < 0) && (inkX + inkXWidth < textWidth)) {
+			return inkX;
+		}
+		if ((inkX > 0) && (inkX + inkXWidth > textWidth)) {
+			return (inkX + inkXWidth - textWidth);
+		}
+		return 0;
+	}
+	
 }
