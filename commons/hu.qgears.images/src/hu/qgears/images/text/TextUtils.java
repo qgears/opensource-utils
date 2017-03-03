@@ -86,10 +86,10 @@ public class TextUtils {
 	 * @return
 	 */
 	public static int shiftHorizontally(int inkX, int inkXWidth, int textWidth) {
-		if ((inkX < 0) && (inkX + inkXWidth < textWidth)) {
+		if ((inkX < 0) && (inkXWidth <= textWidth)) {
 			return inkX;
 		}
-		if ((inkX > 0) && (inkX + inkXWidth > textWidth)) {
+		if ((inkX + inkXWidth > textWidth) && (inkXWidth <= textWidth)) {
 			return (inkX + inkXWidth - textWidth);
 		}
 		return 0;
