@@ -36,6 +36,15 @@ abstract public class AbstractTool implements ITool
 		}
 		return doExec(a);
 	}
+	@Override
+	public int help(List<String> subList) throws Exception {
+		System.out.println(getId()+": "+getDescription());
+		System.out.println("\n\nARGUMENTS:");
+		AnnotatedClass ac2=new AnnotatedClass();
+		ac2.parseAnnotations(createArgsObject());
+		ac2.printHelpOn(System.out);
+		return 0;
+	}
 	abstract protected int doExec(IArgs a) throws Exception;
 	abstract protected IArgs createArgsObject();
 }

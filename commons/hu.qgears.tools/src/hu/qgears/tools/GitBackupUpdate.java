@@ -28,6 +28,7 @@ import joptsimple.annot.JOHelp;
 
 public class GitBackupUpdate extends AbstractTool
 {
+	private final String urslAcceptedCharacters="";
 	private TemplateDelegate t=new TemplateDelegate();
 	public class Args implements IArgs{
 		@JOHelp("Repository backup folder - subfolders are repository backups. All are fetched and then all tags and branches are tagged (except the tags that are already local backups) so that they are not overwritten with next fetches.")
@@ -36,7 +37,7 @@ public class GitBackupUpdate extends AbstractTool
 		public long timeoutMillis=60000*30;
 		@JOHelp("Commit latest backup date to this file. The file must be in a git repo branch which is only written by this client (commit and push only this single file). (When not present log is not saved.)")
 		public File backupLogFile;
-		@JOHelp("Pointer to file of URLs to be backed up. Paramter of the 'git show' command. Containing repo must be within the backed up repositories within the repos folder. Must be $repofolder$:$branch$:$path$ Example: 'master:backupConfig.txt'. If this argument is present then the specified branch is fetched from origin first then the config is parsed.")
+		@JOHelp("Pointer to file of URLs to be backed up. Paramter of the 'git show' command. Containing repo must be within the backed up repositories within the repos folder. Must be $repofolder$:$branch$:$path$ Example: 'repo.gi:master:backupConfig.txt'. If this argument is present then the specified branch is fetched from origin first then the config is parsed.")
 		public String backupConfig;
 		@JOHelp("Reference name to be used for backups. Backup refs are generated like: /refs/$backupRef$/date/original")
 		public String backupRef="backup";
@@ -125,38 +126,44 @@ public class GitBackupUpdate extends AbstractTool
 				File f=new File(a.repos, folder);
 				String branch=pieces.get(1);
 				String path=pieces.get(2);
-				String cmd="git fetch origin +refs/heads/"+branch+":refs/heads/"+branch;
-				Process p=Runtime.getRuntime().exec(cmd, null, f);
+				// String cmd="git fetch origin +refs/heads/"+branch+":refs/heads/"+branch;
+				ProcessBuilder pb=new ProcessBuilder("git", "fetch", "origin", "+refs/heads/"+branch+":refs/heads/"+branch).directory(f);
+				Process p = pb.start();
 				ProcessFuture pr=UtilProcess2.execute(p);
 				ProcessResult r=pr.get(a.timeoutMillis, timeoutUnit);
-				addLog(" $ "+cmd);
+				addLog(" $ "+cmdLog(pb));
 				if(r.getExitCode()!=0)
 				{
 					addExitCode("Update repo containing config: ", r);
 					addLog(r.getStdoutString());
 					addError(r.getStderrString());
 				}
-				cmd="git show "+branch+":"+path;
+				pb=new ProcessBuilder("git", "show", ""+branch+":"+path).directory(f);
+//				cmd="git show "+branch+":"+path;
 				write(" $ ");
-				writeObject(cmd);
+				writeObject(cmdLog(pb));
 				write("\n");
-				p=Runtime.getRuntime().exec(cmd, null, f);
+				p=pb.start();
 				pr=UtilProcess2.execute(p);
 				r=pr.get(a.timeoutMillis, timeoutUnit);
 				if(r.getExitCode()!=0)
 				{
 					addExitCode("Read configuration from repo: ", r);
-					addLog(""+cmd);
+					addLog(""+cmdLog(pb));
 					addLog(r.getStdoutString());
 					addError(r.getStderrString());
 				}
 				reqUrls=new TreeSet<>();
+				// Remote configuration. This is an attack vector of the program if we consider blackhat activity on the git servers.
 				for(String s: UtilString.split(r.getStdoutString(), "\r\n"))
 				{
 					String trimmed=s.trim();
 					if(trimmed.length()>0 && !trimmed.startsWith("#"))
 					{
-						reqUrls.add(trimmed);
+						if(validateURL(trimmed))
+						{
+							reqUrls.add(trimmed);
+						}
 					}
 				}
 			}finally
@@ -173,7 +180,8 @@ public class GitBackupUpdate extends AbstractTool
 					if(!f.getName().startsWith(".") && f.isDirectory())
 					{
 						{
-							Process p=Runtime.getRuntime().exec("git remote get-url origin", null, f);
+							ProcessBuilder pb=new ProcessBuilder("git", "remote", "get-url", "origin").directory(f);
+							Process p=pb.start();
 							ProcessFuture pr=UtilProcess2.execute(p);
 							String url=pr.get(a.timeoutMillis, timeoutUnit).getStdoutString();
 							urls.put(UtilString.split(url, "\r\n").get(0), f.getAbsolutePath());
@@ -195,9 +203,9 @@ public class GitBackupUpdate extends AbstractTool
 						write("\n\n....\n");
 						try
 						{
-							String cmd="git clone --bare "+s;
-							Process p=Runtime.getRuntime().exec(cmd, null, a.repos);
-							addLog(" $ "+cmd);
+							ProcessBuilder pb=new ProcessBuilder("git", "clone", "--bare", ""+s).directory(a.repos);
+							Process p=pb.start();
+							addLog(" $ "+cmdLog(pb));
 							ProcessFuture pf=UtilProcess2.execute(p);
 							ProcessResult pr=pf.get(a.timeoutMillis, timeoutUnit);
 							addExitCode("clone url "+s+": ", pr);
@@ -230,21 +238,26 @@ public class GitBackupUpdate extends AbstractTool
 						try
 						{
 							{
-								Process p=Runtime.getRuntime().exec("git remote get-url origin", null, f);
+								ProcessBuilder pb=new ProcessBuilder("git", "remote" ,"get-url", "origin").directory(f);
+								Process p=pb.start();
 								ProcessFuture pr=UtilProcess2.execute(p);
 								currentUrl=UtilString.split(pr.get(a.timeoutMillis, timeoutUnit).getStdoutString(), "\r\n").get(0);
 								updatedUrls.add(currentUrl);
 								fromTempl.generate();
 							}
 							{
-								StringBuilder refspec=new StringBuilder("git fetch -p origin");
+								List<String> command=new ArrayList<>();
+								command.add("git");
+								command.add("fetch");
+								command.add("-p");
+								command.add("origin");
 								for(String r: a.refs)
 								{
-									refspec.append(" ");
-									refspec.append("+refs/"+r+"/*:refs/"+r+"/*");
+									command.add("+refs/"+r+"/*:refs/"+r+"/*");
 								}
-								addLog(refspec.toString());
-								Process p=Runtime.getRuntime().exec(refspec.toString(), null, f);
+								ProcessBuilder pb=new ProcessBuilder(command).directory(f);
+								addLog(cmdLog(pb));
+								Process p=pb.start();
 								ProcessFuture pr=UtilProcess2.execute(p);
 								ProcessResult r=pr.get(a.timeoutMillis, timeoutUnit);
 								addLog(r.getStdoutString());
@@ -253,7 +266,8 @@ public class GitBackupUpdate extends AbstractTool
 							}
 							Map<String, String> refs=new TreeMap<>();
 							{
-								Process p=Runtime.getRuntime().exec("git show-ref", null, f);
+								ProcessBuilder pb=new ProcessBuilder("git", "show-ref", "origin").directory(f);
+								Process p=pb.start();
 								ProcessFuture pr=UtilProcess2.execute(p);
 								ProcessResult r=pr.get(a.timeoutMillis, timeoutUnit);
 								String refss=r.getStdoutString();
@@ -307,7 +321,8 @@ public class GitBackupUpdate extends AbstractTool
 		}
 		{
 			write("== Disk usage\n\n");
-			Process p=Runtime.getRuntime().exec("du -sh .", null, a.repos);
+			ProcessBuilder pb=new ProcessBuilder("du", "-sh" ,".").directory(a.repos);
+			Process p=pb.start();
 			ProcessFuture pr=UtilProcess2.execute(p);
 			ProcessResult r=pr.get(a.timeoutMillis, timeoutUnit);
 			if(r.getExitCode()!=0)
@@ -333,8 +348,7 @@ public class GitBackupUpdate extends AbstractTool
 			a.backupLogFile.getParentFile().mkdirs();
 			UtilFile.saveAsFile(a.backupLogFile, t.getResult());
 			{
-				String[] cmdarray=new String[]{"git", "add", "."};
-				Process p=Runtime.getRuntime().exec(cmdarray, null, a.backupLogFile.getParentFile());
+				Process p=new ProcessBuilder("git", "add", ".").directory(a.backupLogFile.getParentFile()).start();
 				ProcessFuture pr=UtilProcess2.execute(p);
 				ProcessResult r=pr.get(a.timeoutMillis, timeoutUnit);
 				addExitCode("Log git add results: ", r);
@@ -342,8 +356,7 @@ public class GitBackupUpdate extends AbstractTool
 				addError(r.getStderrString());
 			}
 			{
-				String[] cmdarray=new String[]{"git", "commit", "-m", "Autobackup: "+df.format(c.getTime())};
-				Process p=Runtime.getRuntime().exec(cmdarray, null, a.backupLogFile.getParentFile());
+				Process p=new ProcessBuilder("git", "commit", "-m", "Autobackup: "+df.format(c.getTime())).directory(a.backupLogFile.getParentFile()).start();
 				ProcessFuture pr=UtilProcess2.execute(p);
 				ProcessResult r=pr.get(a.timeoutMillis, timeoutUnit);
 				addExitCode("Commit log results: ", r);
@@ -351,7 +364,7 @@ public class GitBackupUpdate extends AbstractTool
 				addError(r.getStderrString());
 			}
 			{
-				Process p=Runtime.getRuntime().exec("git push", null, a.backupLogFile.getParentFile());
+				Process p=new ProcessBuilder("git", "push").directory(a.backupLogFile.getParentFile()).start();
 				ProcessFuture pr=UtilProcess2.execute(p);
 				ProcessResult r=pr.get(a.timeoutMillis, timeoutUnit);
 				addExitCode("Push log results: ", r);
@@ -362,6 +375,27 @@ public class GitBackupUpdate extends AbstractTool
 		return error?1:0;
 	}
 	
+	private boolean validateURL(String repoUrl) {
+		for(char ch: repoUrl.toCharArray())
+		{
+			if(urslAcceptedCharacters.indexOf(ch)<0)
+			{
+				write("ERROR Invalid character in required URL: '");
+				writeObject(""+ch);
+				write("' in: '");
+				writeObject(""+repoUrl);
+				write("'\n");
+				error=true;
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private String cmdLog(ProcessBuilder pb) {
+		return UtilString.concat(pb.command(), " ");
+	}
+
 	class WriteError implements Consumer<Object[]>
 	{
 		@Override
@@ -400,9 +434,9 @@ public class GitBackupUpdate extends AbstractTool
 	}
 
 	private void createBackup(File f, String src, String target) throws Exception {
-		String cmd0="git update-ref "+target+" "+src;
-		addLog(" $ "+cmd0);
-		Process p=Runtime.getRuntime().exec(cmd0, null, f);
+		ProcessBuilder pb=new ProcessBuilder("git", "update-ref", target, src).directory(f);
+		addLog(" $ "+cmdLog(pb));
+		Process p=pb.start();
 		ProcessFuture pr=UtilProcess2.execute(p);
 		ProcessResult r=pr.get(a.timeoutMillis, timeoutUnit);
 		int ec=r.getExitCode();
@@ -411,12 +445,12 @@ public class GitBackupUpdate extends AbstractTool
 		if(ec!=0)
 		{
 			error=true;
-			addError("Create tag error: '"+cmd0+"' "+ec);
+			addError("Create tag error: '"+cmdLog(pb)+"' "+ec);
 		}
 	}
 	private void getCommitLogMessage(File f, String code) throws IOException, InterruptedException, ExecutionException, TimeoutException {
-		String cmd0="git log --format=%B  -n 1 "+code;
-		Process p=Runtime.getRuntime().exec(cmd0, null, f);
+		ProcessBuilder pb=new ProcessBuilder("git", "log", "--format=%B", "-n", "1", code).directory(f);
+		Process p=pb.start();
 		ProcessFuture pr=UtilProcess2.execute(p);
 		ProcessResult r=pr.get(a.timeoutMillis, timeoutUnit);
 		int ec=r.getExitCode();
@@ -429,7 +463,7 @@ public class GitBackupUpdate extends AbstractTool
 		if(ec!=0)
 		{
 			error=true;
-			addError("Get commit log message error: '"+cmd0+"' "+ec);
+			addError("Get commit log message error: '"+cmdLog(pb)+"' "+ec);
 		}
 	}
 

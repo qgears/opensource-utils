@@ -10,4 +10,6 @@ public interface ITool {
 
 	int exec(List<String> subList) throws Exception;
 
+	int help(List<String> subList) throws Exception;
+
 }
