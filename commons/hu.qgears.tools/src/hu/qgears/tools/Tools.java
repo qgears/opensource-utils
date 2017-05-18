@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import hu.qgears.commons.UtilString;
+import hu.qgears.tools.rtemplate.RTemplateStandalone;
 
 public class Tools {
 	public static void main(String[] args) {
@@ -23,6 +24,7 @@ public class Tools {
 		ret.add(new GitToZip());
 		ret.add(new GitBackupUpdate());
 		ret.add(new SvnDiff());
+		ret.add(new RTemplateStandalone());
 		ret.addAll(tools);
 		return ret;
 	}
