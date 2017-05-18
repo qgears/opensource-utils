@@ -93,6 +93,8 @@ public class TextParameters {
 	 */
 	public double letterSpacing = 0;
 
+	public boolean richText = false;
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof TextParameters) {
@@ -103,7 +105,8 @@ public class TextParameters {
 					&& other.fontStyle == fontStyle && other.hAlign == hAlign
 					&& other.vAlign == vAlign
 					&& other.textDecoration == textDecoration
-					&& other.letterSpacing == letterSpacing;
+					&& other.letterSpacing == letterSpacing
+					&& richText == other.richText;
 		}
 		return false;
 	}
@@ -113,7 +116,8 @@ public class TextParameters {
 		return hash(fontFamily) ^ hash(fontSize) ^ hash(c)/* ^ height ^ width*/
 				^ hash(text) ^ hash(fontWeight) ^ hash(fontStyle)
 				^ hash(vAlign) ^ hash(hAlign) ^ hash(textDecoration)
-				^ hash(letterSpacing);
+				^ hash(letterSpacing)
+				^ hash(richText);
 	}
 	
 	/**
@@ -152,6 +156,7 @@ public class TextParameters {
 		this.vAlign = toCopy.vAlign;
 		this.textDecoration = toCopy.textDecoration;
 		this.letterSpacing = toCopy.letterSpacing;
+		this.richText = toCopy.richText;
 	}
 	
 	
