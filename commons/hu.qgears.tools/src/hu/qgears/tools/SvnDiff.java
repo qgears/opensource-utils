@@ -71,7 +71,8 @@ public class SvnDiff extends AbstractTool {
 
 	@Override
 	public String getDescription() {
-		return "Collect all differences of a current SVN working copy tree to the BASE revision and launch a difftool (meld) session. Both the base revision (left side of compare) and the working copy version (right side of compare) are collected into a temporary folder. BASE revision entries are copies from the svn. Working copy entries are symlinks into the working copy folder.";
+		return "Collect all differences of a current SVN working copy tree to the BASE revision and launch a difftool (meld) session. (Similar feature as git difftool -d) Both the base revision (left side of compare) and the working copy version (right side of compare) are collected into a temporary folder. BASE revision entries are copies from the svn. Working copy entries are symlinks into the working copy folder."
+				+"\nDoes not handle all status (eg. conflict handling is missing). Use it on your own responsibility!";
 	}
 
 	@Override
@@ -105,6 +106,7 @@ public class SvnDiff extends AbstractTool {
 			}
 		}
 		{
+			boolean unversionedOmitted=false;
 			DiffOutput left=new DiffOutput();
 			File folder=File.createTempFile("svndiff", "temp");
 			folder.delete();
@@ -112,6 +114,8 @@ public class SvnDiff extends AbstractTool {
 			left.folder=new File(folder, "left");
 			DiffOutput right=new DiffOutput();
 			right.folder=new File(folder, "right");
+			left.folder.mkdirs();
+			right.folder.mkdirs();
 			NodeList entries = (NodeList) xPath.evaluate("target/entry", doc.getDocumentElement(),
 					XPathConstants.NODESET);
 			XPathExpression selectMode = xPath.compile("wc-status/@item");
@@ -132,7 +136,11 @@ public class SvnDiff extends AbstractTool {
 				{
 					File f=new File(left.folder, path);
 					f.getParentFile().mkdirs();
-					UtilFile.saveAsFile(f, svnCat(a, a.workingCopy, path));
+					byte[] leftContent=svnCat(a, a.workingCopy, path);
+					if(leftContent!=null)
+					{
+						UtilFile.saveAsFile(f, leftContent);
+					}
 					File g=new File(right.folder, path);
 					g.getParentFile().mkdirs();
 					Files.createSymbolicLink(g.toPath(), new File(a.workingCopy, path).toPath());
@@ -144,15 +152,48 @@ public class SvnDiff extends AbstractTool {
 					File g=new File(right.folder, path);
 					g.getParentFile().mkdirs();
 					Files.createSymbolicLink(g.toPath(), new File(a.workingCopy, path).toPath());
+				}else
+				{
+					unversionedOmitted=true;
 				}
 				break;
+				case "missing":
+					// System.err.println("Missing: "+path);
+					if(a.unversioned)
+					{
+						File f=new File(left.folder, path);
+						f.getParentFile().mkdirs();
+						byte[] leftContent=svnCat(a, a.workingCopy, path);
+						if(leftContent!=null)
+						{
+							UtilFile.saveAsFile(f, leftContent);
+						}
+						// TODO create link for the highest level existing folder!
+					}else
+					{
+						unversionedOmitted=true;
+					}
+					break;
+				case "deleted":
+					File f=new File(left.folder, path);
+					f.getParentFile().mkdirs();
+					byte[] leftContent=svnCat(a, a.workingCopy, path);
+					if(leftContent!=null)
+					{
+						UtilFile.saveAsFile(f, leftContent);
+					}
+					break;
 				case "added":
 				{
+					// System.err.println("Added: '"+path+"'");
 					File g=new File(right.folder, path);
 					g.getParentFile().mkdirs();
 					Files.createSymbolicLink(g.toPath(), new File(a.workingCopy, path).toPath());
 				}
 				break;
+				case "external":
+					// Nothing to do with externals
+					break;
 				default:
 					if (!path.equals(".")) {
 						System.out.println("difference: " + mod + " path: " + path);
@@ -160,9 +201,13 @@ public class SvnDiff extends AbstractTool {
 					break;
 				}
 			}
+			if(unversionedOmitted)
+			{
+				System.err.println("There are unversioned changes (missing or added files) that are omitted. Use --unversioned true to make them visible.");
+			}
 			Process difftool=new ProcessBuilder().command("meld", left.folder.getAbsolutePath(), right.folder.getAbsolutePath()).start();
 			UtilProcess.getProcessReturnValueFuture(difftool).get();
-			UtilFile.deleteRecursive(folder);
+			deleteRecursiveDontFollowSymlinks(folder);
 		}
 		return 0;
 	}
@@ -172,7 +217,17 @@ public class SvnDiff extends AbstractTool {
 		Process p=new ProcessBuilder().command("/usr/bin/svn", "cat", path).directory(workingCopy).start();
 		Future<Pair<byte[], byte[]>> fut=UtilProcess.saveOutputsOfProcess(p);
 		Pair<byte[], byte[]> pa=fut.get();
-		return pa.getA();
+		byte[] retBytes=pa.getA();
+		if(retBytes.length==0)
+		{
+			int ret=UtilProcess.getProcessReturnValueFuture(p).get();
+			if(ret!=0)
+			{
+				// svn cat returns error in case of folder.
+				return null;
+			}
+		}
+		return retBytes;
 	}
 
 	@SuppressWarnings("unused")
@@ -224,6 +279,27 @@ public class SvnDiff extends AbstractTool {
 			return writer.toString();
 		} catch (Exception e) {
 			throw new RuntimeException(e);
+		}
+	}
+	/**
+	 * Delete the given file or directory. If it is a directory then delete all
+	 * its content recursively. (Works like "rm -rf" with some differences)
+	 * 
+	 * Folder symbolic links are not followed so the contents of the original folder (which is linked from any subtree
+	 * of the dir folder) is not touched.
+	 * 
+	 * @param dir
+	 */
+	public static void deleteRecursiveDontFollowSymlinks(File dir) {
+		if (dir.exists()) {
+			if (!Files.isSymbolicLink(dir.toPath()) && dir.isDirectory()) {
+				for (File f : dir.listFiles()) {
+					deleteRecursiveDontFollowSymlinks(f);
+				}
+			}
+			if (!dir.delete()){
+				System.err.println("Cannot delete file: "+dir);
+			}
 		}
 	}
 }
