@@ -2,7 +2,7 @@ JNI_INCLUDE=-IC:/cygwin64/usr/jdkinclude -IC:/cygwin64/usr/jdkinclude/win32
 
 ARCHPOSTFIX='64'
 
-DLLS=CYGWIN1.DLL
+DLLS=CYGWIN1.DLL CYGPNG16-16.DLL CYGZ.DLL 
 
 #used by the maven build process, see pom.xml in project.
 ifndef OUTPUTDIR
@@ -15,8 +15,8 @@ gnu_c : cp_bin
 	-DM_PI='(3.14159265358979323846264338327950288419716939937510)' -D__int64=int64_t \
 	${JNI_INCLUDE} \
 	../../nativeLibpng.cpp ../../jniutil.cpp \
-	-static-libgcc -Wl,-Bstatic -lgcc -lstdc++ -lpthread -lwinpthread \
+	-static-libgcc -Wl,-Bstatic -lgcc -lstdc++ -lpthread \
 	-Wl,-Bdynamic -lpng -lz 
  	
 cp_bin:
-	cp $(addprefix C:/cygwin64/bin/, $(DLLS)) $(OUTDIR)/
+	cp $(addprefix C:/cygwin64/bin/, $(DLLS)) $(OUTPUTDIR)/
