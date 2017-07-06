@@ -1,0 +1,17 @@
+#
+#
+#	shm.dll makefile for cygwin
+#
+#
+#The path was modified the include folder from the jdk was moved to cygwin usr folder as jdkinclude
+JNI_INCLUDE=-IC:/cygwin64/usr/jdkinclude -IC:/cygwin64/usr/jdkinclude/win32
+
+gnu_c:
+	gcc -m64 -shared -o ../../src/hu/qgears/shm/natives/shm.dll \
+	-D_REENTRANT \
+	-std=c++11 \
+	-DM_PI='(3.14159265358979323846264338327950288419716939937510)' -D__int64=int64_t \
+	${JNI_INCLUDE} \
+	../malloc.c ../jniutil.cpp ../DlMallocPoolNative.cpp ../PartNativeMemoryNative.cpp \
+	SemaphoreNative.cpp SharedMemoryNative.cpp \
+	-static-libgcc -static-libstdc++ -Wl,-Bstatic -lgcc -lstdc++
