@@ -124,7 +124,7 @@ METHODPREFIX(CLASS, jboolean, decrementValueTimed)(ST_ARGS, jlong timeoutTimeMil
 METHODPREFIX(CLASS, jint, getValue)(ST_ARGS)
 {
 	MYHEADID(JNISTRUCT, FID);
-	long prevValue=0;
+	LONG prevValue=0;
 	if(!ReleaseSemaphore(str->hSem, 0, &prevValue))
 	{
 		JNU_ThrowByNameErrno(env, EXCCLASS, "posting semaphore: ",
