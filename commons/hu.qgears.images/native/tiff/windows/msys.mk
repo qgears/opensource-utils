@@ -12,9 +12,9 @@ ifndef OUTPUTDIR
 endif
 
 gnu_c:
-	gcc -m64 -o $(OUTPUTDIR)/qtiffloader$(ARCHPOSTFIX).dll \
+	gcc -x c++ -m64 -o $(OUTPUTDIR)/qtiffloader$(ARCHPOSTFIX).dll \
 	-D_REENTRANT -shared -Wl,--add-stdcall-alias \
 	${JNI_INCLUDE} \
-	../tiffloader.h ../tiffloader.c ../jni/tiffloader_connector.cpp ../jni/image_data_connector.cpp ../jni/jniutil.cpp \
+	../tiffloader.c ../jni/tiffloader_connector.cpp ../jni/image_data_connector.cpp ../jni/jniutil.cpp \
 	-static-libgcc -lstdc++
 	
