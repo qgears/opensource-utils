@@ -10,4 +10,9 @@
 				installPath="/opt/qgears/qtiffloader.so" />
 		</platform>
 	</platform>
+	<platform name=".*(W|w)indows.*">
+		<platform arch="(amd|x86_)64">
+			<lib path="qtiffloader64.dll" />
+		</platform>
+	</platform>
 </natives-def>
