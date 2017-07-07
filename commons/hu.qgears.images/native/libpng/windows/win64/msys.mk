@@ -1,3 +1,9 @@
+#
+#
+#	libqpng64.dll makefile for msys2
+#
+#
+
 JDKPATH = /C/Program\ Files/Java/jdk1.8.0_60/
 
 JNI_INCLUDE= \
