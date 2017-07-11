@@ -4,7 +4,9 @@
 #
 #
 
-JDKPATH = /C/Program\ Files/Java/jdk1.8.0_60/
+ifndef JDKPATH
+	JDKPATH = /C/Program\ Files/Java/jdk1.8.0_60/
+endif
 
 JNI_INCLUDE= \
 -I$(JDKPATH)/include  \
@@ -21,7 +23,7 @@ endif
 	
 gnu_c : cp_bin
 	gcc -m64 -o $(OUTPUTDIR)/libqpng$(ARCHPOSTFIX).dll \
-	-D_REENTRANT -shared -Wl,--add-stdcall-alias \
+	-fPIC -D_REENTRANT -shared -Wl,--add-stdcall-alias \
 	${JNI_INCLUDE} \
 	../../nativeLibpng.cpp ../../jniutil.cpp \
 	-static-libgcc -Wl,-Bstatic -lgcc -lstdc++ -lpthread \
