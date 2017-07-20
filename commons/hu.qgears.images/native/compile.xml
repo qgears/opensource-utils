@@ -9,7 +9,7 @@
 	<target name="make-all" depends="make-c-win,make-c-linux" />
 		
 	<target name="make-c-win" depends="jnigen,check-cross" if="check-cross-true">
-    	<exec dir="./libpng/windows/win64" executable="make">
+    	<exec dir="./libpng/windows" executable="make">
     		<arg value="-f"/>
     		<arg value="cross-compile.mk"/>
     	</exec>
