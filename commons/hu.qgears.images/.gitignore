@@ -1,4 +1,4 @@
 /bin/
 /nativesTmp/
 /**/src/**/*.dll
-/win64-dep/
+/win-dep/
