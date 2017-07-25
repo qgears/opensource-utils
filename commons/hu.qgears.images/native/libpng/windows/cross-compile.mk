@@ -28,15 +28,19 @@ COMMAND_64 = x86_64-w64-mingw32-gcc -m64 -o $(OUTPUTDIR)/libqpng64.dll -I$(MINGW
 COMMAND_COMMON = -fPIC -D_REENTRANT -shared -Wl,--add-stdcall-alias ${JNI_INCLUDE} ../nativeLibpng.cpp ../jniutil.cpp \
 -static-libgcc -Wl,-Bstatic -lgcc -lstdc++ -lpthread -Wl,-Bdynamic -lpng -lz.dll
 
-.PHONY: all
+.PHONY: all compile32 compile64 checkdir
 
 all: compile32 compile64
 	
-compile32:
-	$(COMMAND_32) $(COMMAND_COMMON) 
+checkdir:
+	echo "Checking directories needed for cross-compile..."
+	if [ ! -d $(MINGW32) ]; then echo "[ERROR]\n[ERROR]: mingw32 directory does not exist\n[ERROR]"; exit -1 ; fi
+	if [ ! -d $(MINGW64) ]; then echo "[ERROR]\n[ERROR]: mingw64 directory does not exist\n[ERROR]"; exit -1 ; fi
+	if [ ! -d $(JDKPATH) ]; then echo "[ERROR]\n[ERROR]: jdk directory does not exist\n[ERROR]";exit -1 ; fi
+
+compile32: checkdir
+	$(COMMAND_32) $(COMMAND_COMMON)
 	
-compile64:
-	$(COMMAND_64) $(COMMAND_COMMON) 
-
-
+compile64: checkdir
+	$(COMMAND_64) $(COMMAND_COMMON)
 
