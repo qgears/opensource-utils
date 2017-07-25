@@ -33,12 +33,19 @@ COMMAND_COMMON = -fPIC -D_REENTRANT -shared -Wl,--add-stdcall-alias \
 	$(PKG_LIB) -lglu32 \
 	-static-libgcc -Wl,-Bstatic -lgcc -lstdc++ -lpthread 
 
-.PHONY: all
+.PHONY: all compile32 compile64 checkdir
 
 all: compile32 compile64
 	
-compile32:
+checkdir:
+	echo "Checking directories needed for cross-compile..."
+	if [ ! -d $(MINGW32) ]; then echo "[ERROR]\n[ERROR]: mingw32 directory does not exist\n[ERROR]"; exit -1 ; fi
+	if [ ! -d $(MINGW64) ]; then echo "[ERROR]\n[ERROR]: mingw64 directory does not exist\n[ERROR]"; exit -1 ; fi
+	if [ ! -d $(JDKPATH) ]; then echo "[ERROR]\n[ERROR]: jdk directory does not exist\n[ERROR]";exit -1 ; fi
+
+compile32: checkdir
 	$(COMMAND_32) $(COMMAND_COMMON)
 	
-compile64:
+compile64: checkdir
 	$(COMMAND_64) $(COMMAND_COMMON)
+
