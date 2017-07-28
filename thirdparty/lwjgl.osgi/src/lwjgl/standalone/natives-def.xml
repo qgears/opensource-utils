@@ -7,7 +7,7 @@
 			<lib path="native/windows/lwjgl.dll"/>
 			<lib path="native/windows/OpenAL32.dll"/>
 		</platform>
-		<platform arch="">
+		<platform arch="(amd|x86_)64">
 			<lib path="native/windows/jinput-dx8_64.dll"/>
 			<lib path="native/windows/jinput-raw_64.dll"/>
 			<lib path="native/windows/lwjgl64.dll"/>
