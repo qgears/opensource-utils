@@ -65,6 +65,22 @@
 							<workingDirectory>./native/libpng/linux</workingDirectory>
 						</configuration>
 					</execution>
+					<!-- Compile libpng native libraries for windows 32 and 64 bit -->
+					<execution>
+						<id>libqpng-natives-windows</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+						<configuration>
+							<executable>make</executable>
+							<workingDirectory>./native/libpng/windows</workingDirectory>
+							<arguments>
+								<argument>-f</argument>
+								<argument>cross-compile.mk</argument>
+							</arguments>
+						</configuration>
+					</execution>
 					<!-- Compiling tiff lib -->
 					<execution>
 						<id>qtiffloader-natives</id>
