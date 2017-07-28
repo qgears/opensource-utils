@@ -4,7 +4,7 @@
 		<platform arch="x86|i[3-6]86">
 			<lib path="native/windows/lwjgl.dll"/>
 		</platform>
-		<platform arch="">
+		<platform arch="(amd|x86_)64">
 			<lib path="native/windows/lwjgl64.dll"/>
 		</platform>
 	</platform>
