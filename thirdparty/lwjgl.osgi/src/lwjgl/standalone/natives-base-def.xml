@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <natives-def>
-	<platform name="Windows .+">
+	<platform name=".*(W|w)in.*">
 		<platform arch="x86|i[3-6]86">
 			<lib path="native/windows/lwjgl.dll"/>
 		</platform>
