@@ -33,6 +33,21 @@
 							<workingDirectory>./native/linux</workingDirectory>
 						</configuration>
 					</execution>
+					<execution>
+						<id>opengl-commons-natives-run-make-file-windows</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+						<configuration>
+							<executable>make</executable>
+							<workingDirectory>./native/windows</workingDirectory>
+							<arguments>
+								<argument>-f</argument>
+								<argument>cross-compile.mk</argument>
+							</arguments>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 		</plugins>
