@@ -10,4 +10,12 @@
 				installPath="/opt/qgears/libqglut.so" />
 		</platform>
 	</platform>
+	<platform name=".*(W|w)in.*">
+		<platform arch="(amd|x86_)64">
+			<lib path="libqglut64.dll"/>
+		</platform>
+		<platform arch="(i386)">
+			<lib path="libqglut32.dll"/>
+		</platform>
+	</platform>
 </natives-def>
