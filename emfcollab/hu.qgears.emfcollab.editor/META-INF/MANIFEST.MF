@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Export-Package: hu.qgears.emfcollab.editor
 Bundle-SymbolicName: hu.qgears.emfcollab.editor;singleton:=true
-Bundle-Version: 6.8.0.qualifier
+Bundle-Version: 6.8.1.qualifier
 Bundle-Name: Editor
 Require-Bundle: org.eclipse.ui,org.eclipse.core.runtime,org.eclipse.co
  re.resources;visibility:=reexport,hu.qgears.emfcollab;bundle-version=

@@ -6,12 +6,12 @@
 	<parent>
 		<groupId>hu.qgears</groupId>
 		<artifactId>opensource-utils-parent</artifactId>
-		<version>6.8.0-SNAPSHOT</version>
+		<version>6.8.1-SNAPSHOT</version>
 		<relativePath>../opensource-utils-parent</relativePath>
 	</parent>
 	<groupId>hu.qgears</groupId>
 	<artifactId>hu.qgears.opensource.utils.p2</artifactId>
-	<version>6.8.0-SNAPSHOT</version>
+	<version>6.8.1-SNAPSHOT</version>
 	<packaging>eclipse-repository</packaging>
 	
 	<properties>
