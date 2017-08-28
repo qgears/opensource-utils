@@ -3,7 +3,7 @@ Export-Package: hu.qgears.opengl.commons,hu.qgears.opengl.commons.cont
  ainer,hu.qgears.opengl.commons.context,hu.qgears.opengl.commons.input
  ,hu.qgears.opengl.osmesa
 Bundle-SymbolicName: hu.qgears.opengl.commons
-Bundle-Version: 6.8.0.qualifier
+Bundle-Version: 6.9.0.qualifier
 Bundle-Name: Commons
 Require-Bundle: lwjgl.osgi;bundle-version="1.0.0";visibility:=reexport
  ,hu.qgears.commons;bundle-version="2.0.0";visibility:=reexport,hu.qge
