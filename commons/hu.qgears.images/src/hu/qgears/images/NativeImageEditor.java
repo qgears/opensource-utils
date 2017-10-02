@@ -156,7 +156,7 @@ public class NativeImageEditor {
 	 * @param height the height of the rectangle to fill
 	 */
 	/* too many parameters are OK here */
-	private void doFillGeneric(byte first, byte second, byte third, byte fourth,
+	private void doFillGeneric(byte first, byte second, byte third, byte fourth, //NOSONAR
 			int x, int y, int width, int height) { // NOSONAR
 		for (int i = x; i < x + width; i++) {
 			for (int j = y; j < y + height; j++) {

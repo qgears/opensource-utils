@@ -2,7 +2,6 @@ package hu.qgears.images.palette;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.TreeMap;
 
 import hu.qgears.images.NativeImage;
@@ -84,7 +83,8 @@ public class QuantizeOctTree {
 				Cluster ch=children[index];
 				if(ch==null)
 				{
-					ch=children[index]=new Cluster(this, level+1, index);
+					ch=new Cluster(this, level+1, index);
+					children[index]=ch;
 					empty=false;
 				}
 				ch.addPixel(v0, v1, v2);
@@ -106,7 +106,8 @@ public class QuantizeOctTree {
 				Cluster ch=children[index];
 				if(ch==null)
 				{
-					ch=children[index]=new Cluster(this, level+1, index);
+					ch=new Cluster(this, level+1, index);
+					children[index]=ch;
 					empty=false;
 					incNBelow();
 				}
@@ -418,28 +419,5 @@ public class QuantizeOctTree {
 	private void reduceOneNode() {
 		Cluster toreduce=delegatesByValue.get(delegatesByValue.firstKey());
 		toreduce.reduce();
-	}
-	/**
-	 * Helper method to print the ten first delegates of reducing the number of colors.
-	 * Was used for debugging purpose only.
-	 */
-	@SuppressWarnings("unused")
-	private void printHead() {
-		System.out.println("Delegates head: npixel: "+root.nPixel+" nbelow: "+root.nBelow+" n delegates: "+delegatesByValue.size());
-		int n=10;
-		for(Map.Entry<Long, Cluster> r: delegatesByValue.entrySet())
-		{
-			Cluster c=r.getValue();
-			System.out.println(""+c+" Cluster: "+r.getKey()+" "+c.delegateKey+" n leave below: "+c.nBelow+" error: "+c.errorIfReduced()+" "+c.errorPerColor()+" level: "+c.level);
-			if(!c.delegate)
-			{
-				throw new RuntimeException("Para!");
-			}
-			n--;
-			if(n==0)
-			{
-				break;
-			}
-		}
 	}
 }
