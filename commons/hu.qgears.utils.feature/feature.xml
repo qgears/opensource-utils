@@ -2,7 +2,7 @@
 <feature
       id="hu.qgears.utils.feature"
       label="Opensource utils"
-      version="6.9.0.qualifier">
+      version="6.9.1.qualifier">
 
    <description url="https://github.com/qgears/opensource-utils">
       Utilities developed by Q-Gears.
