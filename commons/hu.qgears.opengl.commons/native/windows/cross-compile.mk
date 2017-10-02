@@ -16,7 +16,7 @@ JNI_INCLUDE=\
 #PKGCONFIG=`pkg-config freeglut glew --libs`
 PKG_DIR_32=-I$(MINGW32)/include -L$(MINGW32)/lib
 PKG_DIR_64=-I$(MINGW64)/include -L$(MINGW64)/lib
-PKG_LIB=-lfreeglut -lopengl32 -lwinmm -lgdi32 -lm -lglew32
+PKG_LIB=-lfreeglut-gen -lopengl32 -lwinmm -lgdi32 -lm -lglew32
 
 #used by the maven editor_platform_build process, see pom.xml in project.
 ifndef OUTPUTDIR
