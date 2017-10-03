@@ -287,30 +287,6 @@ public class QuantizeOctTree {
 		private String getClusterAccessorKey() {
 			return key;
 		}
-		private Cluster getColor(int v0, int v1, int v2) {
-			int bestFit=-1;
-			int bestError=Integer.MAX_VALUE;
-			for(int i=0; i< children.length;++i)
-			{
-				Cluster c=children[i];
-				if(c!=null)
-				{
-					int error=square(c.getV0()-v0)+square(c.getV1()-v1)+square(c.getV2()-v2);
-					if(error<bestError)
-					{
-						bestFit=i;
-						bestError=error;
-					}
-				}
-			}
-			if(bestFit==-1)
-			{
-				return this;
-			}else
-			{
-				return children[bestFit].getColor(v0, v1, v2);
-			}
-		}
 		private int toNativeImageColor() {
 			int v0=getV0()&0xFF;
 			int v1=getV1()&0xFF;
@@ -392,29 +368,6 @@ public class QuantizeOctTree {
 			colors[i]=ret.get(i).toNativeImageColor();
 		}
 		return new Palette(colors);
-	}
-	/**
-	 * Simple implementation to find a good match of colors for the image.
-	 * Searching all palette entries gives better result though
-	 * see: {@link Palette.reduceImageColorsToPalette}
-	 * (but this is cheaper in CPU cycles).
-	 * @param im
-	 */
-	@SuppressWarnings("unused")
-	private void reduceImageColorsToPalette(NativeImage im) {
-		for(int j=0;j<im.getHeight();++j)
-		{
-			for(int i=0;i<im.getWidth();++i)
-			{
-				int v=im.getPixel(i, j);
-				int v0=(v>>24)&0xFF;
-				int v1=(v>>16)&0xFF;
-				int v2=(v>>8)&0xFF;
-				Cluster c=root.getColor(v0, v1, v2);
-				int vNew=c.toNativeImageColor();
-				im.setPixel(i, j, vNew);
-			}
-		}
 	}
 	private void reduceOneNode() {
 		Cluster toreduce=delegatesByValue.get(delegatesByValue.firstKey());
