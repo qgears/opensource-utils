@@ -7,7 +7,10 @@
 # jdk's include folder, JDKPATH=jdk folder (only include subfolder needed)
 # msys2 64 bit mingw64 folder, MINGW64=msys2/mingw64  (only include and lib directory needed)
 
-WINDEP = ../../../win-dep
+ifndef WINDEP
+    WINDEP = ../../../win-dep
+endif
+
 JDKPATH=$(WINDEP)/JDK-win
 MINGW32=$(WINDEP)/mingw32
 MINGW64=$(WINDEP)/mingw64

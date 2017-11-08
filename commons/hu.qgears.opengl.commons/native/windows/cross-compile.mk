@@ -4,7 +4,9 @@
 #
 #
 
-WINDEP = ../../win-dep
+ifndef WINDEP
+    WINDEP = ../../../win-dep
+endif
 JDKPATH=$(WINDEP)/JDK-win
 MINGW32=$(WINDEP)/mingw32
 MINGW64=$(WINDEP)/mingw64
