@@ -60,12 +60,17 @@ public class MouseWrapper implements IMouse {
 	public int getY() {
 		return getMouse().getY();
 	}
-	private IMouse getMouse() {
+	public IMouse getMouse() {
 		if(mouse0==null)
 		{
 			mouse0=openGLAppContainer.frame.getMouseObject();
 		}
 		return mouse0;
+	}
+	
+	@Override
+	public void addEvent(int type, int x, int y, EMouseButton button, int state) {
+		mouse0.addEvent(type, x, y, button, state);
 	}
 
 }

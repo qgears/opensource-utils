@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-SymbolicName: hu.qgears.shm.test
 Bundle-Name: Test cases for hu.qgears.shm
-Bundle-Version: 6.8.0.qualifier
+Bundle-Version: 6.9.2.qualifier
 Require-Bundle: org.junit;bundle-version="4.8.2",hu.qgears.shm;bundle-
  version="1.0.0",hu.qgears.commons;bundle-version="2.0.0"
 Bundle-ManifestVersion: 2

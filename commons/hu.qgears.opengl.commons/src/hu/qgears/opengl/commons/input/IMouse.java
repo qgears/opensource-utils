@@ -1,6 +1,5 @@
 package hu.qgears.opengl.commons.input;
 
-
 public interface IMouse {
 	/**
 	 * Poll the next event.
@@ -17,4 +16,15 @@ public interface IMouse {
 	int getX();
 
 	int getY();
+	
+	/**
+	 * For testing purposes only: allows the caller to append an event to the 
+	 * low level input event processing queue.
+	 * @param type the type of the event
+	 * @param x x coordinate of the event
+	 * @param y y coordinate of the event
+	 * @param button the mouse button
+	 * @param state state of the mouse button
+	 */
+	void addEvent(int type, int x, int y, EMouseButton button, int state);
 }

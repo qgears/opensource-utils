@@ -54,13 +54,9 @@ public class MouseImplCallback implements IMouse {
 	}
 
 	/**
-	 * 
-	 * @param type
-	 * @param x
-	 * @param y
-	 * @param button
-	 * @param state 1 means button not down
+	 * {@inheritDoc}
 	 */
+	@Override
 	public void addEvent(int type, int x, int y, EMouseButton button, int state) {
 		boolean buttonDown=state!=1;
 		GlMouseEvent currEv=events[eventWritePtr];

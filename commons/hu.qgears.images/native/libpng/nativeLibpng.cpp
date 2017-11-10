@@ -1,5 +1,6 @@
 // #define PNG_DEBUG 3
 #include <png.h>
+#include <string.h>
 #include "nativeLibpng.h"
 #include "hu_qgears_images_libpng_NativeLibPngConnector.h"
 #define PNGCLASS Java_hu_qgears_images_libpng_NativeLibPngConnector_

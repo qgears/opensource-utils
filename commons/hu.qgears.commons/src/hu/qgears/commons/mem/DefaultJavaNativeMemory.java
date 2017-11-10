@@ -1,8 +1,9 @@
 package hu.qgears.commons.mem;
 
-import hu.qgears.commons.AbstractReferenceCountedDisposeable;
-
+import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
+
+import hu.qgears.commons.AbstractReferenceCountedDisposeable;
 
 
 /**
@@ -13,6 +14,7 @@ import java.nio.ByteBuffer;
  */
 public class DefaultJavaNativeMemory extends AbstractReferenceCountedDisposeable implements INativeMemory {
 	private ByteBuffer ptr;
+	
 	public DefaultJavaNativeMemory(long size) {
 		if(((int)size)!=size)
 		{
@@ -25,8 +27,16 @@ public class DefaultJavaNativeMemory extends AbstractReferenceCountedDisposeable
 	}
 	@Override
 	protected void singleDispose() {
-		// Nothing to do ByteBuffers allocated using Java's default mechanism
-		// finalize itself when garbage collected
+		try {
+			final Method cleanerMethod = ptr.getClass().getMethod("cleaner");
+			cleanerMethod.setAccessible(true);
+			final Object cleaner = cleanerMethod.invoke(ptr);
+			final Method cleanMethod = cleaner.getClass().getMethod("clean");
+			cleanMethod.setAccessible(true);
+			cleanMethod.invoke(cleaner);
+		} catch (final Exception e) {
+			throw new NativeMemoryException("Exception during disposal", e);
+		}
 	}
 	@Override
 	public ByteBuffer getJavaAccessor() {
