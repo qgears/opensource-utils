@@ -38,7 +38,10 @@ public class ParagraphInfo {
 	
 	private int width;
 
-	public ParagraphInfo() {
+	private EVerticalAlign verticalAligment;
+
+	public ParagraphInfo(EVerticalAlign va) {
+		this.verticalAligment = va;
 	}
 
 	public ParagraphInfo(String pangoMurkupContent,
@@ -107,4 +110,7 @@ public class ParagraphInfo {
 		this.marginAfter = marginAfter;
 	}
 	
+	public EVerticalAlign getVerticalAligment() {
+		return verticalAligment;
+	}
 }
