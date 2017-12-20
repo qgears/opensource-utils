@@ -40,6 +40,9 @@ public class ParagraphInfo {
 
 	private EVerticalAlign verticalAligment;
 
+	public ParagraphInfo() {
+		this(EVerticalAlign.bottom);
+	}
 	public ParagraphInfo(EVerticalAlign va) {
 		this.verticalAligment = va;
 	}
@@ -112,5 +115,9 @@ public class ParagraphInfo {
 	
 	public EVerticalAlign getVerticalAligment() {
 		return verticalAligment;
+	}
+	
+	public void setVerticalAligment(EVerticalAlign verticalAligment) {
+		this.verticalAligment = verticalAligment;
 	}
 }
