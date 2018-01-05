@@ -111,6 +111,7 @@ public class ConnectStreams extends Thread {
 	 * Start a new thread that streams data from input to output.
 	 * @param is
 	 * @param os
+	 * @return New thread that copies data from is to os. Thread exits when the source or target is closed. 
 	 */
 	public static Thread startStreamThread(final InputStream is, final OutputStream os)
 	{
@@ -132,6 +133,7 @@ public class ConnectStreams extends Thread {
 	 * @param os
 	 * @param closeOutput target is closed after input was consumed if true
 	 * @param bufferSize size of the buffer used when copying
+	 * @return New thread that copies data from is to os. Thread exits when the source or target is closed.
 	 */
 	public static Thread startStreamThread(final InputStream is, final OutputStream os, final boolean closeOutput, final int bufferSize)
 	{
