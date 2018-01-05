@@ -112,9 +112,9 @@ public class ConnectStreams extends Thread {
 	 * @param is
 	 * @param os
 	 */
-	public static void startStreamThread(final InputStream is, final OutputStream os)
+	public static Thread startStreamThread(final InputStream is, final OutputStream os)
 	{
-		new Thread() {
+		Thread ret=new Thread() {
 			public void run() {
 				try {
 					ConnectStreams.doStream(is, os);
@@ -122,7 +122,9 @@ public class ConnectStreams extends Thread {
 					LOG.error("Exception during streaming error stream", e);
 				}
 			};
-		}.start();
+		};
+		ret.start();
+		return ret;
 	}
 	/**
 	 * Start a new thread that streams data from input to output.
@@ -131,9 +133,9 @@ public class ConnectStreams extends Thread {
 	 * @param closeOutput target is closed after input was consumed if true
 	 * @param bufferSize size of the buffer used when copying
 	 */
-	public static void startStreamThread(final InputStream is, final OutputStream os, final boolean closeOutput, final int bufferSize)
+	public static Thread startStreamThread(final InputStream is, final OutputStream os, final boolean closeOutput, final int bufferSize)
 	{
-		new Thread() {
+		Thread ret=new Thread() {
 			public void run() {
 				try {
 					ConnectStreams.doStream(is, os, closeOutput, bufferSize);
@@ -141,6 +143,8 @@ public class ConnectStreams extends Thread {
 					LOG.error("Exception during streaming error stream", e);
 				}
 			};
-		}.start();
+		};
+		ret.start();
+		return ret;
 	}
 }
