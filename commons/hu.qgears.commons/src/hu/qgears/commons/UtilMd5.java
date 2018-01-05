@@ -9,6 +9,11 @@ import java.security.NoSuchAlgorithmException;
  * Md5 hash helper utilities.
  */
 public class UtilMd5 {
+	
+	/**
+	 * Prevent instantiation.
+	 */
+	private UtilMd5(){}
 	/**
 	 * Length of an MD5 hash Hex format in characters.
 	 */

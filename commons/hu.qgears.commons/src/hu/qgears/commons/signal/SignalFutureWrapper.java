@@ -156,7 +156,7 @@ public class SignalFutureWrapper<T> implements SignalFuture<T>, Callable<T>
 		{
 			ready(null, new RuntimeException("callable cancelled before execution"));
 		}
-		return ret;
+		return getSimple();
 	}
 
 	@Override

@@ -2,7 +2,6 @@ package hu.qgears.images.palette;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.TreeMap;
 
 import hu.qgears.images.NativeImage;
@@ -84,7 +83,8 @@ public class QuantizeOctTree {
 				Cluster ch=children[index];
 				if(ch==null)
 				{
-					ch=children[index]=new Cluster(this, level+1, index);
+					ch=new Cluster(this, level+1, index);
+					children[index]=ch;
 					empty=false;
 				}
 				ch.addPixel(v0, v1, v2);
@@ -106,7 +106,8 @@ public class QuantizeOctTree {
 				Cluster ch=children[index];
 				if(ch==null)
 				{
-					ch=children[index]=new Cluster(this, level+1, index);
+					ch=new Cluster(this, level+1, index);
+					children[index]=ch;
 					empty=false;
 					incNBelow();
 				}
@@ -286,30 +287,6 @@ public class QuantizeOctTree {
 		private String getClusterAccessorKey() {
 			return key;
 		}
-		private Cluster getColor(int v0, int v1, int v2) {
-			int bestFit=-1;
-			int bestError=Integer.MAX_VALUE;
-			for(int i=0; i< children.length;++i)
-			{
-				Cluster c=children[i];
-				if(c!=null)
-				{
-					int error=square(c.getV0()-v0)+square(c.getV1()-v1)+square(c.getV2()-v2);
-					if(error<bestError)
-					{
-						bestFit=i;
-						bestError=error;
-					}
-				}
-			}
-			if(bestFit==-1)
-			{
-				return this;
-			}else
-			{
-				return children[bestFit].getColor(v0, v1, v2);
-			}
-		}
 		private int toNativeImageColor() {
 			int v0=getV0()&0xFF;
 			int v1=getV1()&0xFF;
@@ -392,54 +369,8 @@ public class QuantizeOctTree {
 		}
 		return new Palette(colors);
 	}
-	/**
-	 * Simple implementation to find a good match of colors for the image.
-	 * Searching all palette entries gives better result though
-	 * see: {@link Palette.reduceImageColorsToPalette}
-	 * (but this is cheaper in CPU cycles).
-	 * @param im
-	 */
-	@SuppressWarnings("unused")
-	private void reduceImageColorsToPalette(NativeImage im) {
-		for(int j=0;j<im.getHeight();++j)
-		{
-			for(int i=0;i<im.getWidth();++i)
-			{
-				int v=im.getPixel(i, j);
-				int v0=(v>>24)&0xFF;
-				int v1=(v>>16)&0xFF;
-				int v2=(v>>8)&0xFF;
-				Cluster c=root.getColor(v0, v1, v2);
-				int vNew=c.toNativeImageColor();
-				im.setPixel(i, j, vNew);
-			}
-		}
-	}
 	private void reduceOneNode() {
 		Cluster toreduce=delegatesByValue.get(delegatesByValue.firstKey());
 		toreduce.reduce();
-	}
-	/**
-	 * Helper method to print the ten first delegates of reducing the number of colors.
-	 * Was used for debugging purpose only.
-	 */
-	@SuppressWarnings("unused")
-	private void printHead() {
-		System.out.println("Delegates head: npixel: "+root.nPixel+" nbelow: "+root.nBelow+" n delegates: "+delegatesByValue.size());
-		int n=10;
-		for(Map.Entry<Long, Cluster> r: delegatesByValue.entrySet())
-		{
-			Cluster c=r.getValue();
-			System.out.println(""+c+" Cluster: "+r.getKey()+" "+c.delegateKey+" n leave below: "+c.nBelow+" error: "+c.errorIfReduced()+" "+c.errorPerColor()+" level: "+c.level);
-			if(!c.delegate)
-			{
-				throw new RuntimeException("Para!");
-			}
-			n--;
-			if(n==0)
-			{
-				break;
-			}
-		}
 	}
 }

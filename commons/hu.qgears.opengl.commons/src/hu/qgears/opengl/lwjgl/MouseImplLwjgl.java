@@ -114,4 +114,19 @@ public class MouseImplLwjgl implements IMouse
 			return -1;
 		}
 	}
+
+	/**
+	 * Does nothing in this implementation.
+	 * @param type ignored
+	 * @param x ignored
+	 * @param y ignored
+	 * @param button ignored
+	 * @param state ignored
+	 * @see IMouse#addEvent(int, int, int, EMouseButton, int)
+	 */
+	@Override
+	public void addEvent(final int type, final int x, final int y, 
+			final EMouseButton button, final int state) {
+		// Does nothing
+	}
 }

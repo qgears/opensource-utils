@@ -39,7 +39,7 @@ public class ProgressCounter {
 		if(tasks.contains(subTask))
 		{
 			ProgressCounterSubTask st=tasks.pop();
-			while(st!=subTask)
+			while(!subTask.equals(st))
 			{
 				st=tasks.pop();
 			}
