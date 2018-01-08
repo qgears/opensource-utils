@@ -7,26 +7,30 @@ import hu.qgears.commons.UtilString;
 import hu.qgears.tools.rtemplate.RTemplateStandalone;
 
 public class Tools {
+	private static Tools instance=new Tools().populateDefault();
 	public static void main(String[] args) {
+		int ret=instance.mainEntryPoint(args);
+		System.exit(ret);
+	}
+	public int mainEntryPoint(String[] args) {
 		List<String> largs=new ArrayList<>();
 		for(String a: args)
 		{
 			largs.add(a);
 		}
-		int ret=new Tools().exec(largs);
-		System.exit(ret);
-	}
-	private static List<ITool> tools=new ArrayList<>();
-	private List<ITool> createTools()
-	{
-		List<ITool> ret=new ArrayList<>();
-		ret.add(new SrvAdmin());
-		ret.add(new GitToZip());
-		ret.add(new GitBackupUpdate());
-		ret.add(new SvnDiff());
-		ret.add(new RTemplateStandalone());
-		ret.addAll(tools);
+		int ret=exec(largs);
 		return ret;
+	}
+	private List<ITool> tools=new ArrayList<>();
+	private Tools populateDefault()
+	{
+		tools.add(new SrvAdmin());
+		tools.add(new GitToZip());
+		tools.add(new GitBackupUpdate());
+		tools.add(new SvnDiff());
+		tools.add(new RTemplateStandalone());
+		tools.add(new LogPortForward());
+		return this;
 	}
 	private int exec(List<String> args){
 		try {
@@ -36,7 +40,7 @@ public class Tools {
 				{
 					if(args.size()>1)
 					{
-						for(ITool t: createTools())
+						for(ITool t: tools)
 						{
 							if(args.get(1).equals(t.getId()))
 							{
@@ -49,7 +53,7 @@ public class Tools {
 						return 1;
 					}
 				}
-				for(ITool t: createTools())
+				for(ITool t: tools)
 				{
 					if(args.get(0).equals(t.getId()))
 					{
@@ -65,7 +69,7 @@ public class Tools {
 				System.out.println("Help: $ java -jar tools.jar help {toolId}\n");
 				System.out.println("Available tools:");
 				System.out.println("");
-				for(ITool t: createTools())
+				for(ITool t: tools)
 				{
 					System.out.println(""+t.getId()+": "+head(t.getDescription()));
 				}
@@ -95,6 +99,12 @@ public class Tools {
 		return "";
 	}
 	public static void registerTool(ITool tool) {
+		instance.register(tool);
+	}
+	public void register(ITool tool) {
 		tools.add(tool);
+	}
+	public static Tools getInstance() {
+		return instance;
 	}
 }
