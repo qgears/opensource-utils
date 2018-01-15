@@ -6,12 +6,12 @@
 	<parent>
 		<groupId>hu.qgears</groupId>
 		<artifactId>opensource-utils-parent</artifactId>
-		<version>6.10.1-SNAPSHOT</version>
+		<version>6.10.2-SNAPSHOT</version>
 		<relativePath>../../build/opensource-utils-parent/</relativePath>
 	</parent>
 	<groupId>hu.qgears</groupId>
 	<artifactId>lwjgl.osgi</artifactId>
 	<packaging>eclipse-plugin</packaging>
 	<description>Java OpenGL bindings implementation library.</description>
-<version>6.10.1-SNAPSHOT</version>
+<version>6.10.2-SNAPSHOT</version>
 </project>
