@@ -25,6 +25,7 @@ import hu.qgears.rtemplate.runtime.RQuickTemplate;
 import hu.qgears.tools.UtilProcess2.ProcessFuture;
 import hu.qgears.tools.UtilProcess2.ProcessResult;
 import joptsimple.annot.JOHelp;
+import joptsimple.tool.AbstractTool;
 
 public class GitBackupUpdate extends AbstractTool
 {

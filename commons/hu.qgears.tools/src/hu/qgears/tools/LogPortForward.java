@@ -5,6 +5,7 @@ import java.net.Socket;
 
 import hu.qgears.commons.ConnectStreams;
 import hu.qgears.commons.StreamTee;
+import joptsimple.tool.AbstractTool;
 
 public class LogPortForward extends AbstractTool
 {

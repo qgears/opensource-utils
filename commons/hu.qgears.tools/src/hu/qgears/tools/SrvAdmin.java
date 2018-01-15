@@ -12,6 +12,7 @@ import org.eclipse.jgit.ignore.IgnoreNode;
 
 import hu.qgears.commons.UtilFile;
 import hu.qgears.commons.UtilString;
+import joptsimple.tool.AbstractTool;
 
 public class SrvAdmin extends AbstractTool 
 {

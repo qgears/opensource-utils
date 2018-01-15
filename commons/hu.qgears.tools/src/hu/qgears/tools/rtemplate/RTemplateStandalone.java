@@ -8,7 +8,7 @@ import hu.qgears.commons.UtilFile;
 import hu.qgears.rtemplate.RTemplate;
 import hu.qgears.rtemplate.TemplateSequences;
 import hu.qgears.rtemplate.task.FileVisitor;
-import hu.qgears.tools.AbstractTool;
+import joptsimple.tool.AbstractTool;
 
 public class RTemplateStandalone extends AbstractTool {
 

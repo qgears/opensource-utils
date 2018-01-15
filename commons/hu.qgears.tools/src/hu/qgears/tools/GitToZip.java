@@ -15,6 +15,7 @@ import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
 import joptsimple.annot.JOHelp;
+import joptsimple.tool.AbstractTool;
 
 public class GitToZip extends AbstractTool
 {
