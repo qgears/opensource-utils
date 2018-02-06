@@ -8,16 +8,17 @@
 			<lib path="libqpng.so" installPath="/opt/qgears/libqpng.so" />
 		</platform>
 	</platform>
-	<platform name=".*(W|w)indows.*">
+	<platform name=".*(W|w)in.*">
 		<platform arch="(i386|i486|i586|i686|x86|x86_32)">
-			<lib path="zlib1.dll" installPath="C:\opt\qgears\zlib1.dll" />
-			<lib path="libpng3.dll" installPath="C:\opt\qgears\libpng3.dll" />
-			<lib path="libqpng32.dll" installPath="C:\opt\qgears\libqpng32.dll" />
+			<lib path="libqpng32.dll"/>
 		</platform>
-		<platform arch="(amd|x86_)64">
+		<!-- platform arch="(amd|x86_)64">
 			<lib path="zlib164.dll" installPath="C:\opt\qgears\zlib164.dll" />
 			<lib path="libpng64.dll" installPath="C:\opt\qgears\libpng64.dll" />
 			<lib path="libqpng64.dll" installPath="C:\opt\qgears\libqpng64.dll" />
+		</platform-->
+		<platform arch="(amd|x86_)64">
+			<lib path="libqpng64.dll"/>
 		</platform>
 	</platform>
 </natives-def>

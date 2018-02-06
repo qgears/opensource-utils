@@ -4,12 +4,29 @@
 		Dependencies:
 		freeglut3-dev libglew1.6-dev
 	</description>
-	<target name="refresh" depends="make-c">
+	
+	<target name="refresh" depends="make-c-win,make-c-linux">
 		<eclipse.refreshLocal resource="hu.qgears.opengl.commons" depth="infinite" />
 	</target>
-	<target name="make-c" depends="jnigen">
+	
+	<target name="make-c-linux" depends="jnigen">
 		<exec dir="./linux" executable="make"/>
 	</target>
+
+	<target name="make-c-win" depends="jnigen,check-cross" if="check-cross-true">
+    	<exec dir="./windows" executable="make">
+    		<arg value="-f"/>
+    		<arg value="cross-compile.mk"/>
+    	</exec>
+	</target>	
+	<target name="check-cross">
+	    <condition property="check-cross-true">
+	        <and>
+		        <available file="/usr/bin/x86_64-w64-mingw32-gcc"/>
+	        </and>
+	    </condition>
+	</target>
+	
 	<target name="jnigen">
 		<mkdir dir="generated"/>
 		<javah class="hu.qgears.opengl.glut.Glut"
@@ -17,4 +34,5 @@
 			destdir="./generated"
 			/>
 	</target>
+
 </project>

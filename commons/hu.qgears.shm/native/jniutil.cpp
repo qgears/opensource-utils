@@ -25,7 +25,7 @@ void initObj(ST_ARGS, const char * fieldName, int size)
 {
 	jfieldID fieldId=getLongFieldId(env, obj, fieldName);
 	void * str=(void *)calloc(size, 1);
-	env->SetLongField(obj, fieldId, (long)str);
+	env->SetLongField(obj, fieldId, (jlong)str);
 }
 
 void disposeObj(ST_ARGS, const char * fieldName)
