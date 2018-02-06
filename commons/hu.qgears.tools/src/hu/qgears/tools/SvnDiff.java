@@ -29,6 +29,7 @@ import hu.qgears.commons.Pair;
 import hu.qgears.commons.UtilFile;
 import hu.qgears.commons.UtilProcess;
 import joptsimple.annot.JOHelp;
+import joptsimple.tool.AbstractTool;
 
 public class SvnDiff extends AbstractTool {
 
