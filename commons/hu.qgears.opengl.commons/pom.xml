@@ -19,7 +19,7 @@
 		<plugins>
 			<plugin>
 				<artifactId>maven-clean-plugin</artifactId>
-				<version>2.6.1</version>
+				<version>${clean-version}</version>
 				<executions>
 					<execution>
 						<id>auto-clean</id>
@@ -44,7 +44,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
-				<version>1.2.1</version>
+				<version>${exec-plugin-version}</version>
 				<!-- Inheritance must be disabled, because the exec plugin run in all submodules by default-->
 				<inherited>false</inherited>
 				<executions>
@@ -76,7 +76,7 @@
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>exec-maven-plugin</artifactId>
-						<version>1.2.1</version>
+						<version>${exec-plugin-version}</version>
 						<!-- Inheritance must be disabled, because the exec plugin run in all submodules by default-->
 						<inherited>false</inherited>
 						<executions>
@@ -116,7 +116,7 @@
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>exec-maven-plugin</artifactId>
-						<version>1.2.1</version>
+						<version>${exec-plugin-version}</version>
 						<!-- Inheritance must be disabled, because the exec plugin run in all submodules by default-->
 						<inherited>false</inherited>
 						<executions>
