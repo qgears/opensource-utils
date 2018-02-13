@@ -63,8 +63,6 @@ else
 
 	$PACMAN_CMD -Syuu || error "Failed to init package manager"
 
-
-	
 	pinstall mingw32/mingw-w64-i686-pangomm 
 	pinstall mingw32/mingw-w64-i686-glew
 	pinstall mingw32/mingw-w64-i686-freeglut
@@ -74,19 +72,17 @@ else
 	pinstall mingw64/mingw-w64-x86_64-freeglut
 
 	#Override cairomm to an older version
-	CAIRO_32="${PACMAN_CACHE}/mingw-w64-i686-cairomm-1.12.0-1-any.pkg.tar.xz"
-	CAIRO_64="${PACMAN_CACHE}/mingw-w64-x86_64-cairomm-1.12.0-1-any.pkg.tar.xz"
+	#CAIRO_32="${PACMAN_CACHE}/mingw-w64-i686-cairomm-1.12.0-1-any.pkg.tar.xz"
+	#CAIRO_64="${PACMAN_CACHE}/mingw-w64-x86_64-cairomm-1.12.0-1-any.pkg.tar.xz"
 
 	#wget http://repo.msys2.org/mingw/i686/mingw-w64-i686-cairomm-1.11.2-2-any.pkg.tar.xz -O "${CAIRO_32}" || "cannot download cairo 32"
-	#wget http://repo.msys2.org/mingw/i686/mingw-w64-i686-cairomm-1.12.0-1-any.pkg.tar.xz -O "${CAIRO_32}" || "cannot download cairo 32"
-	#wget http://repo.msys2.org/mingw/x86_64/mingw-w64-x86_64-cairomm-1.12.0-1-any.pkg.tar.xz -O "${CAIRO_64}" || "cannot download cairo 64"
+	#wget http://repo.msys2.org/mingw/i686/mingw-w64-i686-cairomm-1.12.0-1-any.pkg.tar.xz -O "${CAIRO_32}" ||  error "cannot download cairo 32"
+	#wget http://repo.msys2.org/mingw/x86_64/mingw-w64-x86_64-cairomm-1.12.0-1-any.pkg.tar.xz -O "${CAIRO_64}" || error "cannot download cairo 64"
 	#wget http://repo.msys2.org/mingw/x86_64/mingw-w64-x86_64-cairomm-1.11.2-2-any.pkg.tar.xz -O "${CAIRO_64}" || "cannot download cairo 64"
-	
-	wget http://repo.msys2.org/mingw/i686/mingw-w64-i686-cairo-1.15.6-2-any.pkg.tar.xz -O "${CAIRO_32}" || "cannot download cairo 32"
-	wget http://repo.msys2.org/mingw/x86_64/mingw-w64-x86_64-cairo-1.15.6-2-any.pkg.tar.xz -O "${CAIRO_64}" || "cannot download cairo 64"
-	
-	tar xpvf "${CAIRO_32}" -C ${ROOT_DIR} || "Cannot untart cairo 32"
-	tar xpvf "${CAIRO_64}" -C ${ROOT_DIR} || "Cannot untart cairo 64"
+	#wget http://repo.msys2.org/mingw/i686/mingw-w64-i686-cairo-1.15.6-2-any.pkg.tar.xz -O "${CAIRO_32}" || "cannot download cairo 32"
+	#wget http://repo.msys2.org/mingw/x86_64/mingw-w64-x86_64-cairo-1.15.6-2-any.pkg.tar.xz -O "${CAIRO_64}" || "cannot download cairo 64"
+	#tar xpvf "${CAIRO_32}" -C ${ROOT_DIR} || error "Cannot untar cairo 32"
+	#tar xpvf "${CAIRO_64}" -C ${ROOT_DIR} || error "Cannot untar cairo 64"
 	#compile freeglut
 
 	cd freeglut
@@ -99,7 +95,7 @@ else
 
 	##Create JDK win include
 	mkdir -p "${ROOT_DIR}/JDK-win"
-	ln -s ../../../commons/hu.qgears.images/native/libpng/windows/deps/include/java/ ${ROOT_DIR}/JDK-win/include
+	ln -s ../../java-win-inc ${ROOT_DIR}/JDK-win/include
 fi
 
 
