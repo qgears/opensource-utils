@@ -11,10 +11,36 @@
 	</parent>
 	<groupId>hu.qgears</groupId>
 	<artifactId>hu.qgears.opengl.commons</artifactId>
+	<version>6.10.2-SNAPSHOT</version>
 	<packaging>eclipse-plugin</packaging>
 	<description>OpenGL helper methods and object oriented abstraction layer over OpenGL API.</description>
+	
 	<build>
 		<plugins>
+			<plugin>
+				<artifactId>maven-clean-plugin</artifactId>
+				<version>2.6.1</version>
+				<executions>
+					<execution>
+						<id>auto-clean</id>
+						<phase>clean</phase>
+						<goals>
+							<goal>clean</goal>
+						</goals>
+						<configuration>
+						<filesets>
+							<fileset>
+								<directory>${basedir}/src/hu/qgears/opengl/glut</directory>
+								<includes>
+									<include>*.dll</include>
+									<include>*.so</include>
+								</includes>
+							</fileset>
+						</filesets>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
@@ -31,21 +57,6 @@
 						<configuration>
 							<executable>make</executable>
 							<workingDirectory>./native/linux</workingDirectory>
-						</configuration>
-					</execution>
-					<execution>
-						<id>opengl-commons-natives-run-make-file-windows</id>
-						<phase>generate-resources</phase>
-						<goals>
-							<goal>exec</goal>
-						</goals>
-						<configuration>
-							<executable>make</executable>
-							<workingDirectory>./native/windows</workingDirectory>
-							<arguments>
-								<argument>-f</argument>
-								<argument>cross-compile.mk</argument>
-							</arguments>
 						</configuration>
 					</execution>
 				</executions>
@@ -92,6 +103,43 @@
 				</plugins>
 			</build>
 		</profile>
+		<profile>
+			<id>windows-cross-compile</id>
+			<activation>
+				<property>
+					<!-- Active only when WINDEP environment variable is set -->
+					<name>env.WINDEP</name>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>exec-maven-plugin</artifactId>
+						<version>1.2.1</version>
+						<!-- Inheritance must be disabled, because the exec plugin run in all submodules by default-->
+						<inherited>false</inherited>
+						<executions>
+							<execution>
+								<id>opengl-commons-natives-run-make-file-windows</id>
+								<phase>generate-resources</phase>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+								<configuration>
+									<executable>make</executable>
+									<workingDirectory>./native/windows</workingDirectory>
+									<arguments>
+										<argument>-f</argument>
+										<argument>cross-compile.mk</argument>
+									</arguments>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 	</profiles>
-<version>6.10.2-SNAPSHOT</version>
+
 </project>
