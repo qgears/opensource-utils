@@ -11,8 +11,10 @@
 	</parent>
 	<groupId>hu.qgears</groupId>
 	<artifactId>hu.qgears.images</artifactId>
+	<version>6.10.2-SNAPSHOT</version>
 	<packaging>eclipse-plugin</packaging>
 	<description>Java bindings to native image handling libraries. Only libpng is used by the application.</description>
+	
 	<build>
 		<plugins>
 			<plugin>
@@ -63,22 +65,6 @@
 						<configuration>
 							<executable>make</executable>
 							<workingDirectory>./native/libpng/linux</workingDirectory>
-						</configuration>
-					</execution>
-					<!-- Compile libpng native libraries for windows 32 and 64 bit -->
-					<execution>
-						<id>libqpng-natives-windows</id>
-						<phase>generate-resources</phase>
-						<goals>
-							<goal>exec</goal>
-						</goals>
-						<configuration>
-							<executable>make</executable>
-							<workingDirectory>./native/libpng/windows</workingDirectory>
-							<arguments>
-								<argument>-f</argument>
-								<argument>cross-compile.mk</argument>
-							</arguments>
 						</configuration>
 					</execution>
 					<!-- Compiling tiff lib -->
@@ -134,30 +120,6 @@
 							 		</arguments>
 								 </configuration>
 							</execution>
-							<!-- x compile libpng native to win32-->
-							<execution>
-								<id>libqpng-win32-natives</id>
-								<phase>generate-resources</phase>
-								<goals>
-									<goal>exec</goal>
-								</goals>
-								<configuration>
-									<executable>make</executable>
-									<workingDirectory>./native/libpng/windows/win32</workingDirectory>
-								</configuration>
-							</execution>
-							<!-- x compile libpng native to win64-->
-							<execution>
-								<id>libqpng-win64-natives</id>
-								<phase>generate-resources</phase>
-								<goals>
-									<goal>exec</goal>
-								</goals>
-								<configuration>
-									<executable>make</executable>
-									<workingDirectory>./native/libpng/windows/win64</workingDirectory>
-								</configuration>
-							</execution>
 							<!-- Compiling tiff lib -->
 							<execution>
 								<id>qtiffloader-cross</id>
@@ -182,6 +144,45 @@
 				</plugins>
 			</build>
 		</profile>
+		<profile>
+			<id>windows-cross-compile</id>
+			<activation>
+				<property>
+					<!-- Active only when WINDEP environment variable is set -->
+					<name>env.WINDEP</name>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<!-- -->
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>exec-maven-plugin</artifactId>
+						<version>1.2.1</version>
+						<!-- Inheritance must be disabled, because the exec plugin run in all 
+							submodules by default -->
+						<inherited>false</inherited>
+						<executions>
+							<!-- Compile libpng native libraries for windows 32 and 64 bit -->
+							<execution>
+								<id>libqpng-natives-windows</id>
+								<phase>generate-resources</phase>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+								<configuration>
+									<executable>make</executable>
+									<workingDirectory>./native/libpng/windows</workingDirectory>
+									<arguments>
+										<argument>-f</argument>
+										<argument>cross-compile.mk</argument>
+									</arguments>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 	</profiles>
-<version>6.10.2-SNAPSHOT</version>
 </project>
