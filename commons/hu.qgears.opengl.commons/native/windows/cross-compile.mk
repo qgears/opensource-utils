@@ -28,7 +28,7 @@ endif
 COMMAND_32 =   i686-w64-mingw32-gcc -m32 -o $(OUTPUTDIR)/libqglut32.dll $(PKG_DIR_32) 
 COMMAND_64 = x86_64-w64-mingw32-gcc -m64 -o $(OUTPUTDIR)/libqglut64.dll $(PKG_DIR_64) 
 
-COMMAND_COMMON = -fPIC -D_REENTRANT -shared -Wl,--add-stdcall-alias \
+COMMAND_COMMON = -D_REENTRANT -shared -Wl,--add-stdcall-alias \
 	${JNI_INCLUDE} \
 	-DQGLUT_MSYS \
 	../QGlut_msys.cpp ../jniutil.cpp \
