@@ -120,6 +120,18 @@
 							 		</arguments>
 								 </configuration>
 							</execution>
+							<execution>
+								<id>libqpng-natives-windows</id>
+								<phase>generate-resources</phase>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+								<configuration>
+									<executable>make</executable>
+									<workingDirectory>./native/libpng/windows/</workingDirectory>
+								</configuration>
+							</execution>
+							
 							<!-- Compiling tiff lib -->
 							<execution>
 								<id>qtiffloader-cross</id>
@@ -139,44 +151,15 @@
 							 		</arguments>
 								 </configuration>
 							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>windows-cross-compile</id>
-			<activation>
-				<property>
-					<!-- Active only when WINDEP environment variable is set -->
-					<name>env.WINDEP</name>
-				</property>
-			</activation>
-			<build>
-				<plugins>
-					<!-- -->
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>exec-maven-plugin</artifactId>
-						<version>${exec-plugin-version}</version>
-						<!-- Inheritance must be disabled, because the exec plugin run in all 
-							submodules by default -->
-						<inherited>false</inherited>
-						<executions>
-							<!-- Compile libpng native libraries for windows 32 and 64 bit -->
 							<execution>
-								<id>libqpng-natives-windows</id>
+								<id>qtiffloader-natives-windows</id>
 								<phase>generate-resources</phase>
 								<goals>
 									<goal>exec</goal>
 								</goals>
 								<configuration>
 									<executable>make</executable>
-									<workingDirectory>./native/libpng/windows</workingDirectory>
-									<arguments>
-										<argument>-f</argument>
-										<argument>cross-compile.mk</argument>
-									</arguments>
+									<workingDirectory>./native/tiff/windows</workingDirectory>
 								</configuration>
 							</execution>
 						</executions>

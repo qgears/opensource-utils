@@ -532,4 +532,13 @@ public class UtilNativeImageIo {
 		NativeImage ret=NativeLibPng.loadImage(url);
 		return UtilNativeImageIo.convertType(ret, allocator, order);
 	}
+	
+	public static void main(String[] args) throws IOException {
+		String png = args[0];
+		NativeImage img = NativeLibPng.loadImage(new File(png));
+		File converted = new File(png+".tiff");
+		UtilNativeImageIo.saveImageToTiff(img, converted);
+		NativeImage convImg = UtilNativeImageIo.loadImageFromTiff(converted);
+		UtilNativeImageIo.saveImageToFile(convImg, new File(png+"_conv.png"));
+	}
 }
