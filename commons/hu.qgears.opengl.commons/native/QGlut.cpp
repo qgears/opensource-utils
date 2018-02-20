@@ -3,17 +3,7 @@
 #define EXCCLASS "hu/qgears/opengl/glut/GlutException"
 #include "jniutil.h"
 
-
-#include <unistd.h>
-#include <GL/glew.h>
-#include <GL/glxew.h>
-#include <GL/glx.h>
-
-#include <GL/freeglut.h>
-#include <GL/gl.h>
-//#include <GL/glfw.h>
-
-#include "x11_keysym2unicode.cpp"
+#include "QGlut.h"
 
 // EVENT_TYPES
 // Normal keyboard down event
@@ -29,31 +19,6 @@
 // Normal mouse motion event
 #define EVENT_MOUSE_MOTION 5
 
-void mlog(const char * str)
-{
-//	printf("%s\n", str);
-//	fflush(stdout);
-}
-
-typedef struct
-{
-	// When this struct is changed the Glut.java / messageSize must also be changed.
-	jint type;
-	// Mouse coordinate when the event is received.
-	jint x;
-	// Mouse coordinate when the event is received.
-	jint y;
-	union
-	{
-		// The mouse button index.
-		jint button;
-		// The code of the key or special key code that is received from Glut
-		jint keyCode;
-	};
-	// mouse state (mouse button event) or glutGetModifiers(keyboard event)
-	jint state;
-	jint charCode;
-} __attribute__((packed)) userEvent;
 
 #define MAX_EVENT 2048
 userEvent eventRR[MAX_EVENT];
@@ -61,39 +26,6 @@ userEvent eventRR[MAX_EVENT];
 int eventReadPtr=0;
 int eventWritePtr=0;
 
-// As read in forum: http://www.opengl.org/discussion_boards/ubbthreads.php?ubb=showflat&Number=288161
-void setupVSync(int swap)
-{
-	mlog("getcurrentdisplay");
-	Display *dpy = glXGetCurrentDisplay();
-	if(dpy!=NULL)
-	{
-		mlog("getcurrentdisplay no null!");
-	}
-	mlog("getcurrentdrawable");
-	GLXDrawable drawable = glXGetCurrentDrawable();
-	if(drawable!=None)
-	{
-		mlog("getcurrentdrawable no null!");
-	}
-	
-	unsigned maxSwap;
-
-	if (drawable) {
-		mlog("get GLX_SWAP_INTERVAL_EXT");
-//		glXQueryDrawable(dpy, drawable, GLX_SWAP_INTERVAL_EXT, &swap);
-		mlog("get GLX_MAX_SWAP_INTERVAL_EXT");
-//		glXQueryDrawable(dpy, drawable, GLX_MAX_SWAP_INTERVAL_EXT, &maxSwap);
-//		printf("The swap interval is %u and the max swap interval is %u\n", swap, maxSwap);
-		mlog("set swap interval");
-//		swap=1;
-		if(glXSwapIntervalEXT)
-		{
-			glXSwapIntervalEXT(dpy, drawable, swap);
-		}
-	}
-	
-}
 float angle=0;
 
 void initialize () 
@@ -312,29 +244,7 @@ void specialUpFunc(int key, int x, int y)
 		ev->charCode = -1;//by definition the special key does not have a corresponding charcode
 	}
 }
-/**
- * Convert character code to raw lower case character code
- * based on modifiers active
- */
-void transcodeeventCharacter(userEvent * ev)
-{
-	Display* fgDisplay = glXGetCurrentDisplay();
-	if (fgDisplay != NULL){
-		XEvent event;
-		if(XPending( fgDisplay ))
-		{
-			XPeekEvent(fgDisplay, &event );
-			KeySym keysym;
-			// Get X11 keysym
-			XLookupString((XKeyEvent*) &event, NULL, 0, &keysym, NULL );
-			int uk = (int)_glfwKeySym2Unicode (keysym);
-			ev->charCode = uk;
-		}else
-		{
-			ev->charCode=-1;
-		}
-	}
-}
+
 
 void keyboardFunc(unsigned char key, int x, int y)
 {
@@ -514,4 +424,10 @@ METHODPREFIX(CLASS, jint, getAndResetMessagesReadIndex)(ST_ARGS)
 METHODPREFIX(CLASS, jint, getMessagesWriteIndex)(ST_ARGS)
 {
 	return eventWritePtr;
+}
+//do not use this method directly. Use mlog
+void mlogImpl(const char * str)
+{
+	printf("%s\n", str);
+	fflush(stdout);
 }

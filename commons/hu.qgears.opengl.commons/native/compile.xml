@@ -14,10 +14,7 @@
 	</target>
 
 	<target name="make-c-win" depends="jnigen,check-cross" if="check-cross-true">
-    	<exec dir="./windows" executable="make">
-    		<arg value="-f"/>
-    		<arg value="cross-compile.mk"/>
-    	</exec>
+    	<exec dir="./windows" executable="make"/>
 	</target>	
 	<target name="check-cross">
 	    <condition property="check-cross-true">

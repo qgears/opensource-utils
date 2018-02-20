@@ -34,10 +34,10 @@ endif
 
 COMMAND_32 =   $(TOOL32)-gcc -m32 -o $(OUTPUTDIR)/w32_libqglut32.dll $(QGLUT_LIB_32) 
 COMMAND_64 = $(TOOL64)-gcc -m64 -o $(OUTPUTDIR)/w64_libqglut64.dll $(QGLUT_LIB_64) 
+#Add -DQGLUT_LOG to enable logging in generated binaries
 COMMAND_COMMON = -g -D_REENTRANT -shared -Wl,--add-stdcall-alias \
 	${QGLUT_INC} \
-	-DQGLUT_MSYS \
-	../QGlut_msys.cpp ../jniutil.cpp \
+	../QGlut.cpp ../QGlutWin.cpp ../jniutil.cpp \
 	-lopengl32 -lwinmm -lgdi32 -lm -lglew32 -lglu32  -lfreeglut-gen \
 	-static-libgcc -Wl,-Bstatic -lgcc -lstdc++ -lpthread 
 
