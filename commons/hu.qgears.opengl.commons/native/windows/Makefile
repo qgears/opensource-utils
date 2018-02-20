@@ -3,7 +3,7 @@ TOOL64 = x86_64-w64-mingw32
 
 #Freeglut sources and config
 FG_OUTDIR := $(shell mktemp -d /tmp/win_freeglut_XXXXXX)
-FG_SRC = ../freeglut-2.6.0
+FG_SRC = ../freeglut-2.8.0
 FG_DEFFILE = $(FG_SRC)/src/freeglutdll.def
 fgsources=$(wildcard $(FG_SRC)/src/*.c)
 fgobjs64=$(fgsources:.c=.64.o)
@@ -32,9 +32,9 @@ ifndef OUTPUTDIR
     OUTPUTDIR = ../../src/hu/qgears/opengl/glut
 endif
 
-COMMAND_32 =   $(TOOL32)-gcc -m32 -o $(OUTPUTDIR)/libqglut32.dll $(QGLUT_LIB_32) 
-COMMAND_64 = $(TOOL64)-gcc -m64 -o $(OUTPUTDIR)/libqglut64.dll $(QGLUT_LIB_64) 
-COMMAND_COMMON = -D_REENTRANT -shared -Wl,--add-stdcall-alias \
+COMMAND_32 =   $(TOOL32)-gcc -m32 -o $(OUTPUTDIR)/w32_libqglut32.dll $(QGLUT_LIB_32) 
+COMMAND_64 = $(TOOL64)-gcc -m64 -o $(OUTPUTDIR)/w64_libqglut64.dll $(QGLUT_LIB_64) 
+COMMAND_COMMON = -g -D_REENTRANT -shared -Wl,--add-stdcall-alias \
 	${QGLUT_INC} \
 	-DQGLUT_MSYS \
 	../QGlut_msys.cpp ../jniutil.cpp \
@@ -49,10 +49,14 @@ all: qglut64 qglut32
 qglut32: freeglut32
 	$(COMMAND_32) $(COMMAND_COMMON)
 	$(RM) $(fgobjs32)
+	cp ./deps/w32/bin/glew32.dll $(OUTPUTDIR)/w32_glew32.dll
+	cp $(FG_BIN_DIR32)/freeglut.dll $(OUTPUTDIR)/w32_freeglut.dll
 
 qglut64: freeglut64
 	$(COMMAND_64) $(COMMAND_COMMON)
 	$(RM) $(fgobjs64)
+	cp ./deps/w64/bin/glew32.dll $(OUTPUTDIR)/w64_glew32.dll
+	cp $(FG_BIN_DIR64)/freeglut.dll $(OUTPUTDIR)/w64_freeglut.dll
 
 $(fgobjs32): %.32.o: %.c 
 	$(TOOL32)-gcc -m32 -c $(FG_CFLAGS) $< -o $@

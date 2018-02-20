@@ -12,10 +12,14 @@
 	</platform>
 	<platform name=".*(W|w)in.*">
 		<platform arch="(amd|x86_)64">
-			<lib path="libqglut64.dll"/>
+			<lib path="w64/freeglut.dll" installPath="C:\opt\qgears\w64\freeglut.dll" />
+			<lib path="w64/glew32.dll" installPath="C:\opt\qgears\w64\glew32.dll" />
+			<lib path="w64/libqglut64.dll"  installPath="C:\opt\qgears\w64\libqglut64.dll"/>
 		</platform>
 		<platform arch="(i386)">
-			<lib path="libqglut32.dll"/>
+			<lib path="w32/freeglut.dll" installPath="C:\opt\qgears\w32\freeglut.dll" />
+			<lib path="w32/glew32.dll" installPath="C:\opt\qgears\w32\glew32.dll" />
+			<lib path="w32/libqglut32.dll" installPath="C:\opt\qgears\w32\libqglut32.dll"/>
 		</platform>
 	</platform>
 </natives-def>
