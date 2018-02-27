@@ -46,15 +46,17 @@ public class UtilString {
 		}
 	}
 	/**
-	 * Using Java's <code>StringTokenizer</code> build a list of string from the tokens
-	 * @param str string to be tokenized
-	 * @param delimiter the delimiter that is passed to <code>StringTokenizer</code>'s constructor
+	 * Using Java's <code>StringTokenizer</code>, builds a list of strings from 
+	 * the tokens identified in the specified string.
+	 * @param str the string to be tokenized
+	 * @param delimiters the series of delimiter characters that is passed to 
+	 * the {@link StringTokenizer#StringTokenizer(String, String)} constructor
 	 * @return tokens in a list of strings
 	 */
-	public static List<String> split(String str, String delimiter)
+	public static List<String> split(String str, String delimiters)
 	{
 		List<String> ret=new ArrayList<String>();
-		StringTokenizer tok=new StringTokenizer(str, delimiter);
+		StringTokenizer tok=new StringTokenizer(str, delimiters);
 		while(tok.hasMoreTokens())
 		{
 			ret.add(tok.nextToken());
