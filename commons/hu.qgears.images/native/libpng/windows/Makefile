@@ -1,7 +1,7 @@
 JNI_INCLUDE = -Ideps/include/java -Ideps/include/java/win32
-LIBPNG_INCLUDE = -Ideps/include/libpng -Ideps/include/zlib
-LIBPNG_LIBS32 = -Ldeps/lib/win32/libpng -Ldeps/lib/win32/zlib
-LIBPNG_LIBS64 = -Ldeps/lib/win64/libpng -Ldeps/lib/win64/zlib
+LIBPNG_INCLUDE = -Ideps/include/
+LIBPNG_LIBS32 = -Ldeps/lib/win32/
+LIBPNG_LIBS64 = -Ldeps/lib/win64/
 
 
 #used by the maven build process, see pom.xml in project.
@@ -16,16 +16,17 @@ COMMAND = 	-D_REENTRANT -shared \
 	${JNI_INCLUDE} -Wl,--add-stdcall-alias \
 	../nativeLibpng.cpp ../jniutil.cpp \
 	-static-libgcc -Wl,-Bstatic -lgcc -lstdc++ -lpthread -lwinpthread \
-	-Wl,-Bdynamic -lpng 
+	-Wl,-Bdynamic -lpng -lz
 	
 libqpng32: cp_bin32
 	i686-w64-mingw32-g++  \
 	-o $(OUTPUTDIR)/libqpng32.dll \
 	${LIBPNG_LIBS32} \
-	$(COMMAND) -lz 
+	$(COMMAND)
  	
 cp_bin32 :
 	cp deps/bin/win32/* $(OUTPUTDIR)/
+	
 
 libqpng64 : cp_bin64
 	x86_64-w64-mingw32-g++  \
