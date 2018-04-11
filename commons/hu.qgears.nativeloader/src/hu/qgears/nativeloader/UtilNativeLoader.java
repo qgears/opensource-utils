@@ -1,14 +1,12 @@
 package hu.qgears.nativeloader;
 
-import hu.qgears.commons.UtilFile;
-
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 
 import org.apache.log4j.Logger;
+
+import hu.qgears.commons.UtilFile;
 
 
 /**
@@ -126,7 +124,7 @@ public class UtilNativeLoader {
 				throw new NativeLoadException("Native not found: " + nativeBinary.getLibPath());
 			}
 			info("- Load native: " + nativeBinary.getLibPath()+" from: "+url);
-			byte[] bs = loadFile(url);
+			byte[] bs = UtilFile.loadFile(url);
 			g = new File(getDirectory(), nativeBinary.getFileName());
 			UtilFile.checkSaveAsFile(g, bs);
 			info("Native is copied to temporary directory: "
@@ -155,27 +153,5 @@ public class UtilNativeLoader {
 			}
 		}
 		return directory;
-	}
-
-	/**
-	 * Load the content from the URL into a byte array.
-	 * 
-	 * @param resource
-	 * @return
-	 * @throws IOException
-	 */
-	public static byte[] loadFile(URL resource) throws IOException {
-		InputStream is = resource.openStream();
-		try {
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			byte[] buffer = new byte[1024];
-			int n;
-			while ((n = is.read(buffer)) > 0) {
-				bos.write(buffer, 0, n);
-			}
-			return bos.toByteArray();
-		} finally {
-			is.close();
-		}
 	}
 }
