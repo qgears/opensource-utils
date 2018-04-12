@@ -1,10 +1,13 @@
 package hu.qgears.nativeloader;
 
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 import java.util.Stack;
 
 import org.xml.sax.Attributes;
@@ -34,11 +37,15 @@ import org.xml.sax.helpers.XMLReaderFactory;
  * Arguments:
  * <dl>
  * <dt><code>arch</code>, optional</dt>
- * <dd>
- * Regular expression.</dd>
+ * <dd>Regular expression, {@link String#matches(String) matched} with 
+ * the {@code os.arch} JVM system property.</dd>
  * <dt><code>name</code>, optional</dt>
- * <dd>
- * Regular expression.</dd>
+ * <dd>Regular expression, {@link String#matches(String) matched} with
+ * the {@code os.arch} JVM system property.</dd>
+ * <dt><code>distroId</code>, optional in Linux, ignored in Windows</dt>
+ * <dd>Regular expression, see {@link XmlHandler#AT_LINUX_DISTRO_ID}.</dd>
+ * <dt><code>distroVer</code>, optional in Linux, ignored in Windows</dt>
+ * <dd>Regular expression, see {@link XmlHandler#AT_LINUX_DISTRO_VERSION_ID}.</dd>
  * </dl>
  * </dd>
  * 
@@ -104,18 +111,57 @@ public abstract class XmlNativeLoader implements INativeLoader {
 	public static final String NATIVES_DEF = "natives-def.xml";
 
 	/**
+	 * On Linux, the {@literal /etc/os-release} file will be examined for
+	 * information on Linux distribution name and version.
+	 */
+	public static final String OS_RELEASE_PLATFORM = "Linux";
+	/**
+	 * The file, from which Linux distribution name and version will be 
+	 * extracted. If this file is not found, a default of the native 
+	 * libraries will be loaded.
+	 */
+	public static final File OS_RELEASE_FILE  = new File("/etc/os-release");
+	
+	/**
+	 * Name of the distribution machine-parseable ID parameter in the 
+	 * {@literal /etc/os-release} file 
+	 */
+	public static final String OS_RELEASE_PROPNAME_ID = "ID";
+	/**
+	 * Name of the version identifier parameter in the 
+	 * {@literal /etc/os-release} file 
+	 */
+	public static final String OS_RELEASE_PROPNAME_VERSION_ID = "VERSION_ID";
+	
+	private Properties osReleaseProperties;
+	
+	/**
 	 * SAX handler that collects the natives for a specific platform.
 	 * 
 	 * @author KRiS
-	 * 
 	 */
-	protected static class XmlHandler extends DefaultHandler {
+	protected class XmlHandler extends DefaultHandler {
 
 		public static final String NAMESPACE = "";
 		public static final String EL_NATIVESDEF = "natives-def";
 		public static final String EL_PLATFORM = "platform";
 		public static final String AT_PLATFORM_ARCH = "arch";
 		public static final String AT_PLATFORM_NAME = "name";
+		/** 
+		 * Optional XML {@link #EL_PLATFORM platform} tag parameter for 
+		 * identifying the Linux distribution. It will be matched with the 
+		 * {@link #OS_RELEASE_PROPNAME_ID ID} entry in the 
+		 * {@code /etc/os-release} file.
+		 */
+		public static final String AT_LINUX_DISTRO_ID = "distroId";
+		/** 
+		 * Optional XML {@link #EL_PLATFORM platform} parameter for identifying
+		 * the version of a Linux distribution. It will be matched with the 
+		 * {@link #OS_RELEASE_PROPNAME_VERSION_ID VERSION_ID} entry in the 
+		 * {@code /etc/os-release} file. Note that the value of the entry 
+		 * contains starting and trailing quotation marks.
+		 */
+		public static final String AT_LINUX_DISTRO_VERSION_ID = "distroVer";
 		public static final String EL_LIBRARY = "lib";
 		public static final String EL_SOURCE_ZIP = "srcZip";
 		public static final String AT_LIBRARY_PATH = "path";
@@ -127,7 +173,7 @@ public abstract class XmlNativeLoader implements INativeLoader {
 		public static final String AT_LIBGROUP_ENABLED = "enabled";
 		public static final String AT_LIBGROUP_ENABLED_TRUE = "true";
 		public static final String AT_LIBGROUP_ENABLED_FALSE = "false";
-
+		
 		protected final String arch;
 		protected final String os;
 		protected final List<NativeBinary> natives = new LinkedList<NativeBinary>();
@@ -142,7 +188,7 @@ public abstract class XmlNativeLoader implements INativeLoader {
 		 * @param os
 		 *            the os name
 		 */
-		public XmlHandler(String arch, String os) {
+		public XmlHandler(String arch, String os) throws NativeLoadException {
 			this.arch = arch;
 			this.os = os;
 		}
@@ -166,7 +212,12 @@ public abstract class XmlNativeLoader implements INativeLoader {
 								AT_PLATFORM_ARCH);
 						String nameCond = attributes.getValue(NAMESPACE,
 								AT_PLATFORM_NAME);
-						boolean match = isMatching(archCond, nameCond);
+						String linuxDistroIdCond = attributes.getValue(NAMESPACE,
+								AT_LINUX_DISTRO_ID);
+						String linuxDistroVersionCond = attributes.getValue(NAMESPACE,
+								AT_LINUX_DISTRO_VERSION_ID);
+						boolean match = isMatching(archCond, nameCond,
+								linuxDistroIdCond, linuxDistroVersionCond);
 						listening.push(match);
 
 					} else {
@@ -227,7 +278,8 @@ public abstract class XmlNativeLoader implements INativeLoader {
 			}
 		}
 
-		protected boolean isMatching(String archCond, String nameCond) {
+		protected boolean isMatching(String archCond, String nameCond, 
+				String linuxDistroIdCond, String linuxDistroVersionCond) {
 			boolean match = true;
 			if (archCond != null) {
 				match &= arch.matches(archCond);
@@ -235,6 +287,23 @@ public abstract class XmlNativeLoader implements INativeLoader {
 			if (nameCond != null) {
 				match &= os.matches(nameCond);
 			}
+			
+			if (osReleaseProperties != null) {
+				if (linuxDistroIdCond != null) {
+					final String distroId = osReleaseProperties.getProperty(
+							OS_RELEASE_PROPNAME_ID);
+					
+					match &= distroId.matches(linuxDistroIdCond);
+				}
+				
+				if (linuxDistroVersionCond != null) {
+					final String versionId = osReleaseProperties.getProperty(
+							OS_RELEASE_PROPNAME_VERSION_ID);
+					
+					match &= versionId.matches(linuxDistroVersionCond);
+				}
+			}
+			
 			return match;
 		}
 
@@ -290,9 +359,36 @@ public abstract class XmlNativeLoader implements INativeLoader {
 		return NATIVES_DEF;
 	}
 
+	/**
+	 * Loads properties from the {@value #OS_RELEASE_FILE} in case if the value 
+	 * {@code os} parameter is 'Linux'. This method also removes leading
+	 * and trailing quotation marks from the 
+	 * {@value #OS_RELEASE_PROPNAME_VERSION_ID} value for convenience.
+	 * @param os the name of the operation system
+	 */
+	private void loadOsReleaseFile(final String os) {
+		if (OS_RELEASE_PLATFORM.equals(os) && OS_RELEASE_FILE.exists()) {
+			try (final FileReader osReleaseReader = new FileReader(OS_RELEASE_FILE)) {
+				osReleaseProperties = new Properties();
+				osReleaseProperties.load(osReleaseReader);
+				
+				/* Postprocessing: removing quotation marks from VERSION_ID */
+				final String osVersionIdRaw = osReleaseProperties.getProperty(
+						OS_RELEASE_PROPNAME_VERSION_ID);
+				osReleaseProperties.put(OS_RELEASE_PROPNAME_VERSION_ID, 
+						osVersionIdRaw.replaceAll("[\"]", ""));
+			} catch (final IOException e) {
+				throw new NativeLoadException("Exception while attempting "
+						+ "to load Linux distribution version information "
+						+ "from " + OS_RELEASE_FILE.getPath(), e);
+			}
+		}
+	}
+
 	@Override
 	public NativesToLoad getNatives(String arch, String os)
 			throws NativeLoadException {
+		loadOsReleaseFile(os);
 		XmlHandler handler = new XmlHandler(arch, os);
 		try {
 			XMLReader reader = XMLReaderFactory.createXMLReader();
