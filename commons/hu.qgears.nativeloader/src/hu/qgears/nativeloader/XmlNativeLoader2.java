@@ -3,6 +3,8 @@ package hu.qgears.nativeloader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.xml.sax.Attributes;
@@ -23,6 +25,8 @@ public abstract class XmlNativeLoader2 implements INativeLoader {
 	private static final Logger LOG = Logger.getLogger(XmlNativeLoader2.class);
 	
 	public static final String IMPLEMENTATIONS = "implementations.xml";
+
+	private Set<String> loadedLibIds = new HashSet<>();
 
 	protected class ImplementationsHandler extends DefaultHandler
 	{
@@ -114,9 +118,15 @@ public abstract class XmlNativeLoader2 implements INativeLoader {
 			Attributes attributes, NativesToLoad result, String prefix) {
 		if("lib".equals(localName))
 		{
-			String path=attributes.getValue("path");
-			String installPath=attributes.getValue("installPath");
-			result.getBinaries().add(new NativeBinary(prefix+path, installPath));
+			final String path=attributes.getValue("path");
+			final String idCandidate = attributes.getValue("id");
+			final String id = idCandidate == null ? path : idCandidate;
+			final String installPath=attributes.getValue("installPath");
+			
+			if (!loadedLibIds.contains(id)) {
+				result.getBinaries().add(new NativeBinary(id, prefix+path, installPath));
+				loadedLibIds.add(id);
+			}
 		}
 	}
 

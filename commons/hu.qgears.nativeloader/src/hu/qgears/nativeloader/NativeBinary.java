@@ -11,12 +11,23 @@ import java.net.URL;
  *
  */
 public class NativeBinary {
-	private String libPath;
-	private String installPath;
-	public NativeBinary(String libPath, String installPath) {
+	private final String libId;
+	private final String libPath;
+	private final String installPath;
+	
+	public NativeBinary(String libId, String libPath, String installPath) {
 		super();
+		this.libId = libId;
 		this.libPath = libPath;
 		this.installPath = installPath;
+	}
+	
+	/**
+	 * Gets a unique identifier for the library. 
+	 * @return the unique identifier for the library
+	 */
+	public String getLibId() {
+		return libId;
 	}
 	/**
 	 * Get the path to the binary relative to the loader class.

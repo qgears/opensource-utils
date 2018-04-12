@@ -5,9 +5,11 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.Stack;
 
 import org.xml.sax.Attributes;
@@ -57,6 +59,10 @@ import org.xml.sax.helpers.XMLReaderFactory;
  * 
  * Arguments:
  * <dl>
+ * <dt><code>id</code>, optional</dt>
+ * <dd>Identifier for the library to be loaded. This identifier has to be unique
+ * to all entries of the same library to ensure that only the first matching one
+ * will be loaded. 
  * <dt><code>path</code>, required</dt>
  * <dd>The path to the library to be loaded.
  * </dl>
@@ -164,10 +170,15 @@ public abstract class XmlNativeLoader implements INativeLoader {
 		public static final String AT_LINUX_DISTRO_VERSION_ID = "distroVer";
 		public static final String EL_LIBRARY = "lib";
 		public static final String EL_SOURCE_ZIP = "srcZip";
+		/**
+		 * Identifier for a library to ensure that a single instance is 
+		 * attempted to be loaded if more than one is matching.
+		 */
+		public static final String AT_LIBRARY_ID = "id";
 		public static final String AT_LIBRARY_PATH = "path";
+		public static final String AT_INSTALLPATH = "installPath";
 		public static final String AT_SOURCE_EXEC = "exec";
 		public static final String AT_SOURCE_OUT = "out";
-		public static final String AT_INSTALLPATH = "installPath";
 		public static final String EL_LIBGROUP = "libs";
 		public static final String AT_LIBGROUP_NAME = "name";
 		public static final String AT_LIBGROUP_ENABLED = "enabled";
@@ -176,7 +187,15 @@ public abstract class XmlNativeLoader implements INativeLoader {
 		
 		protected final String arch;
 		protected final String os;
+		/**
+		 * List of native binaries to be loaded.
+		 */
 		protected final List<NativeBinary> natives = new LinkedList<NativeBinary>();
+		/**
+		 * Identifiers of already matching native libraries. This set is used
+		 * to avoid duplicate library loading. 
+		 */
+		protected final Set<String> nativesEnumd = new HashSet<>(); 
 		protected final List<SourceFile> sources = new ArrayList<SourceFile>(); 
 		protected final Stack<Boolean> listening = new Stack<Boolean>();
 
@@ -196,6 +215,7 @@ public abstract class XmlNativeLoader implements INativeLoader {
 		@Override
 		public void startDocument() throws SAXException {
 			natives.clear();
+			nativesEnumd.clear();
 			listening.clear();
 		}
 
@@ -226,17 +246,25 @@ public abstract class XmlNativeLoader implements INativeLoader {
 
 				} else if (EL_LIBRARY.equals(localName)) { // <path>
 					if (listening.peek()) {
-						String libPath = attributes.getValue(NAMESPACE,
+						final String libPath = attributes.getValue(NAMESPACE,
 								AT_LIBRARY_PATH);
+						final String libIdCandidate = attributes.getValue(NAMESPACE, 
+								AT_LIBRARY_ID);
+						final String libId = libIdCandidate == null 
+								? libPath : libIdCandidate;
+						
 						if (libPath == null) {
 							throw new SAXException("argument 'path' not "
 									+ "supplied for element <library>");
 						}
 						String installPath = attributes.getValue(NAMESPACE,
 								AT_INSTALLPATH);
-						natives.add(new NativeBinary(libPath, installPath));
+						
+						if (!nativesEnumd.contains(libId)) {
+							natives.add(new NativeBinary(libId, libPath, installPath));
+							nativesEnumd.add(libId);
+						}
 					}
-
 				} else if (EL_SOURCE_ZIP.equals(localName)) { // <path>
 					if (listening.peek()) {
 						String srcPath = attributes.getValue(NAMESPACE,
