@@ -2,7 +2,19 @@
 <natives-def>
 	<platform name="Linux">
 		<platform arch="(amd|x86_)64">
-			<lib path="libdevil64.so" />
+			<platform distroId="ubuntu" distroVersion="14.04">			
+				<lib id="libdevil" path="libdevil-ubuntu-14.04-x86_64.so" installPath="/opt/qgears/libdevil-ubuntu-14.04-x86_64.so" />
+			</platform>
+			<lib id="libdevil" path="libdevil-x86_64.so" installPath="/opt/qgears/libdevil-x86_64.so" />
+		</platform>
+		<platform arch="x86|i[3-6]86">
+			<platform distroId="ubuntu" distroVersion="14.04">			
+				<lib id="libdevil" path="libdevil-ubuntu-14.04-i686.so" installPath="/opt/qgears/libdevil-ubuntu-14.04-i686.so" />
+			</platform>
+			<platform distroId="debian" distroVersion="9">			
+				<lib id="libdevil" path="libdevil-debian-9-i686.so" installPath="/opt/qgears/libdevil-debian-9-i686.so" />
+			</platform>
+			<lib id="libdevil" path="libdevil-i686.so" installPath="/opt/qgears/libdevil-i686.so" />
 		</platform>
 	</platform>
 	<platform name="Windows .+">

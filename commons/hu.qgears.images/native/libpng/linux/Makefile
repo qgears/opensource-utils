@@ -3,17 +3,23 @@ JNI_INCLUDE:=-I/usr/lib/jvm/java-1.7.0-openjdk-${JNI_ARCHPOSTFIX}/include \
     -I/usr/lib/jvm/java-1.7.0-openjdk-${JNI_ARCHPOSTFIX}/include/linux \
     -I/usr/lib/jvm/java-1.8.0-openjdk-${JNI_ARCHPOSTFIX}/include \
     -I/usr/lib/jvm/java-1.8.0-openjdk-${JNI_ARCHPOSTFIX}/include/linux
-ARCHPOSTFIX=`uname -m |sed -e 's/x86_64/64/' -e 's/x86//' -e 's/i686//'`
+ARCHPOSTFIX=`uname -m | sed -e 's/\bx86\b/i686/'`
+OS_RELEASE_ID=`grep -w "ID" /etc/os-release | cut -d'=' -f2`
+OS_RELEASE_VERSION=`grep -w "VERSION_ID" /etc/os-release | cut -d'=' -f2 | tr -d '\"'`
+SO_NAME:=libqpng-${OS_RELEASE_ID}-${OS_RELEASE_VERSION}-${ARCHPOSTFIX}.so
+SO_LINK_NAME:=libqpng-${ARCHPOSTFIX}.so
 
 #used by the maven editor_platform_build process, see pom.xml in project.
 ifndef OUTPUTDIR
     OUTPUTDIR = ../../../src/hu/qgears/images/libpng
 endif
+
 gnu_c:
-	g++ -o $(OUTPUTDIR)/libqpng$(ARCHPOSTFIX).so \
+	g++ -o $(OUTPUTDIR)/$(SO_NAME) \
 	-fPIC -D_REENTRANT -shared \
-	${JNI_INCLUDE} -Wl,-soname,libqpng$(ARCHPOSTFIX).so \
+	${JNI_INCLUDE} -Wl,-soname,$(SO_NAME) \
 	../nativeLibpng.cpp ../jniutil.cpp \
 	-lpng
-	
+	rm -f $(OUTPUTDIR)/$(SO_LINK_NAME)
+	ln -s $(SO_NAME) $(OUTPUTDIR)/$(SO_LINK_NAME)
 	

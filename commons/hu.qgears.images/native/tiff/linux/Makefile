@@ -3,16 +3,24 @@ JNI_INCLUDE:=-I/usr/lib/jvm/java-1.7.0-openjdk-${JNI_ARCHPOSTFIX}/include \
     -I/usr/lib/jvm/java-1.7.0-openjdk-${JNI_ARCHPOSTFIX}/include/linux \
     -I/usr/lib/jvm/java-1.8.0-openjdk-${JNI_ARCHPOSTFIX}/include \
     -I/usr/lib/jvm/java-1.8.0-openjdk-${JNI_ARCHPOSTFIX}/include/linux
-ARCHPOSTFIX=`uname -m |sed -e 's/x86_64/64/' -e 's/x86//' -e 's/i686//'`
+ARCHPOSTFIX=`uname -m | sed -e 's/\bx86\b/i686/'`
+OS_RELEASE_ID=`grep -w "ID" /etc/os-release | cut -d'=' -f2`
+OS_RELEASE_VERSION=`grep -w "VERSION_ID" /etc/os-release | cut -d'=' -f2 | tr -d '\"'`
+SO_NAME:=qtiffloader-${OS_RELEASE_ID}-${OS_RELEASE_VERSION}-${ARCHPOSTFIX}.so
+SO_LINK_NAME:=qtiffloader-${ARCHPOSTFIX}.so
 
 #used by the maven editor_platform_build process, see pom.xml in project.
 ifndef OUTPUTDIR
     OUTPUTDIR = ../../../src/hu/qgears/images/tiff
 endif
+
 gnu_c:
-	g++ -o $(OUTPUTDIR)/qtiffloader$(ARCHPOSTFIX).so \
-	-fPIC -D_REENTRANT -shared \
-	${JNI_INCLUDE} -Wl,-soname,qtiffloader$(ARCHPOSTFIX).so \
-	../tiffloader.h ../tiffloader.c ../jni/tiffloader_connector.cpp ../jni/image_data_connector.cpp ../jni/jniutil.cpp\
-	
+	g++ -o $(OUTPUTDIR)/$(SO_NAME) \
+		-fPIC -D_REENTRANT -shared \
+		${JNI_INCLUDE} -Wl,-soname,$(SO_NAME) \
+		../tiffloader.h ../tiffloader.c ../jni/tiffloader_connector.cpp \
+		../jni/image_data_connector.cpp ../jni/jniutil.cpp
+	rm -f $(OUTPUTDIR)/$(SO_LINK_NAME)
+	ln -s $(SO_NAME) $(OUTPUTDIR)/$(SO_LINK_NAME)
+
 	
