@@ -25,7 +25,7 @@ gnu_c: freeglut
 
 freeglut: init
 	/bin/sh buildfreeglut.sh $(FREEGLUT_BUILDDIR) $(FREEGLUT_BINDIR)
-	rm $(OUTPUTDIR)/$(SO_LINK_NAME)
+	rm -f $(OUTPUTDIR)/$(SO_LINK_NAME)
 	ln -s $(SO_NAME) $(OUTPUTDIR)/$(SO_LINK_NAME)
 	
 init:
