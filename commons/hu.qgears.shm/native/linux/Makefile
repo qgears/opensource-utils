@@ -22,5 +22,5 @@ gnu_c:
  		SharedMemoryNative.cpp ../jniutil.cpp ../DlMallocPoolNative.cpp \
  		../PartNativeMemoryNative.cpp SemaphoreNative.cpp \
  		-lrt
- 	rm $(OUTPUTDIR)/$(SO_LINK_NAME)
+	rm -f $(OUTPUTDIR)/$(SO_LINK_NAME)
 	ln -s $(SO_NAME) $(OUTPUTDIR)/$(SO_LINK_NAME)
