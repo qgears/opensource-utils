@@ -114,7 +114,7 @@
 								 		<argument>libpng/linux</argument>
 								 		<argument>${basedir}/src/hu/qgears/images/libpng</argument>
 										<!-- The host is specified from Jenkins or from settings.xml -->
-										<argument>${cross-compile-host}</argument>
+										<argument>${cross-compile-hosts}</argument>
 							 		</arguments>
 								 </configuration>
 							</execution>
@@ -157,7 +157,7 @@
 								 		<argument>tiff/linux</argument>
 								 		<argument>${basedir}/src/hu/qgears/images/tiff</argument>
 										<!-- The host is specified from Jenkins or from settings.xml -->
-										<argument>${cross-compile-host}</argument>
+										<argument>${cross-compile-hosts}</argument>
 							 		</arguments>
 								 </configuration>
 							</execution>
