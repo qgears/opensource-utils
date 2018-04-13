@@ -3,13 +3,16 @@
 	<platform name="Linux">
 		<platform arch="(amd|x86_)64">
 			<platform distroId="ubuntu" distroVersion="14.04">			
-				<lib id="libqglut" path="libqglut-ubuntu-14.04-x86_64.so" installPath="/opt/qgears/libqglut-x86_64.so" />
+				<lib id="libqglut" path="libqglut-ubuntu-14.04-x86_64.so" installPath="/opt/qgears/libqglut-ubuntu-14.04-x86_64.so" />
 			</platform>
 			<lib id="libqglut" path="libqglut-x86_64.so" installPath="/opt/qgears/libqglut-x86_64.so" />
 		</platform>
 		<platform arch="x86|i[3-6]86">
+			<platform distroId="ubuntu" distroVersion="14.04">			
+				<lib id="libqglut" path="libqglut-ubuntu-14.04-i686.so" installPath="/opt/qgears/libqglut-ubuntu-14.04-i686.so" />
+			</platform>
 			<platform distroId="debian" distroVersion="9">			
-				<lib id="libqglut" path="libqglut-debian-9-i686.so" installPath="/opt/qgears/libqglut-i686.so" />
+				<lib id="libqglut" path="libqglut-debian-9-i686.so" installPath="/opt/qgears/libqglut-debian-9-i686.so" />
 			</platform>
 			<lib id="libqglut" path="libqglut-i686.so" installPath="/opt/qgears/libqglut-i686.so" />
 		</platform>

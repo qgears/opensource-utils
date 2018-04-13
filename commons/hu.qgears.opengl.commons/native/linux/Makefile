@@ -16,15 +16,16 @@ endif
 
 gnu_c: freeglut
 	g++ -o $(OUTPUTDIR)/$(SO_NAME) \
-	-fPIC -D_REENTRANT -shared \
-	${JNI_INCLUDE} -Wl,-soname,$(SO_NAME) \
-	../QGlut.cpp ../jniutil.cpp \
-	$(FREEGLUT_BINDIR)/*.o -L$(FREEGLUT_BINDIR) $(FREEGLUT_BINDIR)/libglut.a \
-	-Wl,-Bdynamic -lGLU -lGLEW
+		-fPIC -D_REENTRANT -shared \
+		${JNI_INCLUDE} -Wl,-soname,$(SO_NAME) \
+		../QGlut.cpp ../jniutil.cpp \
+		$(FREEGLUT_BINDIR)/*.o -L$(FREEGLUT_BINDIR) $(FREEGLUT_BINDIR)/libglut.a \
+		-Wl,-Bdynamic -lGLU -lGLEW
 	rm -fr ${FREEGLUT_BUILDDIR} ${FREEGLUT_BINDIR}
 
 freeglut: init
 	/bin/sh buildfreeglut.sh $(FREEGLUT_BUILDDIR) $(FREEGLUT_BINDIR)
+	rm $(OUTPUTDIR)/$(SO_LINK_NAME)
 	ln -s $(SO_NAME) $(OUTPUTDIR)/$(SO_LINK_NAME)
 	
 init:
