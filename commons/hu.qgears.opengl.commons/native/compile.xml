@@ -2,7 +2,7 @@
 	<description>
 		Compile native library.
 		Dependencies:
-		freeglut3-dev libglew1.6-dev
+		freeglut3-dev libglew-dev
 	</description>
 	<target name="refresh" depends="make-c">
 		<eclipse.refreshLocal resource="hu.qgears.opengl.commons" depth="infinite" />
