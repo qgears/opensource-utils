@@ -29,6 +29,7 @@ public class SocketMultiplexer implements ISocketMultiplexer{
 	private ISocketMultiplexerListener messageListener;
 	private InputStream is;
 	private OutputStream os;
+	private SocketMultiplexerDatagramStreamer streamer=new SocketMultiplexerDatagramStreamer();
 	private boolean exit=false;
 	/**
 	 * True means that the next messages can not be sent.
@@ -63,7 +64,7 @@ public class SocketMultiplexer implements ISocketMultiplexer{
 				{
 					while(!exit)
 					{
-						SocketMultiplexerDatagram datagram=SocketMultiplexerDatagram.readFromStream(is);
+						SocketMultiplexerDatagram datagram=streamer.readFromStream(is, datagramMaxSize);
 						long id=datagram.getDatagramId();
 						ByteArrayOutputStream bos=getMessage(id);
 						bos.write(datagram.getContent());
@@ -150,7 +151,7 @@ public class SocketMultiplexer implements ISocketMultiplexer{
 						}
 					}
 					try {
-						datagram.writeToStream(os);
+						streamer.writeToStream(datagram, os);
 						os.flush();
 					} catch (IOException e) {
 						synchronized (messagesToSend) {

@@ -11,8 +11,8 @@ import hu.qgears.commons.signal.SignalFutureWrapper;
  * 
  * The timeout is called on "an other" thread
  *  * The task must execute fast. In case of a long running process a worker thread must be used.
- * 
- * TODO naive implementation - rewrite with a single working thread.
+ *
+ * Current implementation starts a new thread for each timer.
  * 
  * @author rizsi
  *
@@ -36,8 +36,8 @@ public class UtilTimer {
 	 * Execute callable when timeout expires.
 	 * @param <T>
 	 * @param timeoutMillis
-	 * @param callable
-	 * @return
+	 * @param callable this is called when the timeout is triggered.
+	 * @return {@link SignalFutureWrapper} object that can be used to add listeners to the timeout callable return value.
 	 */
 	public <T> SignalFutureWrapper<T> executeTimeout(final long timeoutMillis, final Callable<T> callable)
 	{

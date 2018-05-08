@@ -26,7 +26,13 @@ import hu.qgears.coolrmi.messages.CoolRMIRequestServiceQuery;
 import hu.qgears.coolrmi.messages.CoolRMIRequestServiceReply;
 import hu.qgears.coolrmi.multiplexer.ISocketMultiplexer;
 
-
+/**
+ * Communication object that receives and sends messages.
+ * Both the server and the client side remoting objects extend this base class.
+ * See {@link CoolRMIRemoter} for reference implementation.
+ * Different implementations can be used for different threading models and different communication implementations
+ * (eg. RCOM project multiplexes CoolRMI based control messages into a NIO stream of data containing also audio and video streams).
+ */
 abstract public class GenericCoolRMIRemoter {
 	private ICoolRMILogger log=new ICoolRMILogger() {
 		@Override
@@ -411,6 +417,9 @@ abstract public class GenericCoolRMIRemoter {
 	{
 		return CoolRMICall.getCurrentCall().getRemoter();
 	}
-
+	/**
+	 * Execute a single task on the remoter's executor thread.
+	 * @param runnable
+	 */
 	abstract public void execute(Runnable runnable);
 }
