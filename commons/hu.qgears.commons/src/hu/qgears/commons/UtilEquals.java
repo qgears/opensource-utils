@@ -55,7 +55,10 @@ public class UtilEquals {
 	 */
 	public static boolean safeEquals(Object objA, Object objB) {
 		try {
-			if(objA.getClass().equals(objB.getClass()))
+			if (objA == objB) {
+				//handling null and eq by reference cases
+				return true;
+			} else if(objA.getClass().equals(objB.getClass()))
 			{
 				Field[] fd=objA.getClass().getFields();
 				for(Field f: fd)
