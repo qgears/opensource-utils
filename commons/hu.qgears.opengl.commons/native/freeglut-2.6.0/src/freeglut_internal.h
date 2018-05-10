@@ -92,9 +92,9 @@
  * because the cross-platform includes are case sensitive.
  */
 #if TARGET_HOST_MS_WINDOWS && !defined(_WIN32_WCE)
-#    include <Windows.h>
-#    include <WindowsX.h>
-#    include <MMSystem.h>
+#    include <windows.h>
+#    include <windowsx.h>
+#    include <mmsystem.h>
 /* CYGWIN does not have tchar.h, but has TEXT(x), defined in winnt.h. */
 #    ifndef __CYGWIN__
 #      include <tchar.h>

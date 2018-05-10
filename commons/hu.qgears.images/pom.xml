@@ -11,13 +11,15 @@
 	</parent>
 	<groupId>hu.qgears</groupId>
 	<artifactId>hu.qgears.images</artifactId>
+	<version>6.12.0-SNAPSHOT</version>
 	<packaging>eclipse-plugin</packaging>
 	<description>Java bindings to native image handling libraries. Only libpng is used by the application.</description>
+	
 	<build>
 		<plugins>
 			<plugin>
 				<artifactId>maven-clean-plugin</artifactId>
-				<version>2.6.1</version>
+				<version>${clean-version}</version>
 				<executions>
 					<execution>
 						<id>auto-clean</id>
@@ -49,7 +51,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
-				<version>1.2.1</version>
+				<version>${exec-plugin-version}</version>
 				<!-- Inheritance must be disabled, because the exec plugin run in all submodules by default-->
 				<inherited>false</inherited>
 				<executions>
@@ -95,7 +97,7 @@
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>exec-maven-plugin</artifactId>
-						<version>1.2.1</version>
+						<version>${exec-plugin-version}</version>
 						<!-- Inheritance must be disabled, because the exec plugin run in all submodules by default-->
 						<inherited>false</inherited>
 						<executions>
@@ -118,30 +120,18 @@
 							 		</arguments>
 								 </configuration>
 							</execution>
-							<!-- x compile libpng native to win32-->
 							<execution>
-								<id>libqpng-win32-natives</id>
+								<id>libqpng-natives-windows</id>
 								<phase>generate-resources</phase>
 								<goals>
 									<goal>exec</goal>
 								</goals>
 								<configuration>
 									<executable>make</executable>
-									<workingDirectory>./native/libpng/windows/win32</workingDirectory>
+									<workingDirectory>./native/libpng/windows/</workingDirectory>
 								</configuration>
 							</execution>
-							<!-- x compile libpng native to win64-->
-							<execution>
-								<id>libqpng-win64-natives</id>
-								<phase>generate-resources</phase>
-								<goals>
-									<goal>exec</goal>
-								</goals>
-								<configuration>
-									<executable>make</executable>
-									<workingDirectory>./native/libpng/windows/win64</workingDirectory>
-								</configuration>
-							</execution>
+							
 							<!-- Compiling tiff lib -->
 							<execution>
 								<id>qtiffloader-cross</id>
@@ -161,11 +151,21 @@
 							 		</arguments>
 								 </configuration>
 							</execution>
+							<execution>
+								<id>qtiffloader-natives-windows</id>
+								<phase>generate-resources</phase>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+								<configuration>
+									<executable>make</executable>
+									<workingDirectory>./native/tiff/windows</workingDirectory>
+								</configuration>
+							</execution>
 						</executions>
 					</plugin>
 				</plugins>
 			</build>
 		</profile>
 	</profiles>
-<version>6.12.0-SNAPSHOT</version>
 </project>

@@ -18,9 +18,22 @@
 		</platform>
 	</platform>
 	<platform name="Windows .+">
-		<platform arch="x86|i[3-6]86">
-			<lib path="DevIL.dll" />
-			<lib path="rdevil.dll" />
+		<platform arch="(amd|x86_)64">
+		
+			<lib path="/CYGWIN1.DLL"/>
+			<lib path="/CYGJPEG-8.DLL"/>			
+			<lib path="/CYGJASPER-4.DLL"/>
+			<lib path="/CYGZ.DLL"/>
+			<lib path="/CYGPNG16-16.DLL"/>
+			
+			<lib path="/CYGJBIG-2.DLL"/>
+			<lib path="/CYGLZMA-5.DLL"/>
+			<lib path="/CYGTIFF-6.DLL"/>
+			<lib path="/CYGGCC_S-SEH-1.DLL"/>
+			<lib path="/CYGSTDC++-6.DLL"/>
+			
+			<lib path="/cygIL.dll" />
+			<lib path="/rdevil.dll" />
 		</platform>
 	</platform>
 	

@@ -6,6 +6,9 @@
 #define PNGCLASS Java_hu_qgears_images_libpng_NativeLibPngConnector_
 #include "jniutil.h"
 
+// memcpy
+#include <string.h>
+
 void clearStruct(PngImage * str)
 {
 	str->png_ptr=NULL;

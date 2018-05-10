@@ -1,15 +1,30 @@
-<project name="generate" default="make-c" basedir=".">
+<project name="generate" default="make-all" basedir=".">
 	<description>
 		Compile native library.
 		Dependencies:
 		libavcodec libavformat libswscale
 	</description>
 	<property environment="env"/>
-	<target name="make-c" depends="jnigen">
+	
+	<target name="make-all" depends="make-c-win,make-c-linux" />
+		
+	<target name="make-c-win" depends="jnigen,check-cross" if="check-cross-true">
+		<exec dir="./libpng/windows" executable="make"/>
+		<exec dir="./tiff/windows" executable="make"/>
+		<!-- TODO: devil and compiling -->
+	</target>	
+	<target name="check-cross">
+	    <condition property="check-cross-true">
+	        <and>
+		        <available file="/usr/bin/x86_64-w64-mingw32-gcc"/>
+	        </and>
+	    </condition>
+	</target>
+	
+	<target name="make-c-linux" depends="jnigen">
 		<exec dir="./devIL/linux" executable="make"/>
 		<exec dir="./libpng/linux" executable="make"/>
 		<exec dir="./tiff/linux" executable="make"/>
-<!-- TODO fix windows binary	<exec dir="./devIL/windows" executable="make"/> -->
 	</target>
 	<target name="jnigen">
 		<mkdir dir="generated"/>

@@ -21,5 +21,8 @@
 		<platform arch="x86|i[3-6]86">
 			<lib path="shm.dll" />
 		</platform>
+		<platform arch="(amd|x86_)64">
+			<lib path="shm.dll" />
+		</platform>
 	</platform>
 </natives-def>

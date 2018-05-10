@@ -17,4 +17,9 @@
 			<lib id="qtiffloader" path="qtiffloader-i686.so" installPath="/opt/qgears/qtiffloader-i686.so" />
 		</platform>
 	</platform>
+	<platform name=".*(W|w)indows.*">
+		<platform arch="(amd|x86_)64">
+			<lib path="qtiffloader64.dll" />
+		</platform>
+	</platform>
 </natives-def>
