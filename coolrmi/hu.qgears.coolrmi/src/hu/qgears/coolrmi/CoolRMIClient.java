@@ -88,4 +88,8 @@ public class CoolRMIClient extends CoolRMIRemoter {
 			super.close();
 		}
 	}
+	@Override
+	protected boolean isClient() {
+		return true;
+	}
 }

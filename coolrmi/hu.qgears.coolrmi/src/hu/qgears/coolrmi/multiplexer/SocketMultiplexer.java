@@ -5,7 +5,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,6 +32,8 @@ public class SocketMultiplexer implements ISocketMultiplexer{
 	private InputStream is;
 	private OutputStream os;
 	private SocketMultiplexerDatagramStreamer streamer=new SocketMultiplexerDatagramStreamer();
+	private String requiredHelloString;
+	private String sendHelloString;
 	private boolean exit=false;
 	/**
 	 * True means that the next messages can not be sent.
@@ -39,11 +43,13 @@ public class SocketMultiplexer implements ISocketMultiplexer{
 	private LinkedList<SocketMultiplexerSource> messagesToSend=new LinkedList<SocketMultiplexerSource>();
 	public SocketMultiplexer(InputStream is, OutputStream os,
 			ISocketMultiplexerListener messageListener,
-			boolean guaranteeOrdering) throws IOException {
+			boolean guaranteeOrdering, boolean isClient) throws IOException {
 		super();
 		this.is = is;
 		this.messageListener=messageListener;
 		this.os=os;
+		requiredHelloString="CoolRMI 2.0.0"+(isClient?" server":" client");
+		sendHelloString="CoolRMI 2.0.0"+(!isClient?" server":" client");
 	}
 	public void start()
 	{
@@ -62,6 +68,18 @@ public class SocketMultiplexer implements ISocketMultiplexer{
 			try {
 				try
 				{
+					try {
+						byte[] pattern=requiredHelloString.getBytes(StandardCharsets.UTF_8);
+						byte[] recv=new byte[pattern.length];
+						SocketMultiplexerDatagramStreamer.readAll(is, recv);
+						if(!Arrays.equals(pattern, recv))
+						{
+							throw new IOException("Connection version string does not match! "+new String(recv, StandardCharsets.UTF_8)+" expected: "+requiredHelloString);
+						}
+					} catch (IOException e1) {
+						e1.printStackTrace();
+						exit=true;
+					}
 					while(!exit)
 					{
 						SocketMultiplexerDatagram datagram=streamer.readFromStream(is, datagramMaxSize);
@@ -104,6 +122,12 @@ public class SocketMultiplexer implements ISocketMultiplexer{
 		int lastSent=-1;
 		@Override
 		public void run() {
+			try {
+				os.write(sendHelloString.getBytes(StandardCharsets.UTF_8));
+			} catch (IOException e1) {
+				e1.printStackTrace();
+				exit=true;
+			}
 			while(!exit)
 			{
 				SocketMultiplexerSource source;

@@ -43,4 +43,9 @@ public class CoolRMIServe
 	public void connect() throws IOException {
 		super.connect(sock);
 	}
+
+	@Override
+	protected boolean isClient() {
+		return false;
+	}
 }

@@ -10,7 +10,7 @@ import hu.qgears.coolrmi.multiplexer.ISocketMultiplexerListener;
 import hu.qgears.coolrmi.multiplexer.SocketMultiplexer;
 import hu.qgears.coolrmi.streams.IConnection;
 
-public class CoolRMIRemoter extends GenericCoolRMIRemoter
+abstract public class CoolRMIRemoter extends GenericCoolRMIRemoter
 {
 	private class SocketMultiplexerListener implements ISocketMultiplexerListener
 	{
@@ -50,10 +50,11 @@ public class CoolRMIRemoter extends GenericCoolRMIRemoter
 		this.sock = sock;
 		multiplexer = new SocketMultiplexer(
 				sock.getInputStream(), sock
-				.getOutputStream(), new SocketMultiplexerListener(), guaranteeOrdering);
+				.getOutputStream(), new SocketMultiplexerListener(), guaranteeOrdering, isClient());
 		connected = true;
 		((SocketMultiplexer)multiplexer).start();
 	}
+	abstract protected boolean isClient();
 	@Override
 	protected void closeConnection() throws IOException {
 		sock.close();

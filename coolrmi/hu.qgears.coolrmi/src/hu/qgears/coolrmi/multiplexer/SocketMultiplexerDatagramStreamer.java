@@ -48,7 +48,7 @@ public class SocketMultiplexerDatagramStreamer {
 		}
 		return new SocketMultiplexerDatagram(datagramId, data, lastPiece);
 	}
-	private static void readAll(InputStream is, byte[] header) throws IOException {
+	public static void readAll(InputStream is, byte[] header) throws IOException {
 		readAll(is, header, header.length);
 	}
 	private static void readAll(InputStream is, byte[] header, int length) throws IOException {
