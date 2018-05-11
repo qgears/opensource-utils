@@ -167,7 +167,7 @@ public abstract class XmlNativeLoader implements INativeLoader {
 		 * {@code /etc/os-release} file. Note that the value of the entry 
 		 * contains starting and trailing quotation marks.
 		 */
-		public static final String AT_LINUX_DISTRO_VERSION_ID = "distroVer";
+		public static final String AT_LINUX_DISTRO_VERSION_ID = "distroVersion";
 		public static final String EL_LIBRARY = "lib";
 		public static final String EL_SOURCE_ZIP = "srcZip";
 		/**
