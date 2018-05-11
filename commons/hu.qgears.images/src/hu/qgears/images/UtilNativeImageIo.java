@@ -339,22 +339,20 @@ public class UtilNativeImageIo {
 		}
 		SizeInt s=imSrc.getSize();
 		int nc=imSrc.getComponentOrder().getNCHannels();
-		for(int y=0;y<s.getHeight();++y)
-		{
-			for(int x=0;x<s.getWidth();++x)
-			{
-				for(int c=0;c<nc;++c)
-				{
+		for(int y=0;y<s.getHeight();++y) {
+			for(int x=0;x<s.getWidth();++x) {
+				for(int c=0;c<nc;++c) {
 					int src=imSrc.getChannel(x, y, c);
 					int dst=imOut.getChannel(x, y, c);
-					if(src!=dst)
-					{
+					if(src!=dst) {
 						int [] srcs = new int[nc]; 
 						int [] dsts = new int[nc]; 
 						for(int c2=0;c2<nc;++c2){
-							srcs[c2]=imSrc.getChannel(x, y, c2);
-							dsts[c2]=imOut.getChannel(x, y, c2);
+							srcs[c2]=unsignedByteToInt(imSrc.getChannel(x, y, c2));
+							dsts[c2]=unsignedByteToInt(imOut.getChannel(x, y, c2));
 						}
+						// For testing, commented out
+						//System.out.println("Diff: ["+x+" "+y+"] ch: "+c+". Exp "+Arrays.toString(srcs)+", gen "+Arrays.toString(dsts));
 						return "First different pixel: coordinate: ["+x+" "+y+"] channel: "+c+". Expected pixel color "+Arrays.toString(srcs)+", generated pixel color "+Arrays.toString(dsts);
 					}
 				}
@@ -364,7 +362,10 @@ public class UtilNativeImageIo {
 		return null;
 	}
 	
-
+	public static int unsignedByteToInt(byte b) {
+		return (int) b & 0xFF;
+	}
+	
 	public static byte[] imageToMd5(NativeImage nim) throws NoSuchAlgorithmException {
 		ByteBuffer bb=nim.getBuffer().getJavaAccessor().duplicate();
 		bb.position(0);
