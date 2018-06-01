@@ -146,8 +146,7 @@ public class PackageImplTemplate extends PackageTemplate {
 			genModel.addPseudoImport(
 					genPackage.getQualifiedPackageInterfaceName() + "." + genPackage.getClassifierID(genClassifier));
 		}
-		rtout.write(
-				"\n\n/**\n * <!-- begin-user-doc -->\n * An implementation of the model <b>Package</b>.\n * <!-- end-user-doc -->\n * @generated\n */\n\npublic class ");
+		rtout.write("\n\n/**\n * <!-- begin-user-doc -->\n * An implementation of the model <b>Package</b>.\n * <!-- end-user-doc -->\n * @generated\n */\n\npublic class ");
 		rtcout.write(genPackage.getPackageClassName());
 		rtout.write(" extends ");
 		rtcout.writeClass(EPackageImpl.class);
@@ -155,8 +154,7 @@ public class PackageImplTemplate extends PackageTemplate {
 		rtcout.write(genPackage.getImportedPackageInterfaceName());
 		rtout.write("\n{");
 		if (genModel.hasCopyrightField()) {
-			rtout.write(
-					"\n\t/**\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\t");
+			rtout.write("\n\t/**\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\t");
 			rtcout.write(publicStaticFinalFlag);
 			rtcout.write(genModel.getImportedName("java.lang.String"));
 			rtout.write(" copyright = ");
@@ -166,23 +164,20 @@ public class PackageImplTemplate extends PackageTemplate {
 			rtout.write("\n");
 		}
 		if (genPackage.isLoadingInitialization()) {
-			rtout.write(
-					"\n\t/**\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\tprotected String packageFilename = \"");
+			rtout.write("\n\t/**\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\tprotected String packageFilename = \"");
 			rtcout.write(genPackage.getSerializedPackageFilename());
 			rtout.write("\";");
 			rtcout.write(genModel.getNonNLS());
 			rtout.write("\n");
 		}
 		for (GenClassifier genClassifier : genPackage.getGenClassifiers()) {
-			rtout.write(
-					"\n\t/**\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\tprivate ");
+			rtout.write("\n\t/**\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\tprivate ");
 			rtcout.write(genClassifier.getImportedMetaType());
 			rtout.write(" ");
 			rtcout.write(genClassifier.getClassifierInstanceName());
 			rtout.write(" = null;\n");
 		}
-		rtout.write(
-				"\n\t/**\n\t * Creates an instance of the model <b>Package</b>, registered with\n\t * {@link org.eclipse.emf.ecore.EPackage.Registry EPackage.Registry} by the package\n\t * package URI value.\n\t * <p>Note: the correct way to create the package is via the static\n\t * factory method {@link #init init()}, which also performs\n\t * initialization of the package, or returns the registered package,\n\t * if one already exists.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @see org.eclipse.emf.ecore.EPackage.Registry\n\t * @see ");
+		rtout.write("\n\t/**\n\t * Creates an instance of the model <b>Package</b>, registered with\n\t * {@link org.eclipse.emf.ecore.EPackage.Registry EPackage.Registry} by the package\n\t * package URI value.\n\t * <p>Note: the correct way to create the package is via the static\n\t * factory method {@link #init init()}, which also performs\n\t * initialization of the package, or returns the registered package,\n\t * if one already exists.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @see org.eclipse.emf.ecore.EPackage.Registry\n\t * @see ");
 		rtcout.write(genPackage.getQualifiedPackageInterfaceName());
 		rtout.write("#eNS_URI\n\t * @see #init()\n\t * @generated\n\t */\n\tprivate ");
 		rtcout.write(genPackage.getPackageClassName());
@@ -192,11 +187,9 @@ public class PackageImplTemplate extends PackageTemplate {
 
 		generatePackageHelper();
 
-		rtout.write(
-				"\n\t/**\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\tprivate static boolean isInited = false;\n\n\t/**\n\t * Creates, registers, and initializes the <b>Package</b> for this model, and for any others upon which it depends.\n\t * \n\t * <p>This method is used to initialize {@link ");
+		rtout.write("\n\t/**\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\tprivate static boolean isInited = false;\n\n\t/**\n\t * Creates, registers, and initializes the <b>Package</b> for this model, and for any others upon which it depends.\n\t * \n\t * <p>This method is used to initialize {@link ");
 		rtcout.write(genPackage.getImportedPackageInterfaceName());
-		rtout.write(
-				"#eINSTANCE} when that field is accessed.\n\t * Clients should not invoke it directly. Instead, they should simply access that field to obtain the package.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @see #eNS_URI");
+		rtout.write("#eINSTANCE} when that field is accessed.\n\t * Clients should not invoke it directly. Instead, they should simply access that field to obtain the package.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @see #eNS_URI");
 		if (!genPackage.isLoadedInitialization()) {
 			rtout.write("\n\t * @see #createPackageContents()\n\t * @see #initializePackageContents()");
 		}
@@ -265,8 +258,7 @@ public class PackageImplTemplate extends PackageTemplate {
 		rtcout.write(genPackage.getBasicPackageName());
 		rtout.write(";\n\t}");
 		if (genModel.getRuntimePlatform() == GenRuntimePlatform.GWT) {
-			rtout.write(
-					"\n\n\t/**\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\tpublic static void initializeRegistryHelpers()\n\t{");
+			rtout.write("\n\n\t/**\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\tpublic static void initializeRegistryHelpers()\n\t{");
 			Set<String> helpers = new HashSet<String>();
 			for (GenClassifier genClassifier : genPackage.getGenClassifiers()) {
 				if (genClassifier instanceof GenClass) {
@@ -281,13 +273,11 @@ public class PackageImplTemplate extends PackageTemplate {
 							rtcout.write(theClass);
 							rtout.write(".class, \n\t\t\t new ");
 							rtcout.write(genModel.getImportedName("org.eclipse.emf.common.util.Reflect"));
-							rtout.write(
-									".Helper() \n\t\t\t {\n\t\t\t\t public boolean isInstance(Object instance)\n\t\t\t\t {\n\t\t\t\t\t return instance instanceof ");
+							rtout.write(".Helper() \n\t\t\t {\n\t\t\t\t public boolean isInstance(Object instance)\n\t\t\t\t {\n\t\t\t\t\t return instance instanceof ");
 							rtcout.write(genClass.isMapEntry() ? genClass.getImportedClassName()
 									: genClass.getRawImportedInterfaceName()
 											+ genClass.getInterfaceWildTypeArguments());
-							rtout.write(
-									";\n\t\t\t\t }\n\n\t\t\t\t public Object newArrayInstance(int size)\n\t\t\t\t {\n\t\t\t\t\t return new ");
+							rtout.write(";\n\t\t\t\t }\n\n\t\t\t\t public Object newArrayInstance(int size)\n\t\t\t\t {\n\t\t\t\t\t return new ");
 							rtcout.write(theClass);
 							rtout.write("[size];\n\t\t\t\t }\n\t\t\t });");
 						}
@@ -303,11 +293,9 @@ public class PackageImplTemplate extends PackageTemplate {
 							rtcout.write(theClass);
 							rtout.write(".class, \n\t\t\t new ");
 							rtcout.write(genModel.getImportedName("org.eclipse.emf.common.util.Reflect"));
-							rtout.write(
-									".Helper() \n\t\t\t {\n\t\t\t\t public boolean isInstance(Object instance)\n\t\t\t\t {\n\t\t\t\t\t return instance instanceof ");
+							rtout.write(".Helper() \n\t\t\t {\n\t\t\t\t public boolean isInstance(Object instance)\n\t\t\t\t {\n\t\t\t\t\t return instance instanceof ");
 							rtcout.write(theClass);
-							rtout.write(
-									";\n\t\t\t\t }\n\n\t\t\t\t public Object newArrayInstance(int size)\n\t\t\t\t {");
+							rtout.write(";\n\t\t\t\t }\n\n\t\t\t\t public Object newArrayInstance(int size)\n\t\t\t\t {");
 							if (genDataType.isArrayType()) {
 								String componentType = theClass;
 								String indices = "";
@@ -330,16 +318,14 @@ public class PackageImplTemplate extends PackageTemplate {
 					}
 				}
 			}
-			rtout.write(
-					"\n\t}\n\n\n\t/**\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\tpublic static class WhiteList implements ");
+			rtout.write("\n\t}\n\n\n\t/**\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\tpublic static class WhiteList implements ");
 			rtcout.write(genModel.getImportedName("com.google.gwt.user.client.rpc.IsSerializable"));
 			rtout.write(", EBasicWhiteList\n\t{");
 			for (GenClassifier genClassifier : genPackage.getGenClassifiers()) {
 				if (genClassifier instanceof GenClass) {
 					GenClass genClass = (GenClass) genClassifier;
 					if (!genClass.isDynamic()) {
-						rtout.write(
-								"\n\t\t/**\n\t\t * <!-- begin-user-doc -->\n\t\t * <!-- end-user-doc -->\n\t\t * @generated\n\t\t */\n\t\tprotected ");
+						rtout.write("\n\t\t/**\n\t\t * <!-- begin-user-doc -->\n\t\t * <!-- end-user-doc -->\n\t\t * @generated\n\t\t */\n\t\tprotected ");
 						rtcout.write(genClass.isMapEntry() ? genClass.getImportedClassName()
 								: genClass.getImportedWildcardInstanceClassName());
 						rtout.write(" ");
@@ -349,8 +335,7 @@ public class PackageImplTemplate extends PackageTemplate {
 				} else if (genClassifier instanceof GenDataType) {
 					GenDataType genDataType = (GenDataType) genClassifier;
 					if (!genDataType.isObjectType() && genDataType.isSerializable()) {
-						rtout.write(
-								"\n\t\t/**\n\t\t * <!-- begin-user-doc -->\n\t\t * <!-- end-user-doc -->\n\t\t * @generated\n\t\t */\n\t\tprotected ");
+						rtout.write("\n\t\t/**\n\t\t * <!-- begin-user-doc -->\n\t\t * <!-- end-user-doc -->\n\t\t * @generated\n\t\t */\n\t\tprotected ");
 						rtcout.write(genDataType.getImportedWildcardInstanceClassName());
 						rtout.write(" ");
 						rtcout.write(genDataType.getSafeUncapName());
@@ -372,8 +357,7 @@ public class PackageImplTemplate extends PackageTemplate {
 				}
 				if (genModel.isOperationReflection()) {
 					for (GenOperation genOperation : genClass.getGenOperations()) {
-						rtout.write(
-								"\n\t/**\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\n\tpublic ");
+						rtout.write("\n\t/**\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\n\tpublic ");
 						rtcout.write(genOperation.getImportedMetaType());
 						rtout.write(" get");
 						rtcout.write(genOperation.getOperationAccessorName());
@@ -396,8 +380,7 @@ public class PackageImplTemplate extends PackageTemplate {
 				}
 			}
 		}
-		rtout.write(
-				"\n\t/**\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\n\tpublic ");
+		rtout.write("\n\t/**\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\n\tpublic ");
 		rtcout.write(genPackage.getImportedFactoryInterfaceName());
 		rtout.write(" get");
 		rtcout.write(genPackage.getFactoryName());
@@ -405,8 +388,7 @@ public class PackageImplTemplate extends PackageTemplate {
 		rtcout.write(genPackage.getImportedFactoryInterfaceName());
 		rtout.write(")getEFactoryInstance();\n\t}\n");
 		if (!genPackage.isLoadedInitialization()) {
-			rtout.write(
-					"\n\t/**\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\tprivate boolean isCreated = false;\n\n\t/**\n\t * Creates the meta-model objects for the package.  This method is\n\t * guarded to have no affect on any invocation but its first.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\tpublic void createPackageContents()\n\t{\n\t\tif (isCreated) return;\n\t\tisCreated = true;");
+			rtout.write("\n\t/**\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\tprivate boolean isCreated = false;\n\n\t/**\n\t * Creates the meta-model objects for the package.  This method is\n\t * guarded to have no affect on any invocation but its first.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\tpublic void createPackageContents()\n\t{\n\t\tif (isCreated) return;\n\t\tisCreated = true;");
 			if (!genPackage.getGenClasses().isEmpty()) {
 				rtout.write("\n\n\t\t// Create classes and their features");
 				for (Iterator<GenClass> c = genPackage.getGenClasses().iterator(); c.hasNext();) {
@@ -461,15 +443,13 @@ public class PackageImplTemplate extends PackageTemplate {
 					rtout.write(");");
 				}
 			}
-			rtout.write(
-					"\n\t}\n\n\t/**\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\tprivate boolean isInitialized = false;\n");
+			rtout.write("\n\t}\n\n\t/**\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\tprivate boolean isInitialized = false;\n");
 
 			///////////////////////
 
 			///////////////////////
 
-			rtout.write(
-					"\n\t/**\n\t * Complete the initialization of the package and its meta-model.  This\n\t * method is guarded to have no affect on any invocation but its first.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\tpublic void initializePackageContents()\n\t{\n\t\tif (isInitialized) return;\n\t\tisInitialized = true;\n\n\t\t// Initialize package\n\t\tsetName(eNAME);\n\t\tsetNsPrefix(eNS_PREFIX);\n\t\tsetNsURI(eNS_URI);");
+			rtout.write("\n\t/**\n\t * Complete the initialization of the package and its meta-model.  This\n\t * method is guarded to have no affect on any invocation but its first.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\tpublic void initializePackageContents()\n\t{\n\t\tif (isInitialized) return;\n\t\tisInitialized = true;\n\n\t\t// Initialize package\n\t\tsetName(eNAME);\n\t\tsetNsPrefix(eNS_PREFIX);\n\t\tsetNsURI(eNS_URI);");
 			if (!genPackage.getPackageInitializationDependencies().isEmpty() && doGeneratePackageDeps) {
 				rtout.write("\n\n\t\t// Obtain other dependent packages");
 				for (GenPackage dep : genPackage.getPackageInitializationDependencies()) {
@@ -487,7 +467,7 @@ public class PackageImplTemplate extends PackageTemplate {
 				}
 			}
 			if (!genPackage.getSubGenPackages().isEmpty()) {
-				rtout.write("\n\n\t\t// Add subpackages");
+				rtout.write("\n\n\t\t// Add subpackages\n");
 				for (GenPackage sub : genPackage.getSubGenPackages()) {
 					rtout.write("\n\t\tgetESubpackages().add(");
 					rtcout.write(genPackage.getPackageInstanceVariable(sub));
@@ -495,74 +475,6 @@ public class PackageImplTemplate extends PackageTemplate {
 				}
 			}
 			if (!genPackage.getGenClasses().isEmpty()) {
-				if (genModel.useGenerics()) {
-					rtout.write("\n\n\t\t// Create type parameters");
-					for (GenClassifier genClassifier : genPackage.getGenClassifiers()) {
-						for (GenTypeParameter genTypeParameter : genClassifier.getGenTypeParameters()) {
-							if (!genTypeParameter.getEcoreTypeParameter().getEBounds().isEmpty()
-									|| genTypeParameter.isUsed()) {
-								rtout.write("\n\t\t");
-								rtcout.write(genModel.getImportedName("org.eclipse.emf.ecore.ETypeParameter"));
-								rtout.write(" ");
-								rtcout.write(genClassifier.getClassifierInstanceName());
-								rtout.write("_");
-								rtcout.write(genTypeParameter.getName());
-								rtout.write(" = addETypeParameter(");
-								rtcout.write(genClassifier.getClassifierInstanceName());
-								rtout.write(", \"");
-								rtcout.write(genTypeParameter.getName());
-								rtout.write("\");");
-								rtcout.write(genModel.getNonNLS());
-							} else {
-								rtout.write("\n\t\taddETypeParameter(");
-								rtcout.write(genClassifier.getClassifierInstanceName());
-								rtout.write(", \"");
-								rtcout.write(genTypeParameter.getName());
-								rtout.write("\");");
-								rtcout.write(genModel.getNonNLS());
-							}
-						}
-					}
-				}
-				if (genModel.useGenerics()) {
-					rtout.write("\n\n\t\t// Set bounds for type parameters");
-					for (GenClassifier genClassifier : genPackage.getGenClassifiers()) {
-						for (GenTypeParameter genTypeParameter : genClassifier.getGenTypeParameters()) {
-							for (EGenericType bound : genTypeParameter.getEcoreTypeParameter().getEBounds()) {
-								for (InformationIterator i = new InformationIterator(bound); i.hasNext();) {
-									Information info = i.next();
-									String prefix = "";
-									if (maxGenericTypeAssignment <= info.depth) {
-										++maxGenericTypeAssignment;
-										prefix = genModel.getImportedName("org.eclipse.emf.ecore.EGenericType") + " ";
-									}
-									rtout.write("\n\t\t");
-									rtcout.write(prefix);
-									rtout.write("g");
-									rtcout.write(info.depth + 1);
-									rtout.write(" = createEGenericType(");
-									rtcout.write(info.type);
-									rtout.write(");");
-									if (info.depth > 0) {
-										rtout.write("\n\t\tg");
-										rtcout.write(info.depth);
-										rtout.write(".");
-										rtcout.write(info.accessor);
-										rtout.write("(g");
-										rtcout.write(info.depth + 1);
-										rtout.write(");");
-									}
-								}
-								rtout.write("\n\t\t");
-								rtcout.write(genClassifier.getClassifierInstanceName());
-								rtout.write("_");
-								rtcout.write(genTypeParameter.getName());
-								rtout.write(".getEBounds().add(g1);");
-							}
-						}
-					}
-				}
-				rtout.write("\n");
 				// innen
 				// rtout.write("\t\t// Add supertypes to classes\n");
 				// for (GenClass genClass : genPackage.getGenClasses()) {
@@ -652,8 +564,7 @@ public class PackageImplTemplate extends PackageTemplate {
 			for (String annotationSource : genPackage.getAnnotationSources()) {
 				rtout.write("\n\t/**\n\t * Initializes the annotations for <b>");
 				rtcout.write(annotationSource);
-				rtout.write(
-						"</b>.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\tprotected void create");
+				rtout.write("</b>.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\tprotected void create");
 				rtcout.write(genPackage.getAnnotationSourceIdentifier(annotationSource));
 				rtout.write("Annotations()\n\t{\n\t\tString source = ");
 				if (annotationSource == null) {
@@ -807,11 +718,9 @@ public class PackageImplTemplate extends PackageTemplate {
 			}
 		} else {
 			if (genPackage.isLoadingInitialization()) {
-				rtout.write(
-						"\n\t/**\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\tprivate boolean isLoaded = false;\n\n\t/**\n\t * Laods the package and any sub-packages from their serialized form.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\tpublic void loadPackage()\n\t{\n\t\tif (isLoaded) return;\n\t\tisLoaded = true;\n\n\t\t");
+				rtout.write("\n\t/**\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\tprivate boolean isLoaded = false;\n\n\t/**\n\t * Laods the package and any sub-packages from their serialized form.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\tpublic void loadPackage()\n\t{\n\t\tif (isLoaded) return;\n\t\tisLoaded = true;\n\n\t\t");
 				rtcout.write(genModel.getImportedName("java.net.URL"));
-				rtout.write(
-						" url = getClass().getResource(packageFilename);\n\t\tif (url == null)\n\t\t{\n\t\t\tthrow new RuntimeException(\"Missing serialized package: \" + packageFilename);");
+				rtout.write(" url = getClass().getResource(packageFilename);\n\t\tif (url == null)\n\t\t{\n\t\t\tthrow new RuntimeException(\"Missing serialized package: \" + packageFilename);");
 				rtcout.write(genModel.getNonNLS());
 				rtout.write("\n\t\t}\n\t\t");
 				rtcout.write(genModel.getImportedName("org.eclipse.emf.common.util.URI"));
@@ -829,8 +738,7 @@ public class PackageImplTemplate extends PackageTemplate {
 				rtcout.write(genModel.getImportedName("org.eclipse.emf.ecore.EPackage"));
 				rtout.write(")resource.getContents().get(0));\n\t\tcreateResource(eNS_URI);\n\t}\n");
 			}
-			rtout.write(
-					"\n\n\t/**\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\tprivate boolean isFixed = false;\n\n\t/**\n\t * Fixes up the loaded package, to make it appear as if it had been programmatically built.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\tpublic void fixPackageContents()\n\t{\n\t\tif (isFixed) return;\n\t\tisFixed = true;\n\t\tfixEClassifiers();\n\t}\n\n\t/**\n\t * Sets the instance class on the given classifier.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n");
+			rtout.write("\n\n\t/**\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\tprivate boolean isFixed = false;\n\n\t/**\n\t * Fixes up the loaded package, to make it appear as if it had been programmatically built.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\tpublic void fixPackageContents()\n\t{\n\t\tif (isFixed) return;\n\t\tisFixed = true;\n\t\tfixEClassifiers();\n\t}\n\n\t/**\n\t * Sets the instance class on the given classifier.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n");
 			if (genModel.useClassOverrideAnnotation()) {
 				rtout.write("\n\t@Override");
 			}
@@ -858,8 +766,7 @@ public class PackageImplTemplate extends PackageTemplate {
 						rtout.write(":");
 					}
 				}
-				rtout.write(
-						"\n\t\t\t\t{\n\t\t\t\t\tbreak;\n\t\t\t\t}\n\t\t\t\tdefault:\n\t\t\t\t{\n\t\t\t\t\teClassifier.setInstanceClassName(\"");
+				rtout.write("\n\t\t\t\t{\n\t\t\t\t\tbreak;\n\t\t\t\t}\n\t\t\t\tdefault:\n\t\t\t\t{\n\t\t\t\t\teClassifier.setInstanceClassName(\"");
 				rtcout.write(genPackage.getInterfacePackageName());
 				rtout.write(".\" + eClassifier.getName());");
 				rtcout.write(genModel.getNonNLS());
@@ -868,32 +775,26 @@ public class PackageImplTemplate extends PackageTemplate {
 			rtout.write("\n\t\t}\n\t}\n");
 		}
 		if (needsAddEOperation) {
-			rtout.write(
-					"\n\t/**\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\tprotected ");
+			rtout.write("\n\t/**\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\tprotected ");
 			rtcout.write(genModel.getImportedName("org.eclipse.emf.ecore.EOperation"));
 			rtout.write(" addEOperation(");
 			rtcout.write(genModel.getImportedName("org.eclipse.emf.ecore.EClass"));
 			rtout.write(" owner, ");
 			rtcout.write(genModel.getImportedName("org.eclipse.emf.ecore.EClassifier"));
-			rtout.write(
-					" type, String name, int lowerBound, int upperBound, boolean isUnique, boolean isOrdered)\n\t{\n\t\t");
+			rtout.write(" type, String name, int lowerBound, int upperBound, boolean isUnique, boolean isOrdered)\n\t{\n\t\t");
 			rtcout.write(genModel.getImportedName("org.eclipse.emf.ecore.EOperation"));
-			rtout.write(
-					" o = addEOperation(owner, type, name, lowerBound, upperBound);\n\t\to.setUnique(isUnique);\n\t\to.setOrdered(isOrdered);\n\t\treturn o;\n\t}\n\t");
+			rtout.write(" o = addEOperation(owner, type, name, lowerBound, upperBound);\n\t\to.setUnique(isUnique);\n\t\to.setOrdered(isOrdered);\n\t\treturn o;\n\t}\n\t");
 		}
 		if (needsAddEParameter) {
-			rtout.write(
-					"\n\t/**\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\tprotected ");
+			rtout.write("\n\t/**\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\tprotected ");
 			rtcout.write(genModel.getImportedName("org.eclipse.emf.ecore.EParameter"));
 			rtout.write(" addEParameter(");
 			rtcout.write(genModel.getImportedName("org.eclipse.emf.ecore.EOperation"));
 			rtout.write(" owner, ");
 			rtcout.write(genModel.getImportedName("org.eclipse.emf.ecore.EClassifier"));
-			rtout.write(
-					" type, String name, int lowerBound, int upperBound, boolean isUnique, boolean isOrdered)\n\t{\n\t\t");
+			rtout.write(" type, String name, int lowerBound, int upperBound, boolean isUnique, boolean isOrdered)\n\t{\n\t\t");
 			rtcout.write(genModel.getImportedName("org.eclipse.emf.ecore.EParameter"));
-			rtout.write(
-					" p = ecoreFactory.createEParameter();\n\t\tp.setEType(type);\n\t\tp.setName(name);\n\t\tp.setLowerBound(lowerBound);\n\t\tp.setUpperBound(upperBound);\n\t\tp.setUnique(isUnique);\n\t\tp.setOrdered(isOrdered);\n\t\towner.getEParameters().add(p);\n\t\treturn p;\n\t}\n\t");
+			rtout.write(" p = ecoreFactory.createEParameter();\n\t\tp.setEType(type);\n\t\tp.setName(name);\n\t\tp.setLowerBound(lowerBound);\n\t\tp.setUpperBound(upperBound);\n\t\tp.setUnique(isUnique);\n\t\tp.setOrdered(isOrdered);\n\t\towner.getEParameters().add(p);\n\t\treturn p;\n\t}\n\t");
 		}
 		rtout.write("\n} //");
 		rtcout.write(genPackage.getPackageClassName());
@@ -1556,8 +1457,7 @@ public class PackageImplTemplate extends PackageTemplate {
 
 	private void generateFeatureGetter(final GenPackage genPackage, GenClassifier genClassifier, GenClass genClass,
 			GenFeature genFeature) {
-		rtout.write(
-				"\n\t/**\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * Customized feature getter comes here\n\t * @generated\n\t */\n\n\tpublic ");
+		rtout.write("\n\t/**\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * Customized feature getter comes here\n\t * @generated\n\t */\n\n\tpublic ");
 		rtcout.write(genFeature.getImportedMetaType());
 		rtout.write(" get");
 		rtcout.write(genFeature.getFeatureAccessorName());
@@ -1584,8 +1484,7 @@ public class PackageImplTemplate extends PackageTemplate {
 
 	private void generateClassifierGetter(final GenPackage genPackage, final GenModel genModel,
 			GenClassifier genClassifier) {
-		rtout.write(
-				"\t/**\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t *\n\t * Customized classifier getter comes here\n\t * @generated\n\t */\n\n\tpublic ");
+		rtout.write("\t/**\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t *\n\t * Customized classifier getter comes here\n\t * @generated\n\t */\n\n\tpublic ");
 		rtcout.write(genClassifier.getImportedMetaType());
 		rtout.write(" get");
 		rtcout.write(genClassifier.getClassifierAccessorName());
@@ -1607,10 +1506,12 @@ public class PackageImplTemplate extends PackageTemplate {
 		}
 		rtout.write("\n");
 		if (genClassifier instanceof GenClass) {
+			maxGenericTypeAssignment = 0;
 			GenClass genClass = (GenClass) genClassifier;
 			rtout.write("\t\tif (initedClass.add(\"");
 			rtcout.write(genClass.getName());
 			rtout.write("\")) {\n");
+			generateClassGenericParametersInit(genClassifier);
 			generateClassSuperTypeInit(genClass);
 			generateClassInitCode(genClass);
 			rtout.write("\t\t}\n");
@@ -1618,5 +1519,72 @@ public class PackageImplTemplate extends PackageTemplate {
 		rtout.write("\t\treturn ");
 		rtcout.write(genClassifier.getClassifierInstanceName());
 		rtout.write(";\n\t}\n");
+	}
+
+	private void generateClassGenericParametersInit(GenClassifier genClassifier) {
+		if (genModel.useGenerics()) {
+			rtout.write("\n\n\t\t// Create type parameters\n");
+			for (GenTypeParameter genTypeParameter : genClassifier.getGenTypeParameters()) {
+				if (!genTypeParameter.getEcoreTypeParameter().getEBounds().isEmpty()
+						|| genTypeParameter.isUsed()) {
+					rtout.write("\n\t\t");
+					rtcout.write(genModel.getImportedName("org.eclipse.emf.ecore.ETypeParameter"));
+					rtout.write(" ");
+					rtcout.write(genClassifier.getClassifierInstanceName());
+					rtout.write("_");
+					rtcout.write(genTypeParameter.getName());
+					rtout.write(" = addETypeParameter(");
+					rtcout.write(genClassifier.getClassifierInstanceName());
+					rtout.write(", \"");
+					rtcout.write(genTypeParameter.getName());
+					rtout.write("\");");
+					rtcout.write(genModel.getNonNLS());
+				} else {
+					rtout.write("\n\t\taddETypeParameter(");
+					rtcout.write(genClassifier.getClassifierInstanceName());
+					rtout.write(", \"");
+					rtcout.write(genTypeParameter.getName());
+					rtout.write("\");");
+					rtcout.write(genModel.getNonNLS());
+				}
+			}
+		}
+		if (genModel.useGenerics()) {
+			rtout.write("\n\n\t\t// Set bounds for type parameters");
+			for (GenTypeParameter genTypeParameter : genClassifier.getGenTypeParameters()) {
+				for (EGenericType bound : genTypeParameter.getEcoreTypeParameter().getEBounds()) {
+					for (InformationIterator i = new InformationIterator(bound); i.hasNext();) {
+						Information info = i.next();
+						String prefix = "";
+						if (maxGenericTypeAssignment <= info.depth) {
+							++maxGenericTypeAssignment;
+							prefix = genModel.getImportedName("org.eclipse.emf.ecore.EGenericType") + " ";
+						}
+						rtout.write("\n\t\t");
+						rtcout.write(prefix);
+						rtout.write("g");
+						rtcout.write(info.depth + 1);
+						rtout.write(" = createEGenericType(");
+						rtcout.write(info.type);
+						rtout.write(");");
+						if (info.depth > 0) {
+							rtout.write("\n\t\tg");
+							rtcout.write(info.depth);
+							rtout.write(".");
+							rtcout.write(info.accessor);
+							rtout.write("(g");
+							rtcout.write(info.depth + 1);
+							rtout.write(");");
+						}
+					}
+					rtout.write("\n\t\t");
+					rtcout.write(genClassifier.getClassifierInstanceName());
+					rtout.write("_");
+					rtcout.write(genTypeParameter.getName());
+					rtout.write(".getEBounds().add(g1);");
+				}
+			}
+		}
+		rtout.write("\n");// TODO Auto-generated method stub
 	}
 }
