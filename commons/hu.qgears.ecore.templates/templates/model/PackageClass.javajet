@@ -1,0 +1,10 @@
+<%@ jet package="org.eclipse.emf.codegen.ecore.templates.model" imports="org.eclipse.emf.codegen.ecore.genmodel.* hu.qgears.ecore.templates.* " class="PackageClass"%>
+<%final GenPackage genPackage = (GenPackage)((Object[])argument)[0];%>
+<%//boolean isInterface = Boolean.TRUE.equals(((Object[])argument)[1]);%>
+<%boolean isImplementation = Boolean.TRUE.equals(((Object[])argument)[2]);%>
+<%/*Bridge template that executes an RTemplate based template from JET*/%>
+<%if (isImplementation) {%>
+<%stringBuffer.append(new PackageImplTemplate(genPackage).generate());%>
+<%} else {%>
+<%stringBuffer.append(new PackageInterfaceTemplate(genPackage).generate());%>
+<%}%>
