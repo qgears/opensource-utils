@@ -110,12 +110,14 @@ public class PackageImplTemplate extends PackageTemplate {
 	private boolean firstOperationAssignment = true;
 	private int maxTypeParameterAssignment = 0;
 	private boolean doGeneratePackageDeps = false;
+	private List<GenPackage> dependentPackages;
 
 	public PackageImplTemplate(GenPackage genPackage) {
 		super(genPackage);
 	}
 
 	protected void doGenerate() {
+		dependentPackages = new ArrayList<>();
 		String publicStaticFinalFlag = "public static final ";
 		StringBuffer stringBuffer = rtout.getBuffer();
 		rtout.write("/**");
@@ -251,7 +253,7 @@ public class PackageImplTemplate extends PackageTemplate {
 		}
 		if (!genPackage.isEcorePackage()) {
 			rtout.write("\n\t\t// Mark meta-data to indicate it can't be changed\n");
-			for ( GenPackage p : genModel.getUsedGenPackages()) {
+			for ( GenPackage p : dependentPackages) {
 				if (!p.equals(genPackage) && !p.isEcorePackage()) {
 					rtout.write("\t\t");
 					rtcout.write(p.getImportedPackageClassName());
@@ -1428,7 +1430,9 @@ public class PackageImplTemplate extends PackageTemplate {
 	}
 
 	private String getDependentPackageAccessor(GenPackage dep) {
-		// this call adds the necessary Java import of dep's Java interface
+		if (!dependentPackages.contains(dep)) {
+			dependentPackages.add(dep);
+		}
 		if (dep.equals(genPackage)) {
 			return "this";
 		} else if (dep.isEcorePackage()) {
