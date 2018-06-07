@@ -250,7 +250,15 @@ public class PackageImplTemplate extends PackageTemplate {
 			rtout.write(".INSTANCE;\n\t\t\t\t }\n\t\t\t });\n");
 		}
 		if (!genPackage.isEcorePackage()) {
-			rtout.write("\n\t\t// Mark meta-data to indicate it can't be changed\n\t\tthe");
+			rtout.write("\n\t\t// Mark meta-data to indicate it can't be changed\n");
+			for ( GenPackage p : genModel.getUsedGenPackages()) {
+				if (!p.equals(genPackage) && !p.isEcorePackage()) {
+					rtout.write("\t\t");
+					rtcout.write(p.getImportedPackageClassName());
+					rtout.write(".init();\n");
+				}
+			}
+			rtout.write("\t\tthe");
 			rtcout.write(genPackage.getBasicPackageName());
 			rtout.write(".freeze();\n");
 		}
@@ -802,17 +810,41 @@ public class PackageImplTemplate extends PackageTemplate {
 	}
 
 	private void generatePackageHelper() {
+//		rtout.write("\tprivate ");
+//		rtcout.writeClass(Set.class);
+//		rtout.write("<String> initedClass = new ");
+//		rtcout.writeClass(HashSet.class);
+//		rtout.write("<String>();\n\n\t@SuppressWarnings(\"unchecked\")\n\tprotected <T extends ");
+//		rtcout.writeClass(EPackage.class);
+//		rtout.write("> T getPackage(Class<T> clz,String uri) {\n\t\t");
+//		rtcout.writeClass(EPackage.class);
+//		rtout.write(" fromReg = ");
+//		rtcout.writeClass(EPackage.class);
+//		rtout.write(".Registry.INSTANCE.getEPackage(uri);\n\t\tif (fromReg != null && clz.isInstance(fromReg)) {\n\t\t\treturn (T) fromReg;\n\t\t}\n\t\ttry {\n\t\t\treturn (T) clz.getField(\"eINSTANCE\").get(null);\n\t\t} catch (Exception e) {\n\t\t\tthrow new RuntimeException(\"cannot load package \"+uri, e);\n\t\t}\n\t}\n");
+		String classname = getGenPackage().getPackageClassName();
 		rtout.write("\tprivate ");
 		rtcout.writeClass(Set.class);
 		rtout.write("<String> initedClass = new ");
 		rtcout.writeClass(HashSet.class);
-		rtout.write("<String>();\n\n\t@SuppressWarnings(\"unchecked\")\n\tprotected <T extends ");
+		rtout.write("<String>();\n\n\tpublic static ");
+		rtcout.write(classname);
+		rtout.write(" partInit() {\n\t\tObject fromReg = ");
 		rtcout.writeClass(EPackage.class);
-		rtout.write("> T getPackage(Class<T> clz,String uri) {\n\t\t");
+		rtout.write(".Registry.INSTANCE.get(\"");
+		rtcout.write(getGenPackage().getNSURI());
+		rtout.write("\");\n\t\tif (fromReg instanceof ");
+		rtcout.write(classname);
+		rtout.write(") {\n\t\t\treturn (");
+		rtcout.write(classname);
+		rtout.write(") fromReg;\n\t\t}\n\t\t");
+		rtcout.write(classname);
+		rtout.write(" thePackage = new ");
+		rtcout.write(classname);
+		rtout.write("();\n\t\t");
 		rtcout.writeClass(EPackage.class);
-		rtout.write(" fromReg = ");
-		rtcout.writeClass(EPackage.class);
-		rtout.write(".Registry.INSTANCE.getEPackage(uri);\n\t\tif (fromReg != null && clz.isInstance(fromReg)) {\n\t\t\treturn (T) fromReg;\n\t\t}\n\t\ttry {\n\t\t\treturn (T) clz.getField(\"eINSTANCE\").get(null);\n\t\t} catch (Exception e) {\n\t\t\tthrow new RuntimeException(\"cannot load package \"+uri, e);\n\t\t}\n\t}\n");
+		rtout.write(".Registry.INSTANCE.put(\"");
+		rtcout.write(getGenPackage().getNSURI());
+		rtout.write("\",thePackage);\n\t\tthePackage.createPackageContents();\n\t\treturn thePackage;\n\t}\n");
 	}
 
 	private void generatePackageDependencyInitialization() {
@@ -1397,16 +1429,16 @@ public class PackageImplTemplate extends PackageTemplate {
 
 	private String getDependentPackageAccessor(GenPackage dep) {
 		// this call adds the necessary Java import of dep's Java interface
-		dep.getImportedPackageInterfaceName();
 		if (dep.equals(genPackage)) {
 			return "this";
 		} else if (dep.isEcorePackage()) {
-			return dep.getPackageInterfaceName() + ".eINSTANCE";
+			return dep.getImportedPackageInterfaceName() + ".eINSTANCE";
 		} else {
 			// String fromReg = addImport(EPackage.class)+
 			// ".Registry.INSTANCE.get(\""+dep.getNSURI()+"\")";
-			return "getPackage(" + dep.getPackageInterfaceName() + ".class," + dep.getPackageInterfaceName()
-					+ ".eNS_URI)";
+//			return "getPackage(" + dep.getPackageInterfaceName() + ".class," + dep.getPackageInterfaceName()
+//					+ ".eNS_URI)";
+			return dep.getImportedPackageClassName()+".partInit()";
 
 		}
 	}
@@ -1516,9 +1548,9 @@ public class PackageImplTemplate extends PackageTemplate {
 			generateClassInitCode(genClass);
 			rtout.write("\t\t}\n");
 		}
-		rtout.write("\t\treturn ");
-		rtcout.write(genClassifier.getClassifierInstanceName());
-		rtout.write(";\n\t}\n");
+			rtout.write("\t\treturn ");
+			rtcout.write(genClassifier.getClassifierInstanceName());
+			rtout.write(";\n\t}\n");
 	}
 
 	private void generateClassGenericParametersInit(GenClassifier genClassifier) {

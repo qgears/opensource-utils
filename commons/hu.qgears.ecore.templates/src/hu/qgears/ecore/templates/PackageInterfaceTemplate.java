@@ -46,8 +46,7 @@ public class PackageInterfaceTemplate extends PackageTemplate {
 		rtout.write("\n");
 		genModel.markImportLocation(stringBuffer, genPackage);
 
-		rtout.write(
-				"\n\n/**\n * <!-- begin-user-doc -->\n * The <b>Package</b> for the model. Customized by Q-Gears, de nagyon\n * It contains accessors for the meta objects to represent\n * <ul>\n *   <li>each class,</li>\n *   <li>each feature of each class,</li>");
+		rtout.write("\n\n/**\n * <!-- begin-user-doc -->\n * The <b>Package</b> for the model. Customized by Q-Gears, de nagyon\n * It contains accessors for the meta objects to represent\n * <ul>\n *   <li>each class,</li>\n *   <li>each feature of each class,</li>");
 		if (genModel.isOperationReflection()) {
 			rtout.write("\n *   <li>each operation of each class,</li>");
 		}
@@ -85,8 +84,7 @@ public class PackageInterfaceTemplate extends PackageTemplate {
 		rtcout.write(genModel.getImportedName("org.eclipse.emf.ecore.EPackage"));
 		rtout.write("\n{");
 		if (genModel.hasCopyrightField()) {
-			rtout.write(
-					"\n\t/**\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\t");
+			rtout.write("\n\t/**\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\t");
 			rtcout.write(genModel.getImportedName("java.lang.String"));
 			rtout.write(" copyright = ");
 			rtcout.write(genModel.getCopyrightFieldLiteral());
@@ -94,38 +92,33 @@ public class PackageInterfaceTemplate extends PackageTemplate {
 			rtcout.write(genModel.getNonNLS());
 			rtout.write("\n");
 		}
-		rtout.write(
-				"\n\t/**\n\t * The package name.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\t");
+		rtout.write("\n\t/**\n\t * The package name.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\t");
 		rtcout.write(genModel.getImportedName("java.lang.String"));
 		rtout.write(" eNAME = \"");
 		rtcout.write(genPackage.getPackageName());
 		rtout.write("\";");
 		rtcout.write(genModel.getNonNLS());
-		rtout.write(
-				"\n\n\t/**\n\t * The package namespace URI.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\t");
+		rtout.write("\n\n\t/**\n\t * The package namespace URI.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\t");
 		rtcout.write(genModel.getImportedName("java.lang.String"));
 		rtout.write(" eNS_URI = \"");
 		rtcout.write(genPackage.getNSURI());
 		rtout.write("\";");
 		rtcout.write(genModel.getNonNLS());
-		rtout.write(
-				"\n\n\t/**\n\t * The package namespace name.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\t");
+		rtout.write("\n\n\t/**\n\t * The package namespace name.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\t");
 		rtcout.write(genModel.getImportedName("java.lang.String"));
 		rtout.write(" eNS_PREFIX = \"");
 		rtcout.write(genPackage.getNSName());
 		rtout.write("\";");
 		rtcout.write(genModel.getNonNLS());
 		if (genPackage.isContentType()) {
-			rtout.write(
-					"\n\n\t/**\n\t * The package content type ID.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\t");
+			rtout.write("\n\n\t/**\n\t * The package content type ID.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\t");
 			rtcout.write(genModel.getImportedName("java.lang.String"));
 			rtout.write(" eCONTENT_TYPE = \"");
 			rtcout.write(genPackage.getContentTypeIdentifier());
 			rtout.write("\";");
 			rtcout.write(genModel.getNonNLS());
 		}
-		rtout.write(
-				"\n\n\t/**\n\t * The singleton instance of the package.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\t");
+		rtout.write("\n\n\t/**\n\t * The singleton instance of the package.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\t");
 		rtcout.write(genPackage.getPackageInterfaceName());
 		rtout.write(" eINSTANCE = ");
 		rtcout.write(genPackage.getQualifiedPackageClassName());
@@ -184,8 +177,7 @@ public class PackageInterfaceTemplate extends PackageTemplate {
 					rtcout.write(genFeature.getFormattedName());
 					rtout.write("</b></em>' ");
 					rtcout.write(genFeature.getFeatureKind());
-					rtout.write(
-							".\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t * @ordered\n\t */\n\t");
+					rtout.write(".\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t * @ordered\n\t */\n\t");
 					rtout.write("int ");
 					rtcout.write(genClass.getFeatureID(genFeature));
 					rtout.write(" = ");
@@ -194,8 +186,7 @@ public class PackageInterfaceTemplate extends PackageTemplate {
 				}
 				rtout.write("\n\t/**\n\t * The number of structural features of the '<em>");
 				rtcout.write(genClass.getFormattedName());
-				rtout.write(
-						"</em>' class.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t * @ordered\n\t */\n\t");
+				rtout.write("</em>' class.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t * @ordered\n\t */\n\t");
 				rtout.write("int ");
 				rtcout.write(genClass.getFeatureCountID());
 				rtout.write(" = ");
@@ -206,8 +197,7 @@ public class PackageInterfaceTemplate extends PackageTemplate {
 						if (genClass.getOverrideGenOperation(genOperation) == null) {
 							rtout.write("\n\t/**\n\t * The operation id for the '<em>");
 							rtcout.write(genOperation.getFormattedName());
-							rtout.write(
-									"</em>' operation.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t * @ordered\n\t */\n\t");
+							rtout.write("</em>' operation.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t * @ordered\n\t */\n\t");
 							rtout.write("int ");
 							rtcout.write(genClass.getOperationID(genOperation, false));
 							rtout.write(" = ");
@@ -217,8 +207,7 @@ public class PackageInterfaceTemplate extends PackageTemplate {
 					}
 					rtout.write("\n\t/**\n\t * The number of operations of the '<em>");
 					rtcout.write(genClass.getFormattedName());
-					rtout.write(
-							"</em>' class.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t * @ordered\n\t */\n\t");
+					rtout.write("</em>' class.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t * @ordered\n\t */\n\t");
 					rtout.write("int ");
 					rtcout.write(genClass.getOperationCountID());
 					rtout.write(" = ");
@@ -236,8 +225,7 @@ public class PackageInterfaceTemplate extends PackageTemplate {
 				rtcout.write(genClass.getQualifiedInterfaceName());
 				rtout.write(" <em>");
 				rtcout.write(genClass.getFormattedName());
-				rtout.write(
-						"</em>}'.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @return the meta object for class '<em>");
+				rtout.write("</em>}'.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @return the meta object for class '<em>");
 				rtcout.write(genClass.getFormattedName());
 				rtout.write("</em>'.\n\t * @see ");
 				rtcout.write(genClass.getQualifiedInterfaceName());
@@ -265,8 +253,7 @@ public class PackageInterfaceTemplate extends PackageTemplate {
 				rtcout.write(genEnum.getQualifiedName());
 				rtout.write(" <em>");
 				rtcout.write(genEnum.getFormattedName());
-				rtout.write(
-						"</em>}'.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @return the meta object for enum '<em>");
+				rtout.write("</em>}'.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @return the meta object for enum '<em>");
 				rtcout.write(genEnum.getFormattedName());
 				rtout.write("</em>'.\n\t * @see ");
 				rtcout.write(genEnum.getQualifiedName());
@@ -283,8 +270,7 @@ public class PackageInterfaceTemplate extends PackageTemplate {
 					rtcout.write(genDataType.getFormattedName());
 					rtout.write("</em>}'.");
 				}
-				rtout.write(
-						"\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @return the meta object for data type '<em>");
+				rtout.write("\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @return the meta object for data type '<em>");
 				rtcout.write(genDataType.getFormattedName());
 				rtout.write("</em>'.");
 				if (!genDataType.isPrimitiveType() && !genDataType.isArrayType()) {
@@ -330,8 +316,7 @@ public class PackageInterfaceTemplate extends PackageTemplate {
 					}
 					rtout.write(" <em>");
 					rtcout.write(genFeature.getFormattedName());
-					rtout.write(
-							"</em>}'.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @return the meta object for the ");
+					rtout.write("</em>}'.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @return the meta object for the ");
 					rtcout.write(genFeature.getFeatureKind());
 					rtout.write(" '<em>");
 					rtcout.write(genFeature.getFormattedName());
@@ -362,8 +347,7 @@ public class PackageInterfaceTemplate extends PackageTemplate {
 						rtcout.write(genOperation.getParameterTypes(", "));
 						rtout.write(") <em>");
 						rtcout.write(genOperation.getFormattedName());
-						rtout.write(
-								"</em>}' operation.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @return the meta object for the '<em>");
+						rtout.write("</em>}' operation.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @return the meta object for the '<em>");
 						rtcout.write(genOperation.getFormattedName());
 						rtout.write("</em>' operation.\n\t * @see ");
 						rtcout.write(genClass.getQualifiedInterfaceName());
@@ -384,8 +368,7 @@ public class PackageInterfaceTemplate extends PackageTemplate {
 				}
 			}
 		}
-		rtout.write(
-				"\n\t/**\n\t * Returns the factory that creates the instances of the model.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @return the factory that creates the instances of the model.\n\t * @generated\n\t */\n");
+		rtout.write("\n\t/**\n\t * Returns the factory that creates the instances of the model.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @return the factory that creates the instances of the model.\n\t * @generated\n\t */\n");
 
 		rtout.write("\n\t");
 		rtcout.write(genPackage.getFactoryInterfaceName());
@@ -395,13 +378,11 @@ public class PackageInterfaceTemplate extends PackageTemplate {
 		rtout.write("\n");
 
 		if (genPackage.isLiteralsInterface()) {
-			rtout.write(
-					"\n\t/**\n\t * <!-- begin-user-doc -->\n\t * Defines literals for the meta objects that represent\n\t * <ul>\n\t *   <li>each class,</li>\n\t *   <li>each feature of each class,</li>");
+			rtout.write("\n\t/**\n\t * <!-- begin-user-doc -->\n\t * Defines literals for the meta objects that represent\n\t * <ul>\n\t *   <li>each class,</li>\n\t *   <li>each feature of each class,</li>");
 			if (genModel.isOperationReflection()) {
 				rtout.write("\n\t *   <li>each operation of each class,</li>");
 			}
-			rtout.write(
-					"\n\t *   <li>each enum,</li>\n\t *   <li>and each data type</li>\n\t * </ul>\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\t");
+			rtout.write("\n\t *   <li>each enum,</li>\n\t *   <li>and each data type</li>\n\t * </ul>\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\t");
 			rtout.write("interface Literals\n\t{");
 			for (GenClassifier genClassifier : genPackage.getGenClassifiers()) {
 				rtout.write("\n\t\t/**");
@@ -412,16 +393,14 @@ public class PackageInterfaceTemplate extends PackageTemplate {
 						rtcout.write(genClass.getQualifiedClassName());
 						rtout.write(" <em>");
 						rtcout.write(genClass.getFormattedName());
-						rtout.write(
-								"</em>}' class.\n\t\t * <!-- begin-user-doc -->\n\t\t * <!-- end-user-doc -->\n\t\t * @see ");
+						rtout.write("</em>}' class.\n\t\t * <!-- begin-user-doc -->\n\t\t * <!-- end-user-doc -->\n\t\t * @see ");
 						rtcout.write(genClass.getQualifiedClassName());
 					} else {
 						rtout.write("\n\t\t * The meta object literal for the '{@link ");
 						rtcout.write(genClass.getQualifiedInterfaceName());
 						rtout.write(" <em>");
 						rtcout.write(genClass.getFormattedName());
-						rtout.write(
-								"</em>}' class.\n\t\t * <!-- begin-user-doc -->\n\t\t * <!-- end-user-doc -->\n\t\t * @see ");
+						rtout.write("</em>}' class.\n\t\t * <!-- begin-user-doc -->\n\t\t * <!-- end-user-doc -->\n\t\t * @see ");
 						rtcout.write(genClass.getQualifiedInterfaceName());
 					}
 				} else if (genClassifier instanceof GenEnum) {
@@ -430,8 +409,7 @@ public class PackageInterfaceTemplate extends PackageTemplate {
 					rtcout.write(genEnum.getQualifiedName());
 					rtout.write(" <em>");
 					rtcout.write(genEnum.getFormattedName());
-					rtout.write(
-							"</em>}' enum.\n\t\t * <!-- begin-user-doc -->\n\t\t * <!-- end-user-doc -->\n\t\t * @see ");
+					rtout.write("</em>}' enum.\n\t\t * <!-- begin-user-doc -->\n\t\t * <!-- end-user-doc -->\n\t\t * @see ");
 					rtcout.write(genEnum.getQualifiedName());
 				} else if (genClassifier instanceof GenDataType) {
 					GenDataType genDataType = (GenDataType) genClassifier;
@@ -461,8 +439,7 @@ public class PackageInterfaceTemplate extends PackageTemplate {
 						rtcout.write(genFeature.getFormattedName());
 						rtout.write("</b></em>' ");
 						rtcout.write(genFeature.getFeatureKind());
-						rtout.write(
-								" feature.\n\t\t * <!-- begin-user-doc -->\n\t\t * <!-- end-user-doc -->\n\t\t * @generated\n\t\t */\n\t\t");
+						rtout.write(" feature.\n\t\t * <!-- begin-user-doc -->\n\t\t * <!-- end-user-doc -->\n\t\t * @generated\n\t\t */\n\t\t");
 						rtcout.write(genFeature.getImportedMetaType());
 						rtout.write(" ");
 						rtcout.write(genClass.getFeatureID(genFeature));
@@ -474,8 +451,7 @@ public class PackageInterfaceTemplate extends PackageTemplate {
 						for (GenOperation genOperation : genClass.getGenOperations()) {
 							rtout.write("\n\t\t/**\n\t\t * The meta object literal for the '<em><b>");
 							rtcout.write(genOperation.getFormattedName());
-							rtout.write(
-									"</b></em>' operation.\n\t\t * <!-- begin-user-doc -->\n\t\t * <!-- end-user-doc -->\n\t\t * @generated\n\t\t */\n\t\t");
+							rtout.write("</b></em>' operation.\n\t\t * <!-- begin-user-doc -->\n\t\t * <!-- end-user-doc -->\n\t\t * @generated\n\t\t */\n\t\t");
 							rtcout.write(genOperation.getImportedMetaType());
 							rtout.write(" ");
 							rtcout.write(genClass.getOperationID(genOperation, false));
