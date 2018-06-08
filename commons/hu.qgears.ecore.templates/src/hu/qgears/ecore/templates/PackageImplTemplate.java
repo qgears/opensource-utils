@@ -119,13 +119,12 @@ public class PackageImplTemplate extends PackageTemplate {
 	protected void doGenerate() {
 		dependentPackages = new ArrayList<>();
 		String publicStaticFinalFlag = "public static final ";
-		StringBuffer stringBuffer = rtout.getBuffer();
 		rtout.write("/**");
 		{
 			GenBase copyrightHolder = genPackage;
 			if (copyrightHolder != null && copyrightHolder.hasCopyright()) {
 				rtout.write("\n * ");
-				rtcout.write(copyrightHolder.getCopyright(copyrightHolder.getGenModel().getIndentation(stringBuffer)));
+				rtcout.write(copyrightHolder.getCopyright(copyrightHolder.getGenModel().getIndentation(rtout.getBuffer())));
 			}
 		}
 		rtout.write("\n */\n");
@@ -135,7 +134,13 @@ public class PackageImplTemplate extends PackageTemplate {
 			rtout.write(";\n");
 		}
 		rtout.write("\n");
-		genModel.markImportLocation(stringBuffer, genPackage);
+		deferred(new Runnable(){
+			@Override
+			public void run() {
+				genModel.markImportLocation(rtcout.getBuffer(), genPackage);
+				genModel.emitSortedImports();				
+			}
+		});
 		genModel.addPseudoImport("org.eclipse.emf.ecore.EPackage.Registry");
 		genModel.addPseudoImport("org.eclipse.emf.ecore.EPackage.Descriptor");
 		genModel.addPseudoImport("org.eclipse.emf.ecore.impl.EPackageImpl.EBasicWhiteList");
@@ -253,13 +258,12 @@ public class PackageImplTemplate extends PackageTemplate {
 		}
 		if (!genPackage.isEcorePackage()) {
 			rtout.write("\n\t\t// Mark meta-data to indicate it can't be changed\n");
-			for ( GenPackage p : dependentPackages) {
-				if (!p.equals(genPackage) && !p.isEcorePackage()) {
-					rtout.write("\t\t");
-					rtcout.write(p.getImportedPackageClassName());
-					rtout.write(".init();\n");
+			deferred(new Runnable() {
+				@Override
+				public void run() {
+					generateInitDependencies();
 				}
-			}
+			});
 			rtout.write("\t\tthe");
 			rtcout.write(genPackage.getBasicPackageName());
 			rtout.write(".freeze();\n");
@@ -808,7 +812,23 @@ public class PackageImplTemplate extends PackageTemplate {
 		}
 		rtout.write("\n} //");
 		rtcout.write(genPackage.getPackageClassName());
-		genModel.emitSortedImports();
+	}
+
+	private void generateInitDependencies() {
+		for ( GenPackage p : dependentPackages) {
+			if (!p.equals(genPackage) && !p.isEcorePackage()) {
+				rtout.write("\t\t");
+				rtcout.write(p.getImportedPackageClassName());
+				rtout.write(".init();\n");
+			}
+		}
+//		for ( GenPackage p : dependentPackages) {
+//			if (!p.equals(genPackage) && !p.isEcorePackage()) {
+//				rtout.write("\t\t");
+//				rtcout.write(p.getImportedPackageInterfaceName());
+//				rtout.write(".eINSTANCE.getClass();\n");
+//			}
+//		}
 	}
 
 	private void generatePackageHelper() {
@@ -1442,6 +1462,7 @@ public class PackageImplTemplate extends PackageTemplate {
 			// ".Registry.INSTANCE.get(\""+dep.getNSURI()+"\")";
 //			return "getPackage(" + dep.getPackageInterfaceName() + ".class," + dep.getPackageInterfaceName()
 //					+ ".eNS_URI)";
+//			dep.getImportedPackageInterfaceName();
 			return dep.getImportedPackageClassName()+".partInit()";
 
 		}
