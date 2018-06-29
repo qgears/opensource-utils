@@ -56,6 +56,9 @@ public class PackageTemplate extends AbstractTemplate {
 	public PackageTemplate(GenPackage genPackage) {
 		this.genPackage = genPackage;
 		genModel = genPackage.getGenModel();
+		//ignoring load initialization settings because our template do not support it
+		this.genPackage.setLoadInitialization(false);
+		this.genPackage.setLiteralsInterface(true);
 	}
 
 	public GenPackage getGenPackage() {
@@ -84,7 +87,7 @@ public class PackageTemplate extends AbstractTemplate {
 		if (isImplementation && !genModel.isSuppressInterfaces()) {
 			rtout.write("\npackage ");
 			rtcout.write(genPackage.getClassPackageName());
-			rtout.write(";\n/*Ez biza m\u00E1r rTemplate*/\n");
+			rtout.write(";\n");
 		} else {
 			rtout.write("\npackage ");
 			rtcout.write(genPackage.getReflectionPackageName());

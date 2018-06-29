@@ -39,14 +39,12 @@ public class PackageInterfaceTemplate extends PackageTemplate {
 				rtcout.write(copyrightHolder.getCopyright(copyrightHolder.getGenModel().getIndentation(stringBuffer)));
 			}
 		}
-		rtout.write("\n */\n");
-		rtout.write("\npackage ");
+		rtout.write("\n */\n\npackage ");
 		rtcout.write(genPackage.getReflectionPackageName());
-		rtout.write(";\n/*Ez biza m\u00E1r rTemplate az interfaceben is*/\n");
-		rtout.write("\n");
+		rtout.write(";/*Generator template customized by Q-Gears*/\n");
 		genModel.markImportLocation(stringBuffer, genPackage);
 
-		rtout.write("\n\n/**\n * <!-- begin-user-doc -->\n * The <b>Package</b> for the model. Customized by Q-Gears, de nagyon\n * It contains accessors for the meta objects to represent\n * <ul>\n *   <li>each class,</li>\n *   <li>each feature of each class,</li>");
+		rtout.write("\n\n/**\n * <!-- begin-user-doc -->\n * The <b>Package</b> for the model.\n * It contains accessors for the meta objects to represent\n * <ul>\n *   <li>each class,</li>\n *   <li>each feature of each class,</li>");
 		if (genModel.isOperationReflection()) {
 			rtout.write("\n *   <li>each operation of each class,</li>");
 		}
@@ -164,8 +162,7 @@ public class PackageInterfaceTemplate extends PackageTemplate {
 			rtcout.write(genPackage.getQualifiedPackageClassName());
 			rtout.write("#get");
 			rtcout.write(genClassifier.getClassifierAccessorName());
-			rtout.write("()\n\t * @generated\n\t */\n\t");
-			rtout.write("int ");
+			rtout.write("()\n\t * @generated\n\t */\n\tint ");
 			rtcout.write(genPackage.getClassifierID(genClassifier));
 			rtout.write(" = ");
 			rtcout.write(genPackage.getClassifierValue(genClassifier));
@@ -177,8 +174,7 @@ public class PackageInterfaceTemplate extends PackageTemplate {
 					rtcout.write(genFeature.getFormattedName());
 					rtout.write("</b></em>' ");
 					rtcout.write(genFeature.getFeatureKind());
-					rtout.write(".\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t * @ordered\n\t */\n\t");
-					rtout.write("int ");
+					rtout.write(".\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t * @ordered\n\t */\n\tint ");
 					rtcout.write(genClass.getFeatureID(genFeature));
 					rtout.write(" = ");
 					rtcout.write(genClass.getFeatureValue(genFeature));
@@ -186,8 +182,7 @@ public class PackageInterfaceTemplate extends PackageTemplate {
 				}
 				rtout.write("\n\t/**\n\t * The number of structural features of the '<em>");
 				rtcout.write(genClass.getFormattedName());
-				rtout.write("</em>' class.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t * @ordered\n\t */\n\t");
-				rtout.write("int ");
+				rtout.write("</em>' class.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t * @ordered\n\t */\n\tint ");
 				rtcout.write(genClass.getFeatureCountID());
 				rtout.write(" = ");
 				rtcout.write(genClass.getFeatureCountValue());
@@ -197,8 +192,7 @@ public class PackageInterfaceTemplate extends PackageTemplate {
 						if (genClass.getOverrideGenOperation(genOperation) == null) {
 							rtout.write("\n\t/**\n\t * The operation id for the '<em>");
 							rtcout.write(genOperation.getFormattedName());
-							rtout.write("</em>' operation.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t * @ordered\n\t */\n\t");
-							rtout.write("int ");
+							rtout.write("</em>' operation.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t * @ordered\n\t */\n\tint ");
 							rtcout.write(genClass.getOperationID(genOperation, false));
 							rtout.write(" = ");
 							rtcout.write(genClass.getOperationValue(genOperation));
@@ -207,8 +201,7 @@ public class PackageInterfaceTemplate extends PackageTemplate {
 					}
 					rtout.write("\n\t/**\n\t * The number of operations of the '<em>");
 					rtcout.write(genClass.getFormattedName());
-					rtout.write("</em>' class.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t * @ordered\n\t */\n\t");
-					rtout.write("int ");
+					rtout.write("</em>' class.\n\t * <!-- begin-user-doc -->\n\t * <!-- end-user-doc -->\n\t * @generated\n\t * @ordered\n\t */\n\tint ");
 					rtcout.write(genClass.getOperationCountID());
 					rtout.write(" = ");
 					rtcout.write(genClass.getOperationCountValue());
@@ -329,13 +322,11 @@ public class PackageInterfaceTemplate extends PackageTemplate {
 					}
 					rtout.write("\n\t * @see #get");
 					rtcout.write(genClass.getClassifierAccessorName());
-					rtout.write("()\n\t * @generated\n\t */\n");
-					rtout.write("\n\t");
+					rtout.write("()\n\t * @generated\n\t */\n\n\t");
 					rtcout.write(genFeature.getImportedMetaType());
 					rtout.write(" get");
 					rtcout.write(genFeature.getFeatureAccessorName());
-					rtout.write("();");
-					rtout.write("\n");
+					rtout.write("();\n");
 				}
 				if (genModel.isOperationReflection()) {
 					for (GenOperation genOperation : genClass.getGenOperations()) {
@@ -374,16 +365,14 @@ public class PackageInterfaceTemplate extends PackageTemplate {
 		rtcout.write(genPackage.getFactoryInterfaceName());
 		rtout.write(" get");
 		rtcout.write(genPackage.getFactoryName());
-		rtout.write("();");
-		rtout.write("\n");
+		rtout.write("();\n");
 
 		if (genPackage.isLiteralsInterface()) {
 			rtout.write("\n\t/**\n\t * <!-- begin-user-doc -->\n\t * Defines literals for the meta objects that represent\n\t * <ul>\n\t *   <li>each class,</li>\n\t *   <li>each feature of each class,</li>");
 			if (genModel.isOperationReflection()) {
 				rtout.write("\n\t *   <li>each operation of each class,</li>");
 			}
-			rtout.write("\n\t *   <li>each enum,</li>\n\t *   <li>and each data type</li>\n\t * </ul>\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\t");
-			rtout.write("interface Literals\n\t{");
+			rtout.write("\n\t *   <li>each enum,</li>\n\t *   <li>and each data type</li>\n\t * </ul>\n\t * <!-- end-user-doc -->\n\t * @generated\n\t */\n\tinterface Literals\n\t{");
 			for (GenClassifier genClassifier : genPackage.getGenClassifiers()) {
 				rtout.write("\n\t\t/**");
 				if (genClassifier instanceof GenClass) {

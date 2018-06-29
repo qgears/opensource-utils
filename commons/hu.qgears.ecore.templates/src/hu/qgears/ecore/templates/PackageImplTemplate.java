@@ -131,7 +131,7 @@ public class PackageImplTemplate extends PackageTemplate {
 		if (!genModel.isSuppressInterfaces()) {
 			rtout.write("\npackage ");
 			rtcout.write(genPackage.getClassPackageName());
-			rtout.write(";\n");
+			rtout.write(";/*Generator template customized by Q-Gears*/\n");
 		}
 		rtout.write("\n");
 		deferred(new Runnable(){
