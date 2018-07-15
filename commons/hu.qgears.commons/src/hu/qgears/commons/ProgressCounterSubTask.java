@@ -64,4 +64,7 @@ public class ProgressCounterSubTask implements AutoCloseable
 	public double getCurrent() {
 		return current;
 	}
+	public ProgressCounterSubTask getParent() {
+		return parent;
+	}
 }
