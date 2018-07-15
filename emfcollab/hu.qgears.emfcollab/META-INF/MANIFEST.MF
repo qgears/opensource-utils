@@ -1,7 +1,11 @@
 Manifest-Version: 1.0
-Export-Package: hu.qgears.emfcollab,hu.qgears.emfcollab.exceptions,hu.
- qgears.emfcollab.impl,hu.qgears.emfcollab.load,hu.qgears.emfcollab.sr
- v,hu.qgears.emfcollab.util
+Export-Package: hu.qgears.emfcollab,
+ hu.qgears.emfcollab.backref,
+ hu.qgears.emfcollab.exceptions,
+ hu.qgears.emfcollab.impl,
+ hu.qgears.emfcollab.load,
+ hu.qgears.emfcollab.srv,
+ hu.qgears.emfcollab.util
 Bundle-SymbolicName: hu.qgears.emfcollab
 Bundle-Version: 7.1.0.qualifier
 Bundle-Name: Emfcollab Plug-in
