@@ -8,6 +8,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import hu.qgears.commons.INamed;
+
 /**
  * This class implements the SignalFuture interface. Allows the user of this
  * class to execute a task when the signal is finished.
@@ -19,7 +21,7 @@ import java.util.concurrent.TimeoutException;
  *
  * @param <T>
  */
-public class SignalFutureWrapper<T> implements SignalFuture<T>, Callable<T>
+public class SignalFutureWrapper<T> implements SignalFuture<T>, Callable<T>, INamed
 {
 	private Callable<T> callable;
 	private Throwable exc;
@@ -27,6 +29,7 @@ public class SignalFutureWrapper<T> implements SignalFuture<T>, Callable<T>
 	private boolean cancelled;
 	private List<Slot<SignalFuture<T>>> listeners=null;
 	private T ret;
+	private String name="";
 
 	/**
 	 * Call this method when you want to finish
@@ -34,12 +37,11 @@ public class SignalFutureWrapper<T> implements SignalFuture<T>, Callable<T>
 	 * @param ret
 	 * @param exc
 	 */
-	public void ready(Object ret, Throwable exc) {
+	public void ready(T ret, Throwable exc) {
 		ready(ret, exc, false);
 	}
 
-	@SuppressWarnings("unchecked")
-	private boolean ready(Object ret, Throwable exc, boolean cancel) {
+	private boolean ready(T ret, Throwable exc, boolean cancel) {
 		boolean finishedNow=false;
 		List<Slot<SignalFuture<T>>> ls;
 		synchronized (this) {
@@ -65,6 +67,16 @@ public class SignalFutureWrapper<T> implements SignalFuture<T>, Callable<T>
 		return finishedNow;
 	}
 
+	public SignalFutureWrapper(Callable<T> callable, String name) {
+		super();
+		this.callable = callable;
+		this.name=name;
+	}
+
+	public SignalFutureWrapper(String name) {
+		super();
+		this.name=name;
+	}
 	public SignalFutureWrapper(Callable<T> callable) {
 		super();
 		this.callable = callable;
@@ -107,7 +119,7 @@ public class SignalFutureWrapper<T> implements SignalFuture<T>, Callable<T>
 				synchronized (this) {
 					if(!this.done)
 					{
-						throw new TimeoutException("Timeout: "+timeout+" "+unit);
+						throw new TimeoutException("Timeout: "+timeout+" "+unit+" '"+name+"'");
 					}
 				}
 			}
@@ -147,7 +159,7 @@ public class SignalFutureWrapper<T> implements SignalFuture<T>, Callable<T>
 		if(!isCancelled())
 		{
 			try {
-				Object ret=callable.call();
+				T ret=callable.call();
 				ready(ret, null);
 			} catch (Exception e) {
 				ready(null, e);
@@ -156,7 +168,7 @@ public class SignalFutureWrapper<T> implements SignalFuture<T>, Callable<T>
 		{
 			ready(null, new RuntimeException("callable cancelled before execution"));
 		}
-		return getSimple();
+		return ret;
 	}
 
 	@Override
@@ -178,5 +190,13 @@ public class SignalFutureWrapper<T> implements SignalFuture<T>, Callable<T>
 		synchronized (this) {
 			return ret;
 		}
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	@Override
+	public String getName() {
+		return name;
 	}
 }

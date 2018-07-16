@@ -135,6 +135,7 @@ public final class UtilFile {
 	/**
 	 * Delete the given file or directory. If it is a directory then delete all
 	 * its content recursively. ("rm -rf")
+	 * WARNING Follows symlinks: files in symlinked folders will be deleted!
 	 * 
 	 * @param dir
 	 */
