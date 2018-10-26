@@ -38,6 +38,7 @@ public class UtilTimer {
 	 * @param timeoutMillis
 	 * @param callable this is called when the timeout is triggered.
 	 * @return {@link SignalFutureWrapper} object that can be used to add listeners to the timeout callable return value.
+	 *         The returned object can also be used to cancel the task before execution.
 	 */
 	public <T> SignalFutureWrapper<T> executeTimeout(final long timeoutMillis, final Callable<T> callable)
 	{
@@ -46,8 +47,11 @@ public class UtilTimer {
 			public void run() {
 				try {
 					Thread.sleep(timeoutMillis);
-					Object o=callable.call();
-					ret.ready(o, null);
+					if(!ret.isCancelled())
+					{
+						T o=callable.call();
+						ret.ready(o, null);
+					}
 				} catch (Throwable e) {
 					LOG.error("Interrupt",e);
 					ret.ready(null, e);

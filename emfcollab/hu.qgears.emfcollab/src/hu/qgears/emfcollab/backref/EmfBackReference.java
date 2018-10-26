@@ -16,6 +16,7 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EContentAdapter;
 
 
@@ -293,5 +294,13 @@ public class EmfBackReference {
 			}
 		}
 		return ret;
+	}
+	public void disposeOn(ResourceSet rs)
+	{
+		for(Resource r: rs.getResources())
+		{
+			r.eAdapters().remove(adapter);
+		}
+		
 	}
 }

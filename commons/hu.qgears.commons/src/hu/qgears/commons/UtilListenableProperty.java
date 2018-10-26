@@ -3,6 +3,8 @@ package hu.qgears.commons;
 /**
  * A wrapper class for a property that's value can be get and set and
  * listeners can be added to the setting event.
+ * 
+ * In case the value is set to an other object that is equal to the current one then the event is not propagated.
  * @author rizsi
  *
  * @param <T>
@@ -29,6 +31,15 @@ public class UtilListenableProperty<T> {
 	}
 
 	public void setProperty(T property) {
+		if(property==null && this.property==null)
+		{
+			return;
+		}
+		if(property!=null && property.equals(this.property))
+		{
+			this.property = property;
+			return;
+		}
 		this.property = property;
 		propertyChangedEvent.eventHappened(property);
 	}

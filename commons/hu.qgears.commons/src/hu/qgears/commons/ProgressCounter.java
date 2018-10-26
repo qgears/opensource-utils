@@ -1,6 +1,7 @@
 package hu.qgears.commons;
 
 import java.util.Stack;
+import java.util.concurrent.CancellationException;
 
 /**
  * Create a generic progress counter that counts progress in real numbers
@@ -10,7 +11,8 @@ import java.util.Stack;
  * 
  * Subtasks are marked finished by closing the created object.
  */
-public class ProgressCounter {
+public class ProgressCounter
+{
 	/**
 	 * Callback interface to update the progress GUI.
 	 */
@@ -23,8 +25,10 @@ public class ProgressCounter {
 		 */
 		void setProgressStatus(String name, double current);
 	}
+	private volatile boolean cancelled=false;
 	private IProgressCounterHost host;
 	private Stack<ProgressCounterSubTask> tasks=new Stack<ProgressCounterSubTask>();
+	private static ThreadLocal<ProgressCounter> threadProgess=new ThreadLocal<ProgressCounter>();
 	/**
 	 * Create a progress meter.
 	 * @param host callback that updates progress GUI.
@@ -34,18 +38,56 @@ public class ProgressCounter {
 		this.host=host;
 		tasks.add(new ProgressCounterSubTask(this, null, name, 1.0));
 	}
+	public void setCurrent()
+	{
+		threadProgess.set(this);
+	}
+	public void close()
+	{
+		threadProgess.set(null);
+	}
+	public boolean isCancelled()
+	{
+		return cancelled;
+	}
+	/**
+	 * Throw a {@link CancellationException} in case the current task is cancelled.
+	 */
+	public void checkCancelled()
+	{
+		if(cancelled)
+		{
+			throw new CancellationException("Cancelled by user.");
+		}
+	}
+	public void cancel()
+	{
+		cancelled=true;
+	}
+	public static ProgressCounter getCurrent()
+	{
+		ProgressCounter ret=threadProgess.get();
+		if(ret==null)
+		{
+			return new ProgressCounter(null, "null");
+		}
+		return ret;
+	}
 	
 	protected void finished(ProgressCounterSubTask subTask) {
 		if(tasks.contains(subTask))
 		{
 			ProgressCounterSubTask st=tasks.pop();
-			while(!subTask.equals(st))
+			while(st!=subTask)
 			{
 				st=tasks.pop();
 			}
 			ProgressCounterSubTask parent=tasks.peek();
 			ProgressCounterSubTask whole=tasks.get(0);
-			host.setProgressStatus(parent.getName(), whole.getCurrent());
+			if(host!=null)
+			{
+				host.setProgressStatus(parent.getName(), whole.getCurrent());
+			}
 		}
 	}
 
@@ -70,7 +112,10 @@ public class ProgressCounter {
 		ProgressCounterSubTask ret=new ProgressCounterSubTask(this, parent, string, d);
 		tasks.push(ret);
 		ProgressCounterSubTask whole=tasks.get(0);
-		host.setProgressStatus(ret.getName(), whole.getCurrent());
+		if(host!=null)
+		{
+			host.setProgressStatus(ret.getName(), whole.getCurrent());
+		}
 		return ret;
 	}
 }
