@@ -31,7 +31,7 @@ public class UtilListenableProperty<T> {
 	}
 
 	public void setProperty(T property) {
-		if(property==null && this.property==null)
+		if(property==null && this.property==null) // NOSONAR  pmd:BrokenNullCheck false positive
 		{
 			return;
 		}
