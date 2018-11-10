@@ -351,9 +351,10 @@ public class UtilNativeImageIo {
 							srcs[c2]=unsignedByteToInt(imSrc.getChannel(x, y, c2));
 							dsts[c2]=unsignedByteToInt(imOut.getChannel(x, y, c2));
 						}
-						// For testing, commented out
-						//System.out.println("Diff: ["+x+" "+y+"] ch: "+c+". Exp "+Arrays.toString(srcs)+", gen "+Arrays.toString(dsts));
-						return "First different pixel: coordinate: ["+x+" "+y+"] channel: "+c+". Expected pixel color "+Arrays.toString(srcs)+", generated pixel color "+Arrays.toString(dsts);
+						return "First different pixel: coordinate: [" + x + " "
+								+ y + "] channel: " + c + ". Expected pixel color " 
+								+ Arrays.toString(srcs) + ", generated pixel color "
+								+ Arrays.toString(dsts);
 					}
 				}
 				
