@@ -1,9 +1,12 @@
 package hu.qgears.nativeloader;
 
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -127,6 +130,15 @@ public abstract class XmlNativeLoader implements INativeLoader {
 	 * libraries will be loaded.
 	 */
 	public static final File OS_RELEASE_FILE  = new File("/etc/os-release");
+	
+	/**
+	 * Encoding of the {@link #OS_RELEASE_FILE}, which is, by default, 
+	 * {@link StandardCharsets#UTF_8}, but can be overridden by the
+	 * {@code hu.qgears.nativeloader.os_release_charset} system property.
+	 */
+	public static final Charset OS_RELEASE_ENCODING = Charset.forName(
+			System.getProperty("hu.qgears.nativeloader.os_release_charset", 
+					StandardCharsets.UTF_8.name()));
 	
 	/**
 	 * Name of the distribution machine-parseable ID parameter in the 
@@ -396,7 +408,8 @@ public abstract class XmlNativeLoader implements INativeLoader {
 	 */
 	private void loadOsReleaseFile(final String os) {
 		if (OS_RELEASE_PLATFORM.equals(os) && OS_RELEASE_FILE.exists()) {
-			try (final FileReader osReleaseReader = new FileReader(OS_RELEASE_FILE)) {
+			try (final InputStreamReader osReleaseReader = new InputStreamReader(
+					new FileInputStream(OS_RELEASE_FILE), OS_RELEASE_ENCODING)) {
 				osReleaseProperties = new Properties();
 				osReleaseProperties.load(osReleaseReader);
 				
