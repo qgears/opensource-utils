@@ -11,7 +11,6 @@
 	<target name="make-c-win" depends="jnigen,check-cross" if="check-cross-true">
 		<exec dir="./libpng/windows" executable="make"/>
 		<exec dir="./tiff/windows" executable="make"/>
-		<!-- TODO: devil and compiling -->
 	</target>	
 	<target name="check-cross">
 	    <condition property="check-cross-true">
@@ -22,16 +21,11 @@
 	</target>
 	
 	<target name="make-c-linux" depends="jnigen">
-		<exec dir="./devIL/linux" executable="make"/>
 		<exec dir="./libpng/linux" executable="make"/>
 		<exec dir="./tiff/linux" executable="make"/>
 	</target>
 	<target name="jnigen">
 		<mkdir dir="generated"/>
-		<javah class="hu.qgears.images.devil.NativeDevILConnector"
-			classpath="../bin:${env.QGEARSDEPS}"
-			destdir="./devIL"
-			/>
 		<javah class="hu.qgears.images.libpng.NativeLibPngConnector"
 			classpath="../bin:${env.QGEARSDEPS}"
 			destdir="./libpng"
