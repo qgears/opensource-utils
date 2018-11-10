@@ -55,7 +55,7 @@ public class UtilEquals {
 	 */
 	public static boolean safeEquals(Object objA, Object objB) {
 		try {
-			if (objA == objB) {
+			if (objA == objB) { // NOSONAR appropriate & intentional because of performance 
 				//handling null and eq by reference cases
 				return true;
 			} else if(objA.getClass().equals(objB.getClass()))
