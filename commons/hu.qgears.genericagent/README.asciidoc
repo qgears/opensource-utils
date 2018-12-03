@@ -1,0 +1,20 @@
+= Java agent for dynamic class load
+
+This project build a Java-Agent that is capable of launching dynamic code within a JVM:
+
+ * The jar built can be loaded as a Java Agent into a running JVM using the 
+   com.sun.tools.attach.VirtualMachine.loadAgent(jarpath, option) API method
+ * The option is split by the comma character (',')
+ * All but the last two pieces are used as classpath URLs to create a dynamic classloader
+   (the parent class loader of this loader will be the system classloader which is typically the one
+     that loads the java -jar xxx.jar and the -cp jars)
+ * The one before the last piece is the Java class that is loaded through the dynamic classloader and instantiated
+   (public no-arg constructor must be present)
+ * Last last piece is passed as a parameter to the run method of the class which has to have the prototype:
+ 
+ public void run(String arg);
+
+The useful payload have to be in this method.
+
+
+In case of Exception the exception is printStackTrace()d to stderr.

@@ -1,0 +1,1 @@
+generic-agent hu.qgears.genericagent.GenericAgent
