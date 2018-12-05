@@ -2,15 +2,16 @@ package hu.qgears.images.text;
 
 import java.lang.reflect.Field;
 
+import org.apache.log4j.Logger;
+
 /**
- * All paramters of a text label to be rendered. Using these parameters a label
+ * All parameters of a text label to be rendered. Using these parameters a label
  * can be rendered onto a bitmap
  * 
  * @author rizsi
  *
  */
 public class TextParameters {
-
 	private static final String SYSPROP_NAME_WBF_DEFAULT_FONT = "wbf.defaultFont";
 	/**
 	 * The default system wide fontface
@@ -25,13 +26,13 @@ public class TextParameters {
 	 * 
 	 * @since 3.0
 	 */
-	public static final double DEFAULT_LETTER_SPACING = 0.0d;
+	public static final double DEFAULT_LETTER_SPACING = 0.0D;
 	/**
 	 * The default fontsize in pixel.
 	 * 
 	 * @since 3.0
 	 */
-	public static final float DEFAULT_FONT_SIZE = 19.0f;
+	public static final float DEFAULT_FONT_SIZE = 19.0F;
 	/**
 	 * The default text {@link WColor color}
 	 * 
@@ -161,7 +162,7 @@ public class TextParameters {
 	
 	
 	private static final boolean eq(String a, String b) {
-		return a == null ? b == null : a.equals(b);
+		return a == null ? (b == null) : a.equals(b);
 	}
 
 	@Override
@@ -179,7 +180,11 @@ public class TextParameters {
 				}
 				bld.append(f.getName()).append("=").append(value).append(";");
 			} catch (Exception e) {
+				final Logger logger = Logger.getLogger(TextParameters.class);
+				
 				// should not happen, and toString is used only during debugging
+				logger.error("String representation of TextParameters could "
+						+ "not be constructed", e);
 			}
 		}
 		return bld.toString();
