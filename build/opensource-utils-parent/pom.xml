@@ -18,6 +18,9 @@
 	<properties>
 		<clean-version>2.6.1</clean-version>
 		<exec-plugin-version>1.2.1</exec-plugin-version>
+		<!-- used to postfix jar version when cross compile is not enabled. 
+			Only important on projects with native components. -->	
+		<version-postfix>-nox</version-postfix>
 	</properties>
 	<distributionManagement>
 		<site>
@@ -45,7 +48,31 @@
 			   </configuration>
 			</plugin>
 		</plugins>
+<!--			<plugin>
+    			<groupId>org.eclipse.tycho</groupId>
+		        <artifactId>tycho-packaging-plugin</artifactId>
+				<version>${tycho-version}</version>
+				<configuration>
+					<finalName>${project.artifactId}_${qualifiedVersion}</finalName>
+				</configuration>
+	        </plugin>
+		</plugins>
+		
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.eclipse.tycho</groupId>
+					<artifactId>tycho-source-plugin</artifactId>
+					<version>${tycho-version}</version>
+					<configuration>
+						<finalName>${project.artifactId}.source_${qualifiedVersion}</finalName>
+					</configuration>
+
+				</plugin>
+			</plugins>
+		</pluginManagement> -->
 	</build>
+
 	<profiles>
 		<!-- This profile is activated when the version bump script is executed.
 			It adds each the aggregator pom of the component (../../) as a child module 

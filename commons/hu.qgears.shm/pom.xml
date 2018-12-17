@@ -16,6 +16,15 @@
 	<build>
 		<plugins>
 			<plugin>
+    			<groupId>org.eclipse.tycho</groupId>
+		        <artifactId>tycho-packaging-plugin</artifactId>
+				<version>${tycho-version}</version>
+				<configuration>
+					<!-- using version postfix if xcompile is disabled. See parent pom. -->
+					<forceContextQualifier>${forceContextQualifier}${version-postfix}</forceContextQualifier>
+				</configuration>
+	        </plugin>
+			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
 				<version>${exec-plugin-version}</version>
@@ -46,6 +55,10 @@
 					<exists>${crosscompile-script}</exists>
 				</file>
 			</activation>
+			<properties>
+				<!-- Do not postfix build when cross compile is enabled -->
+				<version-postfix></version-postfix>
+			</properties>
 			<build>
 				<plugins>
 					<plugin>
