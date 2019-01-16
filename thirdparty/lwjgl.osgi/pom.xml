@@ -13,5 +13,12 @@
 	<artifactId>lwjgl.osgi</artifactId>
 	<packaging>eclipse-plugin</packaging>
 	<description>Java OpenGL bindings implementation library.</description>
-<version>7.1.0-SNAPSHOT</version>
+   <licenses>
+            <license>
+                    <name> Custom LWJG license</name>
+                    <url>http://legacy.lwjgl.org/license.php.html</url>
+            </license>
+    </licenses>
+
+	<version>7.1.0-SNAPSHOT</version>
 </project>
