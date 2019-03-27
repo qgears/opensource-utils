@@ -2,8 +2,11 @@
 <natives-def>
 	<platform name="Linux">
 		<platform arch="(amd|x86_)64">
-			<platform distroId="ubuntu" distroVersion="14.04">			
+			<platform distroId="ubuntu" distroVersion="14.04">
 				<lib id="libqpng" path="libqpng-ubuntu-14.04-x86_64.so" installPath="/opt/qgears/libqpng-ubuntu-14.04-x86_64.so" />
+			</platform>
+			<platform distroId="debian" distroVersion="9">			
+				<lib id="libqpng" path="libqpng-debian-9-x86_64.so" installPath="/opt/qgears/libqpng-debian-9-x86_64.so" />
 			</platform>
 			<lib id="libqpng" path="libqpng-x86_64.so" installPath="/opt/qgears/libqpng-x86_64.so" />
 		</platform>
