@@ -25,10 +25,10 @@ gnu_c: freeglut
 		$(FREEGLUT_BINDIR)/*.o -L$(FREEGLUT_BINDIR) $(FREEGLUT_BINDIR)/libglut.a \
 		-Wl,-Bdynamic -lGLU -lGLEW
 	rm -fr ${FREEGLUT_BUILDDIR} ${FREEGLUT_BINDIR}
+	cp -f $(OUTPUTDIR)/$(SO_NAME) $(OUTPUTDIR)/$(SO_GENERIC_NAME)
 
 freeglut: init
 	/bin/sh buildfreeglut.sh $(FREEGLUT_BUILDDIR) $(FREEGLUT_BINDIR)
-	cp -f $(OUTPUTDIR)/$(SO_NAME) $(OUTPUTDIR)/$(SO_GENERIC_NAME)
 	
 init:
 FREEGLUT_BUILDDIR := $(shell mktemp -d /tmp/freeglut_XXXXXX)
