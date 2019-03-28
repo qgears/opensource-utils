@@ -5,7 +5,7 @@ Export-Package: lwjgl.standalone,net.java.games.input,net.java.games.u
  l,org.lwjgl.util.glu,org.lwjgl.util.glu.tessellation,org.lwjgl.util.i
  nput,org.lwjgl.util.jinput,org.lwjgl.util.vector
 Bundle-SymbolicName: lwjgl.osgi
-Bundle-Version: 7.1.0.qualifier
+Bundle-Version: 7.1.3.qualifier
 Bundle-Name: lwjgl.osgi version 2.5.0 repackaged as osgi bundle
 Bundle-Classpath: .,classes/
 Require-Bundle: hu.qgears.nativeloader;bundle-version="1.0.0";visibili
