@@ -10,11 +10,15 @@
 	</target>
 	
 	<target name="make-c-linux" depends="jnigen">
-		<exec dir="./linux" executable="make"/>
+		<exec dir="./linux" executable="make">
+			<arg value="-j8"/>
+		</exec>
 	</target>
 
 	<target name="make-c-win" depends="jnigen,check-cross" if="check-cross-true">
-    	<exec dir="./windows" executable="make"/>
+    	<exec dir="./windows" executable="make">
+			<arg value="-j8"/>
+		</exec>
 	</target>	
 	<target name="check-cross">
 	    <condition property="check-cross-true">
