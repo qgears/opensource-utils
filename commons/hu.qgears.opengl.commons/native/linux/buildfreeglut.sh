@@ -7,9 +7,6 @@ rm -fr $BUILDDIR
 mkdir -p $BUILDDIR
 cp -r ../freeglut-2.6.0/* $BUILDDIR
 
-cd $BUILDDIR
-./configure
-
 # Upgrades old build scripts on Ubuntu 14.04 and above
 LSB_RELEASE=$(lsb_release -rs)
 if [ $(echo "$LSB_RELEASE >= 14.04" | bc -l) ]; then
@@ -18,8 +15,11 @@ if [ $(echo "$LSB_RELEASE >= 14.04" | bc -l) ]; then
 	echo "done"
 fi
 
+cd $BUILDDIR
+./configure
+
 make clean
-make
+make -j8
 
 rm -fr $TARGETDIR
 mkdir -p $TARGETDIR
