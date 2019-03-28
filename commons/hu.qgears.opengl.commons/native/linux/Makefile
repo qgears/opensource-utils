@@ -7,7 +7,9 @@ ARCHPOSTFIX=`uname -m | sed -e 's/\bx86\b/i686/'`
 OS_RELEASE_ID=`grep -w "ID" /etc/os-release | cut -d'=' -f2`
 OS_RELEASE_VERSION=`grep -w "VERSION_ID" /etc/os-release | cut -d'=' -f2 | tr -d '\"'`
 SO_NAME:=libqglut-${OS_RELEASE_ID}-${OS_RELEASE_VERSION}-${ARCHPOSTFIX}.so
-SO_LINK_NAME:=libqglut-${ARCHPOSTFIX}.so
+# .so named in a generic way, for workspace builds in  not explicitly supported 
+# distributions
+SO_GENERIC_NAME:=libqglut-${ARCHPOSTFIX}.so
 
 #used by the maven editor_platform_build process, see pom.xml in project.
 ifndef OUTPUTDIR
@@ -26,8 +28,7 @@ gnu_c: freeglut
 
 freeglut: init
 	/bin/sh buildfreeglut.sh $(FREEGLUT_BUILDDIR) $(FREEGLUT_BINDIR)
-	rm -f $(OUTPUTDIR)/$(SO_LINK_NAME)
-	ln -s $(SO_NAME) $(OUTPUTDIR)/$(SO_LINK_NAME)
+	cp -f $(OUTPUTDIR)/$(SO_NAME) $(OUTPUTDIR)/$(SO_GENERIC_NAME)
 	
 init:
 FREEGLUT_BUILDDIR := $(shell mktemp -d /tmp/freeglut_XXXXXX)

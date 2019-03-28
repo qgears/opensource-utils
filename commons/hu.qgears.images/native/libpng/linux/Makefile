@@ -7,7 +7,9 @@ ARCHPOSTFIX=`uname -m | sed -e 's/\bx86\b/i686/'`
 OS_RELEASE_ID=`grep -w "ID" /etc/os-release | cut -d'=' -f2`
 OS_RELEASE_VERSION=`grep -w "VERSION_ID" /etc/os-release | cut -d'=' -f2 | tr -d '\"'`
 SO_NAME:=libqpng-${OS_RELEASE_ID}-${OS_RELEASE_VERSION}-${ARCHPOSTFIX}.so
-SO_LINK_NAME:=libqpng-${ARCHPOSTFIX}.so
+# .so named in a generic way, for workspace builds in  not explicitly supported 
+# distributions
+SO_GENERIC_NAME:=libqpng-${ARCHPOSTFIX}.so
 
 #used by the maven editor_platform_build process, see pom.xml in project.
 ifndef OUTPUTDIR
@@ -20,6 +22,5 @@ gnu_c:
 	${JNI_INCLUDE} -Wl,-soname,$(SO_NAME) \
 	../nativeLibpng.cpp ../jniutil.cpp \
 	-lpng
-	rm -f $(OUTPUTDIR)/$(SO_LINK_NAME)
-	ln -s $(SO_NAME) $(OUTPUTDIR)/$(SO_LINK_NAME)
+	cp -f $(OUTPUTDIR)/$(SO_NAME) $(OUTPUTDIR)/$(SO_GENERIC_NAME)
 	
