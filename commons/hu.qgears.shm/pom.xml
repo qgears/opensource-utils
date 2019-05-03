@@ -16,6 +16,29 @@
 	<build>
 		<plugins>
 			<plugin>
+				<artifactId>maven-clean-plugin</artifactId>
+				<version>${clean-version}</version>
+				<executions>
+					<execution>
+						<id>auto-clean</id>
+						<phase>clean</phase>
+						<goals>
+							<goal>clean</goal>
+						</goals>
+						<configuration>
+						<filesets>
+							<fileset>
+								<directory>${basedir}/src/hu/qgears/shm/natives</directory>
+								<includes>
+									<include>*.so</include>
+								</includes>
+							</fileset>
+						</filesets>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
     			<groupId>org.eclipse.tycho</groupId>
 		        <artifactId>tycho-packaging-plugin</artifactId>
 				<version>${tycho-version}</version>
