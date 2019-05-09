@@ -52,6 +52,12 @@ public class NativeImageEditor {
 					toByte(color.a), topLeftX, topLeftY, width, height);
 			break;
 		}
+		case BGR:
+		case BGRA: {
+			doFillGeneric(toByte(color.b), toByte(color.g), toByte(color.r), 
+					toByte(color.a), topLeftX, topLeftY, width, height);
+			break;
+		}
 		default:
 			throw new RuntimeException("color fill is not supported for this "
 					+ "pixel order :" + imageToEdit.getComponentOrder());
@@ -63,7 +69,7 @@ public class NativeImageEditor {
 	/**
 	 * Replaces the pixels within specified rectangular area with black pixels
 	 * (rgb(0,0,0)). If an alpha channel is present, the relevant pixels will be
-	 * filled with zeros, too. {@link ENativeImageComponentOrder#MONO MONO} 
+	 * filled with 255. {@link ENativeImageComponentOrder#MONO MONO} 
 	 * images are not supported by this method!
 	 * 
 	 * @param topLeftX the leftmost coordinate of the rectangle to be filled
@@ -76,7 +82,7 @@ public class NativeImageEditor {
 			int width, int height) {
 		byte zByte = toByte(0);
 		
-		doFillGeneric(zByte, zByte, zByte, zByte, topLeftX, topLeftY, width, height);
+		doFillGeneric(zByte, zByte, zByte, toByte(255), topLeftX, topLeftY, width, height);
 		
 		return this;
 	}
@@ -130,11 +136,11 @@ public class NativeImageEditor {
 		return this;
 	}
 	
-	private byte toByte(int i){
+	protected byte toByte(int i){
 		return (byte) (i & 0xFF);
 	}
 	
-	private void doFill(byte first, byte second, byte third, byte fourth) {
+	protected void doFill(byte first, byte second, byte third, byte fourth) {
 		doFillGeneric(first, second, third, fourth, 
 				0, 0, imageToEdit.getWidth(), imageToEdit.getHeight());
 	}
@@ -156,7 +162,7 @@ public class NativeImageEditor {
 	 * @param height the height of the rectangle to fill
 	 */
 	/* too many parameters are OK here */
-	private void doFillGeneric(byte first, byte second, byte third, byte fourth, //NOSONAR
+	protected void doFillGeneric(byte first, byte second, byte third, byte fourth, //NOSONAR
 			int x, int y, int width, int height) { // NOSONAR
 		for (int i = x; i < x + width; i++) {
 			for (int j = y; j < y + height; j++) {
@@ -181,7 +187,7 @@ public class NativeImageEditor {
 	 * @param height the height of the rectangle to fill
 	 * @param color the color value, ranging from  
 	 */
-	private void doFillMono(int x, int y, int width, int height, byte color) {
+	protected void doFillMono(int x, int y, int width, int height, byte color) {
 		for (int i = x; i < x + width; i++) {
 			for (int j = y; j < y + height; j++) {
 				imageToEdit.setChannel(i, j, 0, color);
