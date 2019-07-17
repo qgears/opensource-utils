@@ -1,0 +1,179 @@
+= XmlNativeLoader3 usage howto
+
+== Must be subclassed to be used
+
+
+----
+package examplepackage;
+
+import hu.qgears.nativeloader.XmlNativeLoader3;
+import java.io.File;
+public class NativeLoader extends XmlNativeLoader3
+{
+	private static NativeLoader instance;
+	public static NativeLoader getInstance()
+	{
+		return instance;
+	}
+	/**
+	 * This class is a singleton - singleton pattern is useful to be used.
+	 */
+	private NativeLoader() {
+	}
+	/**
+	 * This is mandatory to implement this way.
+	 * This method can not be implemented in the parent class because the Runtime attaches the
+	 * native library to the classloader that cals the Runtime.load() method.
+	 * With this implementation native library loading works even in a multi-classloader environment
+	 * (Like an OSGI environment) 
+	 */
+    @Override
+    public void load(File nativeLibFile) throws Throwable {
+        Runtime.getRuntime().load(nativeLibFile.getAbsolutePath());
+    }
+}
+----
+
+== Load the library
+
+----
+	new examplepackage.NativeLoader.getInstance().load();
+----
+
+== Include Platform specific binaries into the jar
+
+An implementations.xml file have to be created that references the correct shared object file depending on the runtime environment. This file must be in the same package where the NativeLoader class is found.
+
+The simplest version is to include a single binary for a single environment:
+
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<natives-def>
+<lib path="libexample.so"/>
+</natives-def>
+----
+
+Or a Windows dll:
+
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<natives-def>
+<lib path="example.dll"/>
+</natives-def>
+----
+
+== Filters
+
+The nodes in the XML file are traversed. Subtrees can be filtered for processing using filter expressions:
+
+TODO implement and test filters
+
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<natives-def>
+	<filter property="os.name" regex=".*[l,L][i,I][n,N][u,U][x,X].*">
+		<filter property="os.arch" regex="(.*32.*)|(.*i386*)|(.*i586.*)">
+			<lib path="libexample32.so"/>
+		</filter>
+		<filter property="os.arch" regex=".*64.*">
+			<lib path="libexample64.so"/>
+		</filter>
+	</filter>
+	<filter property="os.name" regex=".*[w,W][i,I][n,N].*">
+		<filter property="os.arch" regex="(.*32.*)|(.*i386*)|(.*i586.*)">
+			<lib path="example32.dll"/>
+		</filter>
+		<filter property="os.arch" regex=".*64.*">
+			<lib path="example64.dll"/>
+		</filter>
+	</filter>
+</natives-def>
+----
+
+Properties access the System.getProperty(name) values. Regex patterns are Java regex patterns implemented using: 
+
+----
+(String)propertyValue.matches(regex)
+----
+
+== Multiple dynamic libraries
+
+The XML descriptor can contain multiple dynamic libraries. In this case they are all loaded in the order of appearance:
+
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<natives-def>
+<lib path="libexample1.so"/>
+<lib path="libexample2.so"/>
+</natives-def>
+----
+
+
+== Include the dynamic library
+
+The dynamic library is packed into the same jar file within the same package where the NativeLoader.java and the implementations.xml file is.
+
+The files structure in the resulting JAR file:
+
+ * examplepackage
+ ** NativeLoader.class
+ ** implementations.xml
+ ** libexample32.so
+ ** libexample64.so
+ ** example32.dll
+ ** example64.dll
+
+== Include
+
+Inlcude tag can be used in XML descriptor to process an other file:
+
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<natives-def>
+	<filter property="os.name" regex=".*[l,L][i,I][n,N][u,U][x,X].*">
+		<include path="linux/implementations.xml" path-prefix="linux/"/>
+	</filter>
+	<filter property="os.name" regex=".*[w,W][i,I][n,N].*">
+		<filter property="os.arch" regex="(.*32.*)|(.*i386*)|(.*i586.*)">
+			<lib path="example32.dll"/>
+		</filter>
+		<filter property="os.arch" regex=".*64.*">
+			<lib path="example64.dll"/>
+		</filter>
+	</filter>
+</natives-def>
+----
+
+Includes are processed under matching filters. path is the relative path of the included XML. path-prefix is added to all dynamic library paths found within the included XML.
+
+The include feature can be useful when multiple target platforms must be supported by the program. The number of files in a single folder and the complexity of single XML files stays manageable.
+
+=== Included file syntax
+
+Similar to the host file:
+
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<natives-def>
+	<filter property="os.arch" regex="(.*32.*)|(.*i386*)|(.*i586.*)">
+		<lib path="libexample32.so"/>
+	</filter>
+	<filter property="os.arch" regex=".*64.*">
+		<lib path="libexample64.so"/>
+	</filter>
+</natives-def>
+----
+
+=== Folder structure in case of include
+
+ * examplepackage
+ ** NativeLoader.class
+ ** implementations.xml
+ ** example32.dll
+ ** example64.dll
+ ** linux/
+ *** implementations.xml
+ *** libexample32.so
+ *** libexample64.so
+
+ 
