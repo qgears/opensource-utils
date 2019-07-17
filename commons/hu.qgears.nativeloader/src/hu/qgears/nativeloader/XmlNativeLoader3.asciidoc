@@ -44,7 +44,7 @@ public class NativeLoader extends XmlNativeLoader3
 == Load the library
 
 ----
-	new examplepackage.NativeLoader.getInstance().load();
+	examplepackage.NativeLoader.getInstance().load();
 ----
 
 == Include Platform specific binaries into the jar
