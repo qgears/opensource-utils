@@ -6,12 +6,12 @@
 	<parent>
 		<groupId>hu.qgears</groupId>
 		<artifactId>opensource-utils-parent</artifactId>
-		<version>7.2.0-SNAPSHOT</version>
+		<version>7.2.1-SNAPSHOT</version>
 		<relativePath>../../build/opensource-utils-parent/</relativePath>
 	</parent>
 	<groupId>hu.qgears</groupId>
 	<artifactId>hu.qgears.coolrmi</artifactId>
 	<packaging>eclipse-plugin</packaging>
 	<description>Simple and effective RMI implementation for Java.</description>
-<version>7.2.0-SNAPSHOT</version>
+<version>7.2.1-SNAPSHOT</version>
 </project>
