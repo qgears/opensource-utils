@@ -2,10 +2,10 @@ target "Opensource utils target platform"
 
 with requirements
 
-location "http://192.168.1.116/mirror/eclipse-mars-mirror/" eclipse-mars-mirror {
+location "https://buildserver.qgears.net/mirror/eclipse2020-03-mirror/" eclipse-2020-03-mirror {
 	org.apache.log4j [1.2.15.v201012070815,1.2.15.v201012070815]
-	org.eclipse.emf.sdk.feature.group [2.11.2.v20160208-0841,2.11.2.v20160208-0841]
+	org.eclipse.emf.sdk.feature.group [2.21.0.v20200205-0529,2.21.0.v20200205-0529]
 	//these plugins are required to execute JUnit tests	
-	org.junit [4.12.0.v201504281640,4.12.0.v201504281640]
-	org.eclipse.equinox.launcher [1.3.100.v20150511-1540,1.3.100.v20150511-1540]
+	org.junit [4.13.0.v20200204-1500,4.13.0.v20200204-1500]
+	org.eclipse.equinox.launcher [1.5.700.v20200207-2156,1.5.700.v20200207-2156]
 }
