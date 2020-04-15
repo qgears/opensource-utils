@@ -3,21 +3,11 @@
 		Generate jni header
 	</description>
 	<target name="jnigen">
-		<javah class="hu.qgears.shm.SharedMemoryNative"
-			classpath="../bin"
-			destdir="./"
-			/>
-		<javah class="hu.qgears.shm.dlmalloc.DlMallocPoolNative"
-			classpath="../bin"
-			destdir="./"
-			/>
-		<javah class="hu.qgears.shm.sem.SemaphoreNative"
-			classpath="../bin"
-			destdir="./"
-			/>
-		<javah class="hu.qgears.shm.part.PartNativeMemoryNative"
-			classpath="../bin"
-			destdir="./"
+		<javac 
+			srcdir="../src/hu/qgears/shm"
+			includes="SharedMemoryNative.java dlmalloc/DlMallocPoolNative.java sem/SemaphoreNative.java part/PartNativeMemoryNative.java"
+			classpath="../bin:../../hu.qgears.commons/bin/"
+			nativeheaderdir="./"
 			/>
 	</target>
 </project>

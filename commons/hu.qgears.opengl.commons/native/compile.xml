@@ -30,9 +30,10 @@
 	
 	<target name="jnigen">
 		<mkdir dir="generated"/>
-		<javah class="hu.qgears.opengl.glut.Glut"
+		<javac srcdir="../src/hu/qgears/opengl/glut"
+			includes="Glut.java"
 			classpath="../bin"
-			destdir="./generated"
+			nativeheaderdir="./generated"
 			/>
 	</target>
 
