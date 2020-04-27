@@ -3,6 +3,7 @@
 BUILDDIR=$1
 TARGETDIR=$2
 
+
 rm -fr $BUILDDIR
 mkdir -p $BUILDDIR
 cp -r ../freeglut-2.6.0/* $BUILDDIR
@@ -10,14 +11,16 @@ cp -r ../freeglut-2.6.0/* $BUILDDIR
 cd $BUILDDIR
 
 # Upgrades old build scripts on Ubuntu 14.04 and above
-LSB_RELEASE=$(lsb_release -rs)
-if [ $(echo "$LSB_RELEASE >= 14.04" | bc -l) ]; then
+#LSB_RELEASE=$(lsb_release -rs)
+#if [ $(echo "$LSB_RELEASE >= 14.04" | bc -l) ]; then
 	echo "Upgrading build scripts for Ubuntu 14 and above..." 
-	autoreconf -vif
+	autoreconf -vif --warnings=cross
 	echo "done"
-fi
+#fi
 
-./configure
+echo "Additional config parameters : $3"
+
+./configure "$3"
 
 make clean
 make -j8
