@@ -8,4 +8,5 @@ location "https://buildserver.qgears.net/mirror/eclipse2020-03-mirror/" eclipse-
 	//these plugins are required to execute JUnit tests	
 	org.junit [4.13.0.v20200204-1500,4.13.0.v20200204-1500]
 	org.eclipse.equinox.launcher [1.5.700.v20200207-2156,1.5.700.v20200207-2156]
+	javax.annotation [1.2.0.v201602091430,1.2.0.v201602091430]
 }
