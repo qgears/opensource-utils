@@ -26,63 +26,25 @@
 					<forceContextQualifier>${forceContextQualifier}${version-postfix}</forceContextQualifier>
 				</configuration>
 	        </plugin>
-			<plugin>
-				<artifactId>maven-clean-plugin</artifactId>
-				<version>${clean-version}</version>
-				<executions>
-					<execution>
-						<id>auto-clean</id>
-						<phase>clean</phase>
-						<goals>
-							<goal>clean</goal>
-						</goals>
-						<configuration>
-						<filesets>
-							<fileset>
-								<directory>${project.basedir}/src/hu/qgears/opengl/glut</directory>
-								<includes>
-									<include>*.dll</include>
-									<include>*.so</include>
-								</includes>
-							</fileset>
-						</filesets>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
-				<version>${exec-plugin-version}</version>
-				<!-- Inheritance must be disabled, because the exec plugin run in all submodules by default-->
-				<inherited>false</inherited>
-				<executions>
-					<execution>
-						<id>opengl-commons-natives</id>
-						<phase>generate-resources</phase>
-						<goals>
-							<goal>exec</goal>
-						</goals>
-						<configuration>
-							<executable>make</executable>
-							<workingDirectory>./native/linux</workingDirectory>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 	</build>
+			
 	<profiles>
 		<profile>
-			<id>cross-compile</id>
+			<!-- Build profile for enable building C libs on current platform
+				This is intended to be used on developer workspaces, where cross compiled libs 
+				for other platforms are unnecessary.
+			-->
+			<id>host-only</id>
 			<activation>
-				<file>
-					<exists>${crosscompile-script}</exists>
-				</file>
+				<property>
+					<name>cbuild</name>
+					<value>host</value>
+				</property>
 			</activation>
 			<properties>
-				<!-- Do not postfix build when cross compile is enabled -->
-				<version-postfix></version-postfix>
+				<!-- Use "-nat" postfix -->
+				<version-postfix>-nat</version-postfix>
 			</properties>
 			<build>
 				<plugins>
@@ -94,38 +56,37 @@
 						<inherited>false</inherited>
 						<executions>
 							<execution>
-								<id>opengl-commons-cross</id>
-								<phase>generate-resources</phase>
-								<goals>
-									<goal>exec</goal>
-								</goals>
-								<configuration>
-									<executable>${crosscompile-script}</executable>
-									<workingDirectory>${project.build.directory}</workingDirectory>
-									<arguments>
-										<argument>${project.basedir}/native</argument>
-										<argument>linux</argument>
-										<argument>${project.basedir}/src/hu/qgears/opengl/glut</argument>
-										<!-- The host is specified from Jenkins or from settings.xml -->
-										<argument>${cross-compile-hosts}</argument>
-									</arguments>
-								</configuration>
-							</execution>
-								<execution>
-								<id>opengl-commons-natives-windows</id>
+								<id>opengl-commons-natives</id>
 								<phase>generate-resources</phase>
 								<goals>
 									<goal>exec</goal>
 								</goals>
 								<configuration>
 									<executable>make</executable>
-									<workingDirectory>./native/windows</workingDirectory>
+									<workingDirectory>./native/linux</workingDirectory>
 								</configuration>
 							</execution>
 						</executions>
 					</plugin>
 				</plugins>
 			</build>
+		</profile>
+		<profile>
+			<!-- Build profile to package native connectors for every platform.
+			This profile intended to be used on build server, where precompiled libs are already created. -->
+			<id>cross-compile</id>
+			<activation>
+				<property>
+					<name>cbuild</name>
+					<value>cross</value>
+				</property>
+			</activation>
+			<properties>
+				<!-- Do not postfix build when cross compile is enabled 
+				There are unit tests that check all libs are packaged
+				-->
+				<version-postfix></version-postfix>
+			</properties>
 		</profile>
 	</profiles>
 </project>

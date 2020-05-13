@@ -1,7 +1,10 @@
 Manifest-Version: 1.0
 Bundle-SymbolicName: hu.qgears.shm
-Export-Package: hu.qgears.shm,hu.qgears.shm.dlmalloc,hu.qgears.shm.par
- t,hu.qgears.shm.sem
+Export-Package: hu.qgears.shm,
+ hu.qgears.shm.dlmalloc,
+ hu.qgears.shm.natives,
+ hu.qgears.shm.part,
+ hu.qgears.shm.sem
 Bundle-Name: Shm
 Bundle-Version: 7.2.1.qualifier
 Require-Bundle: hu.qgears.commons;bundle-version="2.0.0",hu.qgears.nat

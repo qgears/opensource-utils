@@ -153,242 +153,7 @@ public abstract class XmlNativeLoader implements INativeLoader {
 	
 	private Properties osReleaseProperties;
 	
-	/**
-	 * SAX handler that collects the natives for a specific platform.
-	 * 
-	 * @author KRiS
-	 */
-	protected class XmlHandler extends DefaultHandler {
-
-		public static final String NAMESPACE = "";
-		public static final String EL_NATIVESDEF = "natives-def";
-		public static final String EL_PLATFORM = "platform";
-		public static final String AT_PLATFORM_ARCH = "arch";
-		public static final String AT_PLATFORM_NAME = "name";
-		/** 
-		 * Optional XML {@link #EL_PLATFORM platform} tag parameter for 
-		 * identifying the Linux distribution. It will be matched with the 
-		 * {@link #OS_RELEASE_PROPNAME_ID ID} entry in the 
-		 * {@code /etc/os-release} file.
-		 */
-		public static final String AT_LINUX_DISTRO_ID = "distroId";
-		/** 
-		 * Optional XML {@link #EL_PLATFORM platform} parameter for identifying
-		 * the version of a Linux distribution. It will be matched with the 
-		 * {@link #OS_RELEASE_PROPNAME_VERSION_ID VERSION_ID} entry in the 
-		 * {@code /etc/os-release} file. Note that the value of the entry 
-		 * contains starting and trailing quotation marks.
-		 */
-		public static final String AT_LINUX_DISTRO_VERSION_ID = "distroVersion";
-		public static final String EL_LIBRARY = "lib";
-		public static final String EL_SOURCE_ZIP = "srcZip";
-		/**
-		 * Identifier for a library to ensure that a single instance is 
-		 * attempted to be loaded if more than one is matching.
-		 */
-		public static final String AT_LIBRARY_ID = "id";
-		public static final String AT_LIBRARY_PATH = "path";
-		public static final String AT_INSTALLPATH = "installPath";
-		public static final String AT_SOURCE_EXEC = "exec";
-		public static final String AT_SOURCE_OUT = "out";
-		public static final String EL_LIBGROUP = "libs";
-		public static final String AT_LIBGROUP_NAME = "name";
-		public static final String AT_LIBGROUP_ENABLED = "enabled";
-		public static final String AT_LIBGROUP_ENABLED_TRUE = "true";
-		public static final String AT_LIBGROUP_ENABLED_FALSE = "false";
-		
-		protected final String arch;
-		protected final String os;
-		/**
-		 * List of native binaries to be loaded.
-		 */
-		protected final List<NativeBinary> natives = new LinkedList<NativeBinary>();
-		/**
-		 * Identifiers of already matching native libraries. This set is used
-		 * to avoid duplicate library loading. 
-		 */
-		protected final Set<String> nativesEnumd = new HashSet<>(); 
-		protected final List<SourceFile> sources = new ArrayList<SourceFile>(); 
-		protected final Stack<Boolean> listening = new Stack<Boolean>();
-
-		/**
-		 * Initialize a new XmlHandler object.
-		 * 
-		 * @param arch
-		 *            the arch
-		 * @param os
-		 *            the os name
-		 */
-		public XmlHandler(String arch, String os) throws NativeLoadException {
-			this.arch = arch;
-			this.os = os;
-		}
-
-		@Override
-		public void startDocument() throws SAXException {
-			natives.clear();
-			nativesEnumd.clear();
-			listening.clear();
-		}
-
-		@Override
-		public void startElement(String uri, String localName, String qName,
-				Attributes attributes) throws SAXException {
-			if (NAMESPACE.equals(uri)) {
-				if (EL_NATIVESDEF.equals(localName)) { // <natives-def>
-					listening.push(true);
-
-				} else if (EL_PLATFORM.equals(localName)) { // <platform>
-					if (listening.peek()) {
-						String archCond = attributes.getValue(NAMESPACE,
-								AT_PLATFORM_ARCH);
-						String nameCond = attributes.getValue(NAMESPACE,
-								AT_PLATFORM_NAME);
-						String linuxDistroIdCond = attributes.getValue(NAMESPACE,
-								AT_LINUX_DISTRO_ID);
-						String linuxDistroVersionCond = attributes.getValue(NAMESPACE,
-								AT_LINUX_DISTRO_VERSION_ID);
-						boolean match = isMatching(archCond, nameCond,
-								linuxDistroIdCond, linuxDistroVersionCond);
-						listening.push(match);
-
-					} else {
-						listening.push(false);
-					}
-
-				} else if (EL_LIBRARY.equals(localName)) { // <path>
-					if (listening.peek()) {
-						final String libPath = attributes.getValue(NAMESPACE,
-								AT_LIBRARY_PATH);
-						final String libIdCandidate = attributes.getValue(NAMESPACE, 
-								AT_LIBRARY_ID);
-						final String libId = libIdCandidate == null 
-								? libPath : libIdCandidate;
-						
-						if (libPath == null) {
-							throw new SAXException("argument 'path' not "
-									+ "supplied for element <library>");
-						}
-						String installPath = attributes.getValue(NAMESPACE,
-								AT_INSTALLPATH);
-						
-						if (!nativesEnumd.contains(libId)) {
-							natives.add(new NativeBinary(libId, libPath, installPath));
-							nativesEnumd.add(libId);
-						}
-					}
-				} else if (EL_SOURCE_ZIP.equals(localName)) { // <path>
-					if (listening.peek()) {
-						String srcPath = attributes.getValue(NAMESPACE,
-								AT_LIBRARY_PATH);
-						String srcExec = attributes.getValue(NAMESPACE,
-								AT_SOURCE_EXEC);
-						String srcOut = attributes.getValue(NAMESPACE,
-								AT_SOURCE_OUT);
-						String installPath = attributes.getValue(NAMESPACE,
-								AT_INSTALLPATH);
-						if (srcPath == null) {
-							throw new SAXException("argument 'path' not "
-									+ "supplied for element <"+EL_SOURCE_ZIP+">");
-						}
-						sources.add(new SourceFile(srcPath, srcExec, srcOut, installPath));
-					}
-
-				} 
-				else if (EL_LIBGROUP.equals(localName)) { // <libs>
-					if (listening.peek()) {
-						String enabledStr = attributes.getValue(NAMESPACE,
-								AT_LIBGROUP_ENABLED);
-						if (enabledStr == null
-								|| AT_LIBGROUP_ENABLED_TRUE.equals(enabledStr)) {
-							listening.push(true);
-						} else if (AT_LIBGROUP_ENABLED_FALSE.equals(enabledStr)) {
-							listening.push(false);
-						} else {
-							throw new SAXException("Unknown argument value: "
-									+ enabledStr);
-						}
-
-					} else {
-						listening.push(false);
-					}
-				} else {
-					throw new SAXException("Uknown element: " + qName);
-				}
-			}
-		}
-
-		protected boolean isMatching(String archCond, String nameCond, 
-				String linuxDistroIdCond, String linuxDistroVersionCond) {
-			boolean match = true;
-			if (archCond != null) {
-				match &= arch.matches(archCond);
-			}
-			if (nameCond != null) {
-				match &= os.matches(nameCond);
-			}
-			
-			if (osReleaseProperties != null) {
-				if (linuxDistroIdCond != null) {
-					final String distroId = osReleaseProperties.getProperty(
-							OS_RELEASE_PROPNAME_ID);
-					
-					match &= distroId.matches(linuxDistroIdCond);
-				}
-				
-				if (linuxDistroVersionCond != null) {
-					final String versionId = osReleaseProperties.getProperty(
-							OS_RELEASE_PROPNAME_VERSION_ID);
-					
-					match &= versionId.matches(linuxDistroVersionCond);
-				}
-			}
-			
-			return match;
-		}
-
-		@Override
-		public void endElement(String uri, String localName, String qName)
-				throws SAXException {
-			if (NAMESPACE.equals(uri)) {
-				if (EL_NATIVESDEF.equals(localName) // </natives-def>
-						|| EL_PLATFORM.equals(localName) // </platform>
-						|| EL_LIBGROUP.equals(localName)) { // </libs>
-					listening.pop();
-
-				} else if (EL_LIBRARY.equals(localName)||
-						EL_SOURCE_ZIP.equals(localName)) { // </path>
-					// is something needed here?
-
-				} else {
-					// we should never ever be here
-					throw new AssertionError("unknown endElement: " + qName);
-				}
-			}
-		}
-
-		/**
-		 * @return the arch
-		 */
-		public String getArch() {
-			return arch;
-		}
-
-		/**
-		 * @return the os
-		 */
-		public String getOs() {
-			return os;
-		}
-
-		/**
-		 * @return the natives
-		 */
-		public List<NativeBinary> getNatives() {
-			return natives;
-		}
-
-	}
+	
 	
 	/**
 	 * Subclasses may override so they can use different file name.
@@ -426,11 +191,75 @@ public abstract class XmlNativeLoader implements INativeLoader {
 		}
 	}
 
+	private class OsAndArchAwareXmlHandler extends XmlHandler {
+
+		protected final String arch;
+		protected final String os;
+		
+		/**
+		 * Initialize a new XmlHandler object.
+		 * 
+		 * @param arch
+		 *            the arch
+		 * @param os
+		 *            the os name
+		 */
+		public OsAndArchAwareXmlHandler(String arch, String os) throws NativeLoadException {
+			this.arch = arch;
+			this.os = os;
+		}
+		
+		@Override
+		protected boolean isMatching(String archCond, String nameCond, 
+				String linuxDistroIdCond, String linuxDistroVersionCond) {
+			boolean match = true;
+			if (archCond != null) {
+				match &= arch.matches(archCond);
+			}
+			if (nameCond != null) {
+				match &= os.matches(nameCond);
+			}
+			
+			if (osReleaseProperties != null) {
+				if (linuxDistroIdCond != null) {
+					final String distroId = osReleaseProperties.getProperty(
+							OS_RELEASE_PROPNAME_ID);
+					
+					match &= distroId.matches(linuxDistroIdCond);
+				}
+				
+				if (linuxDistroVersionCond != null) {
+					final String versionId = osReleaseProperties.getProperty(
+							OS_RELEASE_PROPNAME_VERSION_ID);
+					
+					match &= versionId.matches(linuxDistroVersionCond);
+				}
+			}
+			
+			return match;
+		}
+		
+		/**
+		 * @return the arch
+		 */
+		public String getArch() {
+			return arch;
+		}
+
+		/**
+		 * @return the os
+		 */
+		public String getOs() {
+			return os;
+		}
+		
+	}
+	
 	@Override
 	public NativesToLoad getNatives(String arch, String os)
 			throws NativeLoadException {
 		loadOsReleaseFile(os);
-		XmlHandler handler = new XmlHandler(arch, os);
+		XmlHandler handler = new OsAndArchAwareXmlHandler(arch, os);
 		try {
 			XMLReader reader = XMLReaderFactory.createXMLReader();
 			InputStream istream = getClass().getResourceAsStream(getNativesDeclarationResourceName());
