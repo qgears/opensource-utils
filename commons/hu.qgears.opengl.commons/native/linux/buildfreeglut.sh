@@ -14,13 +14,12 @@ cd $BUILDDIR
 #LSB_RELEASE=$(lsb_release -rs)
 #if [ $(echo "$LSB_RELEASE >= 14.04" | bc -l) ]; then
 	echo "Upgrading build scripts for Ubuntu 14 and above..." 
-	autoreconf -vif --warnings=cross
-	echo "done"
+	autoreconf -vif
+	echo "done $?"
 #fi
 
-echo "Additional config parameters : $3"
 
-./configure "$3"
+./configure 
 
 make clean
 make -j8

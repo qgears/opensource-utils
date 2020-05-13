@@ -30,7 +30,7 @@ gnu_c: freeglut
 	cp -f $(OUTPUTDIR)/$(SO_NAME) $(OUTPUTDIR)/$(SO_GENERIC_NAME)
 
 freeglut: init
-	/bin/sh buildfreeglut.sh $(FREEGLUT_BUILDDIR) $(FREEGLUT_BINDIR)
+	./buildfreeglut.sh $(FREEGLUT_BUILDDIR) $(FREEGLUT_BINDIR)
 	
 init:
 FREEGLUT_BUILDDIR := $(shell mktemp -d /tmp/freeglut_XXXXXX)
