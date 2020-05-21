@@ -3,11 +3,15 @@
 		Generate jni header
 	</description>
 	<target name="jnigen">
+        <mkdir dir="/tmp/jni-tmp"/>
 		<javac 
+			includeantruntime="false"
+			destdir="/tmp/jni-tmp"
 			srcdir="../src/hu/qgears/shm"
 			includes="SharedMemoryNative.java dlmalloc/DlMallocPoolNative.java sem/SemaphoreNative.java part/PartNativeMemoryNative.java"
 			classpath="../bin:../../hu.qgears.commons/bin/"
 			nativeheaderdir="./"
 			/>
+        <delete dir="/tmp/jni-tmp"/>
 	</target>
 </project>

@@ -30,11 +30,16 @@
 	
 	<target name="jnigen">
 		<mkdir dir="generated"/>
-		<javac srcdir="../src/hu/qgears/opengl/glut"
+		<mkdir dir="/tmp/jni-tmp"/>
+		<javac
+			includeantruntime="false"
+			destdir="/tmp/jni-tmp"
+			srcdir="../src/hu/qgears/opengl/glut"
 			includes="Glut.java"
 			classpath="../bin"
 			nativeheaderdir="./generated"
 			/>
+		<delete dir="/tmp/jni-tmp"/>
 	</target>
 
 </project>
