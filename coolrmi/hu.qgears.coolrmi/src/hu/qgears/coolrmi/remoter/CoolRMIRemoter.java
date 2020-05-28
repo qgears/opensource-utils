@@ -63,6 +63,10 @@ abstract public class CoolRMIRemoter extends GenericCoolRMIRemoter
 			((ExecutorService) serverSideExecutor).shutdown();
 		}
 	}
+	public IConnection getConnection()
+	{
+		return sock;
+	}
 	@Override
 	public void execute(Runnable runnable) {
 		serverSideExecutor.execute(runnable);
