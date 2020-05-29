@@ -10,6 +10,7 @@ import hu.qgears.sdlwindow.natives.SdlWindowAccessor;
  */
 public class SdlWindow {
 	static volatile SdlWindowNative n;
+	private SdlWindowEventParser eventParser;
 	public static void loadNatives()
 	{
 		synchronized (SdlWindow.class) {
@@ -23,6 +24,7 @@ public class SdlWindow {
 	}
 	public SdlWindow() {
 		loadNatives();
+		eventParser=new SdlWindowEventParser();
 	}
 	public void updateFrame(NativeImage im) {
 		if(ENativeImageComponentOrder.ARGB!=im.getComponentOrder())
@@ -31,13 +33,25 @@ public class SdlWindow {
 		}
 		n.updateFrame(im.getBuffer().getJavaAccessor());
 	}
-	public boolean processEvents() {
-		return n.processEvents();
+	public void processEvents() {
+		
+		while(n.pollEvent(eventParser.eventBuffer))
+		{
+			try {
+				eventParser.parse();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 	public void openWindow(int width, int h, String windowName) {
 		n.openWindow(width, h, windowName);
 	}
 	public void closeWindow() {
 		n.closeWindow();
+	}
+	public SdlWindowEventParser getEventParser() {
+		return eventParser;
 	}
 }

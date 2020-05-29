@@ -3,6 +3,7 @@ package hu.qgears.opengl.osmesa;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.GLContext;
 
+import hu.qgears.commons.UtilEventListener;
 import hu.qgears.commons.mem.DefaultJavaNativeMemoryAllocator;
 import hu.qgears.images.ENativeImageComponentOrder;
 import hu.qgears.images.NativeImage;
@@ -11,9 +12,9 @@ import hu.qgears.opengl.commons.IGlContextProvider;
 import hu.qgears.opengl.commons.UtilGl;
 import hu.qgears.opengl.commons.input.IKeyboard;
 import hu.qgears.opengl.commons.input.IMouse;
-import hu.qgears.opengl.commons.input.MouseImplCallback;
 import hu.qgears.opengl.glut.KeyboardImplGlut;
 import hu.qgears.sdlwindow.SdlWindow;
+import hu.qgears.sdlwindow.SdlWindowEventParser;
 import lwjgl.standalone.BaseAccessor;
 
 public class GlContextProviderOsMesaSdl implements IGlContextProvider {
@@ -23,6 +24,8 @@ public class GlContextProviderOsMesaSdl implements IGlContextProvider {
 	IMouse mouse;
 	SdlWindow window;
 	NativeImage frameBuffer;
+	private boolean closeRequested=false;
+
 	@Override
 	public void loadNatives() {
 		OSMesaInstance.getInstance();
@@ -40,7 +43,6 @@ public class GlContextProviderOsMesaSdl implements IGlContextProvider {
 	public void init() {
 		System.out.println("OSMesa Inited Thread: "+Thread.currentThread().getId());
 		keyboard=new KeyboardImplGlut();
-		mouse=new MouseImplCallback();
 	}
 
 	@Override
@@ -53,13 +55,26 @@ public class GlContextProviderOsMesaSdl implements IGlContextProvider {
 		osMesa.makeCurrent(frameBuffer);
 		GLContext.useContext(osMesa);
 		window=new SdlWindow();
+		mouse=window.getEventParser().mouse;
+		window.getEventParser().windowEvent.addListener(new UtilEventListener<SdlWindowEventParser>() {
+			
+			@Override
+			public void eventHappened(SdlWindowEventParser msg) {
+				switch (msg.type) {
+				case windowCloseRequest:
+					closeRequested=true;
+					break;
+
+				default:
+					break;
+				}
+			}
+		});
 		window.openWindow(size.getWidth(), size.getHeight(), initTitle);
 	}
-
 	@Override
 	public boolean isCloseRequested() {
-		// TODO Auto-generated method stub
-		return false;
+		return closeRequested;
 	}
 
 	@Override

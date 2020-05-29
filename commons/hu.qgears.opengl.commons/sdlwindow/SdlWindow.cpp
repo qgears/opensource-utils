@@ -44,19 +44,41 @@ METHODPREFIX(CLASS, void, init)(ST_ARGS)
     atexit( SDL_Quit );
 }
 
-METHODPREFIX(CLASS, jboolean, processEvents)(ST_ARGS)
+METHODPREFIX(CLASS, jboolean, pollEvent)(ST_ARGS, jobject eventBuffer)
 {
-        SDL_Event event;
-        while( SDL_PollEvent( &event ) )
-        {
-            if( ( SDL_QUIT == event.type ) ||
-                ( SDL_KEYDOWN == event.type && SDL_SCANCODE_ESCAPE == event.key.keysym.scancode ) )
-            {
-                running = false;
-                break;
-            }
-        }
-        return running;
+    uint32_t * data = (uint32_t *) env->GetDirectBufferAddress(eventBuffer);
+    uint32_t capacity = env->GetDirectBufferCapacity(eventBuffer);
+    SDL_Event event;
+    if( SDL_PollEvent( &event ) )
+    {
+    	switch(event.type)
+    	{
+    		case SDL_QUIT:
+    			data[0]=1;
+		        return true;
+    		case SDL_KEYDOWN:
+    			break;
+    			
+    		case SDL_MOUSEMOTION:
+    			//event.SDL_MouseMotionEvent.
+//    			printf("Mouse motion\n");
+ //   			fflush(stdout);
+    			break;
+    		case SDL_MOUSEBUTTONDOWN:
+    			data[0]=2;
+    			data[1]=event.button.x;
+    			data[2]=event.button.y;
+    			return true;
+    		case SDL_MOUSEBUTTONUP:
+    			data[0]=3;
+    			data[1]=event.button.x;
+    			data[2]=event.button.y;
+    			return true;
+    		// e->type == SDL_MOUSEMOTION || e->type == SDL_MOUSEBUTTONDOWN || e->type == SDL_MOUSEBUTTONUP
+             //( SDL_KEYDOWN == event.type && SDL_SCANCODE_ESCAPE == event.key.keysym.scancode ) )
+    	}
+    }
+    return false;
 }
 METHODPREFIX(CLASS, void, drawExample)(ST_ARGS, jobject textureBuffer)
 {

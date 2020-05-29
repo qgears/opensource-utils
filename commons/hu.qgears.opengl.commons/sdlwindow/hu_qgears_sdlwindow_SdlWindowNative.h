@@ -49,11 +49,11 @@ JNIEXPORT void JNICALL Java_hu_qgears_sdlwindow_SdlWindowNative_closeWindow
 
 /*
  * Class:     hu_qgears_sdlwindow_SdlWindowNative
- * Method:    processEvents
- * Signature: ()Z
+ * Method:    pollEvent
+ * Signature: (Ljava/nio/ByteBuffer;)Z
  */
-JNIEXPORT jboolean JNICALL Java_hu_qgears_sdlwindow_SdlWindowNative_processEvents
-  (JNIEnv *, jobject);
+JNIEXPORT jboolean JNICALL Java_hu_qgears_sdlwindow_SdlWindowNative_pollEvent
+  (JNIEnv *, jobject, jobject);
 
 #ifdef __cplusplus
 }

@@ -13,5 +13,10 @@ public class SdlWindowNative {
 	protected native void drawExample(ByteBuffer pixelBuffer);
 	protected native void updateFrame(ByteBuffer pixelBuffer);
 	protected native void closeWindow();
-	protected native boolean processEvents();
+	/**
+	 * Read an event into the buffer.
+	 * @param event
+	 * @return false means there is no event in the queue. true means one event was read into the buffer.
+	 */
+	protected native boolean pollEvent(ByteBuffer event);
 }
