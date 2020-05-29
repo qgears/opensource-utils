@@ -177,6 +177,24 @@ public class NativeImage extends AbstractReferenceCountedDisposeable
 		return new NativeImage(buffer, size, componentOrder, alignment);
 	}
 	/**
+	 * Create a native image that has the specified size, component order 
+	 * and alignment.
+	 * @param size
+	 * @param componentOrder
+	 * @param mem
+	 * @param step
+	 * @return
+	 */
+	public static NativeImage create(
+			SizeInt size,
+			ENativeImageComponentOrder componentOrder, INativeMemory mem, int step)
+	{
+		int alignment=step%4==0?4:0;
+		NativeImage ret=new NativeImage(mem, size, componentOrder, alignment);
+		ret.step=step;
+		return ret;
+	}
+	/**
 	 * Get the length of a line of the image data in bytes.
 	 * @param width width of the image in pixels
 	 * @param co pixel data format
@@ -321,12 +339,34 @@ public class NativeImage extends AbstractReferenceCountedDisposeable
 			nbuffer.put(pos+2, (byte)b);
 			nbuffer.put(pos+3, (byte)a);
 			break;
+		case ARGB:
+			nbuffer.put(pos  , (byte)a);
+			nbuffer.put(pos+1,(byte)r);
+			nbuffer.put(pos+2, (byte)g);
+			nbuffer.put(pos+3, (byte)b);
+			break;
 		case MONO:
 			nbuffer.put(pos, (byte)((b+g+r)/3));
+			break;
+		case BIM:
+			nbuffer.put(pos, (byte)a);
+			nbuffer.put(pos+1, (byte)r);
+			nbuffer.put(pos+2, (byte)g);
+			nbuffer.put(pos+3, (byte)b);
 			break;
 		default:
 			throw new RuntimeException("Unknown component order: "+componentOrder);
 		}
+	}
+	/**
+	 * JavaFX image compatible argb format.
+	 * PixelFormat.Type INT_ARGB
+	 * @return
+	 */
+	public int getArgb(int i, int j)
+	{
+		int ret=getPixel(i, j);
+		return Integer.rotateRight(ret, 8);
 	}
 	/**
 	 * Get pixel color in RGBA encoding.
@@ -377,6 +417,12 @@ public class NativeImage extends AbstractReferenceCountedDisposeable
 			r = g;
 			b = g;
 			a=255;
+			break;
+		case BIM:
+			r=nbuffer.get(pos+1);
+			g=nbuffer.get(pos+2);
+			b=nbuffer.get(pos+3);
+			a=nbuffer.get(pos);
 			break;
 		default:
 			throw new RuntimeException("Unknown component order: "+componentOrder);

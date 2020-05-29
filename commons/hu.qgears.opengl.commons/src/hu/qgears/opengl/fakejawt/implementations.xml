@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<natives-def>
+	<filter property="os.name" regex="Linux">
+		<preload fileName="libjawt.so" resource="libjawt-${osrelease.ID}-${osrelease.VERSION_ID}-${processed.arch}.so"/>
+	</filter>
+</natives-def>

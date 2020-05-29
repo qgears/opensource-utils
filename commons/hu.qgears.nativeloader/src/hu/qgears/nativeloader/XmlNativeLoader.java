@@ -7,19 +7,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Properties;
-import java.util.Set;
-import java.util.Stack;
 
-import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.helpers.XMLReaderFactory;
 
 /**
@@ -181,8 +173,11 @@ public abstract class XmlNativeLoader implements INativeLoader {
 				/* Postprocessing: removing quotation marks from VERSION_ID */
 				final String osVersionIdRaw = osReleaseProperties.getProperty(
 						OS_RELEASE_PROPNAME_VERSION_ID);
-				osReleaseProperties.put(OS_RELEASE_PROPNAME_VERSION_ID, 
+				if(osVersionIdRaw!=null)
+				{
+					osReleaseProperties.put(OS_RELEASE_PROPNAME_VERSION_ID, 
 						osVersionIdRaw.replaceAll("[\"]", ""));
+				}
 			} catch (final IOException e) {
 				throw new NativeLoadException("Exception while attempting "
 						+ "to load Linux distribution version information "
@@ -224,35 +219,31 @@ public abstract class XmlNativeLoader implements INativeLoader {
 				if (linuxDistroIdCond != null) {
 					final String distroId = osReleaseProperties.getProperty(
 							OS_RELEASE_PROPNAME_ID);
-					
-					match &= distroId.matches(linuxDistroIdCond);
+					match &= match(distroId, linuxDistroIdCond);
 				}
 				
 				if (linuxDistroVersionCond != null) {
 					final String versionId = osReleaseProperties.getProperty(
 							OS_RELEASE_PROPNAME_VERSION_ID);
-					
-					match &= versionId.matches(linuxDistroVersionCond);
+					if(versionId!=null)
+					{
+						match &= versionId.matches(linuxDistroVersionCond);
+					}
 				}
 			}
 			
 			return match;
 		}
 		
-		/**
-		 * @return the arch
-		 */
-		public String getArch() {
-			return arch;
+		private boolean match(String value, String pattern) {
+			if(value==null)
+			{
+				return false;
+			}else
+			{
+				return value.matches(pattern);
+			}
 		}
-
-		/**
-		 * @return the os
-		 */
-		public String getOs() {
-			return os;
-		}
-		
 	}
 	
 	@Override
@@ -271,6 +262,6 @@ public abstract class XmlNativeLoader implements INativeLoader {
 		} catch (IOException e) {
 			throw new NativeLoadException(e);
 		}
-		return new NativesToLoad(handler.getNatives(), handler.sources);
+		return new NativesToLoad(handler.getPreloads(), handler.getNatives(), handler.sources);
 	}
 }

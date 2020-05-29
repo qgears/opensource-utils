@@ -2,6 +2,7 @@
 #define METHODPREFIX_INTERNAL(JNICLASS, PARAMTYPE, METHODNAME) JNIEXPORT PARAMTYPE JNICALL \
 	JNICLASS ## METHODNAME
 #define ST_ARGS JNIEnv * env, jobject obj
+#define ST_ARGS_STATIC JNIEnv * env, jclass cla
 
 jfieldID getLongFieldId(ST_ARGS, const char * fieldName);
 void * getStruct(ST_ARGS, const char * fieldName);

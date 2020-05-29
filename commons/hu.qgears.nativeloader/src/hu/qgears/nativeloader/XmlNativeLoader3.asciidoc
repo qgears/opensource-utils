@@ -69,9 +69,18 @@ Or a Windows dll:
 </natives-def>
 ----
 
+== lib element
+
+ * resource: The local path of the file to load from the Java class resources
+ * installPath: The global path where the file is loaded from in case it was installed onto the computer. 
+ * id identifier of a library: if multiple libs with similar id are found then only the first is loaded. (This can be used to have a fallback library when no specific library could be loaded.)
+
 == Filters
 
 The nodes in the XML file are traversed. Subtrees can be filtered for processing using filter expressions:
+
+property name is used as key from System.getProperty() function.
+Properties with prefix "osrelease." access /etc/os-release properties.
 
 TODO implement and test filters
 

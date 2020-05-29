@@ -102,4 +102,24 @@ public class UtilSwing {
 			throw new RuntimeException("Unknown buffered image type: "+bufferedImage.getType());
 		}
 	}
+	/**
+	 * Convert a {@link NativeImage} to a {@link BufferedImage}.
+	 */
+	public static BufferedImage nativeImageToBufferedImage(NativeImage im)
+	{
+		BufferedImage ret=new BufferedImage(im.getWidth(), im.getHeight(), BufferedImage.TYPE_INT_ARGB);
+		DataBufferInt bufferedImageDataByte = (DataBufferInt)ret.getRaster().getDataBuffer();
+		int[] data=bufferedImageDataByte.getData();
+		int w=im.getWidth();
+		int h=im.getHeight();
+		int ctr=0;
+		for(int j=0;j<h; j++)
+		{
+			for(int i=0;i<w; i++)
+			{
+				data[ctr++]=im.getArgb(i, j);
+			}
+		}
+		return ret;
+	}
 }

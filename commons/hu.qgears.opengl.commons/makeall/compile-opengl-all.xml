@@ -1,0 +1,14 @@
+<project name="generate" default="make-c" basedir=".">
+	<description>
+		Compile native library.
+		Dependencies:
+	</description>
+	<target name="make-c" depends="jnigen">
+		<exec dir="./" executable="make">
+			<env key="ARCHPOSTFIX" value="amd64"/>
+		</exec>
+	</target>
+	<target name="jnigen">
+		<!-- TODO call jnigen of all -->
+	</target>
+</project>

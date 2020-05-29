@@ -4,9 +4,9 @@ import hu.qgears.images.NativeImage;
 
 /**
  * Snapshot of the VNC client.
- * @author rizsi
  */
-public class VncSnapShot {
+public class VncSnapShot implements AutoCloseable
+{
 	private VNCClient client;
 	/**
 	 * Constructor should only be called by the VNC client implementation.
@@ -22,7 +22,7 @@ public class VncSnapShot {
 	}
 	/**
 	 * This is the snapshot image of the VNC client. Its data will not be updated
-	 * (by the VNC client implementation) until this snapshot object is freed.
+	 * (by the VNC client implementation) until this snapshot object is closed.
 	 * 
 	 * The image reference may be null until the client did not receive the first image
 	 * from the VNC server so the code using this class must check it for null.
@@ -41,8 +41,8 @@ public class VncSnapShot {
 	 * Free this snapshot. The image is not locked any longer, VNC client can update
 	 * it.
 	 */
-	public void free()
-	{
+	@Override
+	public void close() throws Exception {
 		client.released();
 	}
 }

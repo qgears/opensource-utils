@@ -25,17 +25,31 @@ public class ProgressCounter
 		 */
 		void setProgressStatus(String name, double current);
 	}
+	/**
+	 * Extended callback interface to update the progress GUI.
+	 */
+	public interface IProgressCounterHost2 extends IProgressCounterHost
+	{
+		/**
+		 * Called when the progress has finsihed.
+		 */
+		void progressFinished();
+	}
 	private volatile boolean cancelled=false;
+	private volatile String currentProcessName;
+	private volatile double currentProgress;
+	private volatile boolean finished=false;
 	private IProgressCounterHost host;
 	private Stack<ProgressCounterSubTask> tasks=new Stack<ProgressCounterSubTask>();
 	private static ThreadLocal<ProgressCounter> threadProgess=new ThreadLocal<ProgressCounter>();
 	/**
 	 * Create a progress meter.
-	 * @param host callback that updates progress GUI.
+	 * @param host callback that updates progress GUI. null is allowed
 	 * @param name Name of the whole task that is followed by the progress bar.
 	 */
 	public ProgressCounter(IProgressCounterHost host, String name) {
 		this.host=host;
+		currentProcessName=name;
 		tasks.add(new ProgressCounterSubTask(this, null, name, 1.0));
 	}
 	public void setCurrent()
@@ -45,6 +59,14 @@ public class ProgressCounter
 	public void close()
 	{
 		threadProgess.set(null);
+		finished=true;
+		currentProcessName="Finished";
+		currentProgress=1.0;
+		if(host instanceof IProgressCounterHost2)
+		{
+			((IProgressCounterHost2)host).progressFinished();
+		}
+		host=null;
 	}
 	public boolean isCancelled()
 	{
@@ -84,13 +106,16 @@ public class ProgressCounter
 			}
 			ProgressCounterSubTask parent=tasks.peek();
 			ProgressCounterSubTask whole=tasks.get(0);
+			String currentProcessName=parent.getName();
+			double currentProgress=whole.getCurrent();
+			this.currentProcessName=currentProcessName;
+			this.currentProgress=currentProgress;
 			if(host!=null)
 			{
-				host.setProgressStatus(parent.getName(), whole.getCurrent());
+				host.setProgressStatus(currentProcessName, currentProgress);
 			}
 		}
 	}
-
 	/**
 	 * Create a subtask in the progress.
 	 * 
@@ -117,5 +142,27 @@ public class ProgressCounter
 			host.setProgressStatus(ret.getName(), whole.getCurrent());
 		}
 		return ret;
+	}
+	/**
+	 * Get the current progress state of this counter.
+	 * @return the current progress state of this counter.
+	 */
+	public double getCurrentProgress()
+	{
+		return currentProgress;
+	}
+	/**
+	 * Get the current process name of this counter.
+	 * @return the current process name of this counter.
+	 */
+	public String getCurrentProcessName() {
+		return currentProcessName;
+	}
+	/**
+	 * Get the fnished state of this counter.
+	 * @return true means this process is finished.
+	 */
+	public boolean isFinished() {
+		return finished;
 	}
 }

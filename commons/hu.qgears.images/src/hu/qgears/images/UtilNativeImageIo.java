@@ -30,6 +30,18 @@ public class UtilNativeImageIo {
 	 * The header size of the custom QIMG image format.
 	 */
 	private static int headerSize=24;
+	public static interface IImageCompareListener
+	{
+		void differentPixel(int x, int y, int colA, int colB);
+
+		public void differentComponentOrder(ENativeImageComponentOrder componentOrder,
+				ENativeImageComponentOrder componentOrder2);
+
+		public void differentAlphaStorageFormat(ENativeImageAlphaStorageFormat alphaStorageFormat,
+				ENativeImageAlphaStorageFormat alphaStorageFormat2);
+
+		public void differentSize(SizeInt size, SizeInt size2);
+	}
 	
 	private UtilNativeImageIo() {
 		// disable constructor of utility class
@@ -361,6 +373,39 @@ public class UtilNativeImageIo {
 			}
 		}
 		return null;
+	}
+	/**
+	 * Compare two images if they are equal or not.
+	 * 
+	 * @param imSrc first image to be compared
+	 * @param imOut second image to be compared
+	 * @param differenceListener this listener is called for each pixel difference found.
+	 */
+	public static void compareImages(NativeImage imSrc, NativeImage imOut, IImageCompareListener li) {
+		if(!imSrc.getComponentOrder().equals(imOut.getComponentOrder()))
+		{
+			li.differentComponentOrder(imSrc.getComponentOrder(), imOut.getComponentOrder());
+		}
+		if(!imSrc.getAlphaStorageFormat().equals(imOut.getAlphaStorageFormat()))
+		{
+			li.differentAlphaStorageFormat(imSrc.getAlphaStorageFormat(), imOut.getAlphaStorageFormat());
+		}
+		if(!imSrc.getSize().equals(imOut.getSize()))
+		{
+			li.differentSize(imSrc.getSize(), imOut.getSize());
+			return;
+		}
+		SizeInt s=imSrc.getSize();
+		for(int y=0;y<s.getHeight();++y) {
+			for(int x=0;x<s.getWidth();++x) {
+				int colA=imSrc.getPixel(x, y);
+				int colB=imOut.getPixel(x, y);
+				if(colA!=colB)
+				{
+					li.differentPixel(x, y, colA, colB);
+				}
+			}
+		}
 	}
 	
 	public static int unsignedByteToInt(byte b) {
