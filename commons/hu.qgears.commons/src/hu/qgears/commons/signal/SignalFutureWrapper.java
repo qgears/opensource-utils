@@ -2,6 +2,7 @@ package hu.qgears.commons.signal;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -20,8 +21,9 @@ import hu.qgears.commons.INamed;
  *
  * @param <T>
  */
-public class SignalFutureWrapper<T> implements SignalFuture<T>, INamed
+public class SignalFutureWrapper<T> implements SignalFuture<T>, Callable<T>, INamed
 {
+	private Callable<T> callable;
 	private Throwable exc;
 	private boolean done;
 	private boolean cancelled;
@@ -65,9 +67,19 @@ public class SignalFutureWrapper<T> implements SignalFuture<T>, INamed
 		return finishedNow;
 	}
 
+	public SignalFutureWrapper(Callable<T> callable, String name) {
+		super();
+		this.callable = callable;
+		this.name=name;
+	}
+
 	public SignalFutureWrapper(String name) {
 		super();
 		this.name=name;
+	}
+	public SignalFutureWrapper(Callable<T> callable) {
+		super();
+		this.callable = callable;
 	}
 
 	public SignalFutureWrapper() {
@@ -141,6 +153,22 @@ public class SignalFutureWrapper<T> implements SignalFuture<T>, INamed
 			}
 		}
 		listener.signal(this);
+	}
+	@Override
+	public T call() {
+		if(!isCancelled())
+		{
+			try {
+				T ret=callable.call();
+				ready(ret, null);
+			} catch (Exception e) {
+				ready(null, e);
+			}
+		}else
+		{
+			ready(null, new RuntimeException("callable cancelled before execution"));
+		}
+		return ret;
 	}
 
 	@Override

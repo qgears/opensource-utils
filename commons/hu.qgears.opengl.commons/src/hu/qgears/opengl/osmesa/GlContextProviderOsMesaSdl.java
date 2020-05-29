@@ -8,6 +8,7 @@ import hu.qgears.images.ENativeImageComponentOrder;
 import hu.qgears.images.NativeImage;
 import hu.qgears.images.SizeInt;
 import hu.qgears.opengl.commons.IGlContextProvider;
+import hu.qgears.opengl.commons.UtilGl;
 import hu.qgears.opengl.commons.input.IKeyboard;
 import hu.qgears.opengl.commons.input.IMouse;
 import hu.qgears.opengl.commons.input.MouseImplCallback;
@@ -27,6 +28,7 @@ public class GlContextProviderOsMesaSdl implements IGlContextProvider {
 		OSMesaInstance.getInstance();
 		BaseAccessor.initLwjglNatives();
 		SdlWindow.loadNatives();
+		UtilGl.flipY=true;
 	}
 
 	@Override

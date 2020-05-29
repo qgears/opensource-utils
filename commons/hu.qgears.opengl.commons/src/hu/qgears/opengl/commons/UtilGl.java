@@ -37,6 +37,10 @@ public class UtilGl {
 	// will be populated by extensionExists()
 	private HashMap<String, String> OpenGLextensions;
 	/**
+	 * Flip rendering Y.
+	 */
+	public static boolean flipY=false;
+	/**
 	 * Return true if the OpenGL context supports the given OpenGL extension.
 	 */
 	public boolean extensionExists(String extensionName) {
@@ -692,6 +696,10 @@ public class UtilGl {
 		if(scale!=null)
 		{
 			GL11.glScalef(scale.x, scale.y, scale.z);
+		}
+		if(flipY)
+		{
+			GL11.glScalef(1, -1, 1);
 		}
 		// We have to push the layer backwards so we form a
 		// equal side triangle

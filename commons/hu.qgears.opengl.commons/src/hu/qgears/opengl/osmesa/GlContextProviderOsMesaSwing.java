@@ -22,6 +22,7 @@ import hu.qgears.images.ENativeImageComponentOrder;
 import hu.qgears.images.NativeImage;
 import hu.qgears.images.SizeInt;
 import hu.qgears.opengl.commons.IGlContextProvider;
+import hu.qgears.opengl.commons.UtilGl;
 import hu.qgears.opengl.commons.input.EMouseButton;
 import hu.qgears.opengl.commons.input.IKeyboard;
 import hu.qgears.opengl.commons.input.IMouse;
@@ -55,6 +56,7 @@ public class GlContextProviderOsMesaSwing implements IGlContextProvider {
 	public void loadNatives() {
 		OSMesaInstance.getInstance();
 		BaseAccessor.initLwjglNatives();
+		UtilGl.flipY=true;
 	}
 
 	@Override

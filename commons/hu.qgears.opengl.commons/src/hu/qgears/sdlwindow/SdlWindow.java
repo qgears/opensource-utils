@@ -25,7 +25,7 @@ public class SdlWindow {
 		loadNatives();
 	}
 	public void updateFrame(NativeImage im) {
-		if(ENativeImageComponentOrder.BGRA!=im.getComponentOrder())
+		if(ENativeImageComponentOrder.ARGB!=im.getComponentOrder())
 		{
 			throw new IllegalArgumentException("Image format not supported: "+im.getComponentOrder());
 		}

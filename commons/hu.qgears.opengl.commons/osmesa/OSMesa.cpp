@@ -24,7 +24,7 @@ static void * lib_gl_handle = NULL;
 METHODPREFIX(CLASS, void, execPreload)(ST_ARGS_STATIC)
 {
 	printf("execPreload\n");
-	putenv("LD_LIBRARY_PATH=/home/rizsi/git-qgears/fos/opensource-utils/commons/hu.qgears.opengl.commons/src/hu/qgears/opengl/osmesa/");
+//	putenv("LD_LIBRARY_PATH=/home/rizsi/git-qgears/fos/opensource-utils/commons/hu.qgears.opengl.commons/src/hu/qgears/opengl/osmesa/");
 	lib_gl_handle = dlopen("libGL.so.1", RTLD_LAZY | RTLD_GLOBAL);
 //	if (lib_gl_handle == NULL) {
 //		fprintf(stderr, "OSMesa preload - Error loading libGL.so.1: %s\n", dlerror());

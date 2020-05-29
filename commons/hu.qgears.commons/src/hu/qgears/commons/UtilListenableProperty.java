@@ -11,7 +11,7 @@ package hu.qgears.commons;
  */
 public class UtilListenableProperty<T> {
 	private T property;
-	private UtilEvent<T> propertyChangedEvent=new UtilEvent<T>(); 
+	private final UtilEvent<T> propertyChangedEvent=new UtilEvent<T>(); 
 	
 	public UtilListenableProperty() {
 		super();

@@ -11,8 +11,7 @@
 using namespace std;
 
 static SDL_Window* window;
-static SDL_Renderer* renderer;
-static SDL_Texture* texture;
+static SDL_Surface *screen; // even with SDL2, we can still bring ancient code back
 static bool firstFrame = true;
 static bool running = true;
 static int texWidth;
@@ -36,41 +35,8 @@ METHODPREFIX(CLASS, void, openWindow)(ST_ARGS, jint w, jint h, jstring windowNam
         SDL_WINDOW_HIDDEN
         );
 	env->ReleaseStringUTFChars(windowName,str);
-
-    renderer = SDL_CreateRenderer
-        (
-        window,
-        -1,
-        SDL_RENDERER_SOFTWARE|SDL_RENDERER_PRESENTVSYNC
-        );
-    if(renderer==NULL)
-    {
-    }
-        
-    SDL_RendererInfo info;
-    SDL_GetRendererInfo( renderer, &info );
-    cout << "Renderer name: " << info.name << endl;
-    cout << "Texture formats: " << endl;
-    if(info.num_texture_formats<0)
-    {
-     info.num_texture_formats=0;
-    }
-    if(info.num_texture_formats>100)
-    {
-     info.num_texture_formats=100;
-    }
-    for( Uint32 i = 0; i < info.num_texture_formats; i++ )
-    {
-        cout << SDL_GetPixelFormatName( info.texture_formats[i] ) << endl;
-    }
-
-    texture = SDL_CreateTexture
-        (
-        renderer,
-        SDL_PIXELFORMAT_ARGB8888,
-        SDL_TEXTUREACCESS_STREAMING,
-        texWidth, texHeight
-        );
+	// instead of creating a renderer, we can draw directly to the screen
+    screen = SDL_GetWindowSurface(window);
 }
 METHODPREFIX(CLASS, void, init)(ST_ARGS)
 {
@@ -120,35 +86,19 @@ METHODPREFIX(CLASS, void, updateFrame)(ST_ARGS, jobject textureBuffer)
     uint8_t * data = (uint8_t *) env->GetDirectBufferAddress(textureBuffer);
     uint32_t capacity = env->GetDirectBufferCapacity(textureBuffer);
 
-	if(capacity<texWidth*texHeight*4)
-	{
-		cerr << "Texture buffer size too small: " << capacity << " required min: " << (texWidth*texHeight*4);
-		return;
-	}
-
-//      SDL_SetRenderDrawColor( renderer, 0, 0, 0, SDL_ALPHA_OPAQUE );
-//      SDL_RenderClear( renderer );
-
-        SDL_UpdateTexture
-            (
-            texture,
-            NULL,
-            data,
-            texWidth * 4
-            );
-
-        SDL_RenderCopy( renderer, texture, NULL, NULL );
-        SDL_RenderPresent( renderer );
-        if(firstFrame)
-        {
-        	SDL_ShowWindow(window); // Show the window when the first content is already rendered.
-        }
+	SDL_Surface *surf =	SDL_CreateRGBSurfaceWithFormatFrom(data, texWidth, texHeight, 32, texWidth*4, SDL_PIXELFORMAT_BGRA8888);
+    SDL_BlitSurface(surf, NULL, screen, NULL); // blit it to the screen
+    SDL_FreeSurface(surf);
+    SDL_UpdateWindowSurface(window);
+    if(firstFrame)
+    {
+     	SDL_ShowWindow(window); // Show the window when the first content is already rendered.
+    }
     firstFrame = false;
 }
 
 METHODPREFIX(CLASS, void, closeWindow)(ST_ARGS)
 {
-    SDL_DestroyRenderer( renderer );
     SDL_DestroyWindow( window );
     SDL_Quit();
 }
