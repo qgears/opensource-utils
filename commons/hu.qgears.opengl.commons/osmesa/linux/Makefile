@@ -11,4 +11,5 @@ gnu_c:
 	${JNI_INCLUDE} -Wl,-soname,libqosmesa.so \
 	../OSMesa.cpp ../jniutil.cpp -lOSMesa
 	gcc -fPIC -shared ${JNI_INCLUDE} ../osmesapreload.c -o libGL.so.1
+	cp libGL.so.1 ../../src/hu/qgears/opengl/osmesa/libGL.so.1
 

@@ -2,8 +2,6 @@ package hu.qgears.opengl.osmesa;
 
 import hu.qgears.images.NativeImage;
 
-import java.nio.ByteBuffer;
-
 /**
  * Currently single instance is supported only!
  * 
@@ -14,11 +12,17 @@ import java.nio.ByteBuffer;
  *
  */
 public class OSMesa {
-	public native void createContext();
+	OSMesaNative n=new OSMesaNative();
+	public void createContext()
+	{
+		n.createContext();
+	}
 	public  void makeCurrent(NativeImage image)
 	{
-		makeCurrentPrivate(image.getBuffer().getJavaAccessor(), image.getSize().getWidth(), image.getSize().getHeight());
+		n.makeCurrentPrivate(image.getBuffer().getJavaAccessor(), image.getSize().getWidth(), image.getSize().getHeight());
 	}
-	private native void makeCurrentPrivate(ByteBuffer image, int width, int height);
-	public native void disposeContext();
+	public void disposeContext()
+	{
+		n.disposeContext();
+	}
 }

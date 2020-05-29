@@ -3,7 +3,7 @@
 // Compile:
 // gcc -fPIC -shared osmesapreload.c -o libGL.so.1
 // Use:
-// export LD_LIBRARY_PATH='pathtoosmesapreloadfolder'/linGL.so.1
+// export LD_LIBRARY_PATH='pathtoosmesapreloadfolder'/libGL.so.1
 // run the lwjgl application that uses osmesa
 
 #include <dlfcn.h>
@@ -25,6 +25,7 @@ static void * lib_gl_handle = NULL;
 // methods software implementation there and connects them to lwjgl
 void * glXGetProcAddressARB(const GLubyte * procName)
 {
+//	printf("OpenGL context query: %s\n", (char *)procName);
 	if(lib_gl_handle==NULL)
 	{
 		lib_gl_handle=dlopen("libOSMesa.so", RTLD_LAZY | RTLD_GLOBAL);
@@ -40,8 +41,8 @@ void * glXGetProcAddressARB(const GLubyte * procName)
 	void * ret=dlsym(RTLD_DEFAULT,procName);
 	if(ret==NULL)
 	{
-//		printf("Method missing: %s\n", procName);
-//		fflush(stdout);
+		// printf("ligGL.so - Method missing: %s\n", procName);
+		// fflush(stdout);
 	}
 	return ret;
 }

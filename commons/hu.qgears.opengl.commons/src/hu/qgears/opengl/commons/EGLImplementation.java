@@ -3,6 +3,8 @@ package hu.qgears.opengl.commons;
 import hu.qgears.opengl.glut.GLContextProviderGlut;
 import hu.qgears.opengl.lwjgl.GLContextProviderLwjgl;
 import hu.qgears.opengl.mirgl.GlContextProviderMirGl;
+import hu.qgears.opengl.osmesa.GlContextProviderOsMesaSdl;
+import hu.qgears.opengl.osmesa.GlContextProviderOsMesaSwing;
 import hu.qgears.opengl.x11.GlContextProviderX11;
 
 public enum EGLImplementation {
@@ -29,7 +31,21 @@ public enum EGLImplementation {
 		public IGlContextProvider createProvider() {
 			return new GlContextProviderMirGl();
 		}
+	},
+	/**
+	 * In-memory software rendering using OSMesa and show result in Swing window. 
+	 */
+	osmesaSwing{
+		@Override
+		public IGlContextProvider createProvider() {
+			return new GlContextProviderOsMesaSwing();
+		}
+	},
+	osmesaSdl{
+		@Override
+		public IGlContextProvider createProvider() {
+			return new GlContextProviderOsMesaSdl();
+		}
 	};
-
 	public abstract IGlContextProvider createProvider();
 }
