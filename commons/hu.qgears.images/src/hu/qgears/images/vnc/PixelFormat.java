@@ -100,9 +100,9 @@ public class PixelFormat {
 		}
 		if(bitsPerPixel==8 || bitsPerPixel==16 || bitsPerPixel==24 || bitsPerPixel==32)
 		{
-			readRedShift=16+8-getNBit(redMax);
+			readRedShift=0+8-getNBit(redMax);
 			readGreenShift=8+8-getNBit(greenMax);
-			readBlueShift=0+8-getNBit(blueMax);
+			readBlueShift=16+8-getNBit(blueMax);
 		}else
 		{
 			throw new RuntimeException("Unsupported bits per pixel: "+bitsPerPixel);

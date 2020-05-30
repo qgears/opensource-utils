@@ -23,6 +23,10 @@ import hu.qgears.images.SizeInt;
 
 /**
  * Simple VNC server implementation.
+ * Follows: https://tools.ietf.org/html/rfc6143
+ * RFB version RFB 003.008
+ * Not all features are supported.
+ * Proven to work together with VNC Viewer Free Edition 4.1.1 for X
  */
 public class VNCServer 
 {
