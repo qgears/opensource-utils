@@ -15,6 +15,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.log4j.Logger;
@@ -38,7 +39,7 @@ public class VNCClient {
 	private long retryTimeoutMillis=1000;
 	private LazyNativeImage image=new LazyNativeImage();
 	private LazyNativeImage nextImage=new LazyNativeImage();
-	private static final String versionString="RFB 003.008\n";
+	protected static final String versionString="RFB 003.008\n";
 	private String host="localhost";
 	private int port=5902;
 	private volatile int changeCounter=0;
@@ -195,7 +196,7 @@ public class VNCClient {
 		UtilChannel.readNBytes(channel, bb, 3); // padding
 		bb.flip();
 		// Received string is not used by us
-		readString(bb);
+		readString(channel, bb);
 	}
 	private void processBell(ByteBuffer bb) {
 		// Nothing to do, it is a single byte message :-)
@@ -337,16 +338,16 @@ public class VNCClient {
 		pixelFormat.parse(sendByteBuffer);
 		
 		// We don't need the name of the server
-		readString(sendByteBuffer);
+		readString(channel, sendByteBuffer);
 	}
-	private String readString(ByteBuffer bb) throws IOException
+	static protected String readString(SocketChannel sc, ByteBuffer bb) throws IOException
 	{
 		bb.clear();
-		UtilChannel.readNBytes(channel, bb, 4);
+		UtilChannel.readNBytes(sc, bb, 4);
 		bb.flip();
 		int l=bb.getInt();
 		bb.clear();
-		UtilChannel.readNBytes(channel, bb, l);
+		UtilChannel.readNBytes(sc, bb, l);
 		bb.flip();
 		return parseString(bb, l);
 	}
@@ -382,7 +383,7 @@ public class VNCClient {
 		int result=sendByteBuffer.getInt();
 		if(result!=0)
 		{
-			String s=readString(sendByteBuffer);
+			String s=readString(channel, sendByteBuffer);
 			throw new RuntimeException("Authentication error received from server: "+s);
 		}
 	}
@@ -396,7 +397,7 @@ public class VNCClient {
 		sendByteBuffer.flip();
 		UtilChannel.writeNBytes(channel, sendByteBuffer);
 	}
-	static private final String parseString(ByteBuffer params, int length)
+	static protected final String parseString(ByteBuffer params, int length)
 	{
 		byte[] bs=new byte[length];
 		params.get(bs);
@@ -410,7 +411,16 @@ public class VNCClient {
 		}
 		return new String(bs, 0, i, Charset.forName("UTF-8"));
 	}
-	private static final void writeString(ByteBuffer bb, String string, int length) {
+	protected static final void writeStringAndLength(ByteBuffer bb, String string) {
+		byte[] src=string.getBytes(StandardCharsets.UTF_8);
+		bb.putInt(src.length);
+		int i=0;
+		for(;i<src.length;++i)
+		{
+			bb.put(src[i]);
+		}
+	}
+	protected static final void writeString(ByteBuffer bb, String string, int length) {
 		byte[] bs=new byte[length];
 		byte[] src=string.getBytes(Charset.forName("UTF-8"));
 		int i=0;

@@ -19,6 +19,9 @@ public class PixelFormat {
 	public byte redShift;
 	public byte greenShift;
 	public byte blueShift;
+	public int readRedShift;
+	public int readGreenShift;
+	public int readBlueShift;
 	public byte padding0;
 	public byte padding1;
 	public byte padding2;
@@ -84,5 +87,66 @@ public class PixelFormat {
 		bb.put(padding0);
 		bb.put(padding1);
 		bb.put(padding2);
+	}
+	/**
+	 * Throw exception if can not handle this on server side.
+	 * Fill the shift and mask values
+	 */
+	public void validate()
+	{
+		if(bigEndianFlag!=0)
+		{
+			throw new RuntimeException("Unsupported endianness: "+bigEndianFlag);
+		}
+		if(bitsPerPixel==8 || bitsPerPixel==16 || bitsPerPixel==24 || bitsPerPixel==32)
+		{
+			readRedShift=16+8-getNBit(redMax);
+			readGreenShift=8+8-getNBit(greenMax);
+			readBlueShift=0+8-getNBit(blueMax);
+		}else
+		{
+			throw new RuntimeException("Unsupported bits per pixel: "+bitsPerPixel);
+		}
+	}
+	private int getNBit(short m) {
+		int v=2;
+		for(int i=1;i<9;++i)
+		{
+			if(m+1==v)
+			{
+				return i;
+			}
+			v*=2;
+		}
+		throw new RuntimeException();
+	}
+
+	public void encodeStrip(ByteBuffer sendByteBuffer, int step, ByteBuffer src, int x, int y, int w) {
+		int at=step*y+x*4;
+		int sendStep=bitsPerPixel/8;
+		int sendPosStart=sendByteBuffer.position();
+		int redShiftX=redShift+32-depth;
+		int greenShiftX=greenShift+32-depth;
+		int blueShiftX=blueShift+32-depth;
+		for(int i=0;i<w;++i)
+		{
+			int data=src.getInt(at);
+			int r=data;
+			int g=data;
+			int b=data;
+			r>>=readRedShift;
+			g>>=readGreenShift;
+			b>>=readBlueShift;
+			r&=redMax;
+			g&=greenMax;
+			b&=blueMax;
+			r<<=redShiftX;
+			g<<=greenShiftX;
+			b<<=blueShiftX;
+			int val=r|g|b;
+			sendByteBuffer.putInt(val);
+			sendByteBuffer.position(sendPosStart+sendStep*(i+1));
+			at+=4;
+		}
 	}
 }

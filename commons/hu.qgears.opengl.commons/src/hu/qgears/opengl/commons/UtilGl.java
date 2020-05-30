@@ -699,7 +699,7 @@ public class UtilGl {
 		}
 		if(flipY)
 		{
-			GL11.glScalef(1, -1, 1);
+			GL11.glScalef(1f, -1f, 1f);
 		}
 		// We have to push the layer backwards so we form a
 		// equal side triangle

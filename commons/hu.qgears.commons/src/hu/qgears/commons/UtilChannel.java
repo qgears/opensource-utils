@@ -54,6 +54,34 @@ public class UtilChannel {
 			}
 		}
 	}
+	/**
+	 * Read N bytes from a channel and append it to the byte buffer.
+	 * N is the current remaining bytes of the buffer.
+	 * @param channel should be in blocking mode
+	 * @param target
+	 * @param n
+	 * @throws IOException
+	 */
+	public static final void readNBytesAppend(ReadableByteChannel channel,
+			ByteBuffer target) throws IOException
+	{
+		while(target.hasRemaining())
+		{
+			int k=channel.read(target);
+			if(k<0)
+			{
+				throw new EOFException("Channel reached EOF");
+			}else if(k==0)
+			{
+				// Non-blocking channel?
+				try {
+					Thread.sleep(0, 10000);
+				} catch (InterruptedException e) {
+					LOG.error("ReadNBytes",e);
+				}
+			}
+		}
+	}
 	public static void writeNBytes(WritableByteChannel channel, ByteBuffer bb) throws IOException {
 		while(bb.hasRemaining())
 		{

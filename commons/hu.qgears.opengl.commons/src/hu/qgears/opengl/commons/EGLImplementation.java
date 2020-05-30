@@ -5,6 +5,7 @@ import hu.qgears.opengl.lwjgl.GLContextProviderLwjgl;
 import hu.qgears.opengl.mirgl.GlContextProviderMirGl;
 import hu.qgears.opengl.osmesa.GlContextProviderOsMesaSdl;
 import hu.qgears.opengl.osmesa.GlContextProviderOsMesaSwing;
+import hu.qgears.opengl.osmesa.GlContextProviderOsMesaVncServer;
 import hu.qgears.opengl.x11.GlContextProviderX11;
 
 public enum EGLImplementation {
@@ -45,6 +46,15 @@ public enum EGLImplementation {
 		@Override
 		public IGlContextProvider createProvider() {
 			return new GlContextProviderOsMesaSdl();
+		}
+	},
+	/**
+	 * In memory software rendering with a VNC server started.
+	 */
+	osmesaVncServer{
+		@Override
+		public IGlContextProvider createProvider() {
+			return new GlContextProviderOsMesaVncServer();
 		}
 	};
 	public abstract IGlContextProvider createProvider();
