@@ -1,0 +1,16 @@
+<project name="generate" default="make-c" basedir=".">
+	<description>
+		Compile native library.
+		Dependencies:
+	</description>
+	<target name="make-c" depends="jnigen">
+		<exec dir="./" executable="make"/>
+	</target>
+	<target name="jnigen">
+		<mkdir dir="generated"/>
+		<javah class="hu.qgears.opengl.kms.KMSNative"
+			classpath="../bin"
+			destdir="./generated"
+			/>
+	</target>
+</project>
