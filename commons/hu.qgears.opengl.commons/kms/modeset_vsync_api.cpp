@@ -120,6 +120,16 @@ struct modeset_buf * modeset_get_current_frontbuffer(struct modeset_dev * dev)
 {
 	return &(dev->bufs[dev->front_buf]);
 }
+int modeset_get_current_frontbuffer_index(struct modeset_dev * dev)
+{
+	return dev->front_buf;
+}
+
+struct modeset_buf * modeset_getBufferByIndex(struct modeset_dev * dev, uint32_t index)
+{
+	return &(dev->bufs[index]);
+}
+
 
 /*
  * modeset_prepare() stays the same.

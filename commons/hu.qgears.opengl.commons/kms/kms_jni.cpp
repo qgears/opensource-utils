@@ -10,19 +10,16 @@
 
 static modeset_t ms;
 
-METHODPREFIX(CLASS, jint, init)(ST_ARGS)
+METHODPREFIX(CLASS, jint, init)(ST_ARGS, jstring card)
 {
-	/* TODO parameter which DRM device to open and which to draw onto. */
-	const char *card="/dev/dri/card0";
-
-	if(modeset_init(&ms, card))
+	const char* str = env->GetStringUTFChars(card,0);
+	int ret=modeset_init(&ms, str);
+	env->ReleaseStringUTFChars(card,str);
+	if(ret)
 	{
 		return 1;
 	}
-	printf("Modesetinited\n");
-	fflush(stdout);
 	return 0;
-//	struct modeset_dev * dev=get_modeset_dev(&ms, 0);
 }
 
 METHODPREFIX(CLASS, jint, swapBuffers)(ST_ARGS, jint index)
@@ -32,15 +29,39 @@ METHODPREFIX(CLASS, jint, swapBuffers)(ST_ARGS, jint index)
 	return 0;
 }
 
-METHODPREFIX(CLASS, jobject, getCurrentBackBufferPtr)(ST_ARGS, jint index)
+METHODPREFIX(CLASS, jobject, getBufferPtr)(ST_ARGS, jint devIndex, jint bufferIndex)
 {
-	struct modeset_dev * dev=get_modeset_dev(&ms, index);
-	struct modeset_buf * buf=modeset_get_current_backbuffer(dev);
+	struct modeset_dev * dev=get_modeset_dev(&ms, devIndex);
+	struct modeset_buf * buf=modeset_getBufferByIndex(dev, bufferIndex);
 	jobject bb = env->NewDirectByteBuffer((void*) buf->map, buf->stride*buf->height);
 	return bb;
+}
+
+METHODPREFIX(CLASS, jint, getCurrentFrontBufferIndex)(ST_ARGS, jint devIndex)
+{
+	struct modeset_dev * dev=get_modeset_dev(&ms, devIndex);
+	int ret=modeset_get_current_frontbuffer_index(dev);
+	return ret;
 }
 
 METHODPREFIX(CLASS, void, dispose)(ST_ARGS)
 {
   modeset_dispose(&ms);
 }
+
+METHODPREFIX(CLASS, jint, getBufferParam)(ST_ARGS, jint devIndex, jint bufferIndex, jint paramIndex)
+{
+	struct modeset_dev * dev=get_modeset_dev(&ms, devIndex);
+	struct modeset_buf * buf=modeset_getBufferByIndex(dev, bufferIndex);
+	switch(paramIndex)
+	{
+		case 0:
+			return buf->width;
+		case 1:
+			return buf->height;
+		case 2:
+			return buf->stride;
+	}
+	return -1;	
+}
+

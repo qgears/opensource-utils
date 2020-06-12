@@ -177,6 +177,24 @@ public class NativeImage extends AbstractReferenceCountedDisposeable
 		return new NativeImage(buffer, size, componentOrder, alignment);
 	}
 	/**
+	 * Create a native image that has the specified size, component order 
+	 * and alignment.
+	 * @param size
+	 * @param componentOrder
+	 * @param mem
+	 * @param step
+	 * @return
+	 */
+	public static NativeImage create(
+			SizeInt size,
+			ENativeImageComponentOrder componentOrder, INativeMemory mem, int step)
+	{
+		int alignment=step%4==0?4:0;
+		NativeImage ret=new NativeImage(mem, size, componentOrder, alignment);
+		ret.step=step;
+		return ret;
+	}
+	/**
 	 * Get the length of a line of the image data in bytes.
 	 * @param width width of the image in pixels
 	 * @param co pixel data format

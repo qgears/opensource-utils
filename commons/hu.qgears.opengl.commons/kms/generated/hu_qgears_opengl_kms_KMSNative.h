@@ -10,10 +10,10 @@ extern "C" {
 /*
  * Class:     hu_qgears_opengl_kms_KMSNative
  * Method:    init
- * Signature: ()I
+ * Signature: (Ljava/lang/String;)I
  */
 JNIEXPORT jint JNICALL Java_hu_qgears_opengl_kms_KMSNative_init
-  (JNIEnv *, jobject);
+  (JNIEnv *, jobject, jstring);
 
 /*
  * Class:     hu_qgears_opengl_kms_KMSNative
@@ -25,10 +25,26 @@ JNIEXPORT jint JNICALL Java_hu_qgears_opengl_kms_KMSNative_swapBuffers
 
 /*
  * Class:     hu_qgears_opengl_kms_KMSNative
- * Method:    getCurrentBackBufferPtr
- * Signature: (I)Ljava/nio/ByteBuffer;
+ * Method:    getBufferPtr
+ * Signature: (II)Ljava/nio/ByteBuffer;
  */
-JNIEXPORT jobject JNICALL Java_hu_qgears_opengl_kms_KMSNative_getCurrentBackBufferPtr
+JNIEXPORT jobject JNICALL Java_hu_qgears_opengl_kms_KMSNative_getBufferPtr
+  (JNIEnv *, jobject, jint, jint);
+
+/*
+ * Class:     hu_qgears_opengl_kms_KMSNative
+ * Method:    getBufferParam
+ * Signature: (III)I
+ */
+JNIEXPORT jint JNICALL Java_hu_qgears_opengl_kms_KMSNative_getBufferParam
+  (JNIEnv *, jobject, jint, jint, jint);
+
+/*
+ * Class:     hu_qgears_opengl_kms_KMSNative
+ * Method:    getCurrentFrontBufferIndex
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_hu_qgears_opengl_kms_KMSNative_getCurrentFrontBufferIndex
   (JNIEnv *, jobject, jint);
 
 /*

@@ -51,11 +51,13 @@ extern struct modeset_dev * get_modeset_dev(modeset_t * ms, int index);
  * The returned struct is valid until swapbuffers or dispose.
  */
 extern struct modeset_buf * modeset_get_current_backbuffer(struct modeset_dev * dev);
+extern struct modeset_buf * modeset_getBufferByIndex(struct modeset_dev * dev, uint32_t index);
 /**
  * Get the buffer currently being shown to the user.
  * Must be accessed read-only to avoid visible glitches.
  */
 extern struct modeset_buf * modeset_get_current_frontbuffer(struct modeset_dev * dev);
+extern int modeset_get_current_frontbuffer_index(struct modeset_dev * dev);
 /**
  * Swap front and backbuffers.
  * The call is blocking until buffer swap happens on the hardware.
