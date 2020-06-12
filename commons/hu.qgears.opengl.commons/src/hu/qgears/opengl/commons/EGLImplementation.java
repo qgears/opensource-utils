@@ -1,6 +1,7 @@
 package hu.qgears.opengl.commons;
 
 import hu.qgears.opengl.glut.GLContextProviderGlut;
+import hu.qgears.opengl.kms.GlContextProviderOsMesaKMS;
 import hu.qgears.opengl.lwjgl.GLContextProviderLwjgl;
 import hu.qgears.opengl.mirgl.GlContextProviderMirGl;
 import hu.qgears.opengl.osmesa.GlContextProviderOsMesaSdl;
@@ -42,6 +43,9 @@ public enum EGLImplementation {
 			return new GlContextProviderOsMesaSwing();
 		}
 	},
+	/**
+	 * In-memory software rendering using OSMesa and show result in an SDL window.
+	 */
 	osmesaSdl{
 		@Override
 		public IGlContextProvider createProvider() {
@@ -55,6 +59,15 @@ public enum EGLImplementation {
 		@Override
 		public IGlContextProvider createProvider() {
 			return new GlContextProviderOsMesaVncServer();
+		}
+	},
+	/**
+	 * In-memory software rendering using OSMesa and show result in fullscreen KMS software rendering context.
+	 */
+	osmesaKMS {
+		@Override
+		public IGlContextProvider createProvider() {
+			return new GlContextProviderOsMesaKMS();
 		}
 	};
 	public abstract IGlContextProvider createProvider();

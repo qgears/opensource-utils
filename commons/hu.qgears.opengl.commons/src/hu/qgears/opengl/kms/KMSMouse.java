@@ -15,7 +15,10 @@ public class KMSMouse extends MouseImplCallback
 	private SizeInt size;
 	private double x=0;
 	private double y=0;
-	public KMSMouse(KMS kms, Libinput input) {
+	public KMSMouse()
+	{
+	}
+	public void init(KMS kms, Libinput input) {
 		size=kms.getCurrentBackBuffer().getSize();
 		x=size.getWidth()/2;
 		y=size.getHeight()/2;

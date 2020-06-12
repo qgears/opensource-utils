@@ -197,6 +197,17 @@ static int modeset_prepare(modeset_t * ms)
 	return 0;
 }
 
+static char fourCCBuffer[5];
+char * fourccToString(int fourCC)
+{
+	fourCCBuffer[0]=(fourCC>>24)&0xFF;
+	fourCCBuffer[1]=(fourCC>>16)&0xFF;
+	fourCCBuffer[2]=(fourCC>>8)&0xFF;
+	fourCCBuffer[3]=(fourCC>>0)&0xFF;
+	fourCCBuffer[4]=0;
+	return fourCCBuffer;
+}
+
 /*
  * modeset_setup_dev() stays the same.
  */
@@ -218,6 +229,11 @@ static int modeset_setup_dev(modeset_t * ms, drmModeRes *res, drmModeConnector *
 		fprintf(stderr, "no valid mode for connector %u\n",
 			conn->connector_id);
 		return -EFAULT;
+	}
+	for(int i=0;i<conn->count_modes;++i)
+	{
+		printf("Format: w%d h%d\n", conn->modes[i].hdisplay, conn->modes[i].vdisplay);
+//		printf("Format: w%d h%d %s\n", conn->modes[i].hdisplay, conn->modes[i].vdisplay, fourccToString(conn->modes[i].type));
 	}
 
 	/* copy the mode information into our device structure and into both

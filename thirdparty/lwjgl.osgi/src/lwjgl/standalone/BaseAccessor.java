@@ -14,6 +14,8 @@ public class BaseAccessor extends XmlNativeLoader {
 	private static final Logger LOG = Logger.getLogger(BaseAccessor.class);
 	
 	private static boolean inited = false;
+	
+	public static boolean headless = false;
 
 	@Override
 	public void load(File nativeLibFile) throws Throwable {
@@ -29,36 +31,39 @@ public class BaseAccessor extends XmlNativeLoader {
 			throws NativeLoadException {
 
 		if (!inited) {
-			if ("Linux".equals(System.getProperty("os.name"))) {
-				// HACK - initialize AWT so it loads its native libs that lwjgl
-				// depend on: libmawt.so, libjawt.so
-				// A must on Linux but wine hangs on this call for some unknown
-				// reason :-)
-				{
-					try
+			if (!headless)
+			{
+				if ("Linux".equals(System.getProperty("os.name"))) {
+					// HACK - initialize AWT so it loads its native libs that lwjgl
+					// depend on: libmawt.so, libjawt.so
+					// A must on Linux but wine hangs on this call for some unknown
+					// reason :-)
 					{
-						// mawt is not on classpath because it has two versions:
-						// headless and x11. The correct version is selected dynamically 
-						// lwjgl requires the X11 enabled one
-						File mawt = findMawt(new File(System.getProperty("java.home")));
-						Runtime.getRuntime().load(mawt.getAbsolutePath());
-					}catch(Throwable t)
-					{
-						if((t.getMessage()!=null)&&t.getMessage().indexOf("already loaded")<0)
+						try
 						{
-							// Do not log already loaded exception!
-							LOG.error("Loading MAWT",t);
+							// mawt is not on classpath because it has two versions:
+							// headless and x11. The correct version is selected dynamically 
+							// lwjgl requires the X11 enabled one
+							File mawt = findMawt(new File(System.getProperty("java.home")));
+							Runtime.getRuntime().load(mawt.getAbsolutePath());
+						}catch(Throwable t)
+						{
+							if((t.getMessage()!=null)&&t.getMessage().indexOf("already loaded")<0)
+							{
+								// Do not log already loaded exception!
+								LOG.error("Loading MAWT",t);
+							}
+							// Try fallback mawt loading techniqe: create and dispose a frame:
+							new Frame().dispose();
 						}
-						// Try fallback mawt loading techniqe: create and dispose a frame:
-						new Frame().dispose();
 					}
-				}
-				// manually load libjawt.so into vm, needed since Java 7
-				try {
-					System.loadLibrary("jawt");					
-				}catch(Throwable e)
-				{
-					LOG.error("Java version does not support jawt manual load");
+					// manually load libjawt.so into vm, needed since Java 7
+					try {
+						System.loadLibrary("jawt");					
+					}catch(Throwable e)
+					{
+						LOG.error("Java version does not support jawt manual load");
+					}
 				}
 			}
 			UtilNativeLoader.loadNatives(new BaseAccessor());

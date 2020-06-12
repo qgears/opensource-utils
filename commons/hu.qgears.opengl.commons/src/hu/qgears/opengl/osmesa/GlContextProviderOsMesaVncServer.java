@@ -52,10 +52,11 @@ public class GlContextProviderOsMesaVncServer implements IGlContextProvider {
 	@Override
 	public void openWindow(boolean initFullscreen, String initTitle, final SizeInt size) throws Exception {
 		System.out.println("OSMesa SDL Window opened: "+Thread.currentThread().getId());
+		ENativeImageComponentOrder co=ENativeImageComponentOrder.ARGB;
 		osMesa=new OSMesa();
-		osMesa.createContext();
+		osMesa.createContext(co);
 		this.size=size;
-		frameBuffer=NativeImage.create(size, ENativeImageComponentOrder.ARGB, DefaultJavaNativeMemoryAllocator.getInstance());
+		frameBuffer=NativeImage.create(size, co, DefaultJavaNativeMemoryAllocator.getInstance());
 		osMesa.makeCurrent(frameBuffer);
 		GLContext.useContext(osMesa);
 		vncServer=new VNCServer(size);

@@ -40,12 +40,11 @@ public class KMS {
 	}
 	/**
 	 * Swap current front/backbuffer.
-	 * @param index
 	 * @return
 	 */
-	public int swapBuffers(int index)
+	public int swapBuffers()
 	{
-		return nat.swapBuffers(index);
+		return nat.swapBuffers(0);
 	}
 	public void dispose()
 	{

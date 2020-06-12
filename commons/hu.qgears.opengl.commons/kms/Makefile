@@ -21,7 +21,12 @@ gnu_c:
 		${JNI_INCLUDE} -Wl,-soname,$(SO_NAME) \
  		jniutil.cpp \
  		modeset_vsync_api.cpp kms_jni.cpp \
- 		-lrt \
  		`pkg-config --cflags --libs libdrm` -I.
 	rm -f $(OUTPUTDIR)/$(SO_LINK_NAME)
 	ln -s $(SO_NAME) $(OUTPUTDIR)/$(SO_LINK_NAME)
+	g++ -o $(OUTPUTDIR)/../osmesa/libjawt.so \
+		-fPIC -D_REENTRANT -shared \
+		${JNI_INCLUDE} -Wl,-soname,libjawt.so \
+ 		jawt_dummy.cpp \
+ 		-I.
+	

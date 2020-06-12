@@ -75,9 +75,10 @@ public class GlContextProviderOsMesaSwing implements IGlContextProvider {
 	public void openWindow(boolean initFullscreen, String initTitle, final SizeInt size) throws Exception {
 		System.out.println("OSMesa Window opened: "+Thread.currentThread().getId());
 		osMesa=new OSMesa();
-		osMesa.createContext();
+		ENativeImageComponentOrder co=ENativeImageComponentOrder.ARGB;
+		osMesa.createContext(ENativeImageComponentOrder.RGBA);
 		this.size=size;
-		frameBuffer=NativeImage.create(size, ENativeImageComponentOrder.RGBA, DefaultJavaNativeMemoryAllocator.getInstance());
+		frameBuffer=NativeImage.create(size, co, DefaultJavaNativeMemoryAllocator.getInstance());
 		osMesa.makeCurrent(frameBuffer);
 		GLContext.useContext(osMesa);
 		SwingUtilities.invokeLater(new Runnable() {

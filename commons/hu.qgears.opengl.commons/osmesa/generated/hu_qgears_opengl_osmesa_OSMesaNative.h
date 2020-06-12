@@ -10,10 +10,10 @@ extern "C" {
 /*
  * Class:     hu_qgears_opengl_osmesa_OSMesaNative
  * Method:    createContext
- * Signature: ()V
+ * Signature: (I)V
  */
 JNIEXPORT void JNICALL Java_hu_qgears_opengl_osmesa_OSMesaNative_createContext
-  (JNIEnv *, jobject);
+  (JNIEnv *, jobject, jint);
 
 /*
  * Class:     hu_qgears_opengl_osmesa_OSMesaNative
@@ -37,6 +37,14 @@ JNIEXPORT void JNICALL Java_hu_qgears_opengl_osmesa_OSMesaNative_makeCurrentPriv
  * Signature: ()V
  */
 JNIEXPORT void JNICALL Java_hu_qgears_opengl_osmesa_OSMesaNative_disposeContext
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     hu_qgears_opengl_osmesa_OSMesaNative
+ * Method:    getGlVersion
+ * Signature: ()Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_hu_qgears_opengl_osmesa_OSMesaNative_getGlVersion
   (JNIEnv *, jobject);
 
 #ifdef __cplusplus

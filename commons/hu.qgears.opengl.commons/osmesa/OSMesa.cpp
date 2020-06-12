@@ -16,9 +16,22 @@
 
 OSMesaContext osMesaCtx;
 
-METHODPREFIX(CLASS, void, createContext)(ST_ARGS)
+METHODPREFIX(CLASS, void, createContext)(ST_ARGS, jint modeIndex)
 {
-	osMesaCtx = OSMesaCreateContextExt( OSMESA_ARGB, 0, 0, 0, NULL );
+	int mode=OSMESA_ARGB;
+	switch(modeIndex)
+	{
+		case 0:
+		 mode=OSMESA_ARGB;
+		 break;
+		case 1:
+		 mode=OSMESA_BGRA;
+		 break;
+		case 2:
+		 mode=OSMESA_RGBA;
+		 break;
+	}
+	osMesaCtx = OSMesaCreateContextExt( mode, 0, 0, 0, NULL );
 }
 static void * lib_gl_handle = NULL;
 METHODPREFIX(CLASS, void, execPreload)(ST_ARGS_STATIC)
@@ -39,9 +52,13 @@ METHODPREFIX(CLASS, void, makeCurrentPrivate)(ST_ARGS, jobject image, jint width
 	{
 		JNU_ThrowByName(env, EXCCLASS, "Context initialization error");
 	}
-	printf("GL version: %s\n", (char *)glGetString(GL_VERSION));
+//	printf("GL version: %s\n", (char *)glGetString(GL_VERSION));
 //	printf("extgl returns: %llu\n", (jlong)(intptr_t)extgl_GetProcAddress((char *)"glGetString"));
-	fflush(stdout);
+//	fflush(stdout);
+}
+METHODPREFIX(CLASS, jstring, getGlVersion)(ST_ARGS)
+{
+	return env->NewStringUTF((char *)glGetString(GL_VERSION));
 }
 
 METHODPREFIX(CLASS, void, disposeContext)(ST_ARGS)

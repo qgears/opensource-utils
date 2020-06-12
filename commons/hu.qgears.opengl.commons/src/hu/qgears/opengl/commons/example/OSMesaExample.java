@@ -50,7 +50,7 @@ public class OSMesaExample {
 		BaseAccessor.initLwjglNatives();
 		logLibs();
 		OSMesa osMesa=new OSMesa();
-		osMesa.createContext();
+		osMesa.createContext(ENativeImageComponentOrder.ARGB);
 		NativeImage im=NativeImage.create(new SizeInt(WIDTH, HEIGHT), ENativeImageComponentOrder.RGBA, DefaultJavaNativeMemoryAllocator.getInstance());
 		osMesa.makeCurrent(im);
 		System.out.println("Pid: "+getPid());

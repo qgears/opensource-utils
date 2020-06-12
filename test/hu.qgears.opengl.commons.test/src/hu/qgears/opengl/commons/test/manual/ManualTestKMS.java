@@ -32,7 +32,8 @@ public class ManualTestKMS {
 			try
 			{
 				kms.enterKmsFullscreen();
-				KMSMouse mouse=new KMSMouse(kms, li);
+				KMSMouse mouse=new KMSMouse();
+				mouse.init(kms, li);
 				for(int i=0;i<60*5 && !exit;++i)
 				{
 					li.poll();
@@ -43,7 +44,7 @@ public class ManualTestKMS {
 						ed.fillRect(mouse.getX(), mouse.getY(), 10, 10, RGBAColor.RED);
 					}
 					im.setPixel(mouse.getX(), mouse.getY(), RGBAColor.WHITE);
-					kms.swapBuffers(0);
+					kms.swapBuffers();
 				}
 			}finally
 			{

@@ -1,5 +1,6 @@
 package hu.qgears.opengl.osmesa;
 
+import hu.qgears.images.ENativeImageComponentOrder;
 import hu.qgears.images.NativeImage;
 
 /**
@@ -13,9 +14,23 @@ import hu.qgears.images.NativeImage;
  */
 public class OSMesa {
 	OSMesaNative n=new OSMesaNative();
-	public void createContext()
+	public void createContext(ENativeImageComponentOrder co)
 	{
-		n.createContext();
+		int mode=0;
+		switch (co) {
+		case ARGB:
+			mode=0;
+			break;
+		case BGRA:
+			mode=1;
+			break;
+		case RGBA:
+			mode=2;
+			break;
+		default:
+			throw new RuntimeException("Component order not handled: "+co);
+		}
+		n.createContext(mode);
 	}
 	public  void makeCurrent(NativeImage image)
 	{
@@ -24,5 +39,9 @@ public class OSMesa {
 	public void disposeContext()
 	{
 		n.disposeContext();
+	}
+	public String getGlVersion()
+	{
+		return n.getGlVersion();
 	}
 }
