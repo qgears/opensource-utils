@@ -9,7 +9,7 @@ import hu.qgears.images.NativeImage;
 import hu.qgears.images.SizeInt;
 
 /**
- * Linux KMS JNI wrapper to access kernel mode fullscreen switch into graphics mode.
+ * Linux KMS JNI wrapper to access kernel mode fullscreen switch into graphics mode. (Framebuffer API, no OpenGL context)
  */
 public class KMS {
 	private KMSNative nat;

@@ -20,11 +20,11 @@ public interface IMouse {
 	/**
 	 * For testing purposes only: allows the caller to append an event to the 
 	 * low level input event processing queue.
-	 * @param type the type of the event
+	 * @param type the type of the event - 4:button other:move
 	 * @param x x coordinate of the event
 	 * @param y y coordinate of the event
 	 * @param button the mouse button
-	 * @param state state of the mouse button
+	 * @param state state of the mouse button state!=1 means button is down
 	 */
 	void addEvent(int type, int x, int y, EMouseButton button, int state);
 }
