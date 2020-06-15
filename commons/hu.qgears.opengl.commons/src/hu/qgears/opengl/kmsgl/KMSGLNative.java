@@ -11,6 +11,13 @@ public class KMSGLNative {
 	 * @return
 	 */
 	protected native ByteBuffer getBufferPtr(int devIndex, int bufferIndex);
+	/**
+	 * 
+	 * @param devIndex unused TODO remove
+	 * @param bufferIndex unused TODO remove
+	 * @param paramIndex
+	 * @return
+	 */
 	protected native int getBufferParam(int devIndex, int bufferIndex, int paramIndex);
 	protected native int getCurrentFrontBufferIndex(int devIndex);
 	protected native void dispose();

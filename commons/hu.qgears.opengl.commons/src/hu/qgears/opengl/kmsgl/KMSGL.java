@@ -1,19 +1,21 @@
 package hu.qgears.opengl.kmsgl;
 
-import hu.qgears.images.NativeImage;
 import hu.qgears.images.SizeInt;
+import lwjgl.standalone.BaseAccessor;
 
 /**
  * Linux KMS JNI wrapper to access kernel mode fullscreen switch into graphics mode using OpenGL.
  */
 public class KMSGL {
 	private KMSGLNative nat;
+	private SizeInt size;
 //	private NativeImage[] buffers=new NativeImage[2];
 	/**
 	 * Load native libraries.
 	 */
 	public KMSGL()
 	{
+		BaseAccessor.noX11=true;
 		KMSGLInstance.getInstance();
 		nat=new KMSGLNative();
 	}
@@ -23,15 +25,9 @@ public class KMSGL {
 	public void enterKmsFullscreen()
 	{
 		nat.init("/dev/dri/card0");
-		for(int i=0;i<2;++i)
-		{
-			int w=nat.getBufferParam(0, i, 0);
-			int h=nat.getBufferParam(0, i, 1);
-//			int stride=nat.getBufferParam(0, i, 2);
-//			ByteBuffer buffer=nat.getBufferPtr(0, i);
-//			INativeMemory mem=new DefaultJavaNativeMemory(buffer);
-//			buffers[i]=NativeImage.create(new SizeInt(w, h), ENativeImageComponentOrder.RGBA, mem, stride);
-		}
+		int w=nat.getBufferParam(0, 0, 0);
+		int h=nat.getBufferParam(0, 0, 1);
+		size=new SizeInt(w, h);
 	}
 	/**
 	 * Swap current front/backbuffer.

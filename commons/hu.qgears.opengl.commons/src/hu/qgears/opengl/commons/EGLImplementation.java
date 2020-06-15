@@ -2,6 +2,7 @@ package hu.qgears.opengl.commons;
 
 import hu.qgears.opengl.glut.GLContextProviderGlut;
 import hu.qgears.opengl.kms.GlContextProviderOsMesaKMS;
+import hu.qgears.opengl.kmsgl.GlContextProviderKMSGL;
 import hu.qgears.opengl.lwjgl.GLContextProviderLwjgl;
 import hu.qgears.opengl.mirgl.GlContextProviderMirGl;
 import hu.qgears.opengl.osmesa.GlContextProviderOsMesaSdl;
@@ -68,6 +69,15 @@ public enum EGLImplementation {
 		@Override
 		public IGlContextProvider createProvider() {
 			return new GlContextProviderOsMesaKMS();
+		}
+	},	
+	/**
+	 * OpenGL HW rendering in fullscreen KMS context.
+	 */
+	KMSGL {
+		@Override
+		public IGlContextProvider createProvider() {
+			return new GlContextProviderKMSGL();
 		}
 	};
 	public abstract IGlContextProvider createProvider();

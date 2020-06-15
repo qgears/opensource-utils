@@ -47,6 +47,7 @@ METHODPREFIX(CLASS, jint, swapBuffers)(ST_ARGS, jint index)
 {
 	if(firstFrame)
 	{
+		firstFrame=false;
 		psplash_console_switch();
 		if(legacy_firstframe(gbm, &egl))
 		{
@@ -69,18 +70,13 @@ METHODPREFIX(CLASS, void, dispose)(ST_ARGS)
 
 METHODPREFIX(CLASS, jint, getBufferParam)(ST_ARGS, jint devIndex, jint bufferIndex, jint paramIndex)
 {
-/*	struct modeset_dev * dev=get_modeset_dev(&ms, devIndex);
-	struct modeset_buf * buf=modeset_getBufferByIndex(dev, bufferIndex);
 	switch(paramIndex)
 	{
 		case 0:
-			return buf->width;
+			return gbm->width;
 		case 1:
-			return buf->height;
-		case 2:
-			return buf->stride;
+			return gbm->height;
 	}
-	*/
 	return -1;	
 }
 

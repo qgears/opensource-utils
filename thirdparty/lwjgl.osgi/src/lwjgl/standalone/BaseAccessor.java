@@ -15,7 +15,12 @@ public class BaseAccessor extends XmlNativeLoader {
 	
 	private static boolean inited = false;
 	
-	public static boolean headless = false;
+	/**
+	 * When Xless implementation is used (KMS, OSMesa+VNC, etc) then this has to be set to true before initializing
+	 * this class to avoid error message: "java.awt.HeadlessException: 
+     * No X11 DISPLAY variable was set, but this program performed an operation which requires it."
+	 */
+	public static boolean noX11 = false;
 
 	@Override
 	public void load(File nativeLibFile) throws Throwable {
@@ -31,7 +36,7 @@ public class BaseAccessor extends XmlNativeLoader {
 			throws NativeLoadException {
 
 		if (!inited) {
-			if (!headless)
+			if (!noX11)
 			{
 				if ("Linux".equals(System.getProperty("os.name"))) {
 					// HACK - initialize AWT so it loads its native libs that lwjgl

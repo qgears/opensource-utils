@@ -1,20 +1,18 @@
-package hu.qgears.opengl.kms;
+package hu.qgears.opengl.libinput;
 
 import hu.qgears.commons.UtilEventListener;
 import hu.qgears.images.SizeInt;
 import hu.qgears.opengl.commons.input.EMouseButton;
 import hu.qgears.opengl.commons.input.MouseImplCallback;
-import hu.qgears.opengl.libinput.Libinput;
-import hu.qgears.opengl.libinput.LibinputEvent;
 
 /**
- * KMS+libinput mouse implementation
+ * Libinput fullscreen mouse implementation
  */
-public class KMSMouse extends MouseImplCallback
+public class LibinputMouse extends MouseImplCallback
 {
 	private double x=0;
 	private double y=0;
-	public KMSMouse()
+	public LibinputMouse()
 	{
 	}
 	public void init(final SizeInt size, Libinput input) {

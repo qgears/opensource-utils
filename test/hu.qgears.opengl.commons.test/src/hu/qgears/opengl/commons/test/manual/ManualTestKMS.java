@@ -6,9 +6,9 @@ import hu.qgears.images.NativeImageEditor;
 import hu.qgears.images.text.RGBAColor;
 import hu.qgears.opengl.commons.input.EMouseButton;
 import hu.qgears.opengl.kms.KMS;
-import hu.qgears.opengl.kms.KMSMouse;
 import hu.qgears.opengl.libinput.Libinput;
 import hu.qgears.opengl.libinput.LibinputEvent;
+import hu.qgears.opengl.libinput.LibinputMouse;
 import hu.qgears.opengl.osmesa.Log4Init;
 
 public class ManualTestKMS {
@@ -32,7 +32,7 @@ public class ManualTestKMS {
 			try
 			{
 				kms.enterKmsFullscreen();
-				KMSMouse mouse=new KMSMouse();
+				LibinputMouse mouse=new LibinputMouse();
 				mouse.init(kms.getCurrentBackBuffer().getSize(), li);
 				for(int i=0;i<60*5 && !exit;++i)
 				{

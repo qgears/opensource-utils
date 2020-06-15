@@ -1,15 +1,11 @@
-package hu.qgears.opengl.kms;
+package hu.qgears.opengl.kmsgl;
 
+import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.GLContext;
 
 import hu.qgears.commons.UtilEventListener;
-import hu.qgears.images.ENativeImageComponentOrder;
-import hu.qgears.images.NativeImage;
-import hu.qgears.images.NativeImageEditor;
 import hu.qgears.images.SizeInt;
-import hu.qgears.images.text.RGBAColor;
 import hu.qgears.opengl.commons.IGlContextProvider;
-import hu.qgears.opengl.commons.UtilGl;
 import hu.qgears.opengl.commons.input.EMouseButton;
 import hu.qgears.opengl.commons.input.IKeyboard;
 import hu.qgears.opengl.commons.input.IMouse;
@@ -18,27 +14,22 @@ import hu.qgears.opengl.libinput.LibinputEvent;
 import hu.qgears.opengl.libinput.LibinputInstance;
 import hu.qgears.opengl.libinput.LibinputKeyboard;
 import hu.qgears.opengl.libinput.LibinputMouse;
-import hu.qgears.opengl.osmesa.OSMesa;
-import hu.qgears.opengl.osmesa.OSMesaInstance;
 import lwjgl.standalone.BaseAccessor;
 
-public class GlContextProviderOsMesaKMS implements IGlContextProvider
+public class GlContextProviderKMSGL implements IGlContextProvider
 {
 	private LibinputMouse mouse=new LibinputMouse();
 	LibinputKeyboard keyboard=new LibinputKeyboard();
 	private boolean exit=false;
 	private Libinput li;
-	private KMS kms;
-	private OSMesa osMesa;
+	private KMSGL kms;
 	private SizeInt size=new SizeInt(0, 0);
 
 	@Override
 	public void loadNatives() {
-		OSMesaInstance.getInstance();
 		BaseAccessor.noX11=true;
 		BaseAccessor.initLwjglNatives();
-		UtilGl.flipY=true;
-		KMSInstance.getInstance();
+		KMSGLInstance.getInstance();
 		LibinputInstance.getInstance();
 	}
 
@@ -60,20 +51,16 @@ public class GlContextProviderOsMesaKMS implements IGlContextProvider
 				}
 			}
 		});
-		kms=new KMS();
+		kms=new KMSGL();
 	}
 
 	@Override
 	public void openWindow(boolean initFullscreen, String initTitle, SizeInt size) throws Exception {
 		kms.enterKmsFullscreen();
-		this.size=kms.getCurrentBackBuffer().getSize();
+		this.size=kms.getSize();
 		mouse.init(size, li);
-		osMesa=new OSMesa();
-		osMesa.createContext(ENativeImageComponentOrder.BGRA);
 		this.size=size;
-		osMesa.makeCurrent(kms.getCurrentBackBuffer());
-		System.out.println("OSMesa OpenGL Version: '"+osMesa.getGlVersion()+"'");
-		GLContext.useContext(osMesa);
+		GLContext.useContext(kms);
 	}
 
 	@Override
@@ -99,29 +86,24 @@ public class GlContextProviderOsMesaKMS implements IGlContextProvider
 
 	@Override
 	public void update() {
-		NativeImage im=kms.getCurrentBackBuffer();
 		if(mouse.isButtonDown(EMouseButton.LEFT))
 		{
-			NativeImageEditor ed=new NativeImageEditor(im);
-			ed.fillRect(mouse.getX(), mouse.getY(), 10, 10, RGBAColor.RED);
+//			NativeImageEditor ed=new NativeImageEditor(im);
+//			ed.fillRect(mouse.getX(), mouse.getY(), 10, 10, RGBAColor.RED);
 		}
-		im.setPixel(mouse.getX(), mouse.getY(), RGBAColor.WHITE);
+//		im.setPixel(mouse.getX(), mouse.getY(), RGBAColor.WHITE);
 		kms.swapBuffers();
 		li.poll();
-		osMesa.makeCurrent(kms.getCurrentBackBuffer());
 	}
 
 	@Override
 	public void dispose() {
-		try
-		{
-			osMesa.disposeContext();
-		}catch(Exception e)
-		{
+		try {
+			GLContext.useContext(null);
+		} catch (LWJGLException e1) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			e1.printStackTrace();
 		}
-		osMesa=null;
 		try {
 			li.dispose();
 		} catch (Exception e) {
@@ -162,5 +144,4 @@ public class GlContextProviderOsMesaKMS implements IGlContextProvider
 	public void setVSyncEnabled(boolean vSyncEnabled) {
 		// TODO Not implemented: vsync is always on
 	}
-
 }

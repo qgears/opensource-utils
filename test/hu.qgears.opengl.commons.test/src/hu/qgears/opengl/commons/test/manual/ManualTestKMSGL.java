@@ -2,10 +2,10 @@ package hu.qgears.opengl.commons.test.manual;
 
 import hu.qgears.commons.UtilEventListener;
 import hu.qgears.images.SizeInt;
-import hu.qgears.opengl.kms.KMSMouse;
 import hu.qgears.opengl.kmsgl.KMSGL;
 import hu.qgears.opengl.libinput.Libinput;
 import hu.qgears.opengl.libinput.LibinputEvent;
+import hu.qgears.opengl.libinput.LibinputMouse;
 import hu.qgears.opengl.osmesa.Log4Init;
 
 public class ManualTestKMSGL {
@@ -29,7 +29,7 @@ public class ManualTestKMSGL {
 			try
 			{
 				kms.enterKmsFullscreen();
-				KMSMouse mouse=new KMSMouse();
+				LibinputMouse mouse=new LibinputMouse();
 				mouse.init(kms.getSize(), li);
 				for(int i=0;i<60*5 && !exit;++i)
 				{
