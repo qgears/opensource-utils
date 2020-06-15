@@ -59,6 +59,8 @@ struct drm {
 	int kms_in_fence_fd;
 	int kms_out_fence_fd;
 
+	/** Previous CRTC state - after exit we reset this state */
+	drmModeCrtc *saved_crtc;
 	drmModeModeInfo *mode;
 	uint32_t crtc_id;
 	uint32_t connector_id;
@@ -78,6 +80,7 @@ const struct drm * init_drm_legacy(const char *device);
 int legacy_beforefirstframe(const struct gbm *gbm, const struct egl *egl);
 int legacy_firstframe(const struct gbm *gbm, const struct egl *egl);
 int legacy_nextframe(const struct gbm *gbm, const struct egl *egl);
+void legacy_dispose();
 
 //const struct drm * init_drm_atomic(const char *device);
 

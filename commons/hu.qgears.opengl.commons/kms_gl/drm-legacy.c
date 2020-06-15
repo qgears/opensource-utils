@@ -51,6 +51,18 @@ static void page_flip_handler(int fd, unsigned int frame,
 	int *waiting_for_flip = (int *)data;
 	*waiting_for_flip = 0;
 }
+void legacy_dispose()
+{
+		drmModeSetCrtc(drm.fd,
+				       drm.saved_crtc->crtc_id,
+				       drm.saved_crtc->buffer_id,
+				       drm.saved_crtc->x,
+				       drm.saved_crtc->y,
+				       &drm.connector_id,
+				       1,
+				       &(drm.saved_crtc->mode));
+		drmModeFreeCrtc(drm.saved_crtc);
+}
 int legacy_beforefirstframe(const struct gbm *gbm, const struct egl *egl)
 {
 	eglSwapBuffers(egl->display, egl->surface);
@@ -60,6 +72,7 @@ int legacy_beforefirstframe(const struct gbm *gbm, const struct egl *egl)
 		fprintf(stderr, "Failed to get a new framebuffer BO\n");
 		return -1;
 	}
+	drm.saved_crtc=drmModeGetCrtc(drm.fd, drm.crtc_id);
 	return 0;
 }
 

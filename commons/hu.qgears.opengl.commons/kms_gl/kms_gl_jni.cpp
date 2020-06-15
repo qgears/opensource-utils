@@ -65,7 +65,8 @@ METHODPREFIX(CLASS, jint, swapBuffers)(ST_ARGS, jint index)
 
 METHODPREFIX(CLASS, void, dispose)(ST_ARGS)
 {
-	// TODO
+	psplash_console_reset();
+	legacy_dispose();
 }
 
 METHODPREFIX(CLASS, jint, getBufferParam)(ST_ARGS, jint devIndex, jint bufferIndex, jint paramIndex)
