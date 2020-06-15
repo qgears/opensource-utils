@@ -66,7 +66,7 @@ public class GlContextProviderOsMesaKMS implements IGlContextProvider
 	public void openWindow(boolean initFullscreen, String initTitle, SizeInt size) throws Exception {
 		kms.enterKmsFullscreen();
 		this.size=kms.getCurrentBackBuffer().getSize();
-		mouse.init(kms, li);
+		mouse.init(size, li);
 		osMesa=new OSMesa();
 		osMesa.createContext(ENativeImageComponentOrder.BGRA);
 		this.size=size;

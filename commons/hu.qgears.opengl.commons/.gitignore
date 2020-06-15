@@ -2,3 +2,5 @@
 /nativesTmp/
 /win-dep/
 *.o
+/kms/drmScreenshot
+

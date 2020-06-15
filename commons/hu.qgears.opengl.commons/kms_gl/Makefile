@@ -6,30 +6,23 @@ JNI_INCLUDE:=-I/usr/lib/jvm/java-1.7.0-openjdk-${JNI_ARCHPOSTFIX}/include \
 ARCHPOSTFIX=`uname -m | sed -e 's/\bx86\b/i686/'`
 OS_RELEASE_ID=`grep -w "ID" /etc/os-release | cut -d'=' -f2`
 OS_RELEASE_VERSION=`grep -w "VERSION_ID" /etc/os-release | cut -d'=' -f2 | tr -d '\"'`
-SO_NAME:=libkmsjni-${OS_RELEASE_ID}-${OS_RELEASE_VERSION}-${ARCHPOSTFIX}.so
-SO_LINK_NAME:=libkmsjni-${ARCHPOSTFIX}.so
+SO_NAME:=libkmsgljni-${OS_RELEASE_ID}-${OS_RELEASE_VERSION}-${ARCHPOSTFIX}.so
+SO_LINK_NAME:=libkmsgljni-${ARCHPOSTFIX}.so
 
 
 #used by the maven editor_platform_build process, see pom.xml in project.
 ifndef OUTPUTDIR
-    OUTPUTDIR = ../src/hu/qgears/opengl/kms
+    OUTPUTDIR = ../src/hu/qgears/opengl/kmsgl
 endif
 
 gnu_c:
 	g++ -o $(OUTPUTDIR)/$(SO_NAME) \
 		-fPIC -D_REENTRANT -shared \
 		${JNI_INCLUDE} -Wl,-soname,$(SO_NAME) \
- 		jniutil.cpp \
- 		modeset_vsync_api.cpp kms_jni.cpp \
- 		`pkg-config --cflags --libs libdrm` -I.
+ 		drm-legacy.c drm-common.c common.c psplash-console.c jniutil.cpp \
+ 		kms_gl_jni.cpp \
+ 		`pkg-config --cflags --libs libdrm` `pkg-config --cflags --libs gbm` -lEGL -lGL -I.
 	rm -f $(OUTPUTDIR)/$(SO_LINK_NAME)
 	ln -s $(SO_NAME) $(OUTPUTDIR)/$(SO_LINK_NAME)
-	g++ -o $(OUTPUTDIR)/../osmesa/libjawt.so \
-		-fPIC -D_REENTRANT -shared \
-		${JNI_INCLUDE} -Wl,-soname,libjawt.so \
- 		jawt_dummy.cpp \
- 		-I.
 
-drmScreenshot: drmScreenshot.cpp
-	gcc -o drmScreenshot drmScreenshot.cpp `pkg-config --cflags --libs libdrm` `pkg-config cairomm-1.0 pangocairo pangomm-1.4 --cflags --libs`
 

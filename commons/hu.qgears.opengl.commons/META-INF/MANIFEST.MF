@@ -5,6 +5,7 @@ Export-Package: hu.qgears.opengl.commons,
  hu.qgears.opengl.commons.input,
  hu.qgears.opengl.glut,
  hu.qgears.opengl.kms,
+ hu.qgears.opengl.kmsgl,
  hu.qgears.opengl.libinput,
  hu.qgears.opengl.osmesa
 Bundle-SymbolicName: hu.qgears.opengl.commons
