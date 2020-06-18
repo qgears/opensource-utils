@@ -97,7 +97,7 @@ METHODPREFIX(CLASS, jint, poll)(ST_ARGS)
 		   	if(keyb!=NULL)
 		   	{
 		   		ev=allocateEvent();
-		   		ev->type=0;
+		   		ev->type=1;
 		   	 	ev->a=libinput_event_keyboard_get_key(keyb);
 		   	 	ev->b=libinput_event_keyboard_get_key_state(keyb);
 		   	}
@@ -109,21 +109,31 @@ METHODPREFIX(CLASS, jint, poll)(ST_ARGS)
     		if(ptr!=NULL)
     		{
 		   		ev=allocateEvent();
-		   		ev->type=1;
+		   		ev->type=400;
 		   	 	ev->da=libinput_event_pointer_get_dx(ptr);
 		   	 	ev->db=libinput_event_pointer_get_dy(ptr);
     		}
     		break;
     	}
     	case LIBINPUT_EVENT_POINTER_MOTION_ABSOLUTE:
+    	{
+    		struct libinput_event_pointer * ptr = libinput_event_get_pointer_event(event);
+    		if(ptr!=NULL)
+    		{
+		   		ev=allocateEvent();
+		   		ev->type=401;
+		   	 	ev->da=libinput_event_pointer_get_absolute_x_transformed(ptr, 1);
+		   	 	ev->db=libinput_event_pointer_get_absolute_y_transformed(ptr, 1);
+    		}
     		break;
+    	}
     	case LIBINPUT_EVENT_POINTER_BUTTON:
     	{
     		struct libinput_event_pointer * ptr = libinput_event_get_pointer_event(event);
     		if(ptr!=NULL)
     		{
 		   		ev=allocateEvent();
-		   		ev->type=2;
+		   		ev->type=402;
 		   		ev->a=libinput_event_pointer_get_button(ptr);
 		   		ev->b=libinput_event_pointer_get_button_state(ptr);
     		}

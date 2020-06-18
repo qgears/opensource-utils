@@ -34,6 +34,11 @@ public class LibinputMouse extends MouseImplCallback
 					if(y>size.getHeight()-1)y=size.getHeight()-1;
 					addEvent(0, (int)x, (int)y, null, 0);
 					break;
+				case pointerAbsolute:
+					x=msg.da*size.getWidth();
+					y=msg.db*size.getHeight();
+					addEvent(0, (int)x, (int)y, null, 0);
+					break;
 				case pointerButton:
 					EMouseButton b=null;
 					switch(msg.a)

@@ -21,7 +21,7 @@ endif
 gnu_c:
 	g++ -o $(OUTPUTDIR)/$(SO_NAME) \
 	-fPIC -D_REENTRANT -shared \
-	${JNI_INCLUDE} -Wl,-soname,$(SO_NAME) \
+	${JNI_INCLUDE_PLATFORM} ${JNI_INCLUDE} -Wl,-soname,$(SO_NAME) \
 	../nativeLibpng.cpp ../jniutil.cpp \
 	-lpng
 	cp -f $(OUTPUTDIR)/$(SO_NAME) $(OUTPUTDIR)/$(SO_GENERIC_NAME)

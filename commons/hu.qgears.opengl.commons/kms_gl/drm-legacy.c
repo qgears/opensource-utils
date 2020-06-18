@@ -36,6 +36,7 @@ static struct drm drm;
 
 static drmEventContext evctx = {
 			.version = 2,
+			.vblank_handler = NULL,
 			.page_flip_handler = page_flip_handler,
 	};
 static struct gbm_bo *bo;

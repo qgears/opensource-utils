@@ -36,7 +36,7 @@ public class Libinput {
 			for(int i=0;i<N;++i)
 			{
 				bb.position(strip*i);
-				ELibinputEventType type=ELibinputEventType.values()[bb.getInt()];
+				ELibinputEventType type=ELibinputEventType.byOrdinal(bb.getInt());
 				ev.type=type;
 				ev.a=bb.getInt();
 				ev.b=bb.getInt();
@@ -50,6 +50,7 @@ public class Libinput {
 					keyboard.eventHappened(ev);
 					break;
 				case pointerMotion: // Pointer motion
+				case pointerAbsolute: // Pointer motion
 				case pointerButton: // Pointer motion
 					pointer.eventHappened(ev);
 					break;
