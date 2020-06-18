@@ -18,15 +18,36 @@
 #ifndef _HAVE_PSPLASH_CONSOLE_H
 #define _HAVE_PSPLASH_CONSOLE_H
 
-void 
-psplash_console_switch (void); 
+/**
+ * Switch to graphical mode.
+ */
+void psplash_console_switch (void);
 
-void
-psplash_console_reset (void);
+/**
+ * Is the VT currently active?
+ */
+bool psplash_is_active();
+/**
+ * Is a VT switch away request to deactivate currently active?
+ */ 
+bool psplash_is_req_away();
+/**
+ * Send acknowledge of VT switch away after we have finished deactivating our task on the screen and input.
+ */
+void psplash_away_ack(); 
+/**
+ * Is a VT switch back to activate request currently active?
+ */ 
+bool psplash_is_req_back(); 
+/**
+ * Send acknowledge of VT switch back after we have finished reactivating our task on the screen and input.
+ */
+void psplash_back_ack(); 
 
-void
-psplash_console_handle_switches (void);
-
+/**
+ * On exit call this to reset the original state.
+ */
+void psplash_console_reset (void);
 
 #endif
 

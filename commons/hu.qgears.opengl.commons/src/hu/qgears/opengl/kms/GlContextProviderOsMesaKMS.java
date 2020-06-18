@@ -14,8 +14,8 @@ import hu.qgears.opengl.commons.input.EMouseButton;
 import hu.qgears.opengl.commons.input.IKeyboard;
 import hu.qgears.opengl.commons.input.IMouse;
 import hu.qgears.opengl.libinput.Libinput;
+import hu.qgears.opengl.libinput.LibinputAccessor;
 import hu.qgears.opengl.libinput.LibinputEvent;
-import hu.qgears.opengl.libinput.LibinputInstance;
 import hu.qgears.opengl.libinput.LibinputKeyboard;
 import hu.qgears.opengl.libinput.LibinputMouse;
 import hu.qgears.opengl.osmesa.OSMesa;
@@ -39,7 +39,7 @@ public class GlContextProviderOsMesaKMS implements IGlContextProvider
 		BaseAccessor.initLwjglNatives();
 		UtilGl.flipY=true;
 		KMSInstance.getInstance();
-		LibinputInstance.getInstance();
+		LibinputAccessor.getInstance();
 	}
 
 	@Override

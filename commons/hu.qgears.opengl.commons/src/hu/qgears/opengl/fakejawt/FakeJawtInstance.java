@@ -1,16 +1,16 @@
-package hu.qgears.opengl.kms;
+package hu.qgears.opengl.fakejawt;
 
 import java.io.File;
 
 import hu.qgears.nativeloader.XmlNativeLoader3;
 
-public class KMSInstance extends XmlNativeLoader3 {
-	private static KMSInstance instance=new KMSInstance();
+public class FakeJawtInstance extends XmlNativeLoader3 {
+	private static FakeJawtInstance instance=new FakeJawtInstance();
 
-	public static KMSInstance getInstance() {
+	public static FakeJawtInstance getInstance() {
 		return instance;
 	}
-	private KMSInstance()
+	private FakeJawtInstance()
 	{
 		load();
 	}

@@ -13,6 +13,7 @@ static struct egl egl;
 static const struct gbm *gbm;
 static const struct drm * drm;
 static bool firstFrame=true;
+static bool dirty=true;
 
 METHODPREFIX(CLASS, jint, init)(ST_ARGS, jstring card)
 {
@@ -45,20 +46,24 @@ METHODPREFIX(CLASS, jint, init)(ST_ARGS, jstring card)
 
 METHODPREFIX(CLASS, jint, swapBuffers)(ST_ARGS, jint index)
 {
-	if(firstFrame)
+	if(psplash_is_active())
 	{
-		firstFrame=false;
-		psplash_console_switch();
-		if(legacy_firstframe(gbm, &egl))
+		if(firstFrame)
 		{
-			return 1;
-		}
-	}else
-	{
-		if(legacy_nextframe(gbm, &egl))
+			firstFrame=false;
+			psplash_console_switch();
+			if(legacy_firstframe(gbm, &egl))
+			{
+				return 1;
+			}
+		}else
 		{
-			return 2;
+			if(legacy_nextframe(gbm, &egl))
+			{
+				return 2;
+			}
 		}
+		dirty=false;
 	}
 	return 0;
 }
@@ -68,7 +73,24 @@ METHODPREFIX(CLASS, void, dispose)(ST_ARGS)
 	psplash_console_reset();
 	legacy_dispose();
 }
-
+METHODPREFIX(CLASS, jint, handleVTSwitch)(ST_ARGS)
+{
+	if(psplash_is_req_away())
+	{
+		legacy_away();
+		psplash_away_ack();
+		dirty=false;
+		return 1;
+	}
+	if(psplash_is_req_back())
+	{
+		legacy_back();
+		psplash_back_ack();
+		dirty=true;
+		return 2;
+	}
+	return 0;
+}
 METHODPREFIX(CLASS, jint, getBufferParam)(ST_ARGS, jint devIndex, jint bufferIndex, jint paramIndex)
 {
 	switch(paramIndex)
@@ -77,6 +99,14 @@ METHODPREFIX(CLASS, jint, getBufferParam)(ST_ARGS, jint devIndex, jint bufferInd
 			return gbm->width;
 		case 1:
 			return gbm->height;
+		case 2:
+		{
+			return psplash_is_active();
+		}
+		case 3:
+		{
+			return dirty;
+		}
 	}
 	return -1;	
 }

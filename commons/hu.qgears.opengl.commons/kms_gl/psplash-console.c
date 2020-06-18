@@ -15,8 +15,6 @@
  *
  */
 
-//#include "psplash.h"
-
 #define _GNU_SOURCE 1
 #include <assert.h>
 #include <errno.h>
@@ -48,9 +46,9 @@
 #define DEBUG alma
 
 
-#if DEBUG
+#ifdef DEBUG
 #define DBG(x, a...) \
-   { printf ( __FILE__ ":%d,%s() " x "\n", __LINE__, __func__, ##a); }
+   { printf ( __FILE__ ":%d,%s() " x "\n", __LINE__, __func__, ##a); fflush(stdout);}
 #else
 #define DBG(x, a...) do {} while (0)
 #endif
@@ -62,39 +60,65 @@ static int ConsoleFd      = -1;
 static int VTNum          = -1;
 static int VTNumInitial   = -1;
 static int Visible        =  1;
+static volatile bool reqAway = false;
+static volatile bool reqBack = false;
 
-static void
-vt_request (int sig)
+static void psplash_console_handle_switches (bool onAway);
+static void psplash_console_ignore_switches (void);
+
+
+static void vt_request_away (int sig)
 {
 	UNUSED(sig);
-  DBG("mark, visible:%i", Visible);
-
-  if (Visible)
-    {
-      /* Allow Switch Away */
-      if (ioctl (ConsoleFd, VT_RELDISP, 1) < 0)
-	perror("Error cannot switch away from console");
-      Visible = 0;
-
-      /* FIXME: 
-       * We likely now want to signal the main loop as to exit	 
-       * and we've now likely switched to the X tty. Note, this
-       * seems to happen anyway atm due to select() call getting
-       * a signal interuption error - not sure if this is really
-       * reliable however. 
-      */
-    }
-  else
-    {
-      if (ioctl (ConsoleFd, VT_RELDISP, VT_ACKACQ))
-	perror ("Error can't acknowledge VT switch");
-      Visible = 1;
-      /* FIXME: need to schedule repaint some how ? */
-    }
+	reqAway=true;
+  DBG("VT REQ AWAY");
+}
+static void vt_request_back (int sig)
+{
+	UNUSED(sig);
+	reqBack=true;
+  DBG("VT REQ BACK");
 }
 
-static void
-psplash_console_ignore_switches (void)
+bool psplash_is_active()
+{
+	return Visible!=0;
+}
+void psplash_away_ack()
+{
+      /* Allow Switch Away */
+      if (ioctl (ConsoleFd, VT_RELDISP, 1) < 0)
+      {
+		perror("Error cannot switch away from console");
+  }
+      Visible = 0;
+      reqAway=false;
+      psplash_console_handle_switches(false);
+      DBG("VT AWAY ACKED");
+}
+
+bool psplash_is_req_away()
+{
+ return reqAway;
+}
+bool psplash_is_req_back()
+{
+ return reqBack;
+}
+
+void psplash_back_ack()
+{
+    if (ioctl (ConsoleFd, VT_RELDISP, VT_ACKACQ))
+    {
+	  perror ("Error can't acknowledge VT switch");
+    }
+    Visible = 1;
+    reqBack=false;
+    psplash_console_handle_switches(true);
+    DBG("VT BACK ACKED");
+}
+
+static void psplash_console_ignore_switches (void)
 {
   struct sigaction    act;
   struct vt_mode      vt_mode;
@@ -118,91 +142,49 @@ psplash_console_ignore_switches (void)
     perror("Error VT_SETMODE failed");
 }
 
-void
-psplash_console_handle_switches (void)
+static void psplash_console_handle_switches (bool onAway)
 {
- if ((ConsoleFd = open("/dev/tty", O_RDWR|O_NDELAY, 0)) < 0)
-    {
-      fprintf(stderr, "Error cannot open /dev/tty: %s\n", strerror(errno));
-      return;
-    }
   struct sigaction    act;
   struct vt_mode      vt_mode;
  
   if (ioctl(ConsoleFd, VT_GETMODE, &vt_mode) < 0)
     {
-      perror("Error VT_SETMODE failed");
+      perror("Error VT_GETMODE failed");
       return;
     }
 
-  act.sa_handler = vt_request;
+  act.sa_handler = onAway? vt_request_away: vt_request_back;
   sigemptyset (&act.sa_mask);
   act.sa_flags = 0;
   sigaction (SIGUSR1, &act, 0);
   
   vt_mode.mode   = VT_PROCESS;
-  vt_mode.relsig = SIGUSR1;
-  vt_mode.acqsig = SIGUSR1;
+  vt_mode.relsig = onAway?SIGUSR1:0;
+  vt_mode.acqsig = onAway?0:SIGUSR1;
 
   if (ioctl(ConsoleFd, VT_SETMODE, &vt_mode) < 0)
     perror("Error VT_SETMODE failed");
-  printf("Set up console switch is ready!\n");
 }
 
-void 
-psplash_console_switch (void) 
+void psplash_console_switch (void) 
 {
-  char           vtname[10];
-  int            fd;
-  struct vt_stat vt_state;
-
-  if ((fd = open("/dev/tty0",O_WRONLY,0)) < 0)
-    {
-      perror("Error Cannot open /dev/tty0");
-      return;
-    }
-
-  /* Find next free terminal */
-  if ((ioctl(fd, VT_OPENQRY, &VTNum) < 0))
-    {
-      perror("Error unable to find a free virtual terminal");
-      close(fd);
-      return;
-    }
-  
-  close(fd);
-  
-  sprintf(vtname,"/dev/tty%d", VTNum);
-
+  char vtname[]="/dev/tty";
   if ((ConsoleFd = open(vtname, O_RDWR|O_NDELAY, 0)) < 0)
     {
       fprintf(stderr, "Error cannot open %s: %s\n", vtname, strerror(errno));
       return;
     }
-
-  if (ioctl(ConsoleFd, VT_GETSTATE, &vt_state) == 0)
-    VTNumInitial = vt_state.v_active;
-
-  /* Switch to new free terminal */
-
-  psplash_console_ignore_switches ();
-
-  if (ioctl(ConsoleFd, VT_ACTIVATE, VTNum) != 0)
-    perror("Error VT_ACTIVATE failed");
-  
-  if (ioctl(ConsoleFd, VT_WAITACTIVE, VTNum) != 0)
-    perror("Error VT_WAITACTIVE failed\n");
-
-  psplash_console_handle_switches ();
+  psplash_console_handle_switches (true);
   
   if (ioctl(ConsoleFd, KDSETMODE, KD_GRAPHICS) < 0)
     perror("Error KDSETMODE KD_GRAPHICS failed\n");
 
+  DBG("Set up console switch is ready!\n");
+
   return;
 }
 
-void
-psplash_console_reset (void)
+void psplash_console_reset (void)
 {
   int              fd;
   struct vt_stat   vt_state;
@@ -210,33 +192,14 @@ psplash_console_reset (void)
   if (ConsoleFd < 0)
     return;
 
+  psplash_console_ignore_switches ();
+  
   /* Back to text mode */
   ioctl(ConsoleFd, KDSETMODE, KD_TEXT); 
 
-  psplash_console_ignore_switches ();
-
-  /* Attempt to switch back to initial console if were still active */
-  ioctl (ConsoleFd, VT_GETSTATE, &vt_state);
-
-  if (VTNum == vt_state.v_active)
-    {
-      if (VTNumInitial > -1)
-        {
-	  ioctl (ConsoleFd, VT_ACTIVATE, VTNumInitial);
-	  ioctl (ConsoleFd, VT_WAITACTIVE, VTNumInitial);
-	  VTNumInitial = -1;
-        }
-    }
 
   /* Cleanup */
-
   close(ConsoleFd); 
-
-  if ((fd = open ("/dev/tty0", O_RDWR|O_NDELAY, 0)) >= 0)
-    {
-      ioctl (fd, VT_DISALLOCATE, VTNum);
-      close (fd);
-    }
 
   return;
 }

@@ -9,7 +9,6 @@ import lwjgl.standalone.BaseAccessor;
 public class KMSGL {
 	private KMSGLNative nat;
 	private SizeInt size;
-//	private NativeImage[] buffers=new NativeImage[2];
 	/**
 	 * Load native libraries.
 	 */
@@ -41,13 +40,16 @@ public class KMSGL {
 	{
 		nat.dispose();
 	}
-//	public NativeImage getCurrentBackBuffer() {
-//		int i=nat.getCurrentFrontBufferIndex(0);
-//		return buffers[i^1];
-//	}
 	public SizeInt getSize() {
-		// TODO Auto-generated method stub
-		return new SizeInt(640,480);
+		return size;
 	}
-
+	public boolean isVisible() {
+		return nat.getBufferParam(0, 0, 2)!=0;
+	}
+	public boolean isDirty() {
+		return nat.getBufferParam(0, 0, 3)!=0;
+	}
+	public int handleVTSwitch() {
+		return nat.handleVTSwitch();
+	}
 }

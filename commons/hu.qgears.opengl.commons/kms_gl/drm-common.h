@@ -65,7 +65,7 @@ struct drm {
 	uint32_t crtc_id;
 	uint32_t connector_id;
 
-	int (*run)(const struct gbm *gbm, const struct egl *egl);
+	int (*run)(const struct gbm *gbm, const struct egl *egl);	
 };
 
 struct drm_fb {
@@ -81,6 +81,8 @@ int legacy_beforefirstframe(const struct gbm *gbm, const struct egl *egl);
 int legacy_firstframe(const struct gbm *gbm, const struct egl *egl);
 int legacy_nextframe(const struct gbm *gbm, const struct egl *egl);
 void legacy_dispose();
+void legacy_away();
+void legacy_back();
 
 //const struct drm * init_drm_atomic(const char *device);
 

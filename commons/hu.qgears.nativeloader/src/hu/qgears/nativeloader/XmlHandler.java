@@ -64,13 +64,15 @@ public class XmlHandler extends DefaultHandler {
 		 * to avoid duplicate library loading. 
 		 */
 		protected final Set<String> nativesEnumd = new HashSet<>(); 
-		protected final List<SourceFile> sources = new ArrayList<SourceFile>(); 
+		protected final List<SourceFile> sources = new ArrayList<SourceFile>();
+		protected final List<NativePreload> preloads = new ArrayList<NativePreload>();
 		protected final Stack<Boolean> listening = new Stack<Boolean>();
 
 		
 
 		@Override
 		public void startDocument() throws SAXException {
+			preloads.clear();
 			natives.clear();
 			nativesEnumd.clear();
 			listening.clear();
@@ -120,6 +122,19 @@ public class XmlHandler extends DefaultHandler {
 						if (!nativesEnumd.contains(libId)) {
 							natives.add(new NativeBinary(libId, libPath, installPath));
 							nativesEnumd.add(libId);
+						}
+					}
+				} else if ("preload".equals(localName)) {
+					if(listening.peek())
+					{
+						final String fileName = attributes.getValue(NAMESPACE,
+								"fileName");
+						final String resource = attributes.getValue(NAMESPACE, 
+								"resource");
+						if(!nativesEnumd.contains(fileName))
+						{
+							nativesEnumd.add(fileName);
+							preloads.add(new NativePreload(fileName, resource));
 						}
 					}
 				} else if (EL_SOURCE_ZIP.equals(localName)) { // <path>
@@ -179,7 +194,7 @@ public class XmlHandler extends DefaultHandler {
 					listening.pop();
 
 				} else if (EL_LIBRARY.equals(localName)||
-						EL_SOURCE_ZIP.equals(localName)) { // </path>
+						EL_SOURCE_ZIP.equals(localName)|| "preload".equals(localName)) { // </path>
 					// is something needed here?
 
 				} else {
@@ -196,6 +211,10 @@ public class XmlHandler extends DefaultHandler {
 		 */
 		public List<NativeBinary> getNatives() {
 			return natives;
+		}
+
+		public List<NativePreload> getPreloads() {
+			return preloads;
 		}
 
 	}

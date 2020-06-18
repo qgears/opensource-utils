@@ -18,6 +18,8 @@ public class LibinputMouse extends MouseImplCallback
 	public void init(final SizeInt size, Libinput input) {
 		x=size.getWidth()/2;
 		y=size.getHeight()/2;
+		if (input!=null)
+		{
 		input.pointer.addListener(new UtilEventListener<LibinputEvent>() {
 			@Override
 			public void eventHappened(LibinputEvent msg) {
@@ -55,6 +57,6 @@ public class LibinputMouse extends MouseImplCallback
 				}
 			}
 		});
+		}
 	}
-
 }

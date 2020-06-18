@@ -51,6 +51,27 @@ static void page_flip_handler(int fd, unsigned int frame,
 	int *waiting_for_flip = (int *)data;
 	*waiting_for_flip = 0;
 }
+void legacy_away()
+{
+		drmModeSetCrtc(drm.fd,
+				       drm.saved_crtc->crtc_id,
+				       drm.saved_crtc->buffer_id,
+				       drm.saved_crtc->x,
+				       drm.saved_crtc->y,
+				       &drm.connector_id,
+				       1,
+				       &(drm.saved_crtc->mode));
+}
+void legacy_back()
+{
+	int ret = drmModeSetCrtc(drm.fd, drm.crtc_id, fb->fb_id, 0, 0,
+			&drm.connector_id, 1, drm.mode);
+	if (ret) {
+		printf("failed to set mode: %s\n", strerror(errno));
+		return;
+	}
+			
+}
 void legacy_dispose()
 {
 		drmModeSetCrtc(drm.fd,
@@ -126,8 +147,8 @@ int legacy_nextframe(const struct gbm *gbm, const struct egl *egl)
 			if (ret < 0) {
 				if(errno==EINTR)
 				{
-					printf("EINTR - maybe a terminal switch was executed?\n");
-					return ret;
+					// EINTR - maybe a terminal switch was executed? Retry...
+					continue;
 				}
 				else
 				{
@@ -147,7 +168,7 @@ int legacy_nextframe(const struct gbm *gbm, const struct egl *egl)
 		/* release last buffer to render on again: */
 		gbm_surface_release_buffer(gbm->surface, bo);
 		bo = next_bo;
-		return 0;
+	return 0;
 }
 
 

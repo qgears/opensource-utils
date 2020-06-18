@@ -21,4 +21,5 @@ public class KMSGLNative {
 	protected native int getBufferParam(int devIndex, int bufferIndex, int paramIndex);
 	protected native int getCurrentFrontBufferIndex(int devIndex);
 	protected native void dispose();
+	protected native int handleVTSwitch();
 }

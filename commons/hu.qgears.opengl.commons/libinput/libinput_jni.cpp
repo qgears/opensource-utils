@@ -89,7 +89,6 @@ METHODPREFIX(CLASS, jint, poll)(ST_ARGS)
   plijni->currWriteInputEvent=0;
   while ((event = libinput_get_event(plijni->li)) != NULL)
   {
-    fflush(stdout);
     switch(libinput_event_get_type(event))
     {
     	case LIBINPUT_EVENT_KEYBOARD_KEY:

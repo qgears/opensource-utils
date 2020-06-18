@@ -12,9 +12,10 @@ public class Libinput {
 	public final UtilEvent<LibinputEvent> event=new UtilEvent<LibinputEvent>();
 	public final UtilEvent<LibinputEvent> keyboard=new UtilEvent<LibinputEvent>();
 	public final UtilEvent<LibinputEvent> pointer=new UtilEvent<LibinputEvent>();
+	private boolean away;
 	public Libinput()
 	{
-		LibinputInstance.getInstance();
+		LibinputAccessor.getInstance();
 		n=new LibinputNative();
 		n.init();
 		bb=n.getInputBuffer();
@@ -30,27 +31,33 @@ public class Libinput {
 		int N=n.poll();
 		bb.clear();
 		bb.limit(strip*N);
-		for(int i=0;i<N;++i)
+		if(!away)
 		{
-			bb.position(strip*i);
-			ELibinputEventType type=ELibinputEventType.values()[bb.getInt()];
-			ev.type=type;
-			ev.a=bb.getInt();
-			ev.b=bb.getInt();
-			ev.c=bb.getInt();
-			ev.da=bb.getDouble();
-			ev.db=bb.getDouble();
-			event.eventHappened(ev);
-			switch(type)
+			for(int i=0;i<N;++i)
 			{
-			case key:	// keyboard
-				keyboard.eventHappened(ev);
-				break;
-			case pointerMotion: // Pointer motion
-			case pointerButton: // Pointer motion
-				pointer.eventHappened(ev);
-				break;
+				bb.position(strip*i);
+				ELibinputEventType type=ELibinputEventType.values()[bb.getInt()];
+				ev.type=type;
+				ev.a=bb.getInt();
+				ev.b=bb.getInt();
+				ev.c=bb.getInt();
+				ev.da=bb.getDouble();
+				ev.db=bb.getDouble();
+				event.eventHappened(ev);
+				switch(type)
+				{
+				case key:	// keyboard
+					keyboard.eventHappened(ev);
+					break;
+				case pointerMotion: // Pointer motion
+				case pointerButton: // Pointer motion
+					pointer.eventHappened(ev);
+					break;
+				}
 			}
 		}
+	}
+	public void switchedAway(boolean away) {
+		this.away=away;
 	}
 }

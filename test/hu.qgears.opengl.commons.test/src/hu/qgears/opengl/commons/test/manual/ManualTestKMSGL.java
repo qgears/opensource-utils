@@ -1,7 +1,6 @@
 package hu.qgears.opengl.commons.test.manual;
 
 import hu.qgears.commons.UtilEventListener;
-import hu.qgears.images.SizeInt;
 import hu.qgears.opengl.kmsgl.KMSGL;
 import hu.qgears.opengl.libinput.Libinput;
 import hu.qgears.opengl.libinput.LibinputEvent;

@@ -2,3 +2,8 @@
 
 Switches screen into graphics mode and creates a double buffered vsynced environment.
 Drawing is implemented in software into a framebuffer.
+
+== TODOs
+
+Reliable VT switching.
+Hangle edge cases: VT invisible when launched, VT invisible when terminated 

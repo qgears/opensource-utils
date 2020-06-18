@@ -9,10 +9,6 @@
 		</exec>
 	</target>
 	<target name="jnigen">
-		<mkdir dir="generated"/>
-		<javah class="hu.qgears.opengl.libinput.LibinputNative"
-			classpath="../bin"
-			destdir="./generated"
-			/>
+		<!-- TODO call jnigen of all -->
 	</target>
 </project>

@@ -9,9 +9,10 @@ import hu.qgears.opengl.commons.IGlContextProvider;
 import hu.qgears.opengl.commons.input.EMouseButton;
 import hu.qgears.opengl.commons.input.IKeyboard;
 import hu.qgears.opengl.commons.input.IMouse;
+import hu.qgears.opengl.fakejawt.FakeJawtInstance;
 import hu.qgears.opengl.libinput.Libinput;
+import hu.qgears.opengl.libinput.LibinputAccessor;
 import hu.qgears.opengl.libinput.LibinputEvent;
-import hu.qgears.opengl.libinput.LibinputInstance;
 import hu.qgears.opengl.libinput.LibinputKeyboard;
 import hu.qgears.opengl.libinput.LibinputMouse;
 import lwjgl.standalone.BaseAccessor;
@@ -24,13 +25,18 @@ public class GlContextProviderKMSGL implements IGlContextProvider
 	private Libinput li;
 	private KMSGL kms;
 	private SizeInt size=new SizeInt(0, 0);
+	/**
+	 * Debug feature - disable libinput totally.
+	 */
+	private boolean disableInput=false;
 
 	@Override
 	public void loadNatives() {
+		FakeJawtInstance.getInstance();
 		BaseAccessor.noX11=true;
 		BaseAccessor.initLwjglNatives();
 		KMSGLInstance.getInstance();
-		LibinputInstance.getInstance();
+		LibinputAccessor.getInstance();
 	}
 
 	@Override
@@ -40,17 +46,20 @@ public class GlContextProviderKMSGL implements IGlContextProvider
 
 	@Override
 	public void init() {
-		li=new Libinput();
-		li.keyboard.addListener(new UtilEventListener<LibinputEvent>() {
-			
-			@Override
-			public void eventHappened(LibinputEvent msg) {
-				if(msg.a==1)
-				{
-					exit=true;
+		if(!disableInput)
+		{
+			li=new Libinput();
+			li.keyboard.addListener(new UtilEventListener<LibinputEvent>() {
+				
+				@Override
+				public void eventHappened(LibinputEvent msg) {
+					if(msg.a==1)
+					{
+						exit=true;
+					}
 				}
-			}
-		});
+			});
+		}
 		kms=new KMSGL();
 	}
 
@@ -70,20 +79,47 @@ public class GlContextProviderKMSGL implements IGlContextProvider
 
 	@Override
 	public boolean isVisible() {
-		// TODO feedback switch of console to other application
-		return true;
+		return kms.isVisible();
 	}
 
 	@Override
 	public boolean isDirty() {
-		return false;
+		return kms.isDirty();
 	}
 
 	@Override
 	public void processMessages() {
-		li.poll();
+		periodicTasks();
 	}
 
+	private void periodicTasks()
+	{
+		int vtSwRes=kms.handleVTSwitch();
+		switch (vtSwRes) {
+		case 0:
+			// Nothing to do
+			break;
+		case 1:
+			if(li!=null)
+			{
+				li.switchedAway(true);
+			}
+			break;
+		case 2:
+			// Switch back
+			if(li!=null)
+			{
+				li.switchedAway(false);
+			}
+			break;
+		default:
+			break;
+		}
+		if(li!=null)
+		{
+			li.poll();
+		}
+	}
 	@Override
 	public void update() {
 		if(mouse.isButtonDown(EMouseButton.LEFT))
@@ -93,7 +129,7 @@ public class GlContextProviderKMSGL implements IGlContextProvider
 		}
 //		im.setPixel(mouse.getX(), mouse.getY(), RGBAColor.WHITE);
 		kms.swapBuffers();
-		li.poll();
+		periodicTasks();
 	}
 
 	@Override

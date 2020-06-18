@@ -55,6 +55,14 @@ JNIEXPORT jint JNICALL Java_hu_qgears_opengl_kmsgl_KMSGLNative_getCurrentFrontBu
 JNIEXPORT void JNICALL Java_hu_qgears_opengl_kmsgl_KMSGLNative_dispose
   (JNIEnv *, jobject);
 
+/*
+ * Class:     hu_qgears_opengl_kmsgl_KMSGLNative
+ * Method:    handleVTSwitch
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_hu_qgears_opengl_kmsgl_KMSGLNative_handleVTSwitch
+  (JNIEnv *, jobject);
+
 #ifdef __cplusplus
 }
 #endif

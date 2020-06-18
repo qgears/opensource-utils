@@ -1,10 +1,10 @@
 package hu.qgears.opengl.kmsgl;
 
-import hu.qgears.nativeloader.UtilNativeLoader;
-import hu.qgears.opengl.kms.KMSAccessor;
-import hu.qgears.opengl.kms.KMSInstance;
+import java.io.File;
 
-public class KMSGLInstance {
+import hu.qgears.nativeloader.XmlNativeLoader3;
+
+public class KMSGLInstance extends XmlNativeLoader3 {
 	private static KMSGLInstance instance=new KMSGLInstance();
 
 	public static KMSGLInstance getInstance() {
@@ -12,7 +12,12 @@ public class KMSGLInstance {
 	}
 	private KMSGLInstance()
 	{
-		UtilNativeLoader.loadNatives(new KMSGLAccessor());
+		load();
+	}
+
+	@Override
+	public void load(File nativeLibFile) throws Throwable {
+		Runtime.getRuntime().load(nativeLibFile.getAbsolutePath());
 	}
 
 }
