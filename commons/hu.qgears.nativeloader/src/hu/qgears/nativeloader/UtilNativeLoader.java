@@ -40,18 +40,14 @@ public class UtilNativeLoader {
 	 * Tells whether the running JVM is 32 or 64 bit, allowing to properly
 	 * choose which versions of native libraries to load. 
 	 * Note that this might break in the future and is NOT usable in sandboxed
-	 * environments, as some state. See the following pages for more information:
-	 * <ul>
-	 * <li>{@linkplain http://www.oracle.com/technetwork/java/hotspotfaq-138619.html#64bit_detection}</li>
-	 * <li>{@linkplain http://stackoverflow.com/a/12105297}</li>
-	 * </ul>
+	 * environments, as some state. 
 	 * <br/>
 	 * This variable overrides the value queried by the 'os.arch' system 
 	 * property when determining which native lib to load:
 	 * <ul>
-	 * <li>32 -> i386</li>
-	 * <li>64 -> amd64</li>
-	 * <li>null (unknown) -> value of 'os.arch' system property
+	 * <li>32 -&gt; i386</li>
+	 * <li>64 -&gt; amd64</li>
+	 * <li>null (unknown) -&gt; value of 'os.arch' system property
 	 * </ul>
 	 */
 	public static final String dataModelSysProp = System.getProperty("sun.arch.data.model");
@@ -78,7 +74,6 @@ public class UtilNativeLoader {
 	/**
 	 * Load natives. See head comment of the class.
 	 * 
-	 * @param clazz
 	 * @throws Throwable
 	 */
 	public static void loadNatives(INativeLoader nativeLoader)

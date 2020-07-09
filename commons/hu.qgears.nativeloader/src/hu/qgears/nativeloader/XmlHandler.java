@@ -26,16 +26,15 @@ public class XmlHandler extends DefaultHandler {
 		/** 
 		 * Optional XML {@link #EL_PLATFORM platform} tag parameter for 
 		 * identifying the Linux distribution. It will be matched with the 
-		 * {@link #OS_RELEASE_PROPNAME_ID ID} entry in the 
-		 * {@code /etc/os-release} file.
+		 * {@code ID} entry in the {@code /etc/os-release} file.
 		 */
 		public static final String AT_LINUX_DISTRO_ID = "distroId";
 		/** 
-		 * Optional XML {@link #EL_PLATFORM platform} parameter for identifying
+		 * Optional XML {@link #EL_PLATFORM platform} tag parameter for identifying
 		 * the version of a Linux distribution. It will be matched with the 
-		 * {@link #OS_RELEASE_PROPNAME_VERSION_ID VERSION_ID} entry in the 
-		 * {@code /etc/os-release} file. Note that the value of the entry 
-		 * contains starting and trailing quotation marks.
+		 * {@code VERSION_ID} entry in the {@code /etc/os-release} file. Note 
+		 * that the value of the entry contains starting and trailing quotation
+		 * marks.
 		 */
 		public static final String AT_LINUX_DISTRO_VERSION_ID = "distroVersion";
 		public static final String EL_LIBRARY = "lib";
