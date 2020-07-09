@@ -64,10 +64,9 @@ public class ConnectStreams extends Thread {
 	 * Copy all data from input stream to the output stream using this thread.
 	 * Buffer size is the default specified in {@link UtilFile}
 	 * Target is not closed after consuming input.
-	 * @param source
-	 * @param target
-	 * @param bufferSize size of the buffer used when copying
-	 * @throws IOException
+	 * @param source data is read from this stream
+	 * @param target data is written to this stream
+	 * @throws IOException passed up from {@link #doStream(InputStream, OutputStream, boolean, int)}
 	 */
 	public static void doStream(final InputStream source,
 			final OutputStream target) throws IOException {
