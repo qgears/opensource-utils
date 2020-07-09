@@ -11,6 +11,6 @@ Bundle-Classpath: .,classes/
 Require-Bundle: hu.qgears.nativeloader;bundle-version="1.0.0";visibili
  ty:=reexport,org.apache.log4j;bundle-version="1.2.0"
 Bundle-ManifestVersion: 2
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: Q-Gears Kft.
 
