@@ -1,5 +1,7 @@
 package hu.qgears.images.text;
 
+import java.util.Locale;
+
 import hu.qgears.commons.UtilString;
 import hu.qgears.images.NativeImage;
 
@@ -16,6 +18,8 @@ import hu.qgears.images.NativeImage;
  * @since 3.0
  */
 public class RGBAColor {
+	private static final String hahstagColorFormat = "#%02x%02x%02x";
+
 	/**
 	 * Color constant of white.
 	 */
@@ -158,6 +162,15 @@ public class RGBAColor {
 			return "rgba("+r+","+g+","+b+","+(TO_FLOAT_MULTIPLIER * a)+")";
 		}
 	}
+	/**
+	 * Converts this color to '#DEADBE' format (css notation).
+	 * @return
+	 */
+	public String toHashTagCssNotation(){
+		String s = String.format((Locale) null, hahstagColorFormat, r,
+				g, b);
+		return s;
+	}
 	
 	/**
 	 * Converts this DTO to float vector representation. The length of returned
@@ -183,6 +196,11 @@ public class RGBAColor {
 			throw new IllegalArgumentException("Color coordinate is out of range [0,1] : "+a_f);
 		}
 	}
+	private static void assertValidFloat(double a_f) {
+		if (a_f < 0f || a_f > 1f){
+			throw new IllegalArgumentException("Color coordinate is out of range [0,1] : "+a_f);
+		}
+	}
 	private static void assertValidInt(int c) {
 		if (c < 0 || c > 255){
 			throw new IllegalArgumentException("Color coordinate is out of range [0,255] : "+c);
@@ -201,6 +219,19 @@ public class RGBAColor {
 	public static int toInt(float parseFloat) {
 		assertValidFloat(parseFloat);
 		return Math.round((parseFloat / TO_FLOAT_MULTIPLIER));
+	}
+	/**
+	 * Scales 0..1 double floating point color coordinate to 0..255 integer coordinate.
+	 * 
+	 * 
+	 * @param parseFloat The double color coordinate to parse as int.
+	 * @return
+	 * @throws IllegalArgumentException if specified float value is not between 0..1
+	 * 
+	 */
+	public static int toInt(double parseFloat) {
+		assertValidFloat(parseFloat);
+		return (int)Math.round((parseFloat / TO_FLOAT_MULTIPLIER));
 	}
 	/**
 	 * Parse a CSS notation color string. Handles rgb(...), rgba(...) and #... formats

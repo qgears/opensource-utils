@@ -26,4 +26,8 @@ public class VncEvent {
 	public int getPointerY() {
 		return bb.getShort(4)&0xffff;
 	}
+	public int getKey()
+	{
+		return bb.getInt(4);
+	}
 }

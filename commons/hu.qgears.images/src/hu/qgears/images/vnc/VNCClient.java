@@ -32,7 +32,7 @@ import org.apache.log4j.Logger;
  * @author rizsi
  *
  */
-public class VNCClient {
+public class VNCClient implements AutoCloseable {
 	private static final Logger LOG = Logger.getLogger(VNCClient.class);
 	
 	private ENativeImageComponentOrder componentOrder;
@@ -74,7 +74,8 @@ public class VNCClient {
 	/**
 	 * Stop the VNC client and free all resources.
 	 */
-	public void dispose()
+	@Override
+	public void close()
 	{
 		synchronized (this) {
 			exit=true;
@@ -448,6 +449,11 @@ public class VNCClient {
 	protected void released() {
 		lock.unlock();
 	}
+	/**
+	 * Send a key press and release event (two events) to the server.
+	 * @param code keycode that is pressed. (See RFB specification for valid codes)
+	 * @param timeStamp ignored
+	 */
 	public void keyboardEvent(int code, long timeStamp) throws IOException {
 		if(connected)
 		{
@@ -462,6 +468,25 @@ public class VNCClient {
 				sendByteBuffer.clear();
 				sendByteBuffer.put((byte)4);
 				sendByteBuffer.put((byte)0);
+				sendByteBuffer.putShort((short)0);
+				sendByteBuffer.putInt(code);
+				sendByteBuffer.flip();
+				UtilChannel.writeNBytes(channel, sendByteBuffer);
+			}
+		}
+	}
+	/**
+	 * Send a key press or release event to the server.
+	 * @param code keycode that is pressed or released (See RFB specification for valid codes)
+	 * @param down true sends key down, false sends key up event.
+	 */
+	public void keyboardEvent(int code, boolean down) throws IOException {
+		if(connected)
+		{
+			synchronized (sendByteBuffer) {
+				sendByteBuffer.clear();
+				sendByteBuffer.put((byte)4);
+				sendByteBuffer.put((byte)(down?1:0));
 				sendByteBuffer.putShort((short)0);
 				sendByteBuffer.putInt(code);
 				sendByteBuffer.flip();
