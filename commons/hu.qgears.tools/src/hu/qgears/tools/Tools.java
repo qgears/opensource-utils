@@ -24,5 +24,6 @@ public class Tools extends AbstractTools {
 		register(new SvnDiff());
 		register(new RTemplateStandalone());
 		register(new LogPortForward());
+		register(new TiffImageCompare());
 	}
 }
