@@ -12,17 +12,22 @@ import java.io.PipedOutputStream;
 public class JavaPipeConnection implements IConnection{
 	private PipedInputStream is;
 	private PipedOutputStream os;
-	public JavaPipeConnection(PipedInputStream is, PipedOutputStream os) {
-		this.is=is;
-		this.os=os;
+
+	
+	public JavaPipeConnection() throws IOException {
+		is=new PipedInputStream();
+		os=new PipedOutputStream();
+		is.connect(os);
+		os.connect(is);
 	}
+
 	/**
 	 * Create a Java pipe connection based on a new instance of an input and an output stream already connected.
 	 * @throws IOException
 	 */
-	public JavaPipeConnection() throws IOException {
-		this.is=new PipedInputStream();
-		this.os=new PipedOutputStream(is);
+	public JavaPipeConnection(PipedInputStream is, PipedOutputStream os) {
+		this.is=is;
+		this.os=os;
 	}
 
 	@Override
