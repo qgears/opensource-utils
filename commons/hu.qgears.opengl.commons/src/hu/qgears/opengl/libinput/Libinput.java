@@ -21,7 +21,7 @@ public class Libinput {
 		bb=n.getInputBuffer();
 		bb.order(ByteOrder.nativeOrder());
 		strip=n.getInputBufferStrip();
-		System.out.println("Strip: "+strip);
+		// System.out.println("Libinput strip: "+strip);
 	}
 	public void dispose() {
 		n.dispose();
@@ -36,7 +36,8 @@ public class Libinput {
 			for(int i=0;i<N;++i)
 			{
 				bb.position(strip*i);
-				ELibinputEventType type=ELibinputEventType.byOrdinal(bb.getInt());
+				int typeInt=bb.getInt();
+				ELibinputEventType type=ELibinputEventType.byOrdinal(typeInt);
 				ev.type=type;
 				ev.a=bb.getInt();
 				ev.b=bb.getInt();
@@ -44,16 +45,21 @@ public class Libinput {
 				ev.da=bb.getDouble();
 				ev.db=bb.getDouble();
 				event.eventHappened(ev);
-				switch(type)
+				if(type!=null)
 				{
-				case key:	// keyboard
-					keyboard.eventHappened(ev);
-					break;
-				case pointerMotion: // Pointer motion
-				case pointerAbsolute: // Pointer motion
-				case pointerButton: // Pointer motion
-					pointer.eventHappened(ev);
-					break;
+					switch(type)
+					{
+					case key:	// keyboard
+						keyboard.eventHappened(ev);
+						break;
+					case pointerMotion: // Pointer motion
+					case pointerAbsolute: // Pointer motion
+					case pointerButton: // Pointer motion
+						pointer.eventHappened(ev);
+						break;
+					}
+				}else
+				{
 				}
 			}
 		}

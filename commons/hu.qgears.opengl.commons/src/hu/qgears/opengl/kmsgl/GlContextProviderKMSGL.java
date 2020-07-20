@@ -68,6 +68,7 @@ public class GlContextProviderKMSGL implements IGlContextProvider
 		kms.enterKmsFullscreen();
 		this.size=kms.getSize();
 		mouse.init(size, li);
+		keyboard.init(li);
 		this.size=size;
 		GLContext.useContext(kms);
 	}

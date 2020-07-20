@@ -68,6 +68,7 @@ public class GlContextProviderOsMesaKMS implements IGlContextProvider
 		kms.enterKmsFullscreen();
 		this.size=kms.getCurrentBackBuffer().getSize();
 		mouse.init(size, li);
+		keyboard.init(li);
 		osMesa=new OSMesa();
 		osMesa.createContext(ENativeImageComponentOrder.BGRA);
 		this.size=size;
