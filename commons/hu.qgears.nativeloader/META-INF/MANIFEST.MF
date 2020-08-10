@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Export-Package: hu.qgears.nativeloader
 Bundle-SymbolicName: hu.qgears.nativeloader
-Bundle-Version: 8.0.0.qualifier
+Bundle-Version: 8.1.0.qualifier
 Bundle-Name: Nativeloader
 Require-Bundle: hu.qgears.commons;bundle-version="2.0.0",org.apache.lo
  g4j;bundle-version="1.2.0"
