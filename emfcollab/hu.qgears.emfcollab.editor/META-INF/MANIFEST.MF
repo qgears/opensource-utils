@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Export-Package: hu.qgears.emfcollab.editor
 Bundle-SymbolicName: hu.qgears.emfcollab.editor;singleton:=true
-Bundle-Version: 7.2.1.qualifier
+Bundle-Version: 8.0.0.qualifier
 Bundle-Name: Editor
 Require-Bundle: org.eclipse.ui,org.eclipse.core.runtime,org.eclipse.co
  re.resources;visibility:=reexport,hu.qgears.emfcollab;bundle-version=
@@ -11,6 +11,6 @@ Require-Bundle: org.eclipse.ui,org.eclipse.core.runtime,org.eclipse.co
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: hu.qgears.emfcollab.editor.internal.Activator
 Bundle-ManifestVersion: 2
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: Q-Gears Kft.
 

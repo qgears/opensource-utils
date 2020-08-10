@@ -291,8 +291,7 @@ public final class UtilFile {
 	 * Load the content of <code>File</code> into a string. The input file must
 	 * be UTF-8 encoded.
 	 * 
-	 * @param is
-	 * @return
+	 * @return the contents of the file as a string
 	 * @throws IOException
 	 */
 	public static String loadAsString(File f) throws IOException {
@@ -362,8 +361,8 @@ public final class UtilFile {
 	 * Load the content from the <code>URL</code> into a string. The input must
 	 * be UTF-8 encoded.
 	 * 
-	 * @param is
-	 * @return
+	 * @return the contents as a String that could be retrieved from the 
+	 * specified URL
 	 * @throws IOException
 	 */
 	public static String loadAsString(URL url) throws IOException {

@@ -26,17 +26,23 @@
 	</target>
 	<target name="jnigen">
 		<mkdir dir="generated"/>
-		<javah class="hu.qgears.images.libpng.NativeLibPngConnector"
+		<mkdir dir="/tmp/jni-tmp"/>
+		<javac
+			includeantruntime="false"
+			destdir="/tmp/jni-tmp"
+			srcdir="../src/hu/qgears/images/libpng/"
+			includes="NativeLibPngConnector.java"
 			classpath="../bin:${env.QGEARSDEPS}"
-			destdir="./libpng"
+			nativeheaderdir="./libpng"
 			/>
-	 	<javah class="hu.qgears.images.tiff.NativeTiffLoaderConnector"
+	 	<javac
+			includeantruntime="false"
+			destdir="/tmp/jni-tmp"
+			srcdir="../src/hu/qgears/images/tiff/"
+	 		includes="*Connector.java"
 			classpath="../bin:${env.QGEARSDEPS}"
-			destdir="./tiff/jni"
-			/> 
-	 	<javah class="hu.qgears.images.tiff.ImageDataConnector"
-			classpath="../bin:${env.QGEARSDEPS}"
-			destdir="./tiff/jni"
+	 		nativeheaderdir="./tiff/jni"
 			/>
+		<delete dir="/tmp/jni-tmp"/>
 	</target>
 </project>

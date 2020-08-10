@@ -17,7 +17,7 @@ public interface INativeLoader {
 	 * Load the native library in the file given as parameter. Implementation
 	 * must be: Runtime.getRuntime().load(nativeLibFile.getAbsolutePath());
 	 * 
-	 * @param g
+	 * @param nativeLibFile the native library file
 	 * @throws Throwable
 	 */
 	void load(File nativeLibFile) throws Throwable;

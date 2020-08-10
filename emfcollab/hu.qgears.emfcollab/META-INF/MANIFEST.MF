@@ -7,13 +7,13 @@ Export-Package: hu.qgears.emfcollab,
  hu.qgears.emfcollab.srv,
  hu.qgears.emfcollab.util
 Bundle-SymbolicName: hu.qgears.emfcollab
-Bundle-Version: 7.2.1.qualifier
+Bundle-Version: 8.0.0.qualifier
 Bundle-Name: Emfcollab Plug-in
 Require-Bundle: org.eclipse.emf;bundle-version="2.4.0";visibility:=reexport,
  org.eclipse.emf.ecore;bundle-version="2.4.0";visibility:=reexport,
  org.eclipse.emf.ecore.xmi;bundle-version="2.4.0";visibility:=reexport,
  hu.qgears.commons;bundle-version="2.0.0";visibility:=reexport
 Bundle-ManifestVersion: 2
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: Q-Gears Kft.
 

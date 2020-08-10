@@ -360,6 +360,11 @@ METHODPREFIX(PNGCLASS, void, beginLoad)(ST_ARGS, jobject dataBuffer)
 		JNU_ThrowByName(env, EXCCLASS, "png_create_info_struct failed");
 		return;
 	}
+#if defined(PNG_SKIP_sRGB_CHECK_PROFILE) && \
+    defined(PNG_SET_OPTION_SUPPORTED)
+   png_set_option(str->png_ptr, PNG_SKIP_sRGB_CHECK_PROFILE,
+       PNG_OPTION_ON);
+#endif
 	png_set_read_fn(str->png_ptr, str, read_data);
 	png_set_sig_bytes(str->png_ptr, 0);
 
