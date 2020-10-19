@@ -7,17 +7,16 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
 
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.apache.log4j.Logger;
 import org.xml.sax.Attributes;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
-import org.xml.sax.helpers.XMLReaderFactory;
 
 /**
- * NativeLoader which parses an XML file to find the native libraries to load depending on
- * the OS.
+ * NativeLoader which parses an XML file to find the native libraries to load 
+ * depending on the OS.
  * 
  * @author rizsi
  * 
@@ -131,27 +130,17 @@ public abstract class XmlNativeLoader3 implements INativeLoader {
 	}
 
 	private void parseUsingHandler(URL resource, DefaultHandler handler) {
-		try {
-			XMLReader reader = XMLReaderFactory.createXMLReader();
-			InputStream istream = resource.openStream();
-			try
-			{
-				InputSource isource = new InputSource(istream);
-				reader.setContentHandler(handler);
-				reader.parse(isource);
-			}finally
-			{
-				istream.close();
-			}
-		} catch (SAXException e) {
-			throw new NativeLoadException(e);
-		} catch (IOException e) {
+		try (final InputStream istream = resource.openStream()) {
+			UtilNativeLoader.createSAXParser().parse(istream, handler);
+		} catch (SAXException | ParserConfigurationException | IOException e) {
 			throw new NativeLoadException(e);
 		}
 	}
+	
 	/**
 	 * Load the native library.
-	 * On a singleton instance this method is re-callable: only the first call will load the library.
+	 * On a singleton instance this method is re-callable: only the first call 
+	 * will load the library.
 	 */
 	public void load() {
 		synchronized (this) {

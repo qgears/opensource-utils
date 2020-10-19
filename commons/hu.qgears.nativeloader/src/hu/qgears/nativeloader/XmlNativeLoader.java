@@ -7,20 +7,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Properties;
-import java.util.Set;
-import java.util.Stack;
 
-import org.xml.sax.Attributes;
-import org.xml.sax.InputSource;
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.DefaultHandler;
-import org.xml.sax.helpers.XMLReaderFactory;
 
 /**
  * NativeLoader which fetches library data from an XML file.
@@ -239,38 +230,19 @@ public abstract class XmlNativeLoader implements INativeLoader {
 			return match;
 		}
 		
-		/**
-		 * @return the arch
-		 */
-		public String getArch() {
-			return arch;
-		}
-
-		/**
-		 * @return the os
-		 */
-		public String getOs() {
-			return os;
-		}
-		
 	}
 	
 	@Override
 	public NativesToLoad getNatives(String arch, String os)
 			throws NativeLoadException {
 		loadOsReleaseFile(os);
-		XmlHandler handler = new OsAndArchAwareXmlHandler(arch, os);
-		try {
-			XMLReader reader = XMLReaderFactory.createXMLReader();
-			InputStream istream = getClass().getResourceAsStream(getNativesDeclarationResourceName());
-			InputSource isource = new InputSource(istream);
-			reader.setContentHandler(handler);
-			reader.parse(isource);
-		} catch (SAXException e) {
-			throw new NativeLoadException(e);
-		} catch (IOException e) {
+		final XmlHandler handler = new OsAndArchAwareXmlHandler(arch, os);
+		try (final InputStream istream = getClass().getResourceAsStream(
+				getNativesDeclarationResourceName())) { 
+			UtilNativeLoader.createSAXParser().parse(istream, handler);
+		} catch (SAXException | ParserConfigurationException | IOException e) {
 			throw new NativeLoadException(e);
 		}
-		return new NativesToLoad(handler.getNatives(), handler.sources);
+		return new NativesToLoad(handler.getNatives());
 	}
 }

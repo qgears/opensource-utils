@@ -4,7 +4,15 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
+import javax.xml.XMLConstants;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
 import org.apache.log4j.Logger;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXNotRecognizedException;
+import org.xml.sax.SAXNotSupportedException;
 
 import hu.qgears.commons.UtilFile;
 
@@ -149,4 +157,29 @@ public class UtilNativeLoader {
 		}
 		return directory;
 	}
+
+	/**
+	 * Creates a {@link SAXParser SAX parser} suitable for secure processing 
+	 * of the native load XML files.
+	 * @return a secure {@link SAXParser} instance
+	 * @throws ParserConfigurationException
+	 * 		passed up if the SAX parser cannot be created
+	 * @throws SAXNotRecognizedException
+	 * 		passed up if the SAX parser cannot be created
+	 * @throws SAXNotSupportedException
+	 * 		passed up if the SAX parser cannot be created
+	 * @throws SAXException
+	 * 		passed up if the SAX parser cannot be created
+	 */
+	public static SAXParser createSAXParser()
+			throws ParserConfigurationException, SAXNotRecognizedException, 
+				SAXNotSupportedException, SAXException {
+		final SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
+		
+		saxParserFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+		saxParserFactory.setNamespaceAware(true);
+		
+		return saxParserFactory.newSAXParser();
+	}
+
 }
