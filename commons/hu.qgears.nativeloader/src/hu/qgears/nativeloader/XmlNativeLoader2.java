@@ -89,7 +89,7 @@ public abstract class XmlNativeLoader2 implements INativeLoader {
 	
 	class ImplHandler extends DefaultHandler
 	{
-		public List<NativeBinary> result;
+		private List<NativeBinary> result;
 		private String prefix;
 		public ImplHandler(String prefix) {
 			super();
