@@ -1,9 +1,0 @@
-Manifest-Version: 1.0
-Bundle-ManifestVersion: 2
-Bundle-Name: Customized Ecore generator templates
-Bundle-SymbolicName: hu.qgears.ecore.templates
-Bundle-Version: 1.0.0.qualifier
-Bundle-Vendor: Q-Gears
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Require-Bundle: org.eclipse.emf.codegen.ecore
-Export-Package: hu.qgears.ecore.templates
