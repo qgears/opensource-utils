@@ -176,7 +176,7 @@ public class UtilNativeLoader {
 				SAXNotSupportedException, SAXException {
 		final SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
 		
-		// Security; source:
+		// Security settings; source:
 		// https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html#jaxp-documentbuilderfactory-saxparserfactory-and-dom4j
 		saxParserFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
 		saxParserFactory.setFeature(
@@ -186,6 +186,8 @@ public class UtilNativeLoader {
 		saxParserFactory.setFeature(
 				"http://apache.org/xml/features/nonvalidating/load-external-dtd", 
 				false); // Just to make sure
+		saxParserFactory.setFeature(
+				"http://apache.org/xml/features/disallow-doctype-decl", true);
 		saxParserFactory.setXIncludeAware(false);
 		
 		// Etc. functional settings
