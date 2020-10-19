@@ -1,6 +1,6 @@
 package hu.qgears.nativeloader;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -12,15 +12,11 @@ public class NativesToLoad {
 	private List<NativeBinary> binaries;
 	
 	public NativesToLoad(List<NativeBinary> binaries) {
-		super();
-		this.binaries = binaries;
+		this.binaries = Collections.unmodifiableList(binaries);
 	}
-	public NativesToLoad() {
-		super();
-		this.binaries = new ArrayList<NativeBinary>();
-	}
+	
 	public List<NativeBinary> getBinaries() {
-		return binaries;
+		return Collections.unmodifiableList(binaries);
 	}
 	
 }

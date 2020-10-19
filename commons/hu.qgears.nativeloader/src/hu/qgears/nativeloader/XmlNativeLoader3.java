@@ -3,7 +3,9 @@ package hu.qgears.nativeloader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.Stack;
 
@@ -34,7 +36,7 @@ public abstract class XmlNativeLoader3 implements INativeLoader {
 	protected class ImplementationsHandler extends DefaultHandler
 	{
 		private String prefix="";
-		public NativesToLoad nativesToLoad=new NativesToLoad();
+		public List<NativeBinary> nativesToLoad=new ArrayList<>();
 		private Stack<Boolean> loadThis=new Stack<>();
 		public ImplementationsHandler() {
 			loadThis.push(true);
@@ -91,7 +93,7 @@ public abstract class XmlNativeLoader3 implements INativeLoader {
 					final String id = idCandidate == null ? path : idCandidate;
 					final String installPath=attributes.getValue("installPath");
 					if (!loadedLibIds.contains(id)) {
-						nativesToLoad.getBinaries().add(new NativeBinary(id, path, installPath));
+						nativesToLoad.add(new NativeBinary(id, path, installPath));
 						loadedLibIds.add(id);
 					}
 				}
@@ -105,7 +107,10 @@ public abstract class XmlNativeLoader3 implements INativeLoader {
 				loadThis.pop();
 			}
 		}
-		
+		public NativesToLoad getNativesToLoad() {
+			return new NativesToLoad(nativesToLoad);
+		}
+
 	}
 	
 	/**
@@ -126,7 +131,7 @@ public abstract class XmlNativeLoader3 implements INativeLoader {
 			throws NativeLoadException {
 		ImplementationsHandler handler = new ImplementationsHandler();
 		parseUsingHandler(getClass().getResource(getNativesDeclarationResourceName()), handler);
-		return handler.nativesToLoad;
+		return handler.getNativesToLoad();
 	}
 
 	private void parseUsingHandler(URL resource, DefaultHandler handler) {
