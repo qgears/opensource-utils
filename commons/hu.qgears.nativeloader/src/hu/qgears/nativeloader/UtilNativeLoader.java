@@ -176,7 +176,19 @@ public class UtilNativeLoader {
 				SAXNotSupportedException, SAXException {
 		final SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
 		
+		// Security; source:
+		// https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html#jaxp-documentbuilderfactory-saxparserfactory-and-dom4j
 		saxParserFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+		saxParserFactory.setFeature(
+				"http://xml.org/sax/features/external-general-entities", false);
+		saxParserFactory.setFeature(
+				"http://xml.org/sax/features/external-parameter-entities", false);
+		saxParserFactory.setFeature(
+				"http://apache.org/xml/features/nonvalidating/load-external-dtd", 
+				false); // Just to make sure
+		saxParserFactory.setXIncludeAware(false);
+		
+		// Etc. functional settings
 		saxParserFactory.setNamespaceAware(true);
 		
 		return saxParserFactory.newSAXParser();
