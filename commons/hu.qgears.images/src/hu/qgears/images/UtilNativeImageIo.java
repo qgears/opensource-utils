@@ -266,14 +266,15 @@ public class UtilNativeImageIo {
 	/**
 	 * Undo alpha premultiplication on a native image.
 	 * 
-	 * Handles only RGBA images.
+	 * Handles only ARGB images.
 	 * 
 	 * @param ret
 	 */
 	public static void undoPreMultipliedAlpha(NativeImage ret) {
 		if(ENativeImageComponentOrder.ARGB!=ret.getComponentOrder())
 		{
-			throw new RuntimeException("Image format not handled: "+ret.getComponentOrder());
+			throw new IllegalArgumentException("Image format not handled: "
+					+ ret.getComponentOrder());
 		}
 		ByteBuffer bb=ret.getBuffer().getJavaAccessor();
 		bb.clear();
@@ -371,6 +372,8 @@ public class UtilNativeImageIo {
 		ByteBuffer bb=nim.getBuffer().getJavaAccessor().duplicate();
 		bb.position(0);
 		bb.limit(bb.capacity());
+		// Cryptographic hash not required here
+		@SuppressWarnings("squid:S2070")
 		MessageDigest md=MessageDigest.getInstance("MD5");
 		md.update(bb);
 		return md.digest();
