@@ -36,7 +36,7 @@ public abstract class XmlNativeLoader3 implements INativeLoader {
 	protected class ImplementationsHandler extends DefaultHandler
 	{
 		private String prefix="";
-		public List<NativeBinary> nativesToLoad=new ArrayList<>();
+		private List<NativeBinary> nativesToLoad=new ArrayList<>();
 		private Stack<Boolean> loadThis=new Stack<>();
 		public ImplementationsHandler() {
 			loadThis.push(true);
