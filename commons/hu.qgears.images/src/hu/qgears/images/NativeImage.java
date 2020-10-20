@@ -51,15 +51,12 @@ public class NativeImage extends AbstractReferenceCountedDisposeable
 	 * In case the image is modified since calculation of this flag this flag will be incorrect!
 	 */
 	private int transparentOrOpaqueMask = -1;
-	/** 
-	 * The default alignment of native image rows to memory.
-	 * this means that all row start an an address that: ptrRow%defaultAlignment=0
-	 */
-	public static int defaultAlignment=1;
+
 	/**
 	 * The alignment that allows compatibility with openCV.
 	 */
-	public static int compatibleAlignment=4;
+	public static final int COMPATIBLE_ALIGNMENT = 4;
+
 	/**
 	 * Create a native image from existing data.
 	 * @param buffer see getBuffer()
@@ -325,7 +322,7 @@ public class NativeImage extends AbstractReferenceCountedDisposeable
 			nbuffer.put(pos, (byte)((b+g+r)/3));
 			break;
 		default:
-			throw new RuntimeException("Unknown component order: "+componentOrder);
+			throw new IllegalArgumentException("Unknown component order: "+componentOrder);
 		}
 	}
 	/**
@@ -457,7 +454,8 @@ public class NativeImage extends AbstractReferenceCountedDisposeable
 	 * @return
 	 */
 	public NativeImage createCopy(INativeMemoryAllocator allocator) {
-		NativeImage ret=create(getSize(), getComponentOrder(), compatibleAlignment, allocator);
+		NativeImage ret=create(getSize(), getComponentOrder(), 
+				COMPATIBLE_ALIGNMENT, allocator);
 		ret.copyFromSource(this, 0, 0);
 		return ret;
 	}
