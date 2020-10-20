@@ -6,6 +6,11 @@ import hu.qgears.images.NativeImage;
  * Snapshot of the VNC client.
  * @author rizsi
  */
+/*
+ * Sonar warning suppression: this is a simple DTO class with no actual benefit
+ * of adding getters and setters.
+ */
+@SuppressWarnings("squid:ClassVariableVisibilityCheck")
 public class VncSnapShot {
 	private VNCClient client;
 	/**
