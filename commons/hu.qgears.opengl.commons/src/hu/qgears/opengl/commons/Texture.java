@@ -46,13 +46,13 @@ public class Texture implements IDisposeable {
 	private EBlendFunc blendFunc=EBlendFunc.off;
 	private boolean disposed = false;
 	private int width, height;
-	public NativeImage sourceImage;
-	public EMipMapType sourceMipmapType;
-	public ETextureWrapType sourceTextureWrapType;
+	private NativeImage sourceImage;
+	private EMipMapType sourceMipmapType;
+	private ETextureWrapType sourceTextureWrapType;
 	/**
 	 * Use for debug purpose only: number of allocated texture objects.
 	 */
-	public static int numberOfTextures=0;
+	private static int numberOfTextures=0;
 
 	public EBlendFunc getBlendFunc() {
 		return blendFunc;
@@ -77,6 +77,18 @@ public class Texture implements IDisposeable {
 	public SizeInt getSize()
 	{
 		return new SizeInt(width, height);
+	}
+
+	public NativeImage getSourceImage() {
+		return sourceImage;
+	}
+
+	public EMipMapType getSourceMipmapType() {
+		return sourceMipmapType;
+	}
+
+	public ETextureWrapType getSourceTextureWrapType() {
+		return sourceTextureWrapType;
 	}
 
 	private Texture(int textureHandle, int w, int h, int format, int border) {
@@ -859,5 +871,14 @@ public class Texture implements IDisposeable {
 
 	public void setSamplingNear(boolean samplingNear) {
 		this.samplingNear=samplingNear;
+	}
+
+	/**
+	 * Returns the number of allocated texture objects.
+	 * Use for debug purpose only!
+	 * @return the number of allocated texture objects.
+	 */
+	public static int getNumberOfTextures() {
+		return numberOfTextures;
 	}
 }
