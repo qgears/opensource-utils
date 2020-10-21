@@ -112,9 +112,10 @@ public class KeyboardImplX11 implements IKeyboard {
 	}
 	private class KeyCodeMapping
 	{
-		public int keycode;
-		public int lwjglCode;
-		public String name;
+		private int keycode;
+		private int lwjglCode;
+		private String name;
+		
 		public KeyCodeMapping(int keycode, int lwjglCode, String name) {
 			super();
 			this.keycode = keycode;
