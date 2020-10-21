@@ -26,6 +26,8 @@ public class UtilMd5 {
 	public static String getMd5(String f)
 	{
 		try {
+			// Cryptgraphic hash is not required here, but specifically MD5 is 
+			@SuppressWarnings("squid:S2070")
 			MessageDigest m = MessageDigest.getInstance("MD5");
 			m.update(f.getBytes(StandardCharsets.UTF_8));
 			return UtilString.padLeft(new BigInteger(1, m.digest()).toString(16), HASHLENGTH, '0');
@@ -43,6 +45,8 @@ public class UtilMd5 {
 	public static String getMd5(byte[] f)
 	{
 		try {
+			// Cryptgraphic hash is not required here, but specifically MD5 is 
+			@SuppressWarnings("squid:S2070")
 			MessageDigest m = MessageDigest.getInstance("MD5");
 			m.update(f);
 			return UtilString.padLeft(new BigInteger(1, m.digest()).toString(16), HASHLENGTH, '0');
@@ -55,6 +59,8 @@ public class UtilMd5 {
 	 * Create an md5 hash digest. Exceptions are transformed to {@link RuntimeException} inside.
 	 * @return
 	 */
+	// Cryptgraphic hash is not required here, but specifically MD5 is 
+	@SuppressWarnings("squid:S2070")
 	public static MessageDigest createMd5()
 	{
 		try {
