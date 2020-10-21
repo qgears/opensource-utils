@@ -1,4 +1,4 @@
-package hu.qgears.commons;
+package hu.qgears.emfcollab.impl;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

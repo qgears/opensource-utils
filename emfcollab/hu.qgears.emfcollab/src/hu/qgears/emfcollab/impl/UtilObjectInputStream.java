@@ -1,4 +1,4 @@
-package hu.qgears.commons;
+package hu.qgears.emfcollab.impl;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
