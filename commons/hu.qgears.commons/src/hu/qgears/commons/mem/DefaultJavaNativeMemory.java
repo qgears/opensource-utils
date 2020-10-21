@@ -26,15 +26,14 @@ public class DefaultJavaNativeMemory extends AbstractReferenceCountedDisposeable
 		this.ptr=ptr;
 	}
 	
+	/*
+	 * Disallowing parallel access to the 'cleaner' and 'clean' methods as 
+	 * long as their accessibility is set to 'true'.
+	 */
+	@SuppressWarnings("squid:S3011")
 	@Override
 	protected void singleDispose() {
-		/*
-		 * Disallowing parallel access to the 'cleaner' and 'clean' methods as 
-		 * long as their accessibility is set to 'true'.
-		 */
-		@SuppressWarnings("squid:S3011")
 		Method cleanerMethod = null;
-		@SuppressWarnings("squid:S3011")
 		Method cleanMethod = null;
 		try {
 			cleanerMethod = ptr.getClass().getMethod("cleaner");
