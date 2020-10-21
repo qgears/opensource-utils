@@ -162,6 +162,8 @@ public final class UtilFile {
 	 */
 	public static String getMd5(byte[] bytes) {
 		try {
+			// Cryptgraphic hash is not required here, but specifically MD5 is 
+			@SuppressWarnings("squid:S2070")
 			MessageDigest m = MessageDigest.getInstance("MD5");
 			m.update(bytes);
 			return "" + new BigInteger(1, m.digest()).toString(16);
@@ -561,6 +563,8 @@ public final class UtilFile {
 	public static String getMD5Hash(File input,boolean useFileName) throws IOException{
 		byte[] digest = null;
 		try {
+			// Cryptgraphic hash is not required here, but specifically MD5 is 
+			@SuppressWarnings("squid:S2070")
 			MessageDigest dig = MessageDigest.getInstance("MD5");
 			if (input != null){
 				if (input.isFile()){
