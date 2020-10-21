@@ -1,14 +1,14 @@
 package hu.qgears.opengl.commons.input;
 
-import java.util.List;
-
 /**
  * Generic mouse event DTO class.
- * Stores an atomic mouse event that can be either a movement of the mouse (either normal move or drag)
- * or a movement+mouse down/up event.
+ * Stores an atomic mouse event that can be either a movement of the mouse 
+ * (either normal move or drag) or a movement+mouse down/up event.
  * @author rizsi
  *
  */
+// Suppressing warnings because of DTO class
+@SuppressWarnings("squid:ClassVariableVisibilityCheck")
 public class GlMouseEvent {
 	/** 
 	 * Location where the event has happened. X coordinate.
@@ -41,39 +41,7 @@ public class GlMouseEvent {
 	public String toString() {
 		return "["+x+", "+y+"; "+button+": "+buttonState+"]";
 	}
-	public void parseFromLog(final String macroLine, List<String> pieces)
-	{
-		nanoseconds=Long.parseLong(pieces.get(0));
-		x=Integer.parseInt(pieces.get(2));
-		y=Integer.parseInt(pieces.get(3));
-		button=EMouseButton.parseSafe(Integer.parseInt(pieces.get(4)));
-		buttonState=Boolean.parseBoolean(pieces.get(5));
-		
-		final int bracketIdx = macroLine.indexOf('[');
-		
-		affectedElementIds = bracketIdx == -1 ? null : macroLine.substring(bracketIdx);
-	}
-	public String serializeToLog(final long t, final String affectedElementIds) {
-		final StringBuilder ret=new StringBuilder();
-		
-		ret.append(""+t);
-		ret.append(" 0 ");
-		ret.append(""+x);
-		ret.append(" ");
-		ret.append(""+y);
-		ret.append(" ");
-		ret.append(""+EMouseButton.ordinalSafe(button));
-		ret.append(" ");
-		ret.append(""+buttonState);
-		
-		if (affectedElementIds != null && !affectedElementIds.isEmpty()
-				&& !"null".equals(affectedElementIds)) {
-			ret.append(" ");
-			ret.append(affectedElementIds);
-		}
-		
-		return ret.toString();
-	}
+
 	public void clone(GlMouseEvent ev) {
 		x=ev.x;
 		y=ev.y;
@@ -81,6 +49,7 @@ public class GlMouseEvent {
 		button=ev.button;
 		buttonState=ev.buttonState;
 	}
+	
 	/**
 	 * Clear the stored values on this mouse event object for reuse.
 	 */
