@@ -5,11 +5,11 @@ Export-Package: lwjgl.standalone,net.java.games.input,net.java.games.u
  l,org.lwjgl.util.glu,org.lwjgl.util.glu.tessellation,org.lwjgl.util.i
  nput,org.lwjgl.util.jinput,org.lwjgl.util.vector
 Bundle-SymbolicName: lwjgl.osgi
-Bundle-Version: 8.1.0.qualifier
+Bundle-Version: 9.0.0.qualifier
 Bundle-Name: lwjgl.osgi version 2.5.0 repackaged as osgi bundle
 Bundle-Classpath: .,classes/
-Require-Bundle: hu.qgears.nativeloader;bundle-version="1.0.0";visibili
- ty:=reexport,org.apache.log4j;bundle-version="1.2.0"
+Require-Bundle: hu.qgears.nativeloader;bundle-version="9.0.0";visibility:=reexport,
+ org.apache.log4j;bundle-version="1.2.0"
 Bundle-ManifestVersion: 2
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: Q-Gears Kft.
