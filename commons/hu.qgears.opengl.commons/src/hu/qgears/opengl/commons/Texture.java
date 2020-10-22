@@ -399,8 +399,9 @@ public class Texture implements IDisposeable {
 	}
 	
 	/**
-	 * If {@code}, disables all textures, i. e. selects texture id 0 instead 
-	 * of real textures before drawing.
+	 * If {@code true}, disables drawing textures, i. e. selects texture id 0 
+	 * instead of real textures before drawing, if {@code false}, it makes 
+	 * textures to be drawn.
 	 * Use only for performance measurement purpose.
 	 */
 	private static boolean disableAllTextures;
