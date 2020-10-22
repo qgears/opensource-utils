@@ -100,8 +100,6 @@ public class Texture implements IDisposeable {
 		this.border = border;
 	}
 
-	public static int defaultAligment = 1;
-
 	/**
 	 * Create texture object and upload the image to its content.
 	 *
@@ -401,10 +399,11 @@ public class Texture implements IDisposeable {
 	}
 	
 	/**
-	 * Disable all texture selection - select texture id 0 instead of real textures before drawing.
+	 * If {@code}, disables all textures, i. e. selects texture id 0 instead 
+	 * of real textures before drawing.
 	 * Use only for performance measurement purpose.
 	 */
-	public static boolean disableAllTextures;
+	private static boolean disableAllTextures;
 	
 	private void bindThisTexture() {
 		if(disableAllTextures)
@@ -880,5 +879,24 @@ public class Texture implements IDisposeable {
 	 */
 	public static int getNumberOfTextures() {
 		return numberOfTextures;
+	}
+
+	/**
+	 * Queries whether all textures are disabled.
+	 * Use only for performance measurement purpose.
+	 * @return if {@code true}, all textures are disabled, so no textures will
+	 * be drawn; if {@code false}, textures will be drawn 
+	 */
+	public static boolean isDisableAllTextures() {
+		return disableAllTextures;
+	}
+
+	/**
+	 * Enables or disables texture drawing. 
+	 * @param disableAllTextures if {@code true}, all textures are disabled, 
+	 * so no textures will be drawn; if {@code false}, textures will be drawn
+	 */
+	public static void setDisableAllTextures(boolean disableAllTextures) {
+		Texture.disableAllTextures = disableAllTextures;
 	}
 }
