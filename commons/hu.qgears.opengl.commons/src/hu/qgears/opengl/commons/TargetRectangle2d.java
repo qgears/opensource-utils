@@ -2,6 +2,11 @@ package hu.qgears.opengl.commons;
 
 
 public class TargetRectangle2d {
+
+	/*
+	 * Simple DTO class; providing getters and setters does not improve security
+	 */
+	@SuppressWarnings("squid:ClassVariableVisibilityCheck")
 	public float x, y, right, bottom;
 
 	public TargetRectangle2d(float x, float y, float right, float bottom) {
