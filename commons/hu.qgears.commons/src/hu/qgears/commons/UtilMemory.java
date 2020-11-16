@@ -9,11 +9,12 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class UtilMemory {
 
-	private static final Logger LOG = Logger.getLogger(UtilMemory.class);
+	private static final Logger LOG = LogManager.getLogger(UtilMemory.class);
 	/**
 	 * Snapshot of JVM memory status.
 	 */

@@ -3,14 +3,15 @@ package hu.qgears.opengl.commons;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.lwjgl.opengl.ContextCapabilities;
 import org.lwjgl.opengl.GLContext;
 
 
 public class QueryCaps extends AbstractOpenglApplication2 {
 	
-	private static final Logger LOG = Logger.getLogger(QueryCaps.class);
+	private static final Logger LOG = LogManager.getLogger(QueryCaps.class);
 	
 	public static void main(String[] args) {
 		try {

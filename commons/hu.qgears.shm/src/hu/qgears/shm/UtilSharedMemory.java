@@ -2,7 +2,8 @@ package hu.qgears.shm;
 
 import java.io.File;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import hu.qgears.nativeloader.NativeLoadException;
 import hu.qgears.nativeloader.UtilNativeLoader;
@@ -18,7 +19,7 @@ import hu.qgears.shm.sem.Semaphore;
  */
 public class UtilSharedMemory {
 	
-	private static final Logger LOG = Logger.getLogger(UtilSharedMemory.class);
+	private static final Logger LOG = LogManager.getLogger(UtilSharedMemory.class);
 
 	private static UtilSharedMemory instance;
 	private UtilSharedMemory() throws NativeLoadException

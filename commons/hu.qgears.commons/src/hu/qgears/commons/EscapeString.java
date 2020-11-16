@@ -22,7 +22,8 @@ import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * <p>
@@ -46,7 +47,7 @@ import org.apache.log4j.Logger;
 public class EscapeString {
 
 	private static Map<String,Character> htmlEscapeChars;
-	private static final Logger LOG = Logger.getLogger(EscapeString.class);
+	private static final Logger LOG = LogManager.getLogger(EscapeString.class);
 
 	private EscapeString() {
 		//disable ctor of utility class

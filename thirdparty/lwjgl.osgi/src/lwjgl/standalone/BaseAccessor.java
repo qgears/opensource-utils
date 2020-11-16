@@ -1,17 +1,18 @@
 package lwjgl.standalone;
 
+import java.awt.Frame;
+import java.io.File;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import hu.qgears.nativeloader.NativeLoadException;
 import hu.qgears.nativeloader.UtilNativeLoader;
 import hu.qgears.nativeloader.XmlNativeLoader;
 
-import java.awt.Frame;
-import java.io.File;
-
-import org.apache.log4j.Logger;
-
 public class BaseAccessor extends XmlNativeLoader {
 	
-	private static final Logger LOG = Logger.getLogger(BaseAccessor.class);
+	private static final Logger LOG = LogManager.getLogger(BaseAccessor.class);
 	
 	private static boolean inited = false;
 

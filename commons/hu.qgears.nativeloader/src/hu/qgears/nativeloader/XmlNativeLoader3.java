@@ -11,7 +11,8 @@ import java.util.Stack;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -25,7 +26,7 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public abstract class XmlNativeLoader3 implements INativeLoader {
 
-	private static final Logger LOG = Logger.getLogger(XmlNativeLoader3.class);
+	private static final Logger LOG = LogManager.getLogger(XmlNativeLoader3.class);
 	
 	public static final String IMPLEMENTATIONS = "implementations.xml";
 

@@ -1,6 +1,7 @@
 package hu.qgears.opengl.commons.input;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import hu.qgears.opengl.commons.OGlGlobalParameters;
 
@@ -11,7 +12,7 @@ import hu.qgears.opengl.commons.OGlGlobalParameters;
  *
  */
 public class MouseImplCallback implements IMouse {
-	private static final Logger LOG = Logger.getLogger(MouseImplCallback.class);
+	private static final Logger LOG = LogManager.getLogger(MouseImplCallback.class);
 
 	private int globalState=0;
 	private int x;

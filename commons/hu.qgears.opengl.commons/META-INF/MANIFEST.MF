@@ -11,7 +11,7 @@ Bundle-Name: Commons
 Require-Bundle: lwjgl.osgi;bundle-version="9.0.0";visibility:=reexport,
  hu.qgears.commons;bundle-version="9.0.0";visibility:=reexport,
  hu.qgears.images;bundle-version="9.0.0";visibility:=reexport,
- org.apache.log4j;bundle-version="1.2.0"
+ org.apache.logging.log4j.api;bundle-version="2.14.0"
 Bundle-ManifestVersion: 2
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: Q-Gears Kft.

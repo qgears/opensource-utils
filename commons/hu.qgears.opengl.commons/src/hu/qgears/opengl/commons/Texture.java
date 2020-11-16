@@ -1,19 +1,10 @@
 package hu.qgears.opengl.commons;
 
-import hu.qgears.commons.IDisposeable;
-import hu.qgears.commons.mem.DefaultJavaNativeMemory;
-import hu.qgears.images.ENativeImageAlphaStorageFormat;
-import hu.qgears.images.ENativeImageComponentOrder;
-import hu.qgears.images.NativeImage;
-import hu.qgears.images.SizeInt;
-import hu.qgears.images.text.RGBAColor;
-import hu.qgears.opengl.commons.context.EBlendFunc;
-import hu.qgears.opengl.commons.context.RGlContext;
-
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.lwjgl.opengl.APPLEClientStorage;
 import org.lwjgl.opengl.ContextCapabilities;
 import org.lwjgl.opengl.EXTFramebufferObject;
@@ -24,6 +15,16 @@ import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GLContext;
 import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
+
+import hu.qgears.commons.IDisposeable;
+import hu.qgears.commons.mem.DefaultJavaNativeMemory;
+import hu.qgears.images.ENativeImageAlphaStorageFormat;
+import hu.qgears.images.ENativeImageComponentOrder;
+import hu.qgears.images.NativeImage;
+import hu.qgears.images.SizeInt;
+import hu.qgears.images.text.RGBAColor;
+import hu.qgears.opengl.commons.context.EBlendFunc;
+import hu.qgears.opengl.commons.context.RGlContext;
 
 
 /**
@@ -39,7 +40,7 @@ import org.lwjgl.util.vector.Vector4f;
  */
 public class Texture implements IDisposeable {
 	
-	private static final Logger LOG = Logger.getLogger(Texture.class);
+	private static final Logger LOG = LogManager.getLogger(Texture.class);
 	
 	private boolean samplingNear;
 	private int textureHandle;

@@ -1,5 +1,14 @@
 package hu.qgears.images.libpng;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.ByteBuffer;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import hu.qgears.commons.UtilFile;
 import hu.qgears.commons.mem.DefaultJavaNativeMemoryAllocator;
 import hu.qgears.commons.mem.INativeMemory;
@@ -9,17 +18,9 @@ import hu.qgears.images.ENativeImageComponentOrder;
 import hu.qgears.images.NativeImage;
 import hu.qgears.images.SizeInt;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.nio.ByteBuffer;
-
-import org.apache.log4j.Logger;
-
 public class NativeLibPng extends NativeLibPngConnector
 {
-	private static final Logger LOG = Logger.getLogger(NativeLibPng.class);
+	private static final Logger LOG = LogManager.getLogger(NativeLibPng.class);
 	
 	public NativeLibPng()
 	{

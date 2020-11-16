@@ -1,13 +1,14 @@
 package hu.qgears.opengl.commons.example;
 
-import hu.qgears.commons.UtilFile;
-import hu.qgears.opengl.commons.AbstractOpenglApplication2;
-import hu.qgears.opengl.commons.UtilGl;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.lwjgl.opengl.ARBFragmentProgram;
 import org.lwjgl.opengl.ARBProgram;
 import org.lwjgl.opengl.GL11;
+
+import hu.qgears.commons.UtilFile;
+import hu.qgears.opengl.commons.AbstractOpenglApplication2;
+import hu.qgears.opengl.commons.UtilGl;
 
 /**
  * TODO finish the example
@@ -16,8 +17,8 @@ import org.lwjgl.opengl.GL11;
  */
 public class ExampleFragmentProgram extends AbstractOpenglApplication2{
 
-	private static final Logger LOG = Logger
-			.getLogger(ExampleFragmentProgram.class);
+	private static final Logger LOG = LogManager.getLogger(
+			ExampleFragmentProgram.class);
 	
 	public static void main(String[] args) throws Exception {
 		new ExampleFragmentProgram().execute();

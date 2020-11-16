@@ -1,16 +1,17 @@
 package hu.qgears.opengl.commons;
 
 
-import hu.qgears.images.SizeInt;
-import hu.qgears.opengl.commons.input.IKeyboard;
-import hu.qgears.opengl.commons.input.IMouse;
-import hu.qgears.opengl.lwjgl.GLContextProviderLwjgl;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.Rectangle;
 import org.lwjgl.util.glu.GLU;
+
+import hu.qgears.images.SizeInt;
+import hu.qgears.opengl.commons.input.IKeyboard;
+import hu.qgears.opengl.commons.input.IMouse;
+import hu.qgears.opengl.lwjgl.GLContextProviderLwjgl;
 
 
 /**
@@ -21,7 +22,7 @@ import org.lwjgl.util.glu.GLU;
  */
 public abstract class AbstractOpenglApplication2 {
 	
-	private static final Logger LOG = Logger
+	private static final Logger LOG = LogManager
 			.getLogger(AbstractOpenglApplication2.class);
 	
 	private EGLImplementation implementation=EGLImplementation.lwjgl;

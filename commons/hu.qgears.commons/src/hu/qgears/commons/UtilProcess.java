@@ -5,14 +5,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import hu.qgears.commons.signal.SignalFutureWrapper;
 
@@ -21,7 +21,7 @@ import hu.qgears.commons.signal.SignalFutureWrapper;
  */
 public class UtilProcess {
 
-	private static final Logger LOG = Logger.getLogger(UtilProcess.class);
+	private static final Logger LOG = LogManager.getLogger(UtilProcess.class);
 
 	private static class PairFuture implements Future<Pair<byte[], byte[]>>
 	{

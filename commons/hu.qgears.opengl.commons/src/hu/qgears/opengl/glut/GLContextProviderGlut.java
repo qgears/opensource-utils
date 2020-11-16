@@ -3,7 +3,8 @@ package hu.qgears.opengl.glut;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.GLContext;
 
@@ -18,8 +19,8 @@ import lwjgl.standalone.BaseAccessor;
 
 public class GLContextProviderGlut implements IGlContextProvider{
 	
-	private static final Logger LOG = Logger
-			.getLogger(GLContextProviderGlut.class);
+	private static final Logger LOG = LogManager.getLogger(
+			GLContextProviderGlut.class);
 	
 	private Glut glut;
 	private ByteBuffer messagesBuffer;

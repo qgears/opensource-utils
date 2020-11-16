@@ -6,7 +6,8 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Helper class for accessing Java nio channels.
@@ -15,7 +16,7 @@ import org.apache.log4j.Logger;
  */
 public class UtilChannel {
 	
-	private static final Logger LOG = Logger.getLogger(UtilChannel.class);
+	private static final Logger LOG = LogManager.getLogger(UtilChannel.class);
 	
 	private UtilChannel() {
 		//ctor of utility class

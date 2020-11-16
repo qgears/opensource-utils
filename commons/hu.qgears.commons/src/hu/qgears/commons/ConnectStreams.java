@@ -5,7 +5,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Connect two streams to each other by a thread that reads input and writes to 
@@ -14,7 +15,7 @@ import org.apache.log4j.Logger;
  *
  */
 public class ConnectStreams extends Thread {
-	private static final Logger LOG = Logger.getLogger(ConnectStreams.class);
+	private static final Logger LOG = LogManager.getLogger(ConnectStreams.class);
 	private InputStream is;
 	private OutputStream os;
 	private PrintStream err=System.err;

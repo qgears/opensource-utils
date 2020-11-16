@@ -1,6 +1,7 @@
 package hu.qgears.opengl.lwjgl;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
@@ -13,8 +14,8 @@ import hu.qgears.opengl.commons.input.IKeyboard;
 import lwjgl.standalone.BaseAccessor;
 
 public class GLContextProviderLwjgl implements IGlContextProvider{
-	private static final Logger LOG = Logger
-			.getLogger(GLContextProviderLwjgl.class);
+	private static final Logger LOG = LogManager.getLogger(
+			GLContextProviderLwjgl.class);
 	
 
 	private boolean fullscreen;

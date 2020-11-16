@@ -10,7 +10,8 @@ import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -23,7 +24,7 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public abstract class XmlNativeLoader2 implements INativeLoader {
 
-	private static final Logger LOG = Logger.getLogger(XmlNativeLoader2.class);
+	private static final Logger LOG = LogManager.getLogger(XmlNativeLoader2.class);
 	
 	public static final String IMPLEMENTATIONS = "implementations.xml";
 

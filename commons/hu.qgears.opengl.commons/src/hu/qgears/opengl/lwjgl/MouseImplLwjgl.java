@@ -1,18 +1,19 @@
 package hu.qgears.opengl.lwjgl;
 
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.lwjgl.LWJGLException;
+import org.lwjgl.input.Mouse;
+
 import hu.qgears.opengl.commons.OGlGlobalParameters;
 import hu.qgears.opengl.commons.input.EMouseButton;
 import hu.qgears.opengl.commons.input.GlMouseEvent;
 import hu.qgears.opengl.commons.input.IMouse;
 
-import org.apache.log4j.Logger;
-import org.lwjgl.LWJGLException;
-import org.lwjgl.input.Mouse;
-
 public class MouseImplLwjgl implements IMouse
 {
-	private static final Logger LOG = Logger.getLogger(MouseImplLwjgl.class);
+	private static final Logger LOG = LogManager.getLogger(MouseImplLwjgl.class);
 	private GLContextProviderLwjgl provider;
 	private GlMouseEvent event=new GlMouseEvent();
 	private GlMouseEvent wheelReleaseEvent=null;

@@ -1,5 +1,13 @@
 package hu.qgears.opengl.commons.example;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.lwjgl.input.Mouse;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.util.vector.Vector2f;
+import org.lwjgl.util.vector.Vector3f;
+import org.lwjgl.util.vector.Vector4f;
+
 import hu.qgears.images.SizeInt;
 import hu.qgears.opengl.commons.AbstractOpenglApplication2;
 import hu.qgears.opengl.commons.Camera;
@@ -12,13 +20,6 @@ import hu.qgears.opengl.commons.UtilGl;
 import hu.qgears.opengl.commons.context.RGlContext;
 import hu.qgears.opengl.commons.input.IKeyboard;
 
-import org.apache.log4j.Logger;
-import org.lwjgl.input.Mouse;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.util.vector.Vector2f;
-import org.lwjgl.util.vector.Vector3f;
-import org.lwjgl.util.vector.Vector4f;
-
 /**
  * Egyetlen háromszöget megjelenítő alkalmazás.
  * @author rizsi
@@ -26,7 +27,8 @@ import org.lwjgl.util.vector.Vector4f;
  */
 public class ExampleRectangle extends AbstractOpenglApplication2 {
 	private Camera camera=new Camera();
-	private static final Logger LOG = Logger.getLogger(ExampleRectangle.class);
+	private static final Logger LOG = LogManager.getLogger(
+			ExampleRectangle.class);
 	private IRenderOnTexture rot;
 	public ExampleRectangle() {
 		setWindowSize(new SizeInt(1024, 768));

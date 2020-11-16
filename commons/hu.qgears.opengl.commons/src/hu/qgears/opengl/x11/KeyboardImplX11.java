@@ -1,14 +1,15 @@
 package hu.qgears.opengl.x11;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.lwjgl.input.Keyboard;
+
 import hu.qgears.opengl.commons.OGlGlobalParameters;
 import hu.qgears.opengl.commons.input.IKeyboard;
 
-import org.apache.log4j.Logger;
-import org.lwjgl.input.Keyboard;
-
 public class KeyboardImplX11 implements IKeyboard {
 	
-	private static final Logger LOG = Logger.getLogger(KeyboardImplX11.class);
+	private static final Logger LOG = LogManager.getLogger(KeyboardImplX11.class);
 
 	/**
 	 * keyboard events stored as the bits of a 'long'. Keycodes are LWJGL keycodes

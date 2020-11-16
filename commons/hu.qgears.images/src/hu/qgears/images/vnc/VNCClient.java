@@ -1,14 +1,5 @@
 package hu.qgears.images.vnc;
 
-import hu.qgears.commons.UtilChannel;
-import hu.qgears.commons.mem.DefaultJavaNativeMemory;
-import hu.qgears.commons.mem.DefaultJavaNativeMemoryAllocator;
-import hu.qgears.commons.mem.INativeMemory;
-import hu.qgears.images.ENativeImageComponentOrder;
-import hu.qgears.images.LazyNativeImage;
-import hu.qgears.images.NativeImage;
-import hu.qgears.images.SizeInt;
-
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -17,7 +8,17 @@ import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import hu.qgears.commons.UtilChannel;
+import hu.qgears.commons.mem.DefaultJavaNativeMemory;
+import hu.qgears.commons.mem.DefaultJavaNativeMemoryAllocator;
+import hu.qgears.commons.mem.INativeMemory;
+import hu.qgears.images.ENativeImageComponentOrder;
+import hu.qgears.images.LazyNativeImage;
+import hu.qgears.images.NativeImage;
+import hu.qgears.images.SizeInt;
 
 /**
  * In memory VNC client implementation. Can be attached to
@@ -32,7 +33,7 @@ import org.apache.log4j.Logger;
  *
  */
 public class VNCClient {
-	private static final Logger LOG = Logger.getLogger(VNCClient.class);
+	private static final Logger LOG = LogManager.getLogger(VNCClient.class);
 	
 	private ENativeImageComponentOrder componentOrder;
 	private long retryTimeoutMillis=1000;

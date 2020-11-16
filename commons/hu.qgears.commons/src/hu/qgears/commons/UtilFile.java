@@ -1,8 +1,5 @@
 package hu.qgears.commons;
 
-import hu.qgears.commons.mem.INativeMemory;
-import hu.qgears.commons.mem.INativeMemoryAllocator;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -32,7 +29,11 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.jar.Manifest;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import hu.qgears.commons.mem.INativeMemory;
+import hu.qgears.commons.mem.INativeMemoryAllocator;
 
 /**
  * Static methods for handling files.
@@ -42,7 +43,7 @@ import org.apache.log4j.Logger;
  */
 public final class UtilFile {
 
-	private static final Logger LOG = Logger.getLogger(UtilFile.class);
+	private static final Logger LOG = LogManager.getLogger(UtilFile.class);
 	public static final AtomicInteger defaultBufferSize=new AtomicInteger(1024);
 	
 	private UtilFile() {

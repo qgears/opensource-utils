@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde?>
-<!-- generated with https://github.com/eclipse-cbi/targetplatform-dsl -->
-<target name="Opensource utils target platform" sequenceNumber="1588063509">
+<!-- generated with https://github.com/mbarbero/fr.obeo.releng.targetplatform -->
+<target name="Opensource utils target platform" sequenceNumber="1605175063">
   <locations>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="false" includeConfigurePhase="false" type="InstallableUnit">
-      <unit id="org.apache.log4j" version="1.2.15.v201012070815"/>
+      <unit id="org.apache.logging.log4j.api" version="2.14.0"/>
+      <unit id="org.apache.logging.log4j.core" version="2.14.0"/>
+      <repository id="thirdparty-deps" location="file:///home/chreex/svn/wings/dev/maven-build/modules/third-party-deps/target/repository"/>
+    </location>
+    <location includeMode="planner" includeAllPlatforms="false" includeSource="false" includeConfigurePhase="false" type="InstallableUnit">
       <unit id="org.eclipse.emf.sdk.feature.group" version="2.21.0.v20200205-0529"/>
       <unit id="org.junit" version="4.13.0.v20200204-1500"/>
       <unit id="org.eclipse.equinox.launcher" version="1.5.700.v20200207-2156"/>

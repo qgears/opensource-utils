@@ -2,8 +2,12 @@ target "Opensource utils target platform"
 
 with requirements
 
+location "file:///home/chreex/svn/wings/dev/maven-build/modules/third-party-deps/target/repository" thirdparty-deps {
+    org.apache.logging.log4j.api [2.14.0, 2.14.0]
+    org.apache.logging.log4j.core [2.14.0,2.14.0]
+}
+
 location "https://buildserver.qgears.net/mirror/eclipse2020-03-mirror/" eclipse-2020-03-mirror {
-	org.apache.log4j [1.2.15.v201012070815,1.2.15.v201012070815]
 	org.eclipse.emf.sdk.feature.group [2.21.0.v20200205-0529,2.21.0.v20200205-0529]
 	//these plugins are required to execute JUnit tests	
 	org.junit [4.13.0.v20200204-1500,4.13.0.v20200204-1500]

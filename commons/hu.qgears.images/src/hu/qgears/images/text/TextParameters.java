@@ -2,7 +2,8 @@ package hu.qgears.images.text;
 
 import java.lang.reflect.Field;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * All parameters of a text label to be rendered. Using these parameters a label
@@ -185,7 +186,7 @@ public class TextParameters {
 				}
 				bld.append(f.getName()).append("=").append(value).append(";");
 			} catch (Exception e) {
-				final Logger logger = Logger.getLogger(TextParameters.class);
+				final Logger logger = LogManager.getLogger(TextParameters.class);
 				
 				// should not happen, and toString is used only during debugging
 				logger.error("String representation of TextParameters could "

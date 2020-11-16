@@ -1,15 +1,16 @@
 package hu.qgears.opengl.commons.container;
 
-import hu.qgears.opengl.commons.AbstractOpenglApplication2;
-
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import hu.qgears.opengl.commons.AbstractOpenglApplication2;
 
 public abstract class OpenGLFrame extends AbstractOpenglApplication2 {
 
-	private static final Logger LOG = Logger.getLogger(OpenGLFrame.class);
+	private static final Logger LOG = LogManager.getLogger(OpenGLFrame.class);
 
 	private List<OpenGLAppContainer> containers = new ArrayList<OpenGLAppContainer>();
 	private List<OpenGLAppContainer> copyOfContainers=new ArrayList<OpenGLAppContainer>();

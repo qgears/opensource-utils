@@ -9,7 +9,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXNotRecognizedException;
 import org.xml.sax.SAXNotSupportedException;
@@ -38,7 +39,7 @@ import hu.qgears.commons.UtilFile;
  */
 public class UtilNativeLoader {
 	
-	private static final Logger LOG = Logger.getLogger(UtilNativeLoader.class);
+	private static final Logger LOG = LogManager.getLogger(UtilNativeLoader.class);
 	
 	private UtilNativeLoader() {
 		// disable constructor of utility class

@@ -2,7 +2,8 @@ package hu.qgears.commons;
 
 import java.util.concurrent.Callable;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import hu.qgears.commons.signal.SignalFutureWrapper;
 
@@ -19,7 +20,7 @@ import hu.qgears.commons.signal.SignalFutureWrapper;
  */
 public class UtilTimer {
 	
-	private static final Logger LOG = Logger.getLogger(UtilTimer.class);
+	private static final Logger LOG = LogManager.getLogger(UtilTimer.class);
 	
 	private static final UtilTimer INSTANCE = new UtilTimer();
 	
