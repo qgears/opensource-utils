@@ -2,8 +2,11 @@ JNI_ARCHPOSTFIX:=`uname -m | sed -e 's/x86_64/amd64/' -e 's/x86/i386/' -e 's/i68
 JNI_INCLUDE:=-I/usr/lib/jvm/java-1.7.0-openjdk-${JNI_ARCHPOSTFIX}/include \
     -I/usr/lib/jvm/java-1.7.0-openjdk-${JNI_ARCHPOSTFIX}/include/linux \
     -I/usr/lib/jvm/java-1.8.0-openjdk-${JNI_ARCHPOSTFIX}/include \
-    -I/usr/lib/jvm/java-1.8.0-openjdk-${JNI_ARCHPOSTFIX}/include/linux
-SO_NAME:=libinputjni-`../platform_prefix.sh`.so
+    -I/usr/lib/jvm/java-1.8.0-openjdk-${JNI_ARCHPOSTFIX}/include/linux \
+    -I/usr/lib/jvm/java-11-openjdk-${JNI_ARCHPOSTFIX}/include \
+    -I/usr/lib/jvm/java-11-openjdk-${JNI_ARCHPOSTFIX}/include/linux
+    
+SO_NAME:=libinputjni-`../platform_prefix.sh`${JNI_ARCHPOSTFIX}.so
 
 
 #used by the maven editor_platform_build process, see pom.xml in project.
