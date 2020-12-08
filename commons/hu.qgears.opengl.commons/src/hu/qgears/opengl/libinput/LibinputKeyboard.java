@@ -94,8 +94,8 @@ public class LibinputKeyboard implements IKeyboard
 			108, Keyboard.KEY_DOWN,
 			111, Keyboard.KEY_DELETE,
 			42, Keyboard.KEY_LSHIFT,
-			// 56, Keyboard.KEY_ALT,
-			// 29, Keyboard.key_CONTROL,
+			56, Keyboard.KEY_LMENU,     // LEFT ALT
+			29, Keyboard.KEY_LCONTROL   // LEFT CONTROL
 		};
 
 	@Override
@@ -147,9 +147,15 @@ public class LibinputKeyboard implements IKeyboard
 		return decodeKey(key);
 	}
 
-	private int decodeKey(int key2) {
-		Integer ret=specials.get(key2);
-		return ret==null?1:ret;
+	private int decodeKey(int scancode) {
+		final Integer ret=specials.get(scancode);
+		
+		if (ret == null) {
+			throw new IllegalArgumentException(String.format("Cannot decode "
+					+ "special scan code: %d / %08X", scancode));
+		} else {
+			return ret;
+		}
 	}
 	@Override
 	public boolean isKeyDown() {
