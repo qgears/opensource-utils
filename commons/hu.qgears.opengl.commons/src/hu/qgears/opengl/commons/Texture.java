@@ -46,13 +46,13 @@ public class Texture implements IDisposeable {
 	private EBlendFunc blendFunc=EBlendFunc.off;
 	private boolean disposed = false;
 	private int width, height;
-	public NativeImage sourceImage;
-	public EMipMapType sourceMipmapType;
-	public ETextureWrapType sourceTextureWrapType;
+	private NativeImage sourceImage;
+	private EMipMapType sourceMipmapType;
+	private ETextureWrapType sourceTextureWrapType;
 	/**
 	 * Use for debug purpose only: number of allocated texture objects.
 	 */
-	public static int numberOfTextures=0;
+	private static int numberOfTextures=0;
 
 	public EBlendFunc getBlendFunc() {
 		return blendFunc;
@@ -79,6 +79,18 @@ public class Texture implements IDisposeable {
 		return new SizeInt(width, height);
 	}
 
+	public NativeImage getSourceImage() {
+		return sourceImage;
+	}
+
+	public EMipMapType getSourceMipmapType() {
+		return sourceMipmapType;
+	}
+
+	public ETextureWrapType getSourceTextureWrapType() {
+		return sourceTextureWrapType;
+	}
+
 	private Texture(int textureHandle, int w, int h, int format, int border) {
 		super();
 		this.textureHandle = textureHandle;
@@ -87,8 +99,6 @@ public class Texture implements IDisposeable {
 		this.formatInt = format;
 		this.border = border;
 	}
-
-	public static int defaultAligment = 1;
 
 	/**
 	 * Create texture object and upload the image to its content.
@@ -389,10 +399,12 @@ public class Texture implements IDisposeable {
 	}
 	
 	/**
-	 * Disable all texture selection - select texture id 0 instead of real textures before drawing.
+	 * If {@code true}, disables drawing textures, i. e. selects texture id 0 
+	 * instead of real textures before drawing, if {@code false}, it makes 
+	 * textures to be drawn.
 	 * Use only for performance measurement purpose.
 	 */
-	public static boolean disableAllTextures;
+	private static boolean disableAllTextures;
 	
 	private void bindThisTexture() {
 		if(disableAllTextures)
@@ -859,5 +871,33 @@ public class Texture implements IDisposeable {
 
 	public void setSamplingNear(boolean samplingNear) {
 		this.samplingNear=samplingNear;
+	}
+
+	/**
+	 * Returns the number of allocated texture objects.
+	 * Use for debug purpose only!
+	 * @return the number of allocated texture objects.
+	 */
+	public static int getNumberOfTextures() {
+		return numberOfTextures;
+	}
+
+	/**
+	 * Queries whether all textures are disabled.
+	 * Use only for performance measurement purpose.
+	 * @return if {@code true}, all textures are disabled, so no textures will
+	 * be drawn; if {@code false}, textures will be drawn 
+	 */
+	public static boolean isDisableAllTextures() {
+		return disableAllTextures;
+	}
+
+	/**
+	 * Enables or disables texture drawing. 
+	 * @param disableAllTextures if {@code true}, all textures are disabled, 
+	 * so no textures will be drawn; if {@code false}, textures will be drawn
+	 */
+	public static void setDisableAllTextures(boolean disableAllTextures) {
+		Texture.disableAllTextures = disableAllTextures;
 	}
 }

@@ -1,6 +1,6 @@
 package hu.qgears.nativeloader;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -9,26 +9,22 @@ import java.util.List;
 public class NativesToLoad {
 	private List<NativePreload> preloads;
 	private List<NativeBinary> binaries;
-	private List<SourceFile> sources;
-	public NativesToLoad(List<NativePreload> preloads, List<NativeBinary> binaries, List<SourceFile> sources) {
+	
+	public NativesToLoad(List<NativePreload> preloads, List<NativeBinary> binaries) {
 		super();
-		this.preloads=preloads;
+		this.preloads = preloads;
 		this.binaries = binaries;
-		this.sources = sources;
 	}
-	public NativesToLoad() {
-		super();
-		this.preloads = new ArrayList<NativePreload>();
-		this.binaries = new ArrayList<NativeBinary>();
-		this.sources = new ArrayList<SourceFile>();
+
+	public NativesToLoad(List<NativeBinary> binaries) {
+		this.binaries = binaries;
 	}
+	
 	public List<NativeBinary> getBinaries() {
-		return binaries;
+		return Collections.unmodifiableList(binaries);
 	}
-	public List<SourceFile> getSources() {
-		return sources;
-	}
+
 	public List<NativePreload> getPreloads() {
-		return preloads;
+		return Collections.unmodifiableList(preloads);
 	}
 }

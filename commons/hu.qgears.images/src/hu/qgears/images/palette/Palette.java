@@ -1,5 +1,7 @@
 package hu.qgears.images.palette;
 
+import java.util.Arrays;
+
 import hu.qgears.images.NativeImage;
 
 /**
@@ -16,7 +18,7 @@ public class Palette {
 	 */
 	public Palette(int[] colors) {
 		super();
-		this.colors = colors;
+		this.colors = Arrays.copyOf(colors, colors.length);
 	}
 	/**
 	 * Get the color with the closest index for the given input color.

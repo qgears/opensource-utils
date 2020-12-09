@@ -7,7 +7,6 @@ import java.io.IOException;
 import org.eclipse.emf.ecore.resource.Resource;
 
 import hu.qgears.commons.UtilFile;
-import hu.qgears.commons.UtilSerializator;
 import hu.qgears.commons.UtilTime;
 import hu.qgears.emfcollab.IdSource;
 import hu.qgears.emfcollab.XmiIdSource;

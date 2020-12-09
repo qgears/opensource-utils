@@ -11,10 +11,15 @@ import org.apache.log4j.Logger;
  * @author rizsi
  *
  */
+/*
+ * Sonar warning suppression: this is a simple DTO class with no actual benefit
+ * if adding getters and setters.
+ */
+@SuppressWarnings("squid:ClassVariableVisibilityCheck")
 public class TextParameters {
 	private static final String SYSPROP_NAME_WBF_DEFAULT_FONT = "wbf.defaultFont";
 	/**
-	 * The default system wide fontface
+	 * The default system-wide fontface
 	 * 
 	 * @since 3.0
 	 */

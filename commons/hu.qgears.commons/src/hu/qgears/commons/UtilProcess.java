@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -69,9 +70,13 @@ public class UtilProcess {
 			return new Pair<byte[], byte[]>(a,b);
 		}
 	
-		public void setA(byte[] string) {
+		public void setA(final byte[] bytearray) {
 			synchronized (this) {
-				a=string;
+				if (bytearray == null) {
+					a = null;
+				} else {
+					a = Arrays.copyOf(bytearray, bytearray.length);
+				}
 				if(b!=null)
 				{
 					this.notifyAll();
@@ -79,9 +84,13 @@ public class UtilProcess {
 			}
 		}
 	
-		public void setB(byte[] string) {
+		public void setB(final byte[] bytearray) {
 			synchronized (this) {
-				b=string;
+				if (bytearray == null) {
+					b = null;
+				} else {
+					b = Arrays.copyOf(bytearray, bytearray.length);
+				}
 				if(a!=null)
 				{
 					this.notifyAll();

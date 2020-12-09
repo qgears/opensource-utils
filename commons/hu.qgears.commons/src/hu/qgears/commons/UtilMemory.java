@@ -100,6 +100,8 @@ public class UtilMemory {
 		 */
 		public void createManyStupidObjects() {
 			Set<String> mystrings=new HashSet<String>();
+			// No crypto functions are required here
+			@SuppressWarnings({ "squid:S2245", "findsecbugs:PREDICTABLE_RANDOM" })
 			String prefix=""+new Random().nextInt();
 			for(int i=0;i<n;++i)
 			{

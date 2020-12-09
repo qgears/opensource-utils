@@ -3,16 +3,17 @@ package hu.qgears.nativeloader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.log4j.Logger;
 import org.xml.sax.Attributes;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
-import org.xml.sax.helpers.XMLReaderFactory;
 
 /**
  * NativeLoader which fetches library data from an XML file.
@@ -30,7 +31,7 @@ public abstract class XmlNativeLoader2 implements INativeLoader {
 
 	protected class ImplementationsHandler extends DefaultHandler
 	{
-		public NativesToLoad nativesToLoad;
+		private List<NativeBinary> nativesToLoad;
 		private boolean loadThis=false;
 		public ImplementationsHandler() {
 		}
@@ -50,7 +51,7 @@ public abstract class XmlNativeLoader2 implements INativeLoader {
 							NativesToLoad ret=checkAndParse(resource, path);
 							if(ret!=null)
 							{
-								nativesToLoad=ret;
+								nativesToLoad = new ArrayList<>();
 							}
 						}catch(Exception e)
 						{
@@ -61,7 +62,7 @@ public abstract class XmlNativeLoader2 implements INativeLoader {
 				{
 					if(matches(attributes)&&nativesToLoad==null)
 					{
-						nativesToLoad=new NativesToLoad();
+						nativesToLoad = new ArrayList<>();
 						loadThis=true;
 					}
 				}
@@ -80,11 +81,15 @@ public abstract class XmlNativeLoader2 implements INativeLoader {
 			}
 		}
 		
+		public NativesToLoad getNativesToLoad() {
+			return new NativesToLoad(nativesToLoad);
+		}
+		
 	}
 	
 	class ImplHandler extends DefaultHandler
 	{
-		public NativesToLoad result;
+		private List<NativeBinary> result;
 		private String prefix;
 		public ImplHandler(String prefix) {
 			super();
@@ -97,7 +102,7 @@ public abstract class XmlNativeLoader2 implements INativeLoader {
 			{
 				if(matches(attributes))
 				{
-					result=new NativesToLoad();
+					result = new ArrayList<>();
 				}
 			}
 			if(result!=null)
@@ -115,7 +120,7 @@ public abstract class XmlNativeLoader2 implements INativeLoader {
 	}
 	
 	private void tryLoad(String uri, String localName, String qName,
-			Attributes attributes, NativesToLoad result, String prefix) {
+			Attributes attributes, List<NativeBinary> result, String prefix) {
 		if("lib".equals(localName))
 		{
 			final String path=attributes.getValue("path");
@@ -124,7 +129,7 @@ public abstract class XmlNativeLoader2 implements INativeLoader {
 			final String installPath=attributes.getValue("installPath");
 			
 			if (!loadedLibIds.contains(id)) {
-				result.getBinaries().add(new NativeBinary(id, prefix+path, installPath));
+				result.add(new NativeBinary(id, prefix+path, installPath));
 				loadedLibIds.add(id);
 			}
 		}
@@ -143,7 +148,7 @@ public abstract class XmlNativeLoader2 implements INativeLoader {
 		String prefix=getPrefix(path);
 		ImplHandler ih=new ImplHandler(prefix);
 		parseUsingHandler(resource, ih);
-		return ih.result;
+		return new NativesToLoad(ih.result);
 	}
 
 	private String getPrefix(String path) {
@@ -170,25 +175,13 @@ public abstract class XmlNativeLoader2 implements INativeLoader {
 		this.name=name;
 		ImplementationsHandler handler = new ImplementationsHandler();
 		parseUsingHandler(getClass().getResource(getNativesDeclarationResourceName()), handler);
-		return handler.nativesToLoad;
+		return handler.getNativesToLoad();
 	}
 
 	private void parseUsingHandler(URL resource, DefaultHandler handler) {
-		try {
-			XMLReader reader = XMLReaderFactory.createXMLReader();
-			InputStream istream = resource.openStream();
-			try
-			{
-				InputSource isource = new InputSource(istream);
-				reader.setContentHandler(handler);
-				reader.parse(isource);
-			}finally
-			{
-				istream.close();
-			}
-		} catch (SAXException e) {
-			throw new NativeLoadException(e);
-		} catch (IOException e) {
+		try (final InputStream istream = resource.openStream()) {
+			UtilNativeLoader.createSAXParser().parse(istream, handler);
+		} catch (SAXException | ParserConfigurationException | IOException e) {
 			throw new NativeLoadException(e);
 		}
 	}

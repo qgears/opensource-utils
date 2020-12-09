@@ -6,7 +6,15 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.xml.XMLConstants;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
 import org.apache.log4j.Logger;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXNotRecognizedException;
+import org.xml.sax.SAXNotSupportedException;
 
 import hu.qgears.commons.UtilFile;
 import hu.qgears.commons.UtilString;
@@ -156,6 +164,7 @@ public class UtilNativeLoader {
 		}
 		return directory;
 	}
+
 	/**
 	 * Make sure that a specific .so is on a preload path:
 	 *  * Read the "LD_LIBRARY_PATH" variable
@@ -216,5 +225,43 @@ public class UtilNativeLoader {
 			UtilFile.saveAsFile(g, UtilFile.loadFile(res));
 			LOG.info("ensurePreload: correct '"+preload+"' is set up by program into: '"+g.getAbsolutePath()+"'");
 		}
+	}
+
+	/**
+	 * Creates a {@link SAXParser SAX parser} suitable for secure processing 
+	 * of the native load XML files.
+	 * @return a secure {@link SAXParser} instance
+	 * @throws ParserConfigurationException
+	 * 		passed up if the SAX parser cannot be created
+	 * @throws SAXNotRecognizedException
+	 * 		passed up if the SAX parser cannot be created
+	 * @throws SAXNotSupportedException
+	 * 		passed up if the SAX parser cannot be created
+	 * @throws SAXException
+	 * 		passed up if the SAX parser cannot be created
+	 */
+	public static SAXParser createSAXParser()
+			throws ParserConfigurationException, SAXNotRecognizedException, 
+				SAXNotSupportedException, SAXException {
+		final SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
+		
+		// Security settings; source:
+		// https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html#jaxp-documentbuilderfactory-saxparserfactory-and-dom4j
+		saxParserFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+		saxParserFactory.setFeature(
+				"http://xml.org/sax/features/external-general-entities", false);
+		saxParserFactory.setFeature(
+				"http://xml.org/sax/features/external-parameter-entities", false);
+		saxParserFactory.setFeature(
+				"http://apache.org/xml/features/nonvalidating/load-external-dtd", 
+				false); // Just to make sure
+		saxParserFactory.setFeature(
+				"http://apache.org/xml/features/disallow-doctype-decl", true);
+		saxParserFactory.setXIncludeAware(false);
+		
+		// Etc. functional settings
+		saxParserFactory.setNamespaceAware(true);
+		
+		return saxParserFactory.newSAXParser();
 	}
 }

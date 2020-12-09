@@ -5,32 +5,35 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.xml.sax.InputSource;
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.XMLReaderFactory;
 
 /**
  * 
- * Utility for checking that all natives is packaged into binary, which is declated by natives-def.xml
+ * Utility for checking that all natives is packaged into binary, which is 
+ * declared by natives-def.xml.
  * @author agostoni
  *
  */
 public class XMLNativeLoaderValidator {
 
-	
+	/**
+	 * Checks whether the native binaries, belonging to the specified native 
+	 * loader, exist. 
+	 * @param loader the loader, the existence of the native libraries of which
+	 * 		are to be checked
+	 * @throws Exception either if the checking fails for any reason or there
+	 * 		are at least one binary in the XML that does not exist
+	 */
 	public static void check(Class<? extends XmlNativeLoader> loader) throws Exception {
 		
-		XmlHandler handler = new XmlHandler();
-		try {
-			XMLReader reader = XMLReaderFactory.createXMLReader();
-			InputStream istream = loader.getResourceAsStream(XmlNativeLoader.NATIVES_DEF);
-			InputSource isource = new InputSource(istream);
-			reader.setContentHandler(handler);
-			reader.parse(isource);
-		} catch (SAXException e) {
-			throw new NativeLoadException(e);
-		} catch (IOException e) {
+		final XmlHandler handler = new XmlHandler();
+		
+		try (final InputStream istream = loader.getResourceAsStream(
+				XmlNativeLoader.NATIVES_DEF)) {
+			UtilNativeLoader.createSAXParser().parse(istream, handler);
+		} catch (SAXException | ParserConfigurationException | IOException e) {
 			throw new NativeLoadException(e);
 		}
 		List<String> missing = new ArrayList<String>(); 
@@ -41,13 +44,9 @@ public class XMLNativeLoaderValidator {
 			}
 		}
 		if (!missing.isEmpty()) {
-			throw new Exception("Missing binaries specified by "+loader.getSimpleName() + " : "+missing);
+			throw new Exception("Missing binaries specified by "
+					+loader.getSimpleName() + " : "+missing);
 		}
-//		NativesToLoad ntl = new NativesToLoad(handler.getNatives(), handler.sources);
-//		for (SourceFile b : ntl.getBinaries()) {
-//			System.out.println( b.getPath());
-//		}
-		
 	}
 
 	private static boolean exists(NativeBinary b, Class<? extends XmlNativeLoader> loader) {

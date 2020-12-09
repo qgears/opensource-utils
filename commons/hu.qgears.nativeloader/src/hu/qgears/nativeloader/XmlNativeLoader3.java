@@ -5,22 +5,25 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Stack;
 
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.apache.log4j.Logger;
 import org.xml.sax.Attributes;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
-import org.xml.sax.helpers.XMLReaderFactory;
 
 /**
- * NativeLoader which parses an XML file to find the native libraries to load depending on
- * the OS.
+ * NativeLoader which parses an XML file to find the native libraries to load 
+ * depending on the OS.
+ * 
+ * @author rizsi
  */
 public abstract class XmlNativeLoader3 implements INativeLoader {
 
@@ -73,7 +76,8 @@ public abstract class XmlNativeLoader3 implements INativeLoader {
 	protected class ImplementationsHandler extends DefaultHandler
 	{
 		private String prefix="";
-		public NativesToLoad nativesToLoad=new NativesToLoad();
+		private List<NativeBinary> nativeBinaries = new ArrayList<NativeBinary>();
+		private List<NativePreload> nativePreloads = new ArrayList<NativePreload>();
 		private Stack<Boolean> loadThis=new Stack<>();
 		public ImplementationsHandler() {
 			loadThis.push(true);
@@ -130,17 +134,18 @@ public abstract class XmlNativeLoader3 implements INativeLoader {
 					final String id = idCandidate == null ? path : idCandidate;
 					final String installPath=getValueReplaced(attributes, "installPath");
 					if (!loadedLibIds.contains(id)) {
-						nativesToLoad.getBinaries().add(new NativeBinary(id, path, installPath));
+						nativeBinaries.add(new NativeBinary(id, path, installPath));
 						loadedLibIds.add(id);
 					}
-				}else if("preload".equals(localName))
+				} else if("preload".equals(localName))
 				{
+					//System.out.println("WARNING: preload encountered");
 					final String resource=prefix+getValueReplaced(attributes, "resource");
 					final String fileName=getValueReplaced(attributes, "fileName");
 					final String idCandidate = getValueReplaced(attributes, "id");
 					final String id = idCandidate == null ? fileName : idCandidate;
 					if (!loadedLibIds.contains(id)) {
-						nativesToLoad.getPreloads().add(new NativePreload(fileName, resource));
+						nativePreloads.add(new NativePreload(fileName, resource));
 						loadedLibIds.add(id);
 					}
 				}
@@ -202,7 +207,10 @@ public abstract class XmlNativeLoader3 implements INativeLoader {
 				loadThis.pop();
 			}
 		}
-		
+		public NativesToLoad getNativesToLoad() {
+			return new NativesToLoad(nativePreloads, nativeBinaries);
+		}
+
 	}
 	
 	/**
@@ -223,31 +231,21 @@ public abstract class XmlNativeLoader3 implements INativeLoader {
 			throws NativeLoadException {
 		ImplementationsHandler handler = new ImplementationsHandler();
 		parseUsingHandler(getClass().getResource(getNativesDeclarationResourceName()), handler);
-		return handler.nativesToLoad;
+		return handler.getNativesToLoad();
 	}
 
 	private void parseUsingHandler(URL resource, DefaultHandler handler) {
-		try {
-			XMLReader reader = XMLReaderFactory.createXMLReader();
-			InputStream istream = resource.openStream();
-			try
-			{
-				InputSource isource = new InputSource(istream);
-				reader.setContentHandler(handler);
-				reader.parse(isource);
-			}finally
-			{
-				istream.close();
-			}
-		} catch (SAXException e) {
-			throw new NativeLoadException(e);
-		} catch (IOException e) {
+		try (final InputStream istream = resource.openStream()) {
+			UtilNativeLoader.createSAXParser().parse(istream, handler);
+		} catch (SAXException | ParserConfigurationException | IOException e) {
 			throw new NativeLoadException(e);
 		}
 	}
+	
 	/**
 	 * Load the native library.
-	 * On a singleton instance this method is re-callable: only the first call will load the library.
+	 * On a singleton instance this method is re-callable: only the first call 
+	 * will load the library.
 	 */
 	public void load() {
 		synchronized (this) {

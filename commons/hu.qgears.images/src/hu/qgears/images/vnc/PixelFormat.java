@@ -8,7 +8,12 @@ import java.nio.ByteBuffer;
  * @author rizsi
  *
  */
-public class PixelFormat {
+/*
+ * Sonar warning suppression: this is an internal-only, simple DTO class with
+ * no actual benefit of adding getters and setters.
+ */
+@SuppressWarnings("squid:ClassVariableVisibilityCheck")
+class PixelFormat {
 	public byte bitsPerPixel;
 	public byte depth;
 	public byte bigEndianFlag;

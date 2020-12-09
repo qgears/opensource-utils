@@ -2,11 +2,13 @@ package hu.qgears.images.vnc;
 
 import hu.qgears.images.NativeImage;
 
-/**
+/*
  * Snapshot of the VNC client.
+ * Sonar warning suppression: this is a simple DTO class with no actual benefit
+ * of adding getters and setters.
  */
-public class VncSnapShot implements AutoCloseable
-{
+@SuppressWarnings("squid:ClassVariableVisibilityCheck")
+public class VncSnapShot implements AutoCloseable {
 	private VNCClient client;
 	/**
 	 * Constructor should only be called by the VNC client implementation.

@@ -25,15 +25,38 @@ public class DefaultJavaNativeMemory extends AbstractReferenceCountedDisposeable
 	public DefaultJavaNativeMemory(ByteBuffer ptr) {
 		this.ptr=ptr;
 	}
+	
+	/*
+	 * Disallowing parallel access to the 'cleaner' and 'clean' methods as 
+	 * long as their accessibility is set to 'true'.
+	 */
+	@SuppressWarnings("squid:S3011")
 	@Override
 	protected void singleDispose() {
+		Method cleanerMethod = null;
+		Method cleanMethod = null;
 		try {
-			final Method cleanerMethod = ptr.getClass().getMethod("cleaner");
-			cleanerMethod.setAccessible(true);
-			final Object cleaner = cleanerMethod.invoke(ptr);
-			final Method cleanMethod = cleaner.getClass().getMethod("clean");
-			cleanMethod.setAccessible(true);
-			cleanMethod.invoke(cleaner);
+			cleanerMethod = ptr.getClass().getMethod("cleaner");
+			synchronized (cleanerMethod) {
+				try {
+					cleanerMethod.setAccessible(true);
+	
+					final Object cleanerInstance = cleanerMethod.invoke(ptr);
+	
+					cleanMethod = cleanerInstance.getClass().getMethod("clean");
+	
+					synchronized (cleanMethod) {
+						try {
+							cleanMethod.setAccessible(true);
+							cleanMethod.invoke(cleanerInstance);
+						} finally {
+							cleanMethod.setAccessible(false);
+						}
+					}
+				} finally {
+					cleanerMethod.setAccessible(false);
+				}
+			}
 		} catch (final Exception e) {
 			throw new NativeMemoryException("Exception during disposal", e);
 		}

@@ -79,7 +79,7 @@ public abstract class OpenGLFrame extends AbstractOpenglApplication2 {
 					try {
 						c.initialize();
 					} catch (Exception e) {
-						LOG.error("Error initializin container:"+c,e);
+						LOG.error("Error initializing container:"+c,e);
 					}
 					c.setInitialized(true);
 				}
@@ -90,6 +90,11 @@ public abstract class OpenGLFrame extends AbstractOpenglApplication2 {
 		}
 	}
 
+	/*
+	 * Suppressing warning, as this method does return either a newly created or 
+	 * a cached copy of the 'containers' list.
+	 */
+	@SuppressWarnings("squid:S2384")
 	private List<OpenGLAppContainer> getCopyOfContainers() {
 		synchronized (this) {
 			if(copyOfContainers==null)
