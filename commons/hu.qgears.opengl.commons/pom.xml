@@ -66,6 +66,22 @@
 									<workingDirectory>./native/linux</workingDirectory>
 								</configuration>
 							</execution>
+							<execution>
+								<!-- Building OpenGL context factories for e. g.
+									* Xorgless OpenGL, 
+									* software framebuffer
+									* etc
+								 -->
+								<id>opengl-context-factories</id>
+								<phase>generate-resources</phase>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+								<configuration>
+									<executable>make</executable>
+									<workingDirectory>./makeall</workingDirectory>
+								</configuration>
+							</execution>
 						</executions>
 					</plugin>
 				</plugins>
