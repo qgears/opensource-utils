@@ -125,7 +125,7 @@ static void psplash_console_ignore_switches (void)
   
   if (ioctl(ConsoleFd, VT_GETMODE, &vt_mode) < 0)
     {
-      perror("Error VT_SETMODE failed");
+      perror("Error VT_GETMODE failed");
       return;
     }
 
