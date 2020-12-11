@@ -28,6 +28,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <execinfo.h>
+
 #include "common.h"
 #include "drm-common.h"
 
@@ -43,9 +45,28 @@ gbm_bo_get_stride_for_plane(struct gbm_bo *bo, int plane);
 WEAK uint32_t
 gbm_bo_get_offset(struct gbm_bo *bo, int plane);
 
+void print_trace(void) {
+    char **strings;
+    size_t i, size;
+    enum Constexpr { MAX_SIZE = 1024 };
+    void *array[MAX_SIZE];
+    size = backtrace(array, MAX_SIZE);
+    strings = backtrace_symbols(array, size);
+    for (i = 0; i < size; i++) {
+        fprintf(stderr, "%s\n", strings[i]);
+    }
+    free(strings);
+}
+
 static void
 drm_fb_destroy_callback(struct gbm_bo *bo, void *data)
 {
+    if (!bo) {
+        fprintf(stderr, "drm_fb_destroy_callback: bo is null");
+        print_trace();
+        exit(-1);
+    }
+
 	int drm_fd = gbm_device_get_fd(gbm_bo_get_device(bo));
 	struct drm_fb *fb = (struct drm_fb *)data;
 
@@ -57,6 +78,12 @@ drm_fb_destroy_callback(struct gbm_bo *bo, void *data)
 
 struct drm_fb * drm_fb_get_from_bo(struct gbm_bo *bo)
 {
+    if (!bo) {
+        fprintf(stderr, "drm_fb_get_from_bo: bo is null");
+        print_trace();
+        exit(-1);
+    }
+
 	int drm_fd = gbm_device_get_fd(gbm_bo_get_device(bo));
 	struct drm_fb *fb = (struct drm_fb *) gbm_bo_get_user_data(bo);
 	uint32_t width, height, format,

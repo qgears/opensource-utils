@@ -23,6 +23,7 @@
 
 #include <errno.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/select.h>
 
@@ -85,14 +86,22 @@ void legacy_dispose()
 				       &(drm.saved_crtc->mode));
 		drmModeFreeCrtc(drm.saved_crtc);
 }
+
 int legacy_beforefirstframe(const struct gbm *gbm, const struct egl *egl)
 {
 	eglSwapBuffers(egl->display, egl->surface);
 	bo = gbm_surface_lock_front_buffer(gbm->surface);
+	
+	if (NULL == bo) {
+	   fprintf(stderr, "legacy_beforefirstframe: Failed to get a new framebuffer BO\n");
+	   print_trace();
+	   exit(-1);
+	}
+	
 	fb = drm_fb_get_from_bo(bo);
 	if (!fb) {
-		fprintf(stderr, "Failed to get a new framebuffer BO\n");
-		return -1;
+		fprintf(stderr, "Failed to get a new framebuffer\n");
+		exit(-1);
 	}
 	drm.saved_crtc=drmModeGetCrtc(drm.fd, drm.crtc_id);
 	return 0;
@@ -112,7 +121,7 @@ int legacy_firstframe(const struct gbm *gbm, const struct egl *egl)
 
 int legacy_nextframe(const struct gbm *gbm, const struct egl *egl)
 {
-	fd_set fds;
+    	fd_set fds;
 
 		struct gbm_bo *next_bo;
 		int waiting_for_flip = 1;
@@ -120,10 +129,25 @@ int legacy_nextframe(const struct gbm *gbm, const struct egl *egl)
 //		egl->draw(i++);
 
 		eglSwapBuffers(egl->display, egl->surface);
+		
+        if (NULL == gbm->surface) {
+           fprintf(stderr, "legacy_nextframe: gbm->surface is null\n");
+           print_trace();
+           exit(-1);
+        }
+		
+		
 		next_bo = gbm_surface_lock_front_buffer(gbm->surface);
+		
+        if (NULL == next_bo) {
+           fprintf(stderr, "legacy_nextframe: Failed to get next framebuffer BO\n");
+           print_trace();
+           exit(-1);
+        }
+    
 		fb = drm_fb_get_from_bo(next_bo);
 		if (!fb) {
-			fprintf(stderr, "Failed to get a new framebuffer BO\n");
+			fprintf(stderr, "legacy_nextframe: Failed to get a new framebuffer\n");
 			return -1;
 		}
 
@@ -175,6 +199,7 @@ int legacy_nextframe(const struct gbm *gbm, const struct egl *egl)
 
 static int legacy_run(const struct gbm *gbm, const struct egl *egl)
 {
+    printf("legacy_run() with legacy_firstframe() and nextframe endless loop");
 	legacy_firstframe(gbm, egl);
 	while (1) {
 		legacy_nextframe(gbm, egl);

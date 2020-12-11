@@ -84,6 +84,8 @@ void legacy_dispose();
 void legacy_away();
 void legacy_back();
 
+void print_trace();
+
 //const struct drm * init_drm_atomic(const char *device);
 
 #endif /* _DRM_COMMON_H */

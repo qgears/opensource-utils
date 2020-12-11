@@ -168,7 +168,7 @@ static void psplash_console_handle_switches (bool onAway)
 
 void psplash_console_switch (void) 
 {
-  char vtname[]="/dev/tty";
+  char vtname[]="/dev/tty1";
   if ((ConsoleFd = open(vtname, O_RDWR|O_NDELAY, 0)) < 0)
     {
       fprintf(stderr, "Error cannot open %s: %s\n", vtname, strerror(errno));
