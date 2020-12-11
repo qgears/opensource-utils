@@ -5,9 +5,6 @@
 			<platform distroId="ubuntu" distroVersion="14.04">
 				<lib id="libqpng" path="libqpng-ubuntu-14.04-x86_64.so" installPath="/opt/qgears/libqpng-ubuntu-14.04-x86_64.so" />
 			</platform>
-			<platform distroId="ubuntu" distroVersion="20.04">
-				<lib id="libqpng" path="libqpng-ubuntu-20.04-x86_64.so" installPath="/opt/qgears/libqpng-ubuntu-20.04-x86_64.so" />
-			</platform>
 			<platform distroId="debian" distroVersion="9">			
 				<lib id="libqpng" path="libqpng-debian-9-x86_64.so" installPath="/opt/qgears/libqpng-debian-9-x86_64.so" />
 			</platform>
