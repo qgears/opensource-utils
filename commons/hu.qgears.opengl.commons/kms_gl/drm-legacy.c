@@ -26,6 +26,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/select.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/syscall.h>
+
+#include <gbm.h>
+#include <sys/stat.h>
 
 #include "common.h"
 #include "drm-common.h"
@@ -43,6 +49,54 @@ static drmEventContext evctx = {
 static struct gbm_bo *bo;
 static struct drm_fb *fb;
 	
+
+struct gbm_device {
+   /* Hack to make a gbm_device detectable by its first element. */
+   struct gbm_device *(*dummy)(int);
+
+   int fd;
+   const char *name;
+   unsigned int refcount;
+   struct stat stat;
+
+   void (*destroy)(struct gbm_device *gbm);
+   int (*is_format_supported)(struct gbm_device *gbm,
+                              uint32_t format,
+                              uint32_t usage);
+
+   struct gbm_bo *(*bo_create)(struct gbm_device *gbm,
+                               uint32_t width, uint32_t height,
+                               uint32_t format,
+                               uint32_t usage);
+   struct gbm_bo *(*bo_import)(struct gbm_device *gbm, uint32_t type,
+                               void *buffer, uint32_t usage);
+   int (*bo_write)(struct gbm_bo *bo, const void *buf, size_t data);
+   void (*bo_destroy)(struct gbm_bo *bo);
+
+   struct gbm_surface *(*surface_create)(struct gbm_device *gbm,
+                                         uint32_t width, uint32_t height,
+                                         uint32_t format, uint32_t flags);
+   struct gbm_bo *(*surface_lock_front_buffer)(struct gbm_surface *surface);
+   void (*surface_release_buffer)(struct gbm_surface *surface,
+                                  struct gbm_bo *bo);
+   int (*surface_has_free_buffers)(struct gbm_surface *surface);
+   void (*surface_destroy)(struct gbm_surface *surface);
+};
+
+struct gbm_surface {
+   struct gbm_device *gbm;
+   uint32_t width;
+   uint32_t height;
+   uint32_t format;
+   uint32_t flags;
+};
+
+struct gbm_kms_surface {
+    struct gbm_surface base;
+    struct gbm_kms_bo *bo[2];
+    int front;
+    int (*set_bo)(struct gbm_kms_surface *, int, void *, int, uint32_t);
+};
 
 static void page_flip_handler(int fd, unsigned int frame,
 		  unsigned int sec, unsigned int usec, void *data)
@@ -100,7 +154,7 @@ int legacy_beforefirstframe(const struct gbm *gbm, const struct egl *egl)
 	
 	fb = drm_fb_get_from_bo(bo);
 	if (!fb) {
-		fprintf(stderr, "Failed to get a new framebuffer\n");
+		fprintf(stderr, "legacy_beforefirstframe: Failed to get a new framebuffer\n");
 		exit(-1);
 	}
 	drm.saved_crtc=drmModeGetCrtc(drm.fd, drm.crtc_id);
@@ -130,25 +184,20 @@ int legacy_nextframe(const struct gbm *gbm, const struct egl *egl)
 
 		eglSwapBuffers(egl->display, egl->surface);
 		
-        if (NULL == gbm->surface) {
-           fprintf(stderr, "legacy_nextframe: gbm->surface is null\n");
-           print_trace();
-           exit(-1);
-        }
-		
+		fprintf(stderr, "legacy_nextframe on thread %d\n", syscall(__NR_gettid));
+        print_trace();
 		
 		next_bo = gbm_surface_lock_front_buffer(gbm->surface);
 		
-        if (NULL == next_bo) {
-           fprintf(stderr, "legacy_nextframe: Failed to get next framebuffer BO\n");
-           print_trace();
+        if (!next_bo) {
+           fprintf(stderr, "XXX legacy_nextframe: Failed to get next framebuffer BO; thread_id: %d\n", syscall(__NR_gettid));
            exit(-1);
         }
     
 		fb = drm_fb_get_from_bo(next_bo);
 		if (!fb) {
 			fprintf(stderr, "legacy_nextframe: Failed to get a new framebuffer\n");
-			return -1;
+			exit(-1);
 		}
 
 		/*
@@ -184,7 +233,7 @@ int legacy_nextframe(const struct gbm *gbm, const struct egl *egl)
 				printf("select timeout!\n");
 				return -1;
 			} else if (FD_ISSET(0, &fds)) {
-				printf("user interrupted!\n");
+				fprintf(stderr, "user interrupted!\n");
 				return 0;
 			}
 			drmHandleEvent(drm.fd, &evctx);
