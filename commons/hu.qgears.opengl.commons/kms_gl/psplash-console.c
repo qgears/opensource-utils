@@ -177,7 +177,7 @@ void psplash_console_switch (void)
   psplash_console_handle_switches (true);
   
   if (ioctl(ConsoleFd, KDSETMODE, KD_GRAPHICS) < 0)
-    perror("Error KDSETMODE KD_GRAPHICS failed\n");
+    perror("Error KDSETMODE KD_GRAPHICS failed");
 
   DBG("Set up console switch is ready!\n");
 
