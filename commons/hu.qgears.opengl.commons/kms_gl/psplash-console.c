@@ -168,12 +168,45 @@ static void psplash_console_handle_switches (bool onAway)
 
 void psplash_console_switch (void) 
 {
-  char vtname[]="/dev/tty1";
+  char           vtname[10];
+  struct vt_stat vt_state;
+
+
+  if ((ConsoleFd = open("/dev/tty1",O_WRONLY,0)) < 0)
+    {
+      perror("Error Cannot open /dev/tty1");
+      return;
+    }
+
+  /* Find next free terminal */
+  if ((ioctl(ConsoleFd, VT_OPENQRY, &VTNum) < 0))
+    {
+      perror("Error unable to find a free virtual terminal");
+      close(ConsoleFd);
+      return;
+    }
+    
+    close(ConsoleFd);
+  
+  sprintf(vtname,"/dev/tty%d", VTNum);
+  fprintf(stderr, "free tty found: %s\n", vtname);
+  
   if ((ConsoleFd = open(vtname, O_RDWR|O_NDELAY, 0)) < 0)
     {
       fprintf(stderr, "Error cannot open %s: %s\n", vtname, strerror(errno));
       return;
     }
+  if (ioctl(ConsoleFd, VT_GETSTATE, &vt_state) == 0)
+    VTNumInitial = vt_state.v_active;
+
+  psplash_console_ignore_switches ();
+  
+  if (ioctl(ConsoleFd, VT_ACTIVATE, VTNum) != 0)
+    perror("Error VT_ACTIVATE failed");
+  
+  if (ioctl(ConsoleFd, VT_WAITACTIVE, VTNum) != 0)
+    perror("Error VT_WAITACTIVE failed\n");
+
   psplash_console_handle_switches (true);
   
   if (ioctl(ConsoleFd, KDSETMODE, KD_GRAPHICS) < 0)
