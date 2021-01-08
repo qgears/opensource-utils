@@ -273,10 +273,6 @@ public abstract class XmlNativeLoader3 implements INativeLoader {
 				default:
 					break;
 				}
-//				for(Object o: props.keySet())
-//				{
-//					System.out.println(""+o+": "+props.getProperty(o.toString()));
-//				}
 				UtilNativeLoader.loadNatives(this);
 			}
 		}
