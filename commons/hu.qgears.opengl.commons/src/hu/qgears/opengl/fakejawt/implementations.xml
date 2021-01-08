@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <natives-def>
-	<filter property="os.name" regex="Linux">
-		<preload fileName="libjawt.so" resource="libjawt-${osrelease.ID}-${osrelease.VERSION_ID}-${processed.arch}.so"/>
-	</filter>
+    <filter property="os.name" regex="Linux">
+        <lib id="libjawt.so" resource="libjawt-${osrelease.ID}-${osrelease.VERSION_ID}-${processed.arch}.so"
+            installPath="/opt/qgears/libjawt.so" />
+    </filter>
 </natives-def>
