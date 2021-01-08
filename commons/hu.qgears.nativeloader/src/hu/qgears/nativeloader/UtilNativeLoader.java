@@ -108,7 +108,7 @@ public class UtilNativeLoader {
 				loadNativeBinary(libPath, clazz, nativeLoader);
 			}
 		} catch (NativeLoadException e) {//NOSONAR
-			//rethrowing is OK
+			//rethrowing is OK, avoiding repacking if not required
 			throw e;
 		} catch (Throwable t) {
 			throw new NativeLoadException(t);
@@ -167,64 +167,95 @@ public class UtilNativeLoader {
 
 	/**
 	 * Make sure that a specific .so is on a preload path:
-	 *  * Read the "LD_LIBRARY_PATH" variable
-	 *  * Scan all paths of the variable for the given .so name
-	 *  * Compare first match to the required content
-	 *  * If equals then ok
-	 *  * If not equals then throw try to overwrite the file
-	 *  * If does not exist then create the file with the given content into the first LD_LIBRARY_PATH folder.
-	 * @throws IOException 
+	 * <ul>
+	 * <li>Read the "LD_LIBRARY_PATH" variable
+	 * <li>Scan all paths of the variable for the given .so name
+	 * <li>Compare first match to the required content
+	 * <li>If equals then ok
+	 * <li>If not equals then throw try to overwrite the file
+	 * <li>If does not exist then create the file with the given content into 
+	 *  the first LD_LIBRARY_PATH folder.
+	 * </ul>
+	 * @return {@code true} if the library is on a preload path, {@code false}
+	 * otherwise or if the LD_LIBRARY_PATH is not defined
+	 * @throws IOException either if checking the presence of a native library
+	 * fails because of IO-related problem, or if automatic installation on a
+	 * preload path fails
 	 */
-	public static void ensurePreload(INativeLoader nativeLoader, NativePreload preload) throws IOException
+	public static boolean ensurePreload(INativeLoader nativeLoader, 
+			NativePreload preload) throws IOException
 	{
-		String s=System.getenv("LD_LIBRARY_PATH");
-		boolean b=false;
-		URL res=nativeLoader.getClass().getResource(preload.resource);
-		if(res==null)
-		{
-			LOG.error("ensurePreload: Resource does not exist: '"+preload.resource+"' '"+preload.fileName+"' accessor: "+nativeLoader.getClass().getName());
+		URL res=nativeLoader.getClass().getResource(preload.getResource());
+		boolean onPreloadPath = false;
+		
+		if (res == null) {
+			LOG.error("ensurePreload: Resource does not exist: '"
+					+ preload.getResource() + "' '" + preload.getFileName()
+					+ "' accessor: " + nativeLoader.getClass().getName());
 		}
-		List<String> preloadPaths=UtilString.split(s, ":");
-		if(s!=null)
-		{
+		
+		final String ldLibraryPathEnvVar = System.getenv("LD_LIBRARY_PATH");
+		final List<String> preloadPaths;
+		
+		if (ldLibraryPathEnvVar == null) {
+			preloadPaths = null;
+		} else {
+			preloadPaths = UtilString.split(ldLibraryPathEnvVar, ":");
+		}
+		
+		if(preloadPaths == null || preloadPaths.isEmpty()) {
+			LOG.error("ensurePreload: LD_LIBRARY_PATH is not "
+					+ "set up: can not create '" + preload + "' for preload.");
+		} else {
 			iteratePreloadPaths:
-			for(String p:preloadPaths)
-			{
-				try
-				{
-					File folder=new File(p);
-					File g=new File(folder, preload.fileName);
-					if(g.exists())
-					{
-						if(Arrays.equals(UtilFile.loadFile(g), UtilFile.loadFile(res)))
-						{
-							LOG.info("ensurePreload: correct '"+preload+"' is already set up.");
-							return;
-						}else
-						{
-							LOG.warn("ensurePreload: Not correct version (different content) of '"+preload+"' is set up on LD_LIBRARY_PATH. Path of file: '"+g.getAbsolutePath()+"'. Try to overwrite...");
+			for (final String p: preloadPaths) {
+				try {
+					File folder = new File(p);
+					File g = new File(folder, preload.getFileName());
+					if (g.exists()) {
+						if (Arrays.equals(UtilFile.loadFile(g), UtilFile.loadFile(res))) {
+							LOG.info("ensurePreload: correct '" + preload.getFileName() 
+									+ "' is already set up.");
+							onPreloadPath = true;
+						} else {
+							LOG.warn("ensurePreload: Not correct version "
+									+ "(different content) of '" + preload.getFileName()
+									+ "' is set up on LD_LIBRARY_PATH. Path of file: '"
+									+ g.getAbsolutePath() + "'. Try to overwrite...");
+							
 							break iteratePreloadPaths;
 						}
+					} else {
+						
 					}
-				}catch(Exception e)
-				{
+				} catch(Exception e) {
 					// NOSONAR Silent ignore
 				}
 			}
-		}
-		if(!b)
-		{
-			if(preloadPaths.size()==0)
-			{
-				throw new IOException("ensurePreload: LD_LIBRARY_PATH is not set up: can not create '"+preload+"' for preload.");
+		
+			if (!onPreloadPath && preloadPaths != null && !preloadPaths.isEmpty()) {
+				// If the library is not on a preload path, installing automatically
+				final String folderPath = preloadPaths.get(0);
+				
+				try {
+					File folder = new File(folderPath);
+					folder.mkdirs();
+					File g = new File(folder, preload.getFileName());
+					UtilFile.saveAsFile(g, UtilFile.loadFile(res));
+					LOG.info("ensurePreload: correct '" + preload.getFileName()
+							+ "' is set up by program into: " + g.getAbsolutePath());
+					
+					onPreloadPath = true;
+				} catch (final IOException ioe) {
+					LOG.error("Could not automatically copy " + preload.getFileName()
+							+ " to its target preload path: " + folderPath, ioe);
+					
+					throw ioe;
+				}
 			}
-			String folderPath=preloadPaths.get(0);
-			File folder=new File(folderPath);
-			folder.mkdirs();
-			File g=new File(folder, preload.fileName);
-			UtilFile.saveAsFile(g, UtilFile.loadFile(res));
-			LOG.info("ensurePreload: correct '"+preload+"' is set up by program into: '"+g.getAbsolutePath()+"'");
 		}
+		
+		return onPreloadPath;
 	}
 
 	/**

@@ -1,21 +1,27 @@
 package hu.qgears.nativeloader;
 
 /**
- * Native libraries that must be present on the preload path.
+ * Represents a native library that must be present on a preload path.
  */
 public class NativePreload {
-	public final String fileName;
-	public final String resource;
-	public NativePreload(String fileName, String resource) {
-		this.fileName=fileName;
-		this.resource=resource;
-		if(fileName==null)
-		{
-			throw new NullPointerException("fileName must not be null");
+	private final String fileName;
+	private final String resource;
+	
+	public NativePreload(final String fileName, final String resource) {
+		if(fileName == null || resource == null) {
+			throw new NullPointerException((fileName == null ? "filename"
+					: "resource") + "must not be null");
+		} else {
+			this.fileName=fileName;
+			this.resource=resource;
 		}
-		if(resource==null)
-		{
-			throw new NullPointerException("resource must not be null");
-		}
+	}
+	
+	public String getResource() {
+		return resource;
+	}
+	
+	public String getFileName() {
+		return fileName;
 	}
 }
