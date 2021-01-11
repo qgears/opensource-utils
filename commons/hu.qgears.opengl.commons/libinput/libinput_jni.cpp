@@ -89,6 +89,7 @@ METHODPREFIX(CLASS, jint, poll)(ST_ARGS)
   plijni->currWriteInputEvent=0;
   while ((event = libinput_get_event(plijni->li)) != NULL)
   {
+    fprintf(stderr, "libinput event\n");
     switch(libinput_event_get_type(event))
     {
     	case LIBINPUT_EVENT_KEYBOARD_KEY:
@@ -97,7 +98,7 @@ METHODPREFIX(CLASS, jint, poll)(ST_ARGS)
 		   	if(keyb!=NULL)
 		   	{
 		   		ev=allocateEvent();
-		   		ev->type=1;
+		   		ev->type = 300;
 		   	 	ev->a=libinput_event_keyboard_get_key(keyb);
 		   	 	ev->b=libinput_event_keyboard_get_key_state(keyb);
 		   	}
@@ -109,7 +110,7 @@ METHODPREFIX(CLASS, jint, poll)(ST_ARGS)
     		if(ptr!=NULL)
     		{
 		   		ev=allocateEvent();
-		   		ev->type=400;
+		   		ev->type = 400;
 		   	 	ev->da=libinput_event_pointer_get_dx(ptr);
 		   	 	ev->db=libinput_event_pointer_get_dy(ptr);
     		}
@@ -121,7 +122,7 @@ METHODPREFIX(CLASS, jint, poll)(ST_ARGS)
     		if(ptr!=NULL)
     		{
 		   		ev=allocateEvent();
-		   		ev->type=401;
+		   		ev->type = 401;
 		   	 	ev->da=libinput_event_pointer_get_absolute_x_transformed(ptr, 1);
 		   	 	ev->db=libinput_event_pointer_get_absolute_y_transformed(ptr, 1);
     		}
@@ -140,6 +141,7 @@ METHODPREFIX(CLASS, jint, poll)(ST_ARGS)
     		break;
     	}
     	default:
+            fprintf(stderr, "unhandled libinput event type\n");
     		break;
     		// Do not handle other event types 
     }

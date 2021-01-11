@@ -3,7 +3,7 @@ package hu.qgears.opengl.libinput;
 import java.util.HashMap;
 
 public enum ELibinputEventType {
-	key(1),
+	key(300),
 	pointerMotion(400),
 	pointerAbsolute(401),
 	pointerButton(402);
