@@ -77,7 +77,7 @@ int main (int argc, char ** argv)
 	char card[]="/dev/dri/card0";
 	int fd, pitch, bo_handle, fb_id, second_fb_id;
 	drmModeRes *resources;
-	drmModeConnector *connector;
+	drmModeConnector *connector, *first_good_connector = NULL;
 	drmModeEncoder *encoder;
 	drmModeModeInfo mode;
 	drmModeCrtcPtr orig_crtc;
@@ -101,67 +101,66 @@ int main (int argc, char ** argv)
 	}
 
 	/* find the first available connector with modes */
-	for(i=0; i < resources->count_connectors; ++i){
+	for(i=0; i < resources->count_connectors; ++i) {
 		connector = drmModeGetConnector(fd, resources->connectors[i]);
 		if(connector != NULL){
-			fprintf(stderr, "connector %d found\n", connector->connector_id);
-			if(connector->connection == DRM_MODE_CONNECTED
-				&& connector->count_modes > 0)
-				break;
-			drmModeFreeConnector(connector);
-		}
-		else
+			fprintf(stderr, "connector %d found; mode count: %d; state: ", 
+			    connector->connector_id, connector->count_modes);
+			    
+			if(connector->connection == DRM_MODE_CONNECTED) {
+				fprintf(stderr, "connected\n");
+				
+				if (first_good_connector == NULL) {
+				    first_good_connector = connector;
+				}
+			} else {
+			    fprintf(stderr, "disconnected\n");
+			}
+//				break;
+//			drmModeFreeConnector(connector);
+		} else {
 			fprintf(stderr, "get a null connector pointer\n");
+		}
 	}
-	if(i == resources->count_connectors){
+	
+	connector = first_good_connector;
+	
+	if (first_good_connector == NULL) {
 		fprintf(stderr, "No active connector found.\n");
 		goto free_drm_res;
 	}
 
 	mode = connector->modes[0];
-	fprintf(stderr, "(%dx%d)\n", mode.hdisplay, mode.vdisplay);
+	fprintf(stderr, "connector mode 0: %dx%d\n", mode.hdisplay, mode.vdisplay);
 
 	/* find the encoder matching the first available connector */
-	for(i=0; i < resources->count_encoders; ++i){
+	for (i = 0; i < resources->count_encoders; ++i) {
 		encoder = drmModeGetEncoder(fd, resources->encoders[i]);
-		if(encoder != NULL){
-			fprintf(stderr, "encoder %d found\n", encoder->encoder_id);
-			if(encoder->encoder_id == connector->encoder_id);
-				break;
+		if (encoder == NULL){
+            fprintf(stderr, "get a null encoder pointer\n");
+            continue;
+        } else {
+			/* Processing encoder found */
+            if (encoder->encoder_id == connector->encoder_id) {
+                /* Found a matching encoder */
+                break;
+            }
 			drmModeFreeEncoder(encoder);
-		} else
-			fprintf(stderr, "get a null encoder pointer\n");
+		}
 	}
+	
 	if(i == resources->count_encoders){
 		fprintf(stderr, "No matching encoder with connector, shouldn't happen\n");
 		goto free_drm_res;
 	}
 
-/*
-	/ init kms bo stuff
-	ret = kms_create(fd, &kms_driver);
-	if(ret){
-		fprintf(stderr, "kms_create failed: %s\n", strerror(errno));
-		goto free_drm_res;
-	}
-
-	create_bo(kms_driver, mode.hdisplay, mode.vdisplay, 
-		&pitch, &kms_bo, &bo_handle, draw_buffer);
-
-	// add FB which is associated with bo
-	ret = drmModeAddFB(fd, mode.hdisplay, mode.vdisplay, 24, 32, pitch, bo_handle, &fb_id);
-	if(ret){
-		fprintf(stderr, "drmModeAddFB failed (%ux%u): %s\n",
-			mode.hdisplay, mode.vdisplay, strerror(errno));
-		goto free_first_bo;
-	}
-*/
 	orig_crtc = drmModeGetCrtc(fd, encoder->crtc_id);
 	if (orig_crtc == NULL)
 	{
-	  perror("Ger CRTC current state");
+	  perror("Get CRTC current state");
 	  goto free_first_bo;
 	}
+	
 	printf("CRTC current state get success\n");
 	fb = drmModeGetFB(fd, orig_crtc->buffer_id);
 	if(fb==NULL)
@@ -200,8 +199,7 @@ int main (int argc, char ** argv)
 	size=fb->pitch*fb->height;
 	map = (uint8_t *)mmap(0, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, mreq.offset);
 	if (map == MAP_FAILED) {
-		fprintf(stderr, "cannot mmap dumb buffer (%d): %m\n",
-			errno);
+		fprintf(stderr, "cannot mmap dumb buffer (%d): %m\n", errno);
 		exit(-1);
 	}
 	saveImage(map, fb);
