@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<natives-def>
+	<filter property="os.name" regex="Linux">
+		<lib id="libkmsjni.so" resource="libkmsjni-${osrelease.ID}-${osrelease.VERSION_ID}-${processed.arch}.so"
+			installPath="/opt/qgears/libkmsjni.so" />
+	</filter>
+</natives-def>

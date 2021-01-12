@@ -9,7 +9,7 @@
 	</target>
 	<target name="jnigen">
 		<mkdir dir="generated"/>
-		<javah class="hu.qgears.opengl.osmesa.OSMesa"
+		<javah class="hu.qgears.opengl.osmesa.OSMesaNative"
 			classpath="../bin"
 			destdir="./generated"
 			/>

@@ -88,7 +88,7 @@ public class UtilString {
 	 * @param delimiter this will be printed between the pieces. Will not be printed before and after them.
 	 * @return A single string that contains the input list concatenated with delimiters in between
 	 */
-	public static String concat(List<String> list, String delimiter) {
+	public static String concat(Collection<String> list, String delimiter) {
 		StringBuilder ret=new StringBuilder();
 		boolean first=true;
 		for(String s:list)

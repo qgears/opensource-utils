@@ -1,0 +1,36 @@
+= OpenGL context helpers
+
+== EGLImplementation context types
+
+== KMSGL
+
+Uses KMS to switch to graphics mode.
+Uses EGL to acquire GL context.
+Uses libinput to handle mouse and keyboard.
+
+In order to work correctly the user have to be added to the video and input groups.
+
+== OSMesa
+
+GL API implementation is software rendering provided by OSMesa.
+
+The patched libGL.so.1 must be the first on the library path so that the application loads this instead of the GL implementation of the GPU. This will reroute all GL calls to OSMesa.
+
+=== osmesaKMS
+
+Useful to test software rendering performance or to use GL API on machine without OpenGL capable driver.
+
+Uses KMS to switch to graphics mode and have a double buffered framebuffer access to the screen.
+Uses OSMesa to provide GL api.
+Uses libinput to handle mouse and keyboard
+
+=== osmesaSwing
+
+Uses OSMesa to provide GL api.
+Uses Swing to open a GUI window to show the frames and handle mouse and keyboard.
+
+=== osmesaVNC
+
+Uses OSMesa to provide GL api.
+Program is not visible but a VNC server is opened through which a UI can be opened or screenshots can be created. Useful for application automatic testing on a server.
+

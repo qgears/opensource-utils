@@ -6,9 +6,6 @@ import java.net.URL;
  * Binary shared library to be loaded by the program.
  * 
  * Stores all information that is required to load the binary.
- * 
- * @author rizsi
- *
  */
 public class NativeBinary {
 	private final String libId;

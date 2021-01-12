@@ -1,8 +1,6 @@
 package hu.qgears.opengl.mirgl;
 
 import hu.qgears.nativeloader.UtilNativeLoader;
-import hu.qgears.opengl.commons.OGlGlobalParameters;
-import hu.qgears.opengl.commons.input.EMouseButton;
 import hu.qgears.opengl.commons.input.IKeyboard;
 import hu.qgears.opengl.commons.input.IMouse;
 import hu.qgears.opengl.commons.input.MouseImplCallback;

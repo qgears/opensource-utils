@@ -3,6 +3,8 @@ package hu.qgears.nativeloader;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.ParserConfigurationException;
@@ -15,6 +17,7 @@ import org.xml.sax.SAXNotRecognizedException;
 import org.xml.sax.SAXNotSupportedException;
 
 import hu.qgears.commons.UtilFile;
+import hu.qgears.commons.UtilString;
 
 
 /**
@@ -97,11 +100,15 @@ public class UtilNativeLoader {
 			info("Searching for natives for class: "
 					+ clazz.getName() + " arch: " + arch + " os: " + os);
 			NativesToLoad natives = nativeLoader.getNatives(arch, os);
+			for(NativePreload preload : natives.getPreloads())
+			{
+				ensurePreload(nativeLoader, preload);
+			}
 			for (NativeBinary libPath : natives.getBinaries()) {
 				loadNativeBinary(libPath, clazz, nativeLoader);
 			}
 		} catch (NativeLoadException e) {//NOSONAR
-			//rethrowing is OK
+			//rethrowing is OK, avoiding repacking if not required
 			throw e;
 		} catch (Throwable t) {
 			throw new NativeLoadException(t);
@@ -159,6 +166,99 @@ public class UtilNativeLoader {
 	}
 
 	/**
+	 * Make sure that a specific .so is on a preload path:
+	 * <ul>
+	 * <li>Read the "LD_LIBRARY_PATH" variable
+	 * <li>Scan all paths of the variable for the given .so name
+	 * <li>Compare first match to the required content
+	 * <li>If equals then ok
+	 * <li>If not equals then throw try to overwrite the file
+	 * <li>If does not exist then create the file with the given content into 
+	 *  the first LD_LIBRARY_PATH folder.
+	 * </ul>
+	 * @return {@code true} if the library is on a preload path, {@code false}
+	 * otherwise or if the LD_LIBRARY_PATH is not defined
+	 * @throws IOException either if checking the presence of a native library
+	 * fails because of IO-related problem, or if automatic installation on a
+	 * preload path fails
+	 */
+	public static boolean ensurePreload(INativeLoader nativeLoader, 
+			NativePreload preload) throws IOException
+	{
+		URL res=nativeLoader.getClass().getResource(preload.getResource());
+		boolean onPreloadPath = false;
+		
+		if (res == null) {
+			LOG.error("ensurePreload: Resource does not exist: '"
+					+ preload.getResource() + "' '" + preload.getFileName()
+					+ "' accessor: " + nativeLoader.getClass().getName());
+		}
+		
+		final String ldLibraryPathEnvVar = System.getenv("LD_LIBRARY_PATH");
+		final List<String> preloadPaths;
+		
+		if (ldLibraryPathEnvVar == null) {
+			preloadPaths = null;
+		} else {
+			preloadPaths = UtilString.split(ldLibraryPathEnvVar, ":");
+		}
+		
+		if(preloadPaths == null || preloadPaths.isEmpty()) {
+			LOG.error("ensurePreload: LD_LIBRARY_PATH is not "
+					+ "set up: can not create '" + preload + "' for preload.");
+		} else {
+			iteratePreloadPaths:
+			for (final String p: preloadPaths) {
+				try {
+					File folder = new File(p);
+					File g = new File(folder, preload.getFileName());
+					if (g.exists()) {
+						if (Arrays.equals(UtilFile.loadFile(g), UtilFile.loadFile(res))) {
+							LOG.info("ensurePreload: correct '" + preload.getFileName() 
+									+ "' is already set up.");
+							onPreloadPath = true;
+						} else {
+							LOG.warn("ensurePreload: Not correct version "
+									+ "(different content) of '" + preload.getFileName()
+									+ "' is set up on LD_LIBRARY_PATH. Path of file: '"
+									+ g.getAbsolutePath() + "'. Try to overwrite...");
+							
+							break iteratePreloadPaths;
+						}
+					} else {
+						
+					}
+				} catch(Exception e) {
+					// NOSONAR Silent ignore
+				}
+			}
+		
+			if (!onPreloadPath && preloadPaths != null && !preloadPaths.isEmpty()) {
+				// If the library is not on a preload path, installing automatically
+				final String folderPath = preloadPaths.get(0);
+				
+				try {
+					File folder = new File(folderPath);
+					folder.mkdirs();
+					File g = new File(folder, preload.getFileName());
+					UtilFile.saveAsFile(g, UtilFile.loadFile(res));
+					LOG.info("ensurePreload: correct '" + preload.getFileName()
+							+ "' is set up by program into: " + g.getAbsolutePath());
+					
+					onPreloadPath = true;
+				} catch (final IOException ioe) {
+					LOG.error("Could not automatically copy " + preload.getFileName()
+							+ " to its target preload path: " + folderPath, ioe);
+					
+					throw ioe;
+				}
+			}
+		}
+		
+		return onPreloadPath;
+	}
+
+	/**
 	 * Creates a {@link SAXParser SAX parser} suitable for secure processing 
 	 * of the native load XML files.
 	 * @return a secure {@link SAXParser} instance
@@ -195,5 +295,4 @@ public class UtilNativeLoader {
 		
 		return saxParserFactory.newSAXParser();
 	}
-
 }

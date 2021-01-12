@@ -1,0 +1,11 @@
+<project name="generate" default="jnigen" basedir=".">
+	<description>
+		Generate jni header
+	</description>
+	<target name="jnigen">
+		<javah class="hu.qgears.sdlwindow.SdlWindowNative"
+			classpath="../bin"
+			destdir="./"
+			/>
+	</target>
+</project>

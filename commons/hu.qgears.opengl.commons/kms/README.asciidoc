@@ -1,0 +1,4 @@
+= KMS Kernel Mode Switch fullscreen OpenGL rendering JNI API
+
+Switches screen into graphics mode and creates an OpenGL double buffered vsynced environment.
+

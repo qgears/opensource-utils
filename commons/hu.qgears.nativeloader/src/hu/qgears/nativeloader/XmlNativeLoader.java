@@ -172,8 +172,11 @@ public abstract class XmlNativeLoader implements INativeLoader {
 				/* Postprocessing: removing quotation marks from VERSION_ID */
 				final String osVersionIdRaw = osReleaseProperties.getProperty(
 						OS_RELEASE_PROPNAME_VERSION_ID);
-				osReleaseProperties.put(OS_RELEASE_PROPNAME_VERSION_ID, 
+				if(osVersionIdRaw!=null)
+				{
+					osReleaseProperties.put(OS_RELEASE_PROPNAME_VERSION_ID, 
 						osVersionIdRaw.replaceAll("[\"]", ""));
+				}
 			} catch (final IOException e) {
 				throw new NativeLoadException("Exception while attempting "
 						+ "to load Linux distribution version information "
@@ -215,21 +218,31 @@ public abstract class XmlNativeLoader implements INativeLoader {
 				if (linuxDistroIdCond != null) {
 					final String distroId = osReleaseProperties.getProperty(
 							OS_RELEASE_PROPNAME_ID);
-					
-					match &= distroId.matches(linuxDistroIdCond);
+					match &= match(distroId, linuxDistroIdCond);
 				}
 				
 				if (linuxDistroVersionCond != null) {
 					final String versionId = osReleaseProperties.getProperty(
 							OS_RELEASE_PROPNAME_VERSION_ID);
-					
-					match &= versionId.matches(linuxDistroVersionCond);
+					if(versionId!=null)
+					{
+						match &= versionId.matches(linuxDistroVersionCond);
+					}
 				}
 			}
 			
 			return match;
 		}
 		
+		private boolean match(String value, String pattern) {
+			if(value==null)
+			{
+				return false;
+			}else
+			{
+				return value.matches(pattern);
+			}
+		}
 	}
 	
 	@Override
@@ -243,6 +256,6 @@ public abstract class XmlNativeLoader implements INativeLoader {
 		} catch (SAXException | ParserConfigurationException | IOException e) {
 			throw new NativeLoadException(e);
 		}
-		return new NativesToLoad(handler.getNatives());
+		return new NativesToLoad(handler.getPreloads(), handler.getNatives());
 	}
 }

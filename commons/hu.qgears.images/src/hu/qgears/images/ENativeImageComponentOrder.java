@@ -74,6 +74,19 @@ public enum ENativeImageComponentOrder {
 		public int getAlphaChannel() {
 			return 0;
 		}
+	},
+	/**
+	 * BufferedImage component order.
+	 */
+	BIM{
+		@Override
+		public int getNCHannels() {
+			return 4;
+		}
+		@Override
+		public int getAlphaChannel() {
+			return 0;
+		}
 	};
 	public int getNCHannels()
 	{

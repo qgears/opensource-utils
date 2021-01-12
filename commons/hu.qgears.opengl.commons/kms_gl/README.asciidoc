@@ -1,0 +1,55 @@
+:sourcedir: .
+
+= KMS Kernel Mode Switch fullscreen software rendering JNI API
+
+Switches screen into graphics mode and creates a double buffered vsynced environment.
+Drawing is implemented in software into a framebuffer.
+
+== System requirements
+
+Additional setup is required for reliable console switching. 
+
+=== udev rules
+
+If a program is using the kmsgl backend, a readable and writable /dev/ttyX node
+must exist that is accessible by user, on behalf of whom the program runs, in
+order to set up console switching reliably. 
+
+In recent Linux distributions, this has to be usually implemented by a 
+*udev rule* e. g. in a file called `/etc/udev/rules.d/99-kmsgl-tty.rules`:
+
+[source,bash]
+----
+# Rules for allowing the kmsgl process owner to reconfigure tty8:
+SUBSYSTEM=="tty", KERNEL=="tty8", GROUP="$KMSGLGROUP", MODE="0660"
+----
+
+The above example assumes that
+
+* the user, on behalf of whom the process is started, is a member of the group
+called `$KMSGLGROUP`
+* the nodes matching `/dev/tty[0-7]` are reserved by the Linux distribution, and
+* `/dev/tty8` is free
+
+The script results in setting the `/dev/tty8` to be readable and writable by 
+`$KMSGLGROUP`. The term `$KMSGLGROUP` must to be substituted as appropriate.
+
+Note that the KMSGL backend implementation determines the first free tty 
+automatically, but this is the responsibility of the OS or startup scripts to
+make it readable and writable for the kmsgl-related user or group.
+
+=== Linux capability configuration
+
+The kmsgl-based process must have the `CAP_SYS_TTY_CONFIG` Linux capability for
+setting up console switching if started automatically. This can be provided by 
+the `AmbientCapabilities` systemd directive:
+
+[source,bash] 
+----
+include::kmsglapp-systemd-sample.conf[]
+----
+
+== TODOs
+
+Reliable VT switching.
+Handle edge cases: VT invisible when launched, VT invisible when terminated 

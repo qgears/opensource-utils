@@ -206,6 +206,7 @@ public final class UtilFile {
 
 	/**
 	 * Load the content from the <code>InputStream</code> into a byte array.
+	 * After reaching the EOF of the inputstream then close it.
 	 * 
 	 * @param is
 	 * @return

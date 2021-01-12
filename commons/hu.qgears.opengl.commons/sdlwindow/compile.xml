@@ -1,0 +1,11 @@
+<project name="generate" default="make-all" basedir=".">
+	<description>
+		Compile native library.
+		Dependencies:
+	</description>
+	<target name="make-all" depends="make-linux">
+	</target>
+	<target name="make-linux">
+		<exec dir="./linux" executable="make"/>
+	</target>
+</project>
