@@ -107,17 +107,18 @@ int main (int argc, char ** argv)
 			fprintf(stderr, "connector %d found; mode count: %d; state: ", 
 			    connector->connector_id, connector->count_modes);
 			    
-			if(connector->connection == DRM_MODE_CONNECTED) {
+			if (connector->connection == DRM_MODE_CONNECTED && connector->count_modes > 0) {
 				fprintf(stderr, "connected\n");
 				
 				if (first_good_connector == NULL) {
 				    first_good_connector = connector;
-				}
+                                } else {
+                                    drmModeFreeConnector(connector);
+                                }
 			} else {
-			    fprintf(stderr, "disconnected\n");
+			    fprintf(stderr, "disconnected or zero modes\n");
+			    drmModeFreeConnector(connector);
 			}
-//				break;
-//			drmModeFreeConnector(connector);
 		} else {
 			fprintf(stderr, "get a null connector pointer\n");
 		}
@@ -170,21 +171,7 @@ int main (int argc, char ** argv)
 	}
 	
 	printf("FB get success\n");
-	/*
-	flink.handle = fb->handle;
-	if (drmIoctl(fd, DRM_IOCTL_GEM_FLINK, &flink)) {
-		perror("DRM_IOCTL_GEM_FLINK");
-		drmModeFreeFB(fb);
-		exit(1);
-	}
-	printf("Name: %d\n",flink.name);
-	open_arg.name=flink.name;
-	open_arg.name = flink.name;
-	if (drmIoctl(fd, DRM_IOCTL_GEM_OPEN, &open_arg) != 0) {
-		perror("DRM_IOCTL_GEM_OPEN");
-		exit(-1);
-	}
-	*/
+
 	struct drm_mode_map_dumb mreq;
 	memset(&mreq, 0, sizeof(mreq));
 	mreq.handle = fb->handle;
