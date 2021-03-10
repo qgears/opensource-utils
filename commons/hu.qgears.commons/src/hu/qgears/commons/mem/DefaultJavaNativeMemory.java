@@ -9,8 +9,6 @@ import hu.qgears.commons.AbstractReferenceCountedDisposeable;
 /**
  * The default Java implementation of native memory buffers.
  * Does not support native pointer.
- * @author rizsi
- *
  */
 public class DefaultJavaNativeMemory extends AbstractReferenceCountedDisposeable implements INativeMemory {
 	private ByteBuffer ptr;
