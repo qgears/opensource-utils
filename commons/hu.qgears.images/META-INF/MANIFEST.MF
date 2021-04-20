@@ -7,7 +7,7 @@ Export-Package: hu.qgears.images,
  hu.qgears.images.tiff,
  hu.qgears.images.vnc
 Bundle-SymbolicName: hu.qgears.images
-Bundle-Version: 10.0.1.qualifier
+Bundle-Version: 10.1.0.qualifier
 Bundle-Name: Images
 Require-Bundle: hu.qgears.commons;bundle-version="9.0.0";visibility:=reexport,
  hu.qgears.nativeloader;bundle-version="9.0.0",
