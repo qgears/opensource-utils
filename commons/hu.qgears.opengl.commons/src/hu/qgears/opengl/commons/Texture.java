@@ -137,6 +137,7 @@ public class Texture implements IDisposeable {
 				new DefaultJavaNativeMemory(
 		pixels), new SizeInt(w, h), ENativeImageComponentOrder.RGBA, 4);
 		int handle=makeTexture(image);
+		image.decrementReferenceCounter();
 		if (handle > 0) {
 			return new Texture(handle, w, h, GL11.GL_RGBA8, 0);
 		}
@@ -155,7 +156,11 @@ public class Texture implements IDisposeable {
 			throw new RuntimeException("Already disposed!");
 		}
 	}
-
+	/**
+	 * Create OpenGL texture object and copy the given image as initial content into it.
+	 * @param image
+	 * @return
+	 */
 	private static int makeTexture(NativeImage image) {
 		ByteBuffer pixels = image.getBuffer().getJavaAccessor();
 		int w = image.getWidth();
