@@ -1,0 +1,12 @@
+/* comment */
+ws="whitespace";
+comment="comment";
+id="id";
+str="stringConst";
+cSlash="const" "/";
+$ws;
+/* comment */
+%doc;
+doc:=id;
+
+#doc;

@@ -1,0 +1,169 @@
+<!--  The first version of language language -->
+<language>
+	<tokenizer>
+		<token><id>ws</id><recognizer>whitespace</recognizer></token>
+		<token><id>comment</id><recognizer>comment</recognizer></token>
+		<token><id>singleLineComment</id><recognizer>singleLineComment</recognizer></token>
+		<token><id>$</id><recognizer>const</recognizer><conf>$</conf></token>
+		<token><id>#</id><recognizer>const</recognizer><conf>#</conf></token>
+		<token><id>:=</id><recognizer>const</recognizer><conf>:=</conf></token>
+		<token><id>=</id><recognizer>const</recognizer><conf>=</conf></token>
+		<token><id>+</id><recognizer>const</recognizer><conf>+</conf></token>
+		<token><id>;</id><recognizer>const</recognizer><conf>;</conf></token>
+		<token><id>|</id><recognizer>const</recognizer><conf>|</conf></token>
+		<token><id>(</id><recognizer>const</recognizer><conf>(</conf></token>
+		<token><id>)</id><recognizer>const</recognizer><conf>)</conf></token>
+		<token><id>*1</id><recognizer>const</recognizer><conf>*1</conf></token>
+		<token><id>*</id><recognizer>const</recognizer><conf>*</conf></token>
+		<token><id>!</id><recognizer>const</recognizer><conf>!</conf></token>
+		<token><id>%</id><recognizer>const</recognizer><conf>%</conf></token>
+		<token><id>id</id><recognizer>id</recognizer></token>
+		<token><id>str</id><recognizer>stringConst</recognizer></token>
+	</tokenizer>
+	<tokenFilter>
+		<delete>ws</delete>
+		<delete>comment</delete>
+		<delete>singleLineComment</delete>
+	</tokenFilter>
+	<parser>
+		<root>doc</root>
+		<def>
+			<name>doc</name>
+			<term t="d">anyDefinition</term>
+		</def>
+		<def>
+			<name>anyDefinition</name>
+			<term t="*">definition</term>
+		</def>
+		<def>
+			<name>definition</name>
+			<term t="|">
+				<term t="d">defToken</term>
+				<term t="d">defTerm</term>
+				<term t="d">defRoot</term>
+				<term t="d">defFilterToken</term>
+				<term t="d">defAcceptTerm</term>
+			</term>
+		</def>
+		<def>
+			<name>defFilterToken</name>
+			<term t="+">
+				<term t="d">$</term>
+				<term t="d">id</term>
+				<term t="d">;</term>
+			</term>
+		</def>
+		<def>
+			<name>defAcceptTerm</name>
+			<term t="+">
+				<term t="d">#</term>
+				<term t="d">id</term>
+				<term t="d">;</term>
+			</term>
+		</def>
+		<def>
+			<name>defRoot</name>
+			<term t="+">
+				<term t="d">%</term>
+				<term t="d">id</term>
+				<term t="d">;</term>
+			</term>
+		</def>
+		<def>
+			<name>defToken</name>
+			<term t="+">
+				<term t="d">id</term>
+				<term t="d">=</term>
+				<term t="d">str</term>
+				<term t="|">
+					<term t="d">str</term>
+					<term t="E"></term>
+				</term>
+				<term t="d">;</term>
+			</term>
+		</def>
+		<def>
+			<name>defTerm</name>
+			<term t="+">
+				<term t="d">id</term>
+				<term t="d">:=</term>
+				<term t="d">term</term>
+				<term t="d">;</term>
+			</term>
+		</def>
+		<def>
+			<name>term</name>
+			<term t="|">
+				<term t="d">termRef</term>
+				<term t="d">termAdd</term>
+				<term t="d">termOr</term>
+				<term t="d">termEps</term>
+				<term t="d">termBracket</term>
+				<term t="d">termZeroOrMore</term>
+				<term t="d">termOneOrMore</term>
+			</term>
+		</def>
+		<def>
+			<name>termRef</name>
+			<term t="d">id</term>
+		</def>
+		<def>
+			<name>termAdd</name>
+			<term t="+">
+				<term t="d">term</term>
+				<term t="d">+</term>
+				<term t="d">term</term>
+			</term>
+		</def>
+		<def>
+			<name>termOr</name>
+			<term t="+">
+				<term t="d">term</term>
+				<term t="d">|</term>
+				<term t="d">term</term>
+			</term>
+		</def>
+		<def>
+			<name>termBracket</name>
+			<term t="+">
+				<term t="d">(</term>
+				<term t="d">term</term>
+				<term t="d">)</term>
+			</term>
+		</def>
+		<def>
+			<name>termZeroOrMore</name>
+			<term t="+">
+				<term t="d">*</term>
+				<term t="d">term</term>
+			</term>
+		</def>
+		<def>
+			<name>termOneOrMore</name>
+			<term t="+">
+				<term t="d">*1</term>
+				<term t="d">term</term>
+			</term>
+		</def>
+		<def>
+			<name>termEps</name>
+			<term t="d">!</term>
+		</def>
+	</parser>
+	<termFilter>
+		<accept>doc</accept>
+		<accept>id</accept>
+		<accept>str</accept>
+		<accept>defToken</accept>
+		<accept>defRoot</accept>
+		<accept>defTerm</accept>
+		<accept>defFilterToken</accept>
+		<accept>defAcceptTerm</accept>
+		<accept>termRef</accept>
+		<accept>termAdd</accept>
+		<accept>termOr</accept>
+		<accept>termZeroOrMore</accept>
+		<accept>termOneOrMore</accept>
+		<accept>termEps</accept>
+	</termFilter>
+</language>

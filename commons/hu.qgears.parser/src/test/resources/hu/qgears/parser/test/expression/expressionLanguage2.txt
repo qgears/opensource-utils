@@ -1,0 +1,13 @@
+// The non-terminal that this expession language hooks to
+@expression
+// The id of an expression with one level lower precedence 
+$lower
+// The string constant hook that will be replaced with this expression language in the hooking language.
+%INSERT_EXPRESSION_LANGUAGE_HERE
+
+// Expression with  precedence 100 id expAdd
+// and language term definition fragment : "(lower+tAdd)+lower"
+// where lower will be replaced with the generated id of the expressions with precedenece 200 
+!100:expAdd:lower+(tAdd+this)
+
+!300:constId:tId

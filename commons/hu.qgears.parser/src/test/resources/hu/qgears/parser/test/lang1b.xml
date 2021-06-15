@@ -1,0 +1,54 @@
+<!-- A simple example language -->
+<language>
+	<tokenizer>
+		<token><id>ws</id><recognizer>whitespace</recognizer></token>
+		<token><id>id</id><recognizer>id</recognizer></token>
+		<token><id>number</id><recognizer>number</recognizer></token>
+		<token><id>=</id><recognizer>const</recognizer><conf>=</conf></token>
+	</tokenizer>
+	<tokenFilter>
+		<delete>ws</delete>
+	</tokenFilter>
+	<parser>
+		<root>doc</root>
+		<def>
+			<name>doc</name>
+			<term t="|">
+				<term t="d">jah</term>
+				<term t="d">alma</term>
+			</term>
+		</def>
+		<def>
+			<name>jah</name>
+			<term t="|">
+				<term t="d">doc</term>
+				<term t="+">
+					<term t="+">
+						<term t="d">number</term>
+					</term>
+					<term t="*">doc</term>
+				</term>
+			</term>
+		</def>
+		<def>
+			<name>alma</name>
+			<term t="+">
+				<term t="E">doc</term>
+				<term t="E">doc</term>
+			</term>
+		</def>
+		<def>
+			<name>jajj</name>
+			<term t="E">
+			</term>
+		</def>
+		<def>
+			<name>kaposzta</name>
+			<term t="*">doc</term>
+		</def>
+		<def>
+			<name>csillag</name>
+			<term t="*1">doc</term>
+		</def>
+	</parser>
+</language>

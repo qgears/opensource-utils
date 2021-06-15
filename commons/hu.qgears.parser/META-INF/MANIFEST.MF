@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Parser Plug-in
+Bundle-SymbolicName: hu.qgears.parser
+Bundle-Version: 1.0.0
+Bundle-Vendor: Q-Gears Kft.
+Export-Package: hu.qgears.parser,
+ hu.qgears.parser.expression,
+ hu.qgears.parser.impl,
+ hu.qgears.parser.language,
+ hu.qgears.parser.language.impl,
+ hu.qgears.parser.tokenizer,
+ hu.qgears.parser.tokenizer.impl,
+ hu.qgears.parser.tokenizer.recognizer,
+ hu.qgears.parser.util
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Require-Bundle: org.junit,
+ hu.qgears.commons;bundle-version="6.4.1"

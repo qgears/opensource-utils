@@ -1,0 +1,70 @@
+/*
+	Language parser language.
+	It parses itself.
+	It can be parsed by the parser defined in languageLanguage_v01.xml.
+	It differs from that because it defines an expression language with correct precedence hierarchy.
+	
+	ws="whitespace"; means that the ws token matches any whitespace
+	cDSlash="const" "/"; means that the cDSlash token matches "//"
+	doc:=expression is a non-terminal definition
+	$ws; means that whitespaces are omitted before going on with
+		syntactic analization
+	#id means that the token id will be kept in the resulting filtered tree
+ */
+ws="whitespace";
+comment="comment";
+singleLineComment="singleLineComment";
+dollar="const" "$";
+hashmark="const" "#";
+def="const" ":=";
+eq="const" "=";
+anyCaseEq="const" "~=";
+plus="const" "+";
+semicolon="const" ";";
+pipe="const" "|";
+brOpen="const" "(";
+brClose="const" ")";
+oneOrMore="const" "*1";
+zeroOrMore="const" "*";
+eps="const" "!";
+percent="const" "%";
+id="id";
+str="stringConst";
+
+// Whitespaces and comments are filtered after tokenizing.
+$ws;
+$comment;
+$singleLineComment;
+
+// Document root is:
+%doc;
+
+doc:=anyDefinition;
+anyDefinition:=*definition;
+definition:=(((defToken|defTerm)|defRoot)|defFilterToken)|defAcceptTerm;
+defFilterToken:=(dollar+id)+semicolon;
+defAcceptTerm:=(hashmark+id)+semicolon;
+defRoot:=(percent+id)+semicolon;
+defToken:=(((id+eq)+str)+(str|!))+semicolon;
+defTerm:=((id+def)+expression)+semicolon;
+
+
+//INSERT_EXPRESSION_LANGUAGE_HERE
+
+#defFilterToken;
+#defAcceptTerm;
+#defRoot;
+#defRoot;
+#defToken;
+#defTerm;
+#str;
+#id;
+#doc;
+#termAdd;
+#termOr;
+#termRef;
+#termZeroOrMore;
+#termOneOrMore;
+#termEps;
+#termTokenWithRestriction;
+

@@ -1,0 +1,5 @@
+'alma' tokentype: id 1
+' ' tokentype: whitespace 0
+'2' tokentype: number 3
+'=' tokentype: = 4
+'nincs' tokentype: id 1

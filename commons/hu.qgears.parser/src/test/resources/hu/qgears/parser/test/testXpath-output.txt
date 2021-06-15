@@ -1,0 +1,16 @@
+doc
+	pathSlash
+	pathName
+		id 'alma'
+	pathSlash
+	pathName
+		id 'korte'
+	pathSlash
+	pathAny
+	pathDSlash
+	pathName
+		id 'szolo'
+	oneConstraint
+		id 'alm'
+	oneConstraint
+		id 'kort'

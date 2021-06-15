@@ -1,0 +1,36 @@
+<!-- A simple example language -->
+<language>
+	<tokenizer>
+		<token><id>ws</id><recognizer>whitespace</recognizer></token>
+		<token><id>id</id><recognizer>id</recognizer></token>
+		<token><id>number</id><recognizer>number</recognizer></token>
+		<token><id>=</id><recognizer>const</recognizer><conf>=</conf></token>
+	</tokenizer>
+	<tokenFilter>
+		<delete>ws</delete>
+	</tokenFilter>
+	<parser>
+		<root>doc</root>
+		<def>
+			<name>doc</name>
+			<term t="d">add</term>
+		</def>
+		<def>
+			<name>add</name>
+			<term t="+">
+				<term t="d">number</term>
+				<term t="d">list</term>
+			</term>
+		</def>
+		<def>
+			<name>list</name>
+			<term t="*">id</term>
+		</def>
+	</parser>
+	<termFilter>
+		<accept>doc</accept>
+		<accept>id</accept>
+		<accept>number</accept>
+		<accept>add$1</accept>
+	</termFilter>
+</language>

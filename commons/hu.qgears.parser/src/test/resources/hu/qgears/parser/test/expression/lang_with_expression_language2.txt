@@ -1,0 +1,57 @@
+/*
+	An example language for testing expression language generator module.
+	ws="whitespace"; means that the ws token matches any whitespace
+	cDSlash="const" "/"; means that the cDSlash token matches "//"
+	doc:=expression is a non-terminal definition
+	$ws; means that whitespaces are omitted before going on with
+		syntactic analization
+	#id means that the token id will be kept in the resulting filtered tree
+ */
+ws="whitespace";
+comment="comment";
+cDSlash="const" "//";
+tComma="const" ",";
+cSlash="const" "/";
+cBOpen="const" "[";
+tBracketOpen="const" "(";
+tBracketClose="const" ")";
+tAdd="const" "+";
+tSub="const" "-";
+cBClose="const" "]";
+tMul="const" "*";
+tId="id";
+cAttrib="const" "@";
+cThis="const" ".";
+cEqu="const" "=";
+cNEqu="const" "<>";
+tString="stringConst";
+
+$ws;
+$comment;
+%doc;
+#tId;
+#expAdd;
+#expMul;
+#expMinus;
+#fnCall;
+#tString;
+doc:=*declaration;
+declaration:=expression;
+#doc;
+
+EXPRESSION_LANGUAGE_START
+// The non-terminal that this expession language hooks to
+@expression
+// The id of an expression with one level lower precedence 
+$lower
+// The string constant hook that will be replaced with this expression language in the hooking language.
+%INSERT_EXPRESSION_LANGUAGE_HERE
+
+// Expression with  precedence 100 id expAdd
+// and language term definition fragment : "(lower+tAdd)+lower"
+// where lower will be replaced with the generated id of the expressions with precedenece 200 
+!100:expAdd:lower+(tAdd+this)
+
+!300:constId:tId
+EXPRESSION_LANGUAGE_END
+

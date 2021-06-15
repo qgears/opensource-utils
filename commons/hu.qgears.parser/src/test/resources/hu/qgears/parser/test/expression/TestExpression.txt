@@ -1,0 +1,18 @@
+doc
+	fnCall
+		tId 'fn'
+		expAdd
+			expAdd
+				expAdd
+					expAdd
+						expAdd
+							expAdd
+								tId 'a'
+								tString '"alma"'
+							tId 'b'
+						tId 'c'
+					tId 'd'
+				tId 'e'
+			tId 'f'
+		tId 'b'
+		tId 'c'

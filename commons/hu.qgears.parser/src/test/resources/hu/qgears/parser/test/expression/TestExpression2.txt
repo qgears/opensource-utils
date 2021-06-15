@@ -1,0 +1,20 @@
+doc
+	expAdd
+		tId 'a'
+		expAdd
+			tId 'b'
+			expAdd
+				tId 'c'
+				expAdd
+					tId 'd'
+					expAdd
+						tId 'e'
+						expAdd
+							tId 'f'
+							expAdd
+								tId 'g'
+								expAdd
+									tId 'h'
+									expAdd
+										tId 'i'
+										tId 'j'

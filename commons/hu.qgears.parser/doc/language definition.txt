@@ -1,0 +1,53 @@
+
+
+ws="whitespace"; means that the ws token matches any whitespace
+cDSlash="const" "/"; means that the cDSlash token matches "//"
+$ws; terminal type "ws" is filtered out. Means that whitespaces are omitted before going on with
+	syntactic analization
+#id means that the non-terminal id or token id will be kept in the resulting filtered tree
+
+nothing=!;  The epsilon symbol
+oneormore=*1one;  One or more of one
+any=*one; any of one
+
+Tokenizer: The definitions are processed in order of appearance and the first matching rule "wins".
+
+
+== Definition of a not-terminal rule
+
+doc:=...;
+
+=== Or rule
+
+command:=commandSimple|commandComplex;
+
+=== Parametrized token reference
+
+#commandExitwhile;
+commandExitwhile:=tId~="exit"+tId~="while";
+
+~="exit" means that the string "exit" is passed as parameter is passed to the token type for check
+
+If the token matches this string then the token is accepted in this rule.
+
+This feature allows mixing of tokenizing and syntactic analysys-time matching.
+
+With this feature it is possible to create languages where there are no keywords that can not be used as variable names.
+
+The grammar is also simpler because the keywords need not be enumerated as token types.
+
+
+== Root of the document
+
+// This is the root of a document:
+%doc;
+
+A non-terminal identifier must be set as the root of the document.
+
+The Root of the document must be a simple reference to an other rule!
+
+Example
+
+doc:=statementList;
+
+

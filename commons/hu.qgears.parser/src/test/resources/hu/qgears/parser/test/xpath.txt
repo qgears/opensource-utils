@@ -1,0 +1,33 @@
+/* comment */
+ws="whitespace";
+comment="comment";
+cDSlash="const" "//";
+cSlash="const" "/";
+cBOpen="const" "[";
+cBClose="const" "]";
+cAsterix="const" "*";
+id="id";
+str="stringConst";
+$ws;
+/* comment */
+% doc;
+#id;
+#pathSlash;
+#pathDSlash;
+#pathName;
+#pathAny;
+#oneConstraint;
+doc:=path;
+path:=*1pathFragment;
+pathFragment:=(nodeConstraint|pathDiv);
+nodeConstraint:=(pathName|pathAny)+(constraint|!);
+pathName:=id;
+pathDiv:=pathSlash|pathDSlash;
+pathSlash:=cSlash;
+pathDSlash:=cDSlash;
+pathAny:= cAsterix;
+
+constraint:=(cBOpen+anyConstraint)+cBClose;
+anyConstraint:=*oneConstraint;
+oneConstraint:=id;
+#doc;

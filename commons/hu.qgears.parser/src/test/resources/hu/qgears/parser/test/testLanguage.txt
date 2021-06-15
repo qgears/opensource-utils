@@ -1,0 +1,63 @@
+/**
+Test language that must be parsed by the language definition.
+*/
+#doc;
+alma="const" "alma";
+tA:=alma;
+tB:=alma;
+tC:=alma;
+doc:=tA+tB+tB|tC;
+// tA+(tB+())
+doc:=alma;
+
+
+ws="whitespace";
+comment="comment";
+singleLineComment="singleLineComment";
+dollar="const" "$";
+hashmark="const" "#";
+def="const" ":=";
+eq="const" "=";
+plus="const" "+";
+semicolon="const" ";";
+pipe="const" "|";
+brOpen="const" "(";
+brClose="const" ")";
+oneOrMore="const" "*1";
+zeroOrMore="const" "*";
+eps="const" "!";
+percent="const" "%";
+id="id";
+str="stringConst";
+
+// Whitespaces and comments are filtered after tokenizing.
+$ws;
+$comment;
+$singleLineComment;
+
+// Document root is:
+%doc;
+
+doc:=anyDefinition;
+anyDefinition:=*definition;
+definition:=(((defToken|defTerm)|defRoot)|defFilterToken)|defAcceptTerm;
+defFilterToken:=(dollar+id)+semicolon;
+defAcceptTerm:=(hashmark+id)+semicolon;
+defRoot:=(percent+id)+semicolon;
+defToken:=(((id+eq)+str)+(str|!))+semicolon;
+defTerm:=((id+def)+expression)+semicolon;
+
+
+//INSERT_EXPRESSION_LANGUAGE_HERE
+
+#defFilterToken;
+#defAcceptTerm;
+#defRoot;
+#defRoot;
+#defToken;
+#str;
+#id;
+#doc;
+#termAdd;
+#termOr;
+#termRef;
