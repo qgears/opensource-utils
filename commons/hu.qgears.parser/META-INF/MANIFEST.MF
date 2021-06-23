@@ -14,5 +14,4 @@ Export-Package: hu.qgears.parser,
  hu.qgears.parser.tokenizer.recognizer,
  hu.qgears.parser.util
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Require-Bundle: org.junit,
- hu.qgears.commons;bundle-version="6.4.1"
+Require-Bundle: hu.qgears.commons;bundle-version="6.4.1"
