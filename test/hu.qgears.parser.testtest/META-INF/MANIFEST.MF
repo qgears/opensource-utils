@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Tests of prser bundle
+Bundle-SymbolicName: hu.qgears.parser.test
+Bundle-Version: 10.1.0.qualifier
+Automatic-Module-Name: hu.qgears.parser.test
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Require-Bundle: org.junit
