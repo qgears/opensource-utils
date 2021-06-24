@@ -7,7 +7,7 @@ Export-Package: hu.qgears.emfcollab,
  hu.qgears.emfcollab.srv,
  hu.qgears.emfcollab.util
 Bundle-SymbolicName: hu.qgears.emfcollab
-Bundle-Version: 10.1.0.qualifier
+Bundle-Version: 10.2.0.qualifier
 Bundle-Name: Emfcollab Plug-in
 Require-Bundle: org.eclipse.emf;bundle-version="2.4.0";visibility:=reexport,
  org.eclipse.emf.ecore;bundle-version="2.4.0";visibility:=reexport,
