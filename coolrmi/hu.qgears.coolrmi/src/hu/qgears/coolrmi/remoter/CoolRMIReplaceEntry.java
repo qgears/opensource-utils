@@ -17,9 +17,6 @@ package hu.qgears.coolrmi.remoter;
  * (In cases when a callback interface is to be passed the proxy type feature is to be used instead - see {@link CoolRMIServiceRegistry})
  * 
  * All used replace entries must be registered on the server and the client side registry!
- * 
- * @author rizsi
- *
  */
 abstract public class CoolRMIReplaceEntry {
 	private Class<?> typeToReplace;

@@ -7,6 +7,7 @@ import java.io.Serializable;
 
 import hu.qgears.coolrmi.remoter.CoolRMIReplaceEntry;
 import hu.qgears.coolrmi.remoter.CoolRMIServiceRegistry;
+import hu.qgears.coolrmi.remoter.ICoolRMIReplaceType;
 
 /**
  * Object output stream with replace capability.
@@ -25,6 +26,10 @@ public class CoolRMIObjectOutputStream extends ObjectOutputStream
 
 	@Override
 	protected Object replaceObject(Object obj) throws IOException {
+		if(obj instanceof ICoolRMIReplaceType)
+		{
+			return ((ICoolRMIReplaceType)obj).coolRMIReplaceObject();
+		}
 		Object ret=reg.replaceObject(obj);
 		if(ret==null)
 		{
