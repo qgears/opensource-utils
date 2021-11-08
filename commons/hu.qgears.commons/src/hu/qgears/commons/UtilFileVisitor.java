@@ -1,6 +1,10 @@
 package hu.qgears.commons;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Simple file system visitor that visits a folder with all subfolders and files.
@@ -8,6 +12,10 @@ import java.io.File;
  *
  */
 public class UtilFileVisitor {
+	
+	
+	private boolean visitInAlphabeticOrder;
+	
 	public final void visit(File dir) throws Exception
 	{
 		visit(dir, "", 0);
@@ -21,7 +29,15 @@ public class UtilFileVisitor {
 			File[] fs=dir.listFiles();
 			if(fs!=null)
 			{
-				for(File f:fs)
+				List<File> dirContent;
+				if (visitInAlphabeticOrder) {
+					dirContent = new ArrayList<>(Arrays.asList(fs));
+					Collections.sort(dirContent);
+				} else {
+					dirContent = Arrays.asList(fs);
+				}
+				
+				for(File f:dirContent)
 				{
 					String lp=localPath+f.getName();
 					if(f.isDirectory())
@@ -34,6 +50,19 @@ public class UtilFileVisitor {
 		}
 	}
 
+	public UtilFileVisitor() {
+		//keep backward compatibility of API
+		this(false);
+	}
+	
+	/**
+	 * @param visitInAlphabeticOrder If true, then traverse files of directories in
+	 *                               alphabetical order (sorting files with
+	 *                               {@link File#compareTo(File)})
+	 */
+	public UtilFileVisitor(boolean visitInAlphabeticOrder ) {
+		setVisitInAlphabeticOrder(visitInAlphabeticOrder);
+	}
 	/**
 	 * Subclasses must override this method to implement useful feature.
 	 * @param dir folder or file currently visited.
@@ -54,5 +83,17 @@ public class UtilFileVisitor {
 	 */
 	protected boolean visited(File dir, String localPath, int depth) throws Exception {
 		return true;
+	}
+	
+	/**
+	 * Traverse files of directories in alphabetical order (sorting files with {@link File#compareTo(File)}) 
+	 * @param visitInAlphabeticOrder
+	 */
+	public void setVisitInAlphabeticOrder(boolean visitInAlphabeticOrder) {
+		this.visitInAlphabeticOrder = visitInAlphabeticOrder;
+	}
+	
+	public boolean isVisitInAlphabeticOrder() {
+		return visitInAlphabeticOrder;
 	}
 }
