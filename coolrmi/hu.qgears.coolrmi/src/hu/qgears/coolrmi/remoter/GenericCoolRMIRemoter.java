@@ -11,6 +11,7 @@ import hu.qgears.coolrmi.CoolRMIException;
 import hu.qgears.coolrmi.CoolRMIService;
 import hu.qgears.coolrmi.CoolRMIShareableObject;
 import hu.qgears.coolrmi.CoolRMITimeoutException;
+import hu.qgears.coolrmi.ICoolRMIAutoProxy;
 import hu.qgears.coolrmi.ICoolRMILogger;
 import hu.qgears.coolrmi.ICoolRMIProxy;
 import hu.qgears.coolrmi.ICoolRMIServerSideProxy;
@@ -238,6 +239,14 @@ abstract public class GenericCoolRMIRemoter {
 		{
 			CoolRMIServerSideObject sso=((ICoolRMIServerSideProxy) arg).getCoolRMIServerSideProxyObject();
 			CoolRMIProxyPlaceHolder ph=new CoolRMIProxyPlaceHolder(sso.getProxyId(), null);
+			return ph;
+		}
+		if(arg instanceof ICoolRMIAutoProxy)
+		{
+			Class<?> iftype=((ICoolRMIAutoProxy)arg).getProxyInterface();
+			ICoolRMIServerSideProxy ssop=createServerSideProxyObject(new CoolRMIShareableObject(iftype, arg));
+			CoolRMIServerSideObject sso=ssop.getCoolRMIServerSideProxyObject();
+			CoolRMIProxyPlaceHolder ph=new CoolRMIProxyPlaceHolder(sso.getProxyId(), sso.getIface().getName());
 			return ph;
 		}
 		return arg;

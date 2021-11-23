@@ -15,12 +15,8 @@ import org.lwjgl.util.glu.GLU;
 
 /**
  * Base class of OpenGL window applications
- * 
- * @author rizsi
- *
  */
 public abstract class AbstractOpenglApplication2 {
-	
 	private static final Logger LOG = Logger
 			.getLogger(AbstractOpenglApplication2.class);
 	
