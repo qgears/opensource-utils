@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.concurrent.Future;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -144,7 +145,7 @@ public class SvnDiff extends AbstractTool {
 					}
 					File g=new File(right.folder, path);
 					g.getParentFile().mkdirs();
-					Files.createSymbolicLink(g.toPath(), new File(a.workingCopy, path).toPath());
+					myCreateSymbolicLink(mod, g.toPath(), new File(a.workingCopy, path).toPath());
 					break;
 				}
 				case "unversioned":
@@ -152,7 +153,7 @@ public class SvnDiff extends AbstractTool {
 				{
 					File g=new File(right.folder, path);
 					g.getParentFile().mkdirs();
-					Files.createSymbolicLink(g.toPath(), new File(a.workingCopy, path).toPath());
+					myCreateSymbolicLink(mod, g.toPath(), new File(a.workingCopy, path).toPath());
 				}else
 				{
 					unversionedOmitted=true;
@@ -189,7 +190,7 @@ public class SvnDiff extends AbstractTool {
 					// System.err.println("Added: '"+path+"'");
 					File g=new File(right.folder, path);
 					g.getParentFile().mkdirs();
-					Files.createSymbolicLink(g.toPath(), new File(a.workingCopy, path).toPath());
+					myCreateSymbolicLink(mod, g.toPath(), new File(a.workingCopy, path).toPath());
 				}
 				break;
 				case "external":
@@ -212,7 +213,31 @@ public class SvnDiff extends AbstractTool {
 		}
 		return 0;
 	}
-	
+	/**
+	 * Create symbolic link to a file.
+	 * (Or a folder with similar name in case the target is a folder.)
+	 * 
+	 * Handle exceptions inside: in case of exception that will be logged to stderr and ignored.
+	 * @param why
+	 * @param path
+	 * @param target
+	 * @throws IOException
+	 */
+	private void myCreateSymbolicLink(String why, Path path, Path target) {
+		try {
+			if(target.toFile().isDirectory())
+			{
+				Files.createDirectory(path);
+			}else
+			{
+				Files.createSymbolicLink(path, target);
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
 	private byte[] svnCat(Args a, File workingCopy, String path) throws Exception
 	{
 		Process p=new ProcessBuilder().command("/usr/bin/svn", "cat", path).directory(workingCopy).start();
