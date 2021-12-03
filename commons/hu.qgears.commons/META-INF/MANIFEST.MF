@@ -1,6 +1,8 @@
 Manifest-Version: 1.0
-Export-Package: hu.qgears.commons,hu.qgears.commons.mem,hu.qgears.comm
- ons.signal
+Export-Package: hu.qgears.commons,
+ hu.qgears.commons.csv,
+ hu.qgears.commons.mem,
+ hu.qgears.commons.signal
 Bundle-SymbolicName: hu.qgears.commons
 Bundle-Version: 10.4.0.qualifier
 Bundle-Name: Commons
