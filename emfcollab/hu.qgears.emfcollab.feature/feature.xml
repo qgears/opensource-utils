@@ -2,7 +2,7 @@
 <feature
       id="hu.qgears.emfcollab.feature"
       label="EMF collab"
-      version="10.4.0.qualifier">
+      version="10.4.1.qualifier">
 
    <description url="http://www.example.com/description">
       [Enter Feature Description here.]

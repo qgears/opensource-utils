@@ -9,7 +9,7 @@ Export-Package: hu.qgears.opengl.commons,
  hu.qgears.opengl.libinput,
  hu.qgears.opengl.osmesa
 Bundle-SymbolicName: hu.qgears.opengl.commons
-Bundle-Version: 10.4.0.qualifier
+Bundle-Version: 10.4.1.qualifier
 Bundle-Name: Commons
 Require-Bundle: lwjgl.osgi;bundle-version="9.0.0";visibility:=reexport,
  hu.qgears.commons;bundle-version="9.0.0";visibility:=reexport,

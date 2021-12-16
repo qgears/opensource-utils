@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>hu.qgears</groupId>
 		<artifactId>opensource-utils-parent</artifactId>
-		<version>10.4.0-SNAPSHOT</version>
+		<version>10.4.1-SNAPSHOT</version>
 		<relativePath>../../build/opensource-utils-parent/</relativePath>
 	</parent>
 	<groupId>hu.qgears</groupId>
@@ -20,5 +20,5 @@
             </license>
     </licenses>
 
-	<version>10.4.0-SNAPSHOT</version>
+	<version>10.4.1-SNAPSHOT</version>
 </project>
