@@ -39,6 +39,8 @@ public class ParagraphInfo {
 	private int width;
 
 	private EVerticalAlign verticalAligment;
+	
+	private int nImageRectangle;
 
 	public ParagraphInfo() {
 		this(EVerticalAlign.bottom);
@@ -119,5 +121,15 @@ public class ParagraphInfo {
 	
 	public void setVerticalAligment(EVerticalAlign verticalAligment) {
 		this.verticalAligment = verticalAligment;
+	}
+	public int getnImageRectangle() {
+		return nImageRectangle;
+	}
+	/**
+	 * Set the number of image rectangles within the markup.
+	 * @param nImageRectangle
+	 */
+	public void setnImageRectangle(int nImageRectangle) {
+		this.nImageRectangle = nImageRectangle;
 	}
 }

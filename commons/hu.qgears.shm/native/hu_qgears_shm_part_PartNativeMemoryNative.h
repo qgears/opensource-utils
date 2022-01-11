@@ -31,6 +31,22 @@ JNIEXPORT jlong JNICALL Java_hu_qgears_shm_part_PartNativeMemoryNative_getNative
 JNIEXPORT jobject JNICALL Java_hu_qgears_shm_part_PartNativeMemoryNative_getBuffer
   (JNIEnv *, jobject, jlong, jlong, jlong);
 
+/*
+ * Class:     hu_qgears_shm_part_PartNativeMemoryNative
+ * Method:    getOffset
+ * Signature: (Ljava/nio/ByteBuffer;Ljava/nio/ByteBuffer;)J
+ */
+JNIEXPORT jlong JNICALL Java_hu_qgears_shm_part_PartNativeMemoryNative_getOffset
+  (JNIEnv *, jclass, jobject, jobject);
+
+/*
+ * Class:     hu_qgears_shm_part_PartNativeMemoryNative
+ * Method:    clearBuffer
+ * Signature: (Ljava/nio/ByteBuffer;)V
+ */
+JNIEXPORT void JNICALL Java_hu_qgears_shm_part_PartNativeMemoryNative_clearBuffer
+  (JNIEnv *, jclass, jobject);
+
 #ifdef __cplusplus
 }
 #endif

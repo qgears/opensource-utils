@@ -1,11 +1,12 @@
 package hu.qgears.shm.part;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+
 import hu.qgears.commons.AbstractReferenceCountedDisposeable;
 import hu.qgears.commons.mem.INativeMemory;
 import hu.qgears.commons.mem.INativeMemoryWithRelativeAddress;
-
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
+import hu.qgears.shm.jmalloc.JMalloc;
 
 /**
  * Manually grab a part of an already allocated memory.
@@ -87,5 +88,26 @@ public class PartNativeMemory extends AbstractReferenceCountedDisposeable implem
 	static public long javaBufferToPointer(ByteBuffer bb, int ptrPartIndex)
 	{
 		return new PartNativeMemoryNative().getNativePointer(bb, ptrPartIndex);
+	}
+	/**
+	 * Get the relative offset of an address compared to the base address.
+	 * Useful when offsets of buffers allocated within a shared memory (for example with {@link JMalloc})
+	 * have to be sent between processes.
+	 * @param base
+	 * @param relative
+	 * @return Difference of the pointers counted in bytes
+	 */
+	static public long getOffset(ByteBuffer base, ByteBuffer relative)
+	{
+		return PartNativeMemoryNative.getOffset(base, relative);
+	}
+	/**
+	 * Clear buffer by setting all to 0 from first byte to capacity.
+	 * (Useful because it will call the C library memset that is optimized for speed.)
+	 * @param ret
+	 */
+	public static void clearBuffer(ByteBuffer buffer)
+	{
+		PartNativeMemoryNative.clearBuffer(buffer);
 	}
 }

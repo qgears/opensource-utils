@@ -2,8 +2,6 @@ package hu.qgears.commons.mem;
 
 /**
  * Native memory with a relative address to its owner host.
- * @author rizsi
- *
  */
 public interface INativeMemoryWithRelativeAddress extends INativeMemory {
 	/**

@@ -2,6 +2,7 @@ Manifest-Version: 1.0
 Bundle-SymbolicName: hu.qgears.shm
 Export-Package: hu.qgears.shm,
  hu.qgears.shm.dlmalloc,
+ hu.qgears.shm.jmalloc,
  hu.qgears.shm.natives,
  hu.qgears.shm.part,
  hu.qgears.shm.sem

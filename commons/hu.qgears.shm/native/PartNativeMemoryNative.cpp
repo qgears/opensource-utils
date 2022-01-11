@@ -1,5 +1,6 @@
 #include<stdio.h>
 #include<stdlib.h>
+#include <stdint.h>
 
 #include "hu_qgears_shm_part_PartNativeMemoryNative.h"
 #include "jniutil.h"
@@ -25,4 +26,19 @@ METHODPREFIX(CLASS, jobject, getBuffer)(ST_ARGS,
 	jlong ptr1, jlong ptr2, jlong size)
 {
 	return env->NewDirectByteBuffer((void *)ptr1, size);
+}
+
+METHODPREFIX(CLASS, jlong, getOffset)(JNIEnv * env, jclass cla,
+	jobject base, jobject relative)
+{
+	uint8_t * pBase=(uint8_t *)env->GetDirectBufferAddress(base);
+	uint8_t * pRelative=(uint8_t *)env->GetDirectBufferAddress(relative);
+	return pRelative-pBase;
+}
+METHODPREFIX(CLASS, void, clearBuffer)(JNIEnv * env, jclass cla,
+	jobject buffer)
+{
+	uint8_t * pBase=(uint8_t *)env->GetDirectBufferAddress(buffer);
+	uint32_t size=(uint32_t)env->GetDirectBufferCapacity(buffer);
+	memset(pBase, 0, size);
 }
