@@ -53,7 +53,10 @@ final public class ElemBuffer {
 	private int currentGroupStart=0;
 	private Term[] terms = new Term[0];
 	public long nanosDoGenerates;
-
+	/**
+	 * Index of the current group.
+	 * @return
+	 */
 	public int getCurrentGroup() {
 		return currentGroup;
 	}

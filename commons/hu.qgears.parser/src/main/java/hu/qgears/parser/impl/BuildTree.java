@@ -15,9 +15,6 @@ import hu.qgears.parser.tokenizer.IToken;
 
 /**
  * After creating the table of early parse built the AST tree by reading it up.
- * 
- * @author rizsi
- * 
  */
 public class BuildTree {
 	private ParserLogger logger;
@@ -147,6 +144,17 @@ public class BuildTree {
 		int fromPos = fromToken.getPos();
 		int toPos = toToken.getPos() + toToken.getLength();
 //		logger.getErr().println(buf.print());
+/*		for(List<TreeElem> l: sub)
+		{
+			
+			System.out.println("possible parse: ");
+			for(TreeElem te:l)
+			{
+				System.out.println(" * "+te.getTypeName());
+				LanguageHelper.print(te);
+			}
+		}
+*/
 		return new ParseException("parse ambigous from:"
 				+ from
 				+ " to: "
@@ -194,16 +202,20 @@ public class BuildTree {
 		} else {
 			// All elements that generate the last type until the last position
 			// but we don't check the from part
-			List<TreeElem> items=findElements(types.get(types.size() - 1), to,
-					buf);
+			Term lastType=types.get(types.size() - 1);
+			List<TreeElem> items=findElements(lastType, to,	buf);
+			TreeElem prevSolution=null;
 			for (TreeElem last : items) {
 				int lastFrom=last.from;
-				List<Term> subTypes=types.subList(0,
-						types.size() - 1);
-				List<TreeElem> sub = findElements(subTypes, from, lastFrom, buf);
-				if (sub != null) {
-					sub.add(last);
-					ret.add(sub);
+				List<Term> subTypes=types.subList(0, types.size() - 1);
+				if(lastFrom>=from)
+				{
+					List<TreeElem> sub = findElements(subTypes, from, lastFrom, buf);
+					if (sub != null) {
+						sub.add(last);
+						ret.add(sub);
+						prevSolution=last;
+					}
 				}
 			}
 		}
@@ -252,14 +264,17 @@ public class BuildTree {
 	 * @param buf
 	 * @return
 	 */
-	private List<TreeElem> findElements(Term type, int to, ElemBuffer buf) {
+	public static List<TreeElem> findElements(Term type, int to, ElemBuffer buf) {
 		List<TreeElem> ret = new ArrayList<TreeElem>();
 		int fromIndex=buf.getGroupStart(to);
 		int toIndex=buf.getGroupEnd(to);
 		for(int i=fromIndex; i<toIndex;++i)
 		{
-			if (buf.getTermTypeId(i)==type.getId() && GenerationRules.isPassed(buf, i)) {
-				ret.add(new TreeElem(buf, i, to));
+			if (buf.getTermTypeId(i)==type.getId()) {
+				if(GenerationRules.isPassed(buf, i))
+				{
+					ret.add(new TreeElem(buf, i, to));
+				}
 			}
 		}
 		return ret;

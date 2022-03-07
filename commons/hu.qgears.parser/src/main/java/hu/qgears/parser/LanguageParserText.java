@@ -5,6 +5,7 @@ import java.net.URL;
 
 import org.w3c.dom.Document;
 
+import hu.qgears.parser.impl.DefaultReceiver;
 import hu.qgears.parser.impl.Parser;
 import hu.qgears.parser.impl.TreeElem;
 import hu.qgears.parser.language.ILanguage;
@@ -41,7 +42,7 @@ public class LanguageParserText {
 
 	public ILanguage parseLanguage(TokenizerImplManager tokenManager,
 			String text, ParserLogger parserLogger) throws Exception {
-		return parseLanguage(tokenManager, text, parserLogger, null);
+		return parseLanguage(tokenManager, text, parserLogger, new DefaultReceiver() {});
 	}
 	public ILanguage parseLanguage(TokenizerImplManager tokenManager,
 			String text, ParserLogger parserLogger, IParserReceiver receiver) throws Exception {
@@ -51,7 +52,7 @@ public class LanguageParserText {
 		}
 		checkInit();
 		Parser p = new Parser(languageLanguage, text, parserLogger);
-		p.tokenize();
+		p.tokenize(receiver);
 		TreeElem root = p.parse(receiver);
 		ILanguage ret=LanguageParserAST.buildLanguageFromAST(tokenManager, root);
 		return ret;
@@ -70,7 +71,7 @@ public class LanguageParserText {
 					.getResource("languageLanguageExpressions.txt"));
 			ParserLogger parserLogger=new ParserLogger();
 			Parser q = new Parser(langLang, l, parserLogger);
-			q.tokenize();
+			q.tokenize(new DefaultReceiver());
 			TreeElem qRoot = q.parse(null);
 			languageLanguage = LanguageParserAST.buildLanguageFromAST(
 					new TokenizerImplManager(), qRoot);

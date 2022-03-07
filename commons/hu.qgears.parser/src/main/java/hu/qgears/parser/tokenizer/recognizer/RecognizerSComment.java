@@ -4,7 +4,6 @@ import hu.qgears.parser.language.ITokenType;
 import hu.qgears.parser.language.impl.TokenType;
 import hu.qgears.parser.tokenizer.ITextSource;
 import hu.qgears.parser.tokenizer.IToken;
-import hu.qgears.parser.tokenizer.TokenizerException;
 
 public class RecognizerSComment extends RecognizerConcat {
 	@Override
@@ -12,7 +11,7 @@ public class RecognizerSComment extends RecognizerConcat {
 		return super.getGeneratedToken(_src);
 	}
 
-	public RecognizerSComment(ITokenType tokenType) throws TokenizerException {
+	public RecognizerSComment(ITokenType tokenType) {
 		super(tokenType);
 		addSubToken(new RecognizerConst(new TokenType("dummy"), "//"), true);
 		addSubToken(new RecognizerAnyLetter(new TokenType("dummy"),

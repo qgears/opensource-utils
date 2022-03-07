@@ -4,6 +4,7 @@ import java.util.List;
 
 import hu.qgears.parser.IParserReceiver;
 import hu.qgears.parser.tokenizer.IToken;
+import hu.qgears.parser.tokenizer.TokenizerException;
 
 public class DefaultReceiver implements IParserReceiver
 {
@@ -40,5 +41,10 @@ public class DefaultReceiver implements IParserReceiver
 
 	@Override
 	public void tokens(List<IToken> tokens) {
+	}
+
+	@Override
+	public void tokenizeError(TokenizerException exc) throws TokenizerException {
+		throw exc;
 	}
 }

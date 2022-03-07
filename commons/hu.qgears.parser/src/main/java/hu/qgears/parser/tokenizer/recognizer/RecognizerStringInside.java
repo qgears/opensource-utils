@@ -9,8 +9,11 @@ import hu.qgears.parser.tokenizer.SimpleToken;
 
 public class RecognizerStringInside extends RecognizerAbstract implements
 		ITokenRecognizer {
-	public RecognizerStringInside(ITokenType tokenType) {
+	private char stringEndingCharacter='"';
+	private char escapeCharacter='\\';
+	public RecognizerStringInside(ITokenType tokenType, char stringEndingCharacter) {
 		super(tokenType);
+		this.stringEndingCharacter=stringEndingCharacter;
 	}
 
 	@Override
@@ -18,8 +21,8 @@ public class RecognizerStringInside extends RecognizerAbstract implements
 		int ctr = 0;
 		boolean lastEscape = false;
 		while (src.getCharAt(ctr) != null
-				&& (lastEscape || src.getCharAt(ctr) != '"')) {
-			if (!lastEscape && src.getCharAt(ctr) == '\\')
+				&& (lastEscape || src.getCharAt(ctr) != stringEndingCharacter)) {
+			if (!lastEscape && src.getCharAt(ctr) == escapeCharacter)
 				lastEscape = true;
 			else
 				lastEscape = false;

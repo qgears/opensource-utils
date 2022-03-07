@@ -40,12 +40,16 @@ public class Parser implements IParser {
 	}
 
 	@Override
-	public List<IToken> tokenize()
+	public List<IToken> tokenize(IParserReceiver receiver)
 			throws ParseException {
 		if(!tokenized)
 		{
 			logger.logStart();
-			tokensUnfiltered=tok.tokenize(ts);
+			tokensUnfiltered=tok.tokenize(ts, receiver);
+			if(receiver!=null)
+			{
+				receiver.tokensUnfiltered(tokensUnfiltered);
+			}
 			toks = new TokenFilter(lang.getTokenFilterDef()).filter(tokensUnfiltered);
 			logger.logTokenized();
 			tokenized=true;
@@ -59,8 +63,7 @@ public class Parser implements IParser {
 			receiver=new DefaultReceiver();
 		}
 		// Be sure to have the text tokenized.
-		List<IToken> tokens=tokenize();
-		receiver.tokensUnfiltered(tokensUnfiltered);
+		List<IToken> tokens=tokenize(receiver);
 		receiver.tokens(tokens);
 		ITextSource src=ts;
 		Term[] terms = lang.getTerms();
@@ -107,6 +110,7 @@ public class Parser implements IParser {
 		// Table is filled.
 		logger.logTableFilled(buffer, buffer.getSize(), buffer.getCurrentGroup(), tokens
 				.size());
+		receiver.tableFilled(buffer, tokens.size());
 		// Now find the real generation tree of the sentence.
 		if (buffer.contains(buffer.getCurrentGroupStart(), buffer.getCurrentGroupEnd(), 1, lang.getRootTerm().getId(), 0, 0)) {
 			// parse successful!

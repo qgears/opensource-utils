@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 
 import hu.qgears.parser.ParserLogger;
+import hu.qgears.parser.impl.DefaultReceiver;
 import hu.qgears.parser.impl.Parser;
 import hu.qgears.parser.language.ILanguage;
 import hu.qgears.parser.language.impl.LanguageParserXML;
@@ -32,7 +33,7 @@ public class TestBuildLanguage {
 		Tokenizer tok = new Tokenizer(lang.getTokenizerDef());
 		ITextSource ts = new TextSource(UtilFile.loadFileAsString(getClass()
 				.getResource("in1_1.txt")));
-		List<IToken> toks = tok.tokenize(ts);
+		List<IToken> toks = tok.tokenize(ts, new DefaultReceiver());
 		toks = new TokenFilter(lang.getTokenFilterDef()).filter(toks);
 		UtilLanguage.checkLanguage(lang);
 		new Parser(lang, "", new ParserLogger(System.out));

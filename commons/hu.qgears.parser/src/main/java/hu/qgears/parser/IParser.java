@@ -13,7 +13,7 @@ import hu.qgears.parser.tokenizer.IToken;
  */
 public interface IParser {
 
-	List<IToken> tokenize() throws ParseException;
+	List<IToken> tokenize(IParserReceiver receiver) throws ParseException;
 	List<IToken> getTokensUnfiltered();
 
 	/**

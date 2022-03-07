@@ -12,15 +12,15 @@ import hu.qgears.parser.tokenizer.IToken;
 
 
 /**
- * Implementation of the parse result node.
- * @author rizsi
- *
+ * Implementation of a parse result node.
  */
 public class TreeElem implements ITreeElem {
-//	private Elem elem;
 	protected int dotPos;
 	protected int choice;
 	private int typeId;
+	/**
+	 * Group index where this element produces tokens.
+	 */
 	protected int from;
 	private int group;
 	private ElemBuffer buffer;
@@ -118,7 +118,7 @@ public class TreeElem implements ITreeElem {
 	@Override
 	public String toString() {
 		IToken tok = getToken();
-		return "at: " + group + " " + buffer.toString(dotPos, typeId, choice, from) + " "
+		return ""+getTypeName()+" at: " + group + " " + buffer.toString(dotPos, typeId, choice, from) + " "
 				+ (tok == null ? "" : "" + tok);
 	}
 

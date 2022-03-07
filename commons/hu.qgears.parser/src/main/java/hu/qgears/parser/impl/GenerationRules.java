@@ -91,6 +91,12 @@ public class GenerationRules {
 
 	}
 
+	/**
+	 * True if the element pointed in the buffer was passed so it is a valid match.
+	 * @param eb
+	 * @param absoluteIndex
+	 * @return
+	 */
 	static public boolean isPassed(ElemBuffer eb, int absoluteIndex) {
 		Term term=eb.resolve(eb.getTermTypeId(absoluteIndex));
 		return isPassed(eb, absoluteIndex, term);

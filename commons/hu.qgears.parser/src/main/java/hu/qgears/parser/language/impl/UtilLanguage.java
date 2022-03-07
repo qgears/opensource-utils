@@ -114,7 +114,13 @@ public class UtilLanguage {
 			}
 		}else
 		{
-			ret.add(ts.getName());
+			if(EType.and.equals(parentType) && EType.epsilon.equals(ts.getType()))
+			{
+				// Do not add epsilon rules to and lists
+			}else
+			{
+				ret.add(ts.getName());
+			}
 		}
 	}
 }

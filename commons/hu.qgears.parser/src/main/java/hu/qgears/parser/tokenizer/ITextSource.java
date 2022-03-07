@@ -90,7 +90,7 @@ public interface ITextSource {
 	 * Get the at the given relative position.
 	 * 
 	 * @param i
-	 * @return the next character or null at EOF
+	 * @return the character at the position or null if addressed over or under.
 	 */
 	Character getCharAt(int i);
 

@@ -4,20 +4,13 @@ import hu.qgears.parser.impl.ParseException;
 
 public class TokenizerException extends ParseException {
 	private static final long serialVersionUID = 1L;
+	private int position;
 
-	public TokenizerException() {
-		super();
-	}
-
-	public TokenizerException(String message, Throwable cause) {
-		super(message, cause);
-	}
-
-	public TokenizerException(String message) {
+	public TokenizerException(String message, int position) {
 		super(message);
+		this.position=position;
 	}
-
-	public TokenizerException(Throwable cause) {
-		super(cause);
+	public int getPosition() {
+		return position;
 	}
 }

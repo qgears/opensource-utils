@@ -8,6 +8,7 @@ import hu.qgears.parser.LanguageParserText;
 import hu.qgears.parser.ParserLogger;
 import hu.qgears.parser.TokenizerImplManager;
 import hu.qgears.parser.TreeRenderer;
+import hu.qgears.parser.impl.DefaultReceiver;
 import hu.qgears.parser.impl.Parser;
 import hu.qgears.parser.impl.TreeElem;
 import hu.qgears.parser.language.ILanguage;
@@ -26,7 +27,7 @@ public class TestLanguageParser {
 		String txt = UtilFile.loadFileAsString(getClass().getResource(
 				"testXpath.txt"));
 		Parser p = new Parser(lang, txt, new ParserLogger(System.err));
-		p.tokenize();
+		p.tokenize(new DefaultReceiver());
 		TreeElem elem=p.parse(null);
 		String tree=new TreeRenderer().render2(elem, "");
 		Assert.assertEquals(UtilFile.loadFileAsString(getClass().getResource("testXpath-output.txt")), tree);

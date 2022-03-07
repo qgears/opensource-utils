@@ -6,9 +6,10 @@ import hu.qgears.parser.tokenizer.ITextSource;
 import hu.qgears.parser.tokenizer.IToken;
 import hu.qgears.parser.tokenizer.RecognizerAbstract;
 import hu.qgears.parser.tokenizer.SimpleToken;
-import hu.qgears.parser.tokenizer.TokenizerException;
 
 public class RecognizerComment extends RecognizerConcat {
+	private char exit0;
+	private char exit1;
 	class RecognizerCommentInside extends RecognizerAbstract {
 		public RecognizerCommentInside() {
 			super(new TokenType("dummy"));
@@ -23,9 +24,9 @@ public class RecognizerComment extends RecognizerConcat {
 					break;
 				}
 				char ch = cho.charValue();
-				if (ch == '*') {
+				if (ch == exit0) {
 					Character chh = src.getCharAt(ctr + 1);
-					if (chh != null && chh.charValue() == '/') {
+					if (chh != null && chh.charValue() == exit1) {
 						break;
 					}
 				}
@@ -41,11 +42,20 @@ public class RecognizerComment extends RecognizerConcat {
 		return super.getGeneratedToken(_src);
 	}
 
-	public RecognizerComment(ITokenType tokenType) throws TokenizerException {
+	public RecognizerComment(ITokenType tokenType, String open, String close) {
 		super(tokenType);
-		addSubToken(new RecognizerConst(new TokenType("dummy"), "/*"), true);
+		if(close.length()!=2)
+		{
+			throw new IllegalArgumentException("commend close string must have length of 2: '"+close+"'");
+		}
+		exit0=close.charAt(0);
+		exit1=close.charAt(1);
+		addSubToken(new RecognizerConst(new TokenType("dummy"), open), true);
 		addSubToken(new RecognizerCommentInside(), false);
-		addSubToken(new RecognizerConst(new TokenType("dummy"), "*/"), true);
+		addSubToken(new RecognizerConst(new TokenType("dummy"), close), true);
+	}
+	public RecognizerComment(ITokenType tokenType) {
+		this(tokenType, "/*", "*/");
 	}
 
 }

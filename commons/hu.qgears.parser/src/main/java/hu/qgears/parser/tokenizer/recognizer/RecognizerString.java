@@ -5,7 +5,6 @@ import hu.qgears.parser.language.ITokenType;
 import hu.qgears.parser.language.impl.TokenType;
 import hu.qgears.parser.tokenizer.ITextSource;
 import hu.qgears.parser.tokenizer.IToken;
-import hu.qgears.parser.tokenizer.TokenizerException;
 
 /**
  * Recognizes string constants.
@@ -13,9 +12,6 @@ import hu.qgears.parser.tokenizer.TokenizerException;
  * Escaping with \ is allowed: the next character after \ can be " but that does not close the string.
  * 
  * The String representation is intended to follow the Java specification of string constants.
- * 
- * @author rizsi
- *
  */
 public class RecognizerString extends RecognizerConcat {
 	@Override
@@ -23,11 +19,11 @@ public class RecognizerString extends RecognizerConcat {
 		return super.getGeneratedToken(_src);
 	}
 
-	public RecognizerString(ITokenType tokenType) throws TokenizerException {
+	public RecognizerString(ITokenType tokenType, char endingCharacter) {
 		super(tokenType);
-		addSubToken(new RecognizerConst(new TokenType("dummy"), "\""), true);
-		addSubToken(new RecognizerStringInside(new TokenType("dummy")), false);
-		addSubToken(new RecognizerConst(new TokenType("dummy"), "\""), true);
+		addSubToken(new RecognizerConst(new TokenType("dummy"), ""+endingCharacter), true);
+		addSubToken(new RecognizerStringInside(new TokenType("dummy"), endingCharacter), false);
+		addSubToken(new RecognizerConst(new TokenType("dummy"), ""+endingCharacter), true);
 	}
 	/**
 	 * Remove quotes and unescape the string. Convert the token content to a pure string.

@@ -6,6 +6,7 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
+import hu.qgears.parser.impl.DefaultReceiver;
 import hu.qgears.parser.language.ITokenType;
 import hu.qgears.parser.language.impl.IDGen;
 import hu.qgears.parser.language.impl.TokenType;
@@ -15,6 +16,7 @@ import hu.qgears.parser.tokenizer.ITokenRecognizer;
 import hu.qgears.parser.tokenizer.impl.TextSource;
 import hu.qgears.parser.tokenizer.impl.Tokenizer;
 import hu.qgears.parser.tokenizer.impl.TokenizerDef;
+import hu.qgears.parser.tokenizer.recognizer.RecognizerCStyleHexa;
 import hu.qgears.parser.tokenizer.recognizer.RecognizerConst;
 import hu.qgears.parser.tokenizer.recognizer.RecognizerDoubleNumber;
 import hu.qgears.parser.tokenizer.recognizer.RecognizerId;
@@ -23,12 +25,9 @@ import hu.qgears.parser.tokenizer.recognizer.RecognizerWhiteSpace;
 import hu.qgears.parser.tokenizer.recognizer.RecognizerWord;
 import hu.qgears.parser.util.UtilFile;
 
-
-
 public class TestTokenizer {
 	@Test
-	public void run() throws Exception
-	{
+	public void run() throws Exception {
 		List<ITokenRecognizer> recogs = new ArrayList<ITokenRecognizer>();
 		recogs.add(new RecognizerWhiteSpace(new TokenType("whitespace")));
 		recogs.add(new RecognizerId(new TokenType("id")));
@@ -42,19 +41,35 @@ public class TestTokenizer {
 		new IDGen().genTokenTypeIds(types);
 		Tokenizer tok = new Tokenizer(new TokenizerDef(recogs));
 		ITextSource ts = new TextSource("alma 2=nincs");
-		StringBuilder ret=new StringBuilder();
-		List<IToken> toks = tok.tokenize(ts);
+		StringBuilder ret = new StringBuilder();
+		List<IToken> toks = tok.tokenize(ts, new DefaultReceiver());
 		for (IToken t : toks) {
 			ret.append(t);
 			ret.append("\n");
 		}
-		Assert.assertEquals(UtilFile.loadFileAsString(getClass().getResource("TestTokenizer-output.txt")), ret.toString());
+		Assert.assertEquals(UtilFile.loadFileAsString(getClass().getResource("TestTokenizer-output.txt")),
+				ret.toString());
 	}
+
 	@Test
-	public void testNumberTokenizer()
-	{
-		RecognizerDoubleNumber rdn=new RecognizerDoubleNumber(null);
+	public void testNumberTokenizer() {
+		RecognizerDoubleNumber rdn = new RecognizerDoubleNumber(null);
 		Assert.assertEquals(3, rdn.getGeneratedToken(new TextSource("112")).getLength());
 		Assert.assertEquals(5, rdn.getGeneratedToken(new TextSource(".10e6")).getLength());
+	}
+
+	@Test
+	public void testHexaTokenizer() {
+		RecognizerCStyleHexa rdn = new RecognizerCStyleHexa(null);
+		Assert.assertEquals(5, rdn.getGeneratedToken(new TextSource("0x113")).getLength());
+		Assert.assertEquals(7, rdn.getGeneratedToken(new TextSource("0X42faB")).getLength());
+	}
+
+	@Test
+	public void testXtextIdTokenizer() {
+		RecognizerId rdn = new RecognizerId(null, '^');
+		Assert.assertEquals(4, rdn.getGeneratedToken(new TextSource("alma")).getLength());
+		Assert.assertEquals(5, rdn.getGeneratedToken(new TextSource("korte szolo")).getLength());
+		Assert.assertEquals(6, rdn.getGeneratedToken(new TextSource("^korte szolo")).getLength());
 	}
 }

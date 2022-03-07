@@ -6,7 +6,7 @@ import hu.qgears.parser.tokenizer.IToken;
 import hu.qgears.parser.tokenizer.ITokenRecognizer;
 import hu.qgears.parser.tokenizer.RecognizerAbstract;
 import hu.qgears.parser.tokenizer.SimpleToken;
-import hu.qgears.parser.tokenizer.TokenizerException;
+import hu.qgears.parser.util.ParseRuntimeException;
 
 public class RecognizerAnyCaseConst extends RecognizerAbstract implements
 		ITokenRecognizer {
@@ -23,10 +23,10 @@ public class RecognizerAnyCaseConst extends RecognizerAbstract implements
 	}
 
 	public RecognizerAnyCaseConst(ITokenType tokenType, String c)
-			throws TokenizerException {
+			throws ParseRuntimeException {
 		super(tokenType);
 		if (c.length() < 1)
-			throw new TokenizerException("invalid token: = length constant");
+			throw new ParseRuntimeException("invalid token: = length constant");
 		this.c = c;
 	}
 }
