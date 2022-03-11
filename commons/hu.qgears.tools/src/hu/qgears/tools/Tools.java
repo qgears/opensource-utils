@@ -1,5 +1,6 @@
 package hu.qgears.tools;
 
+import hu.qgears.tools.build.BundleStandaloneBuild;
 import hu.qgears.tools.rtemplate.RTemplateStandalone;
 import joptsimple.tool.AbstractTools;
 
@@ -25,5 +26,7 @@ public class Tools extends AbstractTools {
 		register(new RTemplateStandalone());
 		register(new LogPortForward());
 		register(new TiffImageCompare());
+		register(new TcpProxy());
+		register(new BundleStandaloneBuild());
 	}
 }

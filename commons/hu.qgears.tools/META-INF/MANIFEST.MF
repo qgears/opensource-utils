@@ -13,4 +13,7 @@ Require-Bundle: hu.qgears.commons;bundle-version="5.0.0",
  hu.qgears.rtemplate.runtime,
  hu.rtemplate,
  hu.qgears.images
-Export-Package: hu.qgears.tools
+Export-Package: hu.qgears.tools,
+ hu.qgears.tools.build,
+ hu.qgears.tools.build.gen
+Automatic-Module-Name: hu.qgears.tools

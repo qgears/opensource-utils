@@ -1,0 +1,15 @@
+package hu.qgears.tools.build.compiler.test;
+public class Example implements MyInterface {
+	class Internal
+	{
+		public void wow() {
+			new RuntimeException("Good exception: internal class also works").printStackTrace();
+		}
+		
+	}
+	@Override
+	public void myCall() {
+		System.out.println("Dynamic class loading works");
+		new Internal().wow();
+	}
+}

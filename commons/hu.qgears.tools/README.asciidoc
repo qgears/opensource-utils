@@ -11,7 +11,9 @@ Back up git repositiories using git itself:
     * Iterates all git clones
     * git fetch -p origin +refs/heads/*:refs/heads/* +refs/tags/*:refs/tags/* (all new refs in heads and tags, also delete remote deleted ones)
     * (configurable which refs/XXX/* are fetched)
-    * Create a /refs/backup/timestamp/original/ref/path of all refs fetched
+    * Create a /refs/backup/from/timestamp/original/ref/path of all refs fetched: means that this ref existed first at the given timestamp
+    * If ref does not exist in backup then creates a /refs/backup/until/timestamp/original/ref/path: means that the ref does not exist any longer at that timestamp.
+    * ("Old style" previous version backup reference format is updated to current format automatically.)
     * The backup refs are local and are never updated from remote. So they will not be overwritten.
     
 Return value: Returns non 0 in case any of the gits could not be fetched or the log could not be uploaded.

@@ -60,6 +60,7 @@ public class GitToZip extends AbstractTool
 	protected IArgs createArgsObject() {
 		return new Args();
 	}
+	@SuppressWarnings("deprecation")
 	@Override
 	public int doExec(IArgs aa) throws Exception {
 		Args a=(Args) aa;
