@@ -58,6 +58,10 @@ public class TextParameters {
 	public static final EHorizontalAlign DEFAULT_HORIZONTAL_ALIGNMENT = EHorizontalAlign.left;
 
 	/**
+	 * The default {@link EWrapMode} of the text.
+	 */
+	public static final EWrapMode DEFAULT_WRAP_MODE = EWrapMode.WORD;
+	/**
 	 * The name of the font family
 	 */
 	public String fontFamily = DEFAULT_FONT_FACE;
@@ -101,6 +105,8 @@ public class TextParameters {
 
 	public boolean richText = false;
 	
+	public EWrapMode wrapMode = DEFAULT_WRAP_MODE;
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof TextParameters) {
@@ -112,7 +118,8 @@ public class TextParameters {
 					&& other.vAlign == vAlign
 					&& other.textDecoration == textDecoration
 					&& other.letterSpacing == letterSpacing
-					&& richText == other.richText;
+					&& richText == other.richText
+					&& wrapMode == other.wrapMode;
 		}
 		return false;
 	}
@@ -123,7 +130,8 @@ public class TextParameters {
 				^ hash(text) ^ hash(fontWeight) ^ hash(fontStyle)
 				^ hash(vAlign) ^ hash(hAlign) ^ hash(textDecoration)
 				^ hash(letterSpacing)
-				^ hash(richText);
+				^ hash(richText)
+				^ hash(wrapMode);
 	}
 	
 	/**
@@ -163,6 +171,7 @@ public class TextParameters {
 		this.textDecoration = toCopy.textDecoration;
 		this.letterSpacing = toCopy.letterSpacing;
 		this.richText = toCopy.richText;
+		this.wrapMode = toCopy.wrapMode;
 	}
 	
 	

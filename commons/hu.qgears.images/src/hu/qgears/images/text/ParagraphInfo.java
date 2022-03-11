@@ -1,6 +1,5 @@
 package hu.qgears.images.text;
 
-
 /**
  * POJO that describes the the content and the horizontal alignment of a
  * paragraph in flowtexts. The content can be either plain text, or pango
@@ -36,11 +35,13 @@ public class ParagraphInfo {
 	
 	private double marginAfter = marginAfterDefault;
 	
+	private EWrapMode wrapMode = TextParameters.DEFAULT_WRAP_MODE;
 	private int width;
 
 	private EVerticalAlign verticalAligment;
 	
 	private int nImageRectangle;
+
 
 	public ParagraphInfo() {
 		this(EVerticalAlign.bottom);
@@ -131,5 +132,12 @@ public class ParagraphInfo {
 	 */
 	public void setnImageRectangle(int nImageRectangle) {
 		this.nImageRectangle = nImageRectangle;
+	}
+	public void setWrapMode(EWrapMode wrapMode) {
+		this.wrapMode = wrapMode;
+	}
+	
+	public EWrapMode getWrapMode() {
+		return wrapMode;
 	}
 }
