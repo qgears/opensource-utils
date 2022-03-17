@@ -1,0 +1,22 @@
+ = Compile Java code programmatically
+
+Goals:
+
+ * Dynamically compile and load Java source code runtime
+ * Simple and effective autobuild for Eclipse projects (proof of concept project).
+ 
+ == Configuration
+
+Loading the compiler has to be configured through environment variables:
+
+ * In case JDK is installed and the integrated builder is used then no configuration is necessary
+ * In case only JRE is available then it is possible to load ECJ compiler:
+ ** COMPILER_CLASS = org.eclipse.jdt.internal.compiler.tool.EclipseCompiler
+ ** COMPILER_CLASSPATH = path/to/ecj-4.5.2.jar
+ ** COMPILER_CLASS_CREATOR stays default
+
+The compiler jar is loaded dynamically so it is not necessary to be on the classpath when the JVM is launched. In case the compiler is on the classpath when the JRE is started then that variable need not be configured.
+
+== Usage for dynamic compilation
+
+See: TestDynamicClass

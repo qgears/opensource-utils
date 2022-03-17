@@ -8,10 +8,8 @@ import hu.qgears.commons.UtilFile;
 import hu.qgears.tools.build.compiler.CompilerVersionConfiguration;
 import hu.qgears.tools.build.compiler.DynamicCompiler;
 import hu.qgears.tools.build.compiler.ICompileCallback;
-import hu.qgears.tools.build.compiler.InMemoryForwardingFileManager;
 
 public class TestDynamicClass {
-	InMemoryForwardingFileManager imfm;
 	public void test01() throws Exception
 	{
 		ClassLoader classLoader=getClass().getClassLoader();

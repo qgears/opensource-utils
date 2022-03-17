@@ -1,4 +1,10 @@
 package hu.qgears.tools.build.compiler.test;
+/**
+ * Example for dynamic compilation of Java source.
+ * The class implements an interface that is defined in the parent classloader
+ * and the interface can be used to access the implementation without using reflection
+ * for other than instantiating the class.
+ */
 public class Example implements MyInterface {
 	class Internal
 	{
