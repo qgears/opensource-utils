@@ -6,8 +6,6 @@ import hu.qgears.parser.language.EType;
 
 /**
  * The nothing symbol.
- * @author rizsi
- *
  */
 public class TermEpsilon extends Term {
 
@@ -29,7 +27,7 @@ public class TermEpsilon extends Term {
 
 	@Override
 	public boolean isFiltered() {
-		return true;
+		return super.isFiltered();
 	}
 
 }

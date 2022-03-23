@@ -114,7 +114,7 @@ public class UtilLanguage {
 			}
 		}else
 		{
-			if(EType.and.equals(parentType) && EType.epsilon.equals(ts.getType()))
+			if(EType.and.equals(parentType) && EType.epsilon.equals(ts.getType()) && ts.isFiltered())
 			{
 				// Do not add epsilon rules to and lists
 			}else
