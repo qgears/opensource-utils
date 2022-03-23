@@ -10,7 +10,7 @@ public class Obj extends CrossRefObject {
 	String typeAndLocalId;
 	String fqId;
 	protected Set<Ref> referencesTargetingThis=new HashSet<>(); 
-	public Obj(Doc doc, String fqId, String type) {
+	protected Obj(Doc doc, String fqId, String type) {
 		super(doc.getHost());
 		this.doc=doc;
 		localId=getHost().getLocalId(fqId);
@@ -33,5 +33,9 @@ public class Obj extends CrossRefObject {
 	@Override
 	public Doc getDoc() {
 		return doc;
+	}
+	@Override
+	public String toString() {
+		return "OBJ "+localId+" "+fqId;
 	}
 }

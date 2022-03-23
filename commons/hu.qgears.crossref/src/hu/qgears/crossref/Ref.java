@@ -9,7 +9,7 @@ public class Ref extends CrossRefObject {
 	private List<IRefListener> listeners=new ArrayList<>();
 	private IRefListener[] listenersAsArray;
 	protected List<Obj> resolvedTo=new ArrayList<>();
-	public Ref(Doc crossrefDoc, Scope scope) {
+	protected Ref(Doc crossrefDoc, Scope scope) {
 		super(crossrefDoc.getHost());
 		this.crossrefDoc=crossrefDoc;
 		this.scope=scope;
