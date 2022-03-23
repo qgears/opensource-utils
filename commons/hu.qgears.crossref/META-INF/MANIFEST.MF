@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Crossref
+Bundle-SymbolicName: hu.qgears.crossref
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Q-Gears Kft.
+Automatic-Module-Name: hu.qgears.crossref
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Export-Package: hu.qgears.crossref
+Require-Bundle: hu.qgears.commons;bundle-version="8.0.0"

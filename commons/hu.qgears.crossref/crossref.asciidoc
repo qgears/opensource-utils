@@ -1,0 +1,117 @@
+= Cross referencing logic
+
+== Documents (Doc)
+
+All defined objects and references are connected to a document.
+When the document is deleted then all its objects and references are destroyed.
+
+== Defining objects (Obj)
+
+All objects within the code are organized into a namespace hierarchy
+
+packages with arbitrary length of identifier:
+
+package: tId.tId.tId
+
+Objects can be in the root package (no prefix): objectId
+
+or any package: p1.p2.p3.Object
+
+Object definitions always set the whole name of the object.
+
+Objects can be stored within other objects:  p1.p2.p3.Object.subObject
+In this case p1.p2.p3.Object is like a package!
+
+All objects have a type.
+
+Different typed objects may have equal identifiers!
+(packages are just a specific type of objects)
+
+Equal identifiers are allowed by the crossref framework (though that will definitely raise alarm in the domain language).
+
+When an object is defined then its whole identifier is known.
+
+== Objects with multiple identifiers
+
+If the target domain requires a single object to be injected with multiple identifiers then for each identifier a crossref identifier must be created. 
+
+== Types
+
+All objects have a type which is a single string identifier of the type. This type can be used to narrow searches.
+
+Because normally types don't clash by their identifiers types are not indexed.
+
+== Categories
+
+Types can be organized into categories to make multi-types searches easier.
+
+== Search scopes
+
+Within the code there can be a search scope. A search scope is a set of imports and the current local namespace.
+
+For example: within a function there is a local namespace of the function.
+Within a block there is a local namespace of the block
+Within a class there is a local namespace of the class.
+The global namespace is always accessible in most languages.
+
+== References
+
+References may be global or local:
+
+ * Local references have a search scope
+ 
+== Reference types
+
+References also have types which are a single string.
+This is useful when searching for reference sources by reference type.
+ 
+== Transactions
+
+All references are resolved in a single transaction.
+
+After applying changes to the files the transaction finish has to be called to apply all changes. This will execute all the commands one after another:
+
+ * Delete files
+ * register all defined objects
+ * resolve all references
+ * Mark unresolved references
+
+=== sub transactions
+
+When all references that are currently resolved are marked resolved then a sub-transaction is finished. The sub-transacion may be listened and then new objects may be created/deleted.
+
+Thus sub transations are repeated until there are no more resolved reference changes available.
+ 
+== Listeners
+
+Reference Listeners may update the model when a reference is resolved:
+
+ * reference deletion may delete further objects (example: objects created when the reference was found)
+ * reference resolve may create new objects
+
+== Internals
+
+ * Declared objects always have an exact identifier. It is not possible to declare objects without an identifier
+ * References can have different possible targets:
+ ** any imported packages may contain the object
+ ** any parent package may contain the object (if that is a specification of the language)
+ ** any package may contain the object (if that is the specification of the language)
+ ** There may be an order which reference is used first (local, less local, etc)
+ *** It is possible that a new referenced object overwrites a previous one! Example: the reference is found and then a new object is created.
+
+SearchReference objects:
+
+ * BySimpleId - simple id is a local identifier or a UUID like global identifier
+ * ByListOfPackages (In a given order)
+ * Additional filters are possible: type, etc to see if a target is possible or not.
+
+ * SearchReference maintains a priority list of found matches. When a single match (at least one) is found then the resolved target is updated.
+
+
+
+
+
+
+
+
+
