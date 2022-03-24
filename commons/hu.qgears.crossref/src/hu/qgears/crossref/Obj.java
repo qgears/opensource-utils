@@ -13,7 +13,7 @@ public class Obj extends CrossRefObject {
 	protected Obj(Doc doc, String fqId, String type) {
 		super(doc.getHost());
 		this.doc=doc;
-		localId=getHost().getLocalId(fqId);
+		localId=CrossRefManager.getLocalId(fqId);
 		this.type=type;
 		this.typeAndLocalId=getHost().getTypeAndLocalId(type, getLocalId());
 		this.fqId=fqId;

@@ -10,7 +10,6 @@ import hu.qgears.parser.LanguageParserText;
 import hu.qgears.parser.ParserLogger;
 import hu.qgears.parser.TokenizerImplManager;
 import hu.qgears.parser.TreeRenderer;
-import hu.qgears.parser.impl.Parser;
 import hu.qgears.parser.language.ILanguage;
 import hu.qgears.parser.util.UtilFile;
 

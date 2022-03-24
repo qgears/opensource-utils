@@ -15,9 +15,6 @@ import hu.qgears.parser.util.UtilIntArrayFlexible;
 
 /**
  * The element buffer of the early algorithm.
- * 
- * @author rizsi
- * 
  */
 final public class ElemBuffer {
 	private long nanosStoredAlready=0;

@@ -22,6 +22,7 @@ public class CrossRefManager {
 	// Objects stored to process when transaction was finished.
 	private Set<Doc> toDelete=new HashSet<>();
 	private Set<Ref> toResolve=new HashSet<>();
+	private Object syncObj=new Object();
 	/** Objects by their identifier. */
 	private MultiMapTreeImpl<String, Obj> objects=new MultiMapTreeImpl<>();
 	
@@ -63,13 +64,15 @@ public class CrossRefManager {
 			throw new IllegalStateException();
 		}
 		Obj ret=new Obj(owner, fqId, type);
-		owner.objs.add(ret);
-		objects.putSingle(fqId, ret);
-		objectsByLocalId.putSingle(ret.getLocalId(), ret);
-		objectsByTypeAndLocalId.putSingle(ret.getTypeAndLocalId(), ret);
-		
-		signalSearches(refByFqId.getPossibleNull(fqId), ret);
-		signalSearches(refByTypeAndLocalId.getPossibleNull(fqId), ret);
+		synchronized (syncObj) {
+			owner.objs.add(ret);
+			objects.putSingle(fqId, ret);
+			objectsByLocalId.putSingle(ret.getLocalId(), ret);
+			objectsByTypeAndLocalId.putSingle(ret.getTypeAndLocalId(), ret);
+			
+			signalSearches(refByFqId.getPossibleNull(fqId), ret);
+			signalSearches(refByTypeAndLocalId.getPossibleNull(fqId), ret);
+		}
 		return ret;
 	}
 	/**
@@ -90,7 +93,7 @@ public class CrossRefManager {
 			}
 		}
 	}
-	public String getLocalId(String fqId) {
+	public static String getLocalId(String fqId) {
 		int idx=fqId.lastIndexOf('.');
 		if(idx>=0)
 		{
@@ -171,35 +174,37 @@ public class CrossRefManager {
 			throw new IllegalStateException();
 		}
 		Ref ref=new Ref(crossrefDoc, scope);
-		crossrefDoc.refs.add(ref);
-		toResolve.add(ref);
-		refs.add(ref);
-		scope.seal();
-		List<String> pgid=scope.getPossibleGlobalIds();
-		if(pgid!=null)
-		{
-			ref.scope.gidSearch=new ArrayList<>();
-			for(int i=0;i<pgid.size();++i)
+		synchronized (syncObj) {
+			crossrefDoc.refs.add(ref);
+			toResolve.add(ref);
+			refs.add(ref);
+			scope.seal();
+			List<String> pgid=scope.getPossibleGlobalIds();
+			if(pgid!=null)
 			{
-				String gid=pgid.get(i);
-				GidSearch gs=new GidSearch(gid, ref, i);
-				refByFqId.putSingle(gs.gid, gs);
-				ref.scope.gidSearch.add(gs);
+				ref.scope.gidSearch=new ArrayList<>();
+				for(int i=0;i<pgid.size();++i)
+				{
+					String gid=pgid.get(i);
+					GidSearch gs=new GidSearch(gid, ref, i);
+					refByFqId.putSingle(gs.gid, gs);
+					ref.scope.gidSearch.add(gs);
+				}
 			}
-		}
-		Set<String> allowedTypes=scope.getAllowedTypes();
-		if(allowedTypes!=null && ref.scope.getLocalIdentifier()!=null)
-		{
-			ref.scope.typeSearch=new ArrayList<>();
-			for(String type: allowedTypes)
+			Set<String> allowedTypes=scope.getAllowedTypes();
+			if(allowedTypes!=null && ref.scope.getLocalIdentifier()!=null)
 			{
-				String key=getTypeAndLocalId(type, ref.scope.getLocalIdentifier());
-				GidSearch s=new GidSearch(key, ref, 0);
-				refByTypeAndLocalId.putSingle(key, s);
-				ref.scope.typeSearch.add(s);
+				ref.scope.typeSearch=new ArrayList<>();
+				for(String type: allowedTypes)
+				{
+					String key=getTypeAndLocalId(type, ref.scope.getLocalIdentifier());
+					GidSearch s=new GidSearch(key, ref, 0);
+					refByTypeAndLocalId.putSingle(key, s);
+					ref.scope.typeSearch.add(s);
+				}
 			}
+			toResolve.add(ref);
 		}
-		toResolve.add(ref);
 		return ref;
 	}
 	private void resolveReference(Ref ref) {

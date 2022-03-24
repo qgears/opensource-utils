@@ -60,13 +60,13 @@ public class Scope {
 	 */
 	public List<String> getPossibleGlobalIds()
 	{
-		if(id!=null)
+		if(localIdentifier!=null && pack!=null)
 		{
 			List<String> ret=new ArrayList<>();
 			String p=pack;
 			while(p.length()>0)
 			{
-				ret.add(p+"."+id);
+				ret.add(p+"."+localIdentifier);
 				int idx=p.lastIndexOf('.');
 				if(idx>0)
 				{
@@ -76,7 +76,7 @@ public class Scope {
 					p="";
 				}
 			}
-			ret.add(id);
+			ret.add(localIdentifier);
 			return ret;
 		}
 		return null;
@@ -86,7 +86,7 @@ public class Scope {
 	 * For performance reasons it stores the reference to the types set.
 	 * @param targetType caller must not change this set after setting this value.
 	 */
-	public void setAllowedTypes(Set<String> targetType) {
+	public Scope setAllowedTypes(Set<String> targetType) {
 		if(sealed)
 		{
 			throw new IllegalStateException();
@@ -94,6 +94,7 @@ public class Scope {
 		{
 			allowedTypes=targetType;
 		}
+		return this;
 	}
 	/**
 	 * After this call the scope object is read only.
