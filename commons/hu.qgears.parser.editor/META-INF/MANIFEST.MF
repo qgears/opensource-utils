@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Editor
+Bundle-SymbolicName: hu.qgears.parser.editor
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: hu.qgears.parser.editor.internal.Activator
+Bundle-Vendor: Q-Gears Kft.
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.ui.workbench.texteditor,
+ org.eclipse.jface.text,
+ org.eclipse.ui.editors,
+ org.eclipse.core.filebuffers,
+ org.eclipse.core.resources,
+ hu.qgears.commons,
+ org.eclipse.ui.ide,
+ hu.qgears.crossref,
+ hu.qgears.parser.editor
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ActivationPolicy: lazy
+Export-Package: hu.qgears.parser.editor
