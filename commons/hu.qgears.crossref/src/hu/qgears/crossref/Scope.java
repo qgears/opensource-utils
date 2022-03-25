@@ -1,6 +1,7 @@
 package hu.qgears.crossref;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -76,8 +77,15 @@ public class Scope {
 					p="";
 				}
 			}
-			ret.add(localIdentifier);
+			if(id!=null)
+			{
+				ret.add(id);
+			}
 			return ret;
+		}
+		if(id!=null)
+		{
+			return Collections.singletonList(id);
 		}
 		return null;
 	}

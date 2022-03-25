@@ -133,6 +133,10 @@ public class CrossRefManager {
 			{
 				resolveReference(r);
 			}
+			for(ICrossRefManagerListener l: getListenersCopy())
+			{
+				l.resolveCycleFinished();
+			}
 		}
 		for(ICrossRefManagerListener l: getListenersCopy())
 		{
@@ -240,7 +244,6 @@ public class CrossRefManager {
 		{
 			for(GidSearch gs: ref.scope.typeSearch)
 			{
-				@SuppressWarnings("unused")
 				Set<Obj> matches=objectsByTypeAndLocalId.getPossibleNull(gs.gid);
 				if(matches!=null&&matches.size()>0)
 				{
