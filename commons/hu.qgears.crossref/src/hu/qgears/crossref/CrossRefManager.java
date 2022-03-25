@@ -393,4 +393,8 @@ public class CrossRefManager {
 	public MultiMapTreeImpl<String, Obj> getObjects() {
 		return objects;
 	}
+	/**
+	 * Free to all cache.
+	 */
+	public MultiMapHashToHashSetImpl<String, Object> caches=new MultiMapHashToHashSetImpl<>();
 }

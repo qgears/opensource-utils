@@ -11,22 +11,26 @@ import org.apache.log4j.Logger;
  * Features:
  *  - multithread access to listeners is allowed
  *  - listeners and events can be chained. 
- * @author rizsi
- *
  */
 public class UtilEvent<T> implements UtilEventListener<T> {
-	
 	private static final Logger LOG = Logger.getLogger(UtilEvent.class);
+	private static UtilEventListener<?>[] emptyArray=new UtilEventListener<?>[]{};
 	
-	private List<UtilEventListener<T>> listeners=new ArrayList<UtilEventListener<T>>();
+	private List<UtilEventListener<T>> listeners=null;
+	private UtilEventListener<T>[] listenersArray;
 	/**
 	 * Add a listener to this event.
 	 * @param l listener to be added
 	 */
 	public void addListener(UtilEventListener<T> l)
 	{
-		synchronized (listeners) {
+		synchronized (this) {
+			if(listeners==null)
+			{
+				listeners=new ArrayList<>();
+			}
 			listeners.add(l);
+			listenersArray=null;
 		}
 	}
 	/**
@@ -35,8 +39,16 @@ public class UtilEvent<T> implements UtilEventListener<T> {
 	 */
 	public void removeListener(UtilEventListener<T> l)
 	{
-		synchronized (listeners) {
-			listeners.remove(l);
+		synchronized (this) {
+			if(listeners!=null)
+			{
+				listeners.remove(l);
+				if(listeners.isEmpty())
+				{
+					listeners=null;
+				}
+			}
+			listenersArray=null;
 		}
 	}
 	/**
@@ -45,10 +57,8 @@ public class UtilEvent<T> implements UtilEventListener<T> {
 	@Override
 	public void eventHappened(T msg)
 	{
-		List<UtilEventListener<T>> ls;
-		synchronized (listeners) {
-			ls=new ArrayList<UtilEventListener<T>>(listeners);
-		}
+		UtilEventListener<T>[] ls;
+		ls=getListenersArray();
 		for(UtilEventListener<T> l:ls)
 		{
 			try
@@ -60,13 +70,33 @@ public class UtilEvent<T> implements UtilEventListener<T> {
 			}
 		}
 	}
+	@SuppressWarnings("unchecked")
+	private UtilEventListener<T>[] getListenersArray() {
+		synchronized (this) {
+			if(listenersArray==null)
+			{
+				if(listeners==null)
+				{
+					listenersArray=(UtilEventListener<T>[])emptyArray;
+				}else
+				{
+					listenersArray=listeners.toArray((UtilEventListener<T>[])emptyArray);
+				}
+			}
+			return listenersArray;
+		}
+	}
 	/**
 	 * Get the current count of listeners added to this event.
 	 * @return the current number of listeners added to this event.
 	 */
 	public int getNListeners()
 	{
-		synchronized (listeners) {
+		synchronized (this) {
+			if(listeners==null)
+			{
+				return 0;
+			}
 			return listeners.size();
 		}
 	}

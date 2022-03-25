@@ -5,7 +5,6 @@ package hu.qgears.commons;
  * listeners can be added to the setting event.
  * 
  * In case the value is set to an other object that is equal to the current one then the event is not propagated.
- * @author rizsi
  *
  * @param <T>
  */
