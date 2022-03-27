@@ -284,6 +284,14 @@ public class CrossRefManager {
 				return false;
 			}
 		}
+		String fqId=ref.scope.getId();
+		if(fqId!=null)
+		{
+			if(!fqId.equals(o.fqId))
+			{
+				return false;
+			}
+		}
 		if(ref.scope.filterFunction!=null)
 		{
 			return ref.scope.filterFunction.isPossibleTarget(o);
