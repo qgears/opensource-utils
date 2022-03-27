@@ -1,8 +1,5 @@
 package hu.qgears.emfcollab.util;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
@@ -14,13 +11,9 @@ import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
  * 
  * TODO - objects are stored "forever" this prevents them from being garbage collected.
  * A mechanism to know when they are no longer needed should be implemented. 
- * 
- * @author rizsi
- *
  */
 public class UUIDXmiResource extends XMIResourceImpl
 {
-	Map<EObject, String> detachedIds=new HashMap<EObject, String>();
 	public UUIDXmiResource() {
 		super();
 	}
@@ -38,18 +31,19 @@ public class UUIDXmiResource extends XMIResourceImpl
 		String ret=super.getID(eObject);
 		if(ret==null)
 		{
-			String ret2=detachedIds.get(eObject);
-			if(ret2!=null)
-			{
-				setID(eObject, ret2);
-				return ret2;
-			}
+			IdAdapter ad=IdAdapter.get(eObject);
+			return ad.getId();
 		}
 		return ret;
 	}
 	@Override
+	public void setID(EObject eObject, String id) {
+		IdAdapter ad=IdAdapter.get(eObject);
+		ad.setId(id);
+		super.setID(eObject, id);
+	}
+	@Override
 	protected void detachedHelper(EObject eObject) {
-		detachedIds.put(eObject, getID(eObject));
 		super.detachedHelper(eObject);
 	}
 }

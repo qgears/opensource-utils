@@ -3,7 +3,6 @@ Export-Package: hu.qgears.emfcollab,
  hu.qgears.emfcollab.backref,
  hu.qgears.emfcollab.exceptions,
  hu.qgears.emfcollab.impl,
- hu.qgears.emfcollab.load,
  hu.qgears.emfcollab.srv,
  hu.qgears.emfcollab.util
 Bundle-SymbolicName: hu.qgears.emfcollab

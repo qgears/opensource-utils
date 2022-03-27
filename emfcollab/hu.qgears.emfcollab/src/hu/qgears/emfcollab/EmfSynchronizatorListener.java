@@ -1,8 +1,5 @@
 package hu.qgears.emfcollab;
 
-import hu.qgears.emfcollab.backref.EmfBackReference;
-import hu.qgears.emfcollab.util.UtilEmf;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -15,21 +12,23 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
-import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EContentAdapter;
+
+import hu.qgears.emfcollab.backref.EmfBackReferenceImpl;
+import hu.qgears.emfcollab.util.UtilEmf;
 
 
 /**
  * Listens EMF model events
  * and records them into
  * serializable and remotely replayable objects.
- * @author rizsi
- *
  */
 public class EmfSynchronizatorListener {
 	private IdSource idSource;
 	private List<EmfEvent> eventsCollected=new ArrayList<EmfEvent>();
+	private EmfBackReferenceImpl emfBackRef=new EmfBackReferenceImpl();
+	private MyAdapter adapter=new MyAdapter();
 	class MyAdapter extends EContentAdapter
 	{
 		@Override
@@ -38,8 +37,6 @@ public class EmfSynchronizatorListener {
 			EmfSynchronizatorListener.this.notifyChanged(notification);
 		}
 	}
-	EmfBackReference emfBackRef=new EmfBackReference();
-	MyAdapter adapter=new MyAdapter();
 	public void notifyChanged(Notification notification) {
 		int type=notification.getEventType();
 		List<EmfEvent> events=new ArrayList<EmfEvent>();
@@ -156,7 +153,7 @@ public class EmfSynchronizatorListener {
 				EmfEventRemove removeEvent=new EmfEventRemove();
 				removeEvent.setSourceId(getId(source));
 				removeEvent.setReferenceName(ref.getName());
-				removeEvent.setRemovedId(idSource.getId(resource, toRemove));
+				removeEvent.setRemovedId(idSource.getId(toRemove));
 				removeEvent.setPosition(position);
 				AEmfEvent ev=removeEvent;
 				events.add(ev);
@@ -185,7 +182,7 @@ public class EmfSynchronizatorListener {
 		removeEvent.setReferenceName(ref.getName());
 		removeEvent.setRemovedPosition(position);
 		removeEvent.setDeletedType(typeToName(toRemove.eClass()));
-		removeEvent.setDeletedId(idSource.getId(resource, toRemove));
+		removeEvent.setDeletedId(idSource.getId(toRemove));
 		AEmfEvent ev=removeEvent;
 		events.add(ev);
 	}
@@ -411,7 +408,7 @@ public class EmfSynchronizatorListener {
 	 * @return the unique id of the model element
 	 */
 	private String getId(EObject element) {
-		return idSource.getId(resource, element);
+		return idSource.getId(element);
 	}
 	/**
 	 * Convert an EClass to a string that can be used to instantiate an
@@ -447,14 +444,10 @@ public class EmfSynchronizatorListener {
 		}
 		return new ArrayList<EObject>(0);
 	}
-	ResourceSet resourceSet;
-	Resource resource;
-	public void init(Resource resource, IdSource idSource) {
-		this.resource=resource;
+	public void init(ResourceSet resourceSet, IdSource idSource) {
 		this.idSource=idSource;
-		resourceSet=resource.getResourceSet();
-		resource.eAdapters().add(adapter);
-		emfBackRef.init(resource);
+		resourceSet.eAdapters().add(adapter);
+		emfBackRef.init(resourceSet);
 	}
 	public List<EmfEvent> getAndClearEventsCollected() {
 		List<EmfEvent> ret=eventsCollected;

@@ -1,241 +1,17 @@
 package hu.qgears.emfcollab.backref;
 
-import hu.qgears.commons.MultiMapHashToHashSetImpl;
-import hu.qgears.emfcollab.load.UtilVisitor;
-import hu.qgears.emfcollab.util.UtilEmf;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-import org.eclipse.emf.common.notify.Notification;
-import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
-import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.emf.ecore.util.EContentAdapter;
-
+import org.eclipse.emf.ecore.xmi.XMIResource;
 
 /**
- * Indexes EMF model:
- *  * Maintain back references of all relations.
- *  * Maintain a type to instance mapping.
- * 
- * @author rizsi
- * 
+ * Interface for querying inverse references within an EMF model structure.
  */
-public class EmfBackReference {
-	class MyAdapter extends EContentAdapter {
-		@Override
-		public void notifyChanged(Notification notification) {
-			super.notifyChanged(notification);
-			if (notification.getNotifier() instanceof EObject) {
-				EObject o = (EObject) notification.getNotifier();
-				Object feature = notification.getFeature();
-				if (feature instanceof EReference) {
-					EReference ref = (EReference) feature;
-					boolean containment = ref.isContainment();
-					switch (notification.getEventType()) {
-					case Notification.ADD:
-					case Notification.ADD_MANY:
-						addReference(o, ref, notification);
-						if (containment) {
-							addElementRecursive(o, ref, notification);
-						}
-						break;
-					case Notification.MOVE:
-						break;
-					case Notification.REMOVE_MANY:
-					case Notification.REMOVE:
-						removeReference(o, ref, notification);
-						if (containment) {
-							removeElementRecursive(o, ref, notification);
-						}
-						break;
-					case Notification.SET:
-						// TODO remove old Value
-						removeReference(o, ref, notification);
-						addReference(o, ref, notification);
-						if (containment) {
-							addElementRecursive(o, ref, notification);
-						}
-						break;
-					case Notification.UNSET:
-						removeReference(o, ref, notification);
-						if (containment) {
-							removeElementRecursive(o, ref, notification);
-						}
-						break;
-					}
-
-				}
-			}
-		}
-
-	}
-
-	private void removeReference(EObject o, EReference ref,
-			Notification notification) {
-		List<EObject> target = getEObjects(notification.getOldValue());
-		for (EObject t : target) {
-			EmfReference emfRef = new EmfReference(o, ref, t);
-			removeReference(emfRef);
-		}
-	}
-
-	private void removeElementRecursive(EObject o, EReference ref,
-			Notification notification) {
-		List<EObject> target = getEObjects(notification.getOldValue());
-		for (EObject t : target) {
-			UtilVisitor.visitModel(t, new UtilVisitor.Visitor() {
-				@Override
-				public Object visit(EObject element) {
-					removeElement(element);
-					return null;
-				}
-			});
-		}
-	}
-
-	private void addElementRecursive(EObject o, EReference ref,
-			Notification notification) {
-		List<EObject> target = getEObjects(notification.getNewValue());
-		for (EObject t : target) {
-			UtilVisitor.visitModel(t, new UtilVisitor.Visitor() {
-				@Override
-				public Object visit(EObject element) {
-					addElement(element);
-					return null;
-				}
-			});
-		}
-	}
-
-	private void addReference(EObject o, EReference ref,
-			Notification notification) {
-		List<EObject> target = getEObjects(notification.getNewValue());
-		for (EObject t : target) {
-			EmfReference emfRef = new EmfReference(o, ref, t);
-			addReference(emfRef);
-		}
-	}
-
-	/**
-	 * Create a list of EObjects from an EMF notification value object. Check
-	 * whether value is a single EObject or a list.
-	 * 
-	 * @param newValue
-	 * @return
-	 */
-	public static List<EObject> getEObjects(Object newValue) {
-		if (newValue instanceof EObject) {
-			return Collections.singletonList((EObject) newValue);
-		} else if (newValue instanceof List<?>) {
-			List<?> l = (List<?>) newValue;
-			List<EObject> ret = new ArrayList<EObject>(l.size());
-			for (Object o : l) {
-				ret.add((EObject) o);
-			}
-			return ret;
-		}
-		return new ArrayList<EObject>(0);
-	}
-
-	MyAdapter adapter = new MyAdapter();
-
-	MultiMapHashToHashSetImpl<EClass, EObject> instances = new MultiMapHashToHashSetImpl<EClass, EObject>();
-	MultiMapHashToHashSetImpl<EObject, EmfReference> sourceReferences = new MultiMapHashToHashSetImpl<EObject, EmfReference>();
-	MultiMapHashToHashSetImpl<EObject, EmfReference> targetReferences = new MultiMapHashToHashSetImpl<EObject, EmfReference>();
-	MultiMapHashToHashSetImpl<EReference, EmfReference> references = new MultiMapHashToHashSetImpl<EReference, EmfReference>();
-
-	public void init(Resource resource) {
-		resource.eAdapters().add(adapter);
-		for (EObject o : resource.getContents()) {
-			UtilVisitor.visitModel(o, new UtilVisitor.Visitor() {
-				@Override
-				public Object visit(EObject element) {
-					addElement(element);
-					return null;
-				}
-			});
-		}
-	}
-
-	/**
-	 * Remove an element('s all references) fully from the reference index.
-	 * 
-	 * @param element
-	 * @param changed
-	 *            list of elements changed by this method. Output parameter
-	 */
-	private void removeElement(EObject element) {
-		Set<EmfReference> sources = sourceReferences.get(element);
-		Set<EmfReference> targets = targetReferences.get(element);
-		List<EmfReference> toRemove = new ArrayList<EmfReference>(sources
-				.size()
-				+ targets.size());
-		toRemove.addAll(sources);
-		toRemove.addAll(targets);
-		for (EmfReference ref : toRemove) {
-			removeReference(ref);
-		}
-		instances.removeSingle(element.eClass(), element);
-	}
-
-	/**
-	 * Add an element's all references (that are source of the reference) to the
-	 * index model.
-	 * 
-	 * @param element
-	 */
-	private void addElement(EObject element) {
-		if (element.eResource() != null) {
-			EList<EReference> refs = element.eClass().getEAllReferences();
-			for (EReference ref : refs) {
-				if (!ref.isTransient()) {
-					List<EObject> targets = UtilEmf.getReferenceValues(
-							element, ref);
-					for (EObject target : targets) {
-						EmfReference r = new EmfReference(element, ref, target);
-						addReference(r);
-					}
-				}
-			}
-			instances.putSingle(element.eClass(), element);
-		}
-	}
-
-	void addReference(EmfReference ref) {
-		sourceReferences.putSingle(ref.getSource(), ref);
-		targetReferences.putSingle(ref.getTarget(), ref);
-		references.putSingle(ref.getRefType(), ref);
-	}
-
-	void removeReference(EmfReference ref) {
-		sourceReferences.removeSingle(ref.getSource(), ref);
-		targetReferences.removeSingle(ref.getTarget(), ref);
-		references.removeSingle(ref.getRefType(), ref);
-	}
-
-	public void print(Object singleSelectedDomainObject) {
-		for (EmfReference ref : sourceReferences
-				.get(singleSelectedDomainObject)) {
-			System.out.println("SRC " + ref.getSource().eClass().getName()
-					+ " " + ref.getTarget().eClass().getName() + " "
-					+ ref.getRefType().getName());
-		}
-		for (EmfReference ref : targetReferences
-				.get(singleSelectedDomainObject)) {
-			System.out.println("TRG " + ref.getSource().eClass().getName()
-					+ " " + ref.getTarget().eClass().getName() + " "
-					+ ref.getRefType().getName());
-		}
-	}
-
+public interface EmfBackReference {	
 	/**
 	 * Get all references that end at this element by reference type.
 	 * 
@@ -243,64 +19,108 @@ public class EmfBackReference {
 	 * @param type
 	 * @return
 	 */
-	public Set<EmfReference> getTargetReferencesByType(EObject target,
-			EReference type) {
-		Set<EmfReference> query = targetReferences.get(target);
-		Set<EmfReference> ret = new HashSet<EmfReference>();
-		for (EmfReference ref : query) {
-			if (ref.getRefType().equals(type)) {
-				ret.add(ref);
-			}
-		}
-		return ret;
-	}
-
+	Set<EmfReference> getTargetReferencesByType(EObject target, EReference type);
 	/**
 	 * Get all EMF references that target this element.
 	 * 
 	 * @param target
 	 * @return
 	 */
-	public Set<EmfReference> getTargetReferences(EObject target) {
-		Set<EmfReference> query = targetReferences.get(target);
-		Set<EmfReference> ret = new HashSet<EmfReference>();
-		for (EmfReference ref : query) {
-			ret.add(ref);
-		}
-		return ret;
-	}
-
+	Set<EmfReference> getTargetReferences(EObject target);
+	/**
+	 * Get all EMF references that source this element.
+	 * These references are directly navigable: this method is useful for debug purpose only.
+	 * @param source
+	 * @return
+	 */
+	Set<EmfReference> getSourceReferences(EObject source);
+	/**
+	 * Returns all {@link EClass} instances (or types), that are present in
+	 * underlying {@link XMIResource}.
+	 * <p>
+	 * NOTE this method doesn't find those {@link EClass}es, that are part of
+	 * metamodel, but doesn't exist any of theirs instances in current
+	 * {@link XMIResource}.
+	 * 
+	 * @return
+	 */
+	Set<EClass> getEclasses();
 	/**
 	 * Get all direct instances of an EMF class in the EMF model.
+	 * <p>
+	 * Instances of subclasses are not returned.
 	 * 
-	 * @param clazz
+	 * @param clazz Java interface class of the required type
 	 * @return
 	 */
-	public Set<EObject> getInstances(EClass clazz) {
-		return new HashSet<EObject>(instances.get(clazz));
-	}
-
+	<T extends EObject> Set<T> getInstances(Class<T> clazz);
+	/**
+	 * Get all direct instances of an EMF class in the EMF model.
+	 * <p>
+	 * Instances of subclasses are not returned.
+	 * 
+	 * @param type EMF EClass type descriptor of the required type
+	 * @return
+	 */
+	Set<EObject> getInstances(EClass type);
 	/**
 	 * Get all recursive instances of an EMF class in the EMF model.
+	 * <p>
+	 * Instances of subclasses are returned.
 	 * 
-	 * @param clazz
+	 * @param clazz Java interface class of the required type
 	 * @return
 	 */
-	public Set<EObject> getInstancesRecursive(EClass clazz) {
-		HashSet<EObject> ret = new HashSet<EObject>();
-		for (EClass c : instances.keySet()) {
-			if (clazz.isSuperTypeOf(c)) {
-				ret.addAll(instances.get(c));
-			}
+	<T extends EObject> Set<T> getInstancesRecursive(Class<T> clazz);
+	/**
+	 * Get all recursive instances of an EMF class in the EMF model.
+	 * <p>
+	 * Instances of subclasses are returned.
+	 * 
+	 * @param type  EMF EClass type descriptor of the required type
+	 * @return
+	 */
+	Set<EObject> getInstancesRecursive(EClass type);
+	
+	/**
+	 * Initialize all indexes and tracking mechanism.
+	 * Can be recalled multiple times, cache is rebuild in case of non-auto updated backref implementation.
+	 */
+	void initIndexes();
+	/**
+	 * Called when this instance is not necessary anymore.
+	 * 
+	 * @param resource
+	 */
+	void dispose();
+	/**
+	 * Prints all source and target references of the given {@link EObject} to
+	 * standard output.
+	 * 
+	 * @param singleSelectedDomainObject
+	 */
+	void print(EObject singleSelectedDomainObject);
+	/**
+	 * Returns the model objects that have a reference to given target object.
+	 * 
+	 * @param target
+	 * @return An ordered, never-null list containing the referring objects.
+	 */
+	Set<EObject> getReferrers(EObject target);
+	/**
+	 * Returns the single instance of the specified type, or <code>null</code> if
+	 * there no instance exists at all, or multiple instances exist.
+	 * 
+	 * @param clz
+	 * @return
+	 */
+	default <T extends EObject> T getSingleInstanceOf(Class<T> clz){
+		Set<T> i = getInstancesRecursive(clz);
+		if (i.size() == 1){
+			return i.iterator().next();
+		} else {
+			return null;
 		}
-		return ret;
 	}
-	public void disposeOn(ResourceSet rs)
-	{
-		for(Resource r: rs.getResources())
-		{
-			r.eAdapters().remove(adapter);
-		}
-		
-	}
+	ResourceSet getResourceSet();
 }

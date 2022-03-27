@@ -36,6 +36,6 @@ public class Obj extends CrossRefObject {
 	}
 	@Override
 	public String toString() {
-		return "OBJ "+localId+" "+fqId;
+		return "OBJ "+localId+" "+fqId+" ["+type+"]";
 	}
 }

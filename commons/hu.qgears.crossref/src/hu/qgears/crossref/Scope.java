@@ -115,6 +115,6 @@ public class Scope {
 	}
 	@Override
 	public String toString() {
-		return "Scope_"+id+" "+localIdentifier;
+		return "Scope_"+id+" "+localIdentifier+" "+allowedTypes;
 	}
 }

@@ -216,7 +216,7 @@ public class CrossRefManager {
 		{
 			return;
 		}
-		List<Obj> found=null;
+		Set<Obj> found=null;
 		if(ref.scope.gidSearch!=null)
 		{
 			for(GidSearch gs: ref.scope.gidSearch)
@@ -259,10 +259,10 @@ public class CrossRefManager {
 		}
 		ref.setResolvedTo(found);
 	}
-	private List<Obj> addFound(List<Obj> found, Obj o) {
+	private Set<Obj> addFound(Set<Obj> found, Obj o) {
 		if(found==null)
 		{
-			found=new ArrayList<>(1);
+			found=new HashSet<>();
 		}
 		found.add(o);
 		return found;

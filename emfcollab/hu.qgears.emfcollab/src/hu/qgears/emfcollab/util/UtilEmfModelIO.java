@@ -1,7 +1,6 @@
 package hu.qgears.emfcollab.util;
 
 import hu.qgears.emfcollab.impl.LoadedResource;
-import hu.qgears.emfcollab.load.UtilVisitor;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -36,7 +35,7 @@ public class UtilEmfModelIO {
 			UtilVisitor.visitModel(obj, new UtilVisitor.Visitor() {
 				@Override
 				public Object visit(EObject element) {
-					loadedResource.getIdSoruce().getId(loadedResource.getResource(), element);
+					loadedResource.getIdSoruce().getId(element);
 					return null;
 				}
 			});
@@ -172,8 +171,7 @@ public class UtilEmfModelIO {
 	public static void register(Registry registry, EPackage pack) {
 		registry.put(pack.getNsURI(), pack);
 	}
-	public static Resource loadFile(File g) throws IOException {
-		ResourceSet resourceSet=new ResourceSetImpl();
+	public static Resource loadFile(ResourceSet resourceSet, File g) throws IOException {
 		UUIDXmiResource res=new UUIDXmiResource();
 		res.setURI(URI.createFileURI(g.getAbsolutePath()));
 		resourceSet.getResources().add(res);

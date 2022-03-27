@@ -142,7 +142,7 @@ public class EmfCommandExecutor {
 	}
 
 	private void undoSetReference(EmfEventSetReference event) {
-		EObject source=idSource.getById(resource, event.getParentId());
+		EObject source=idSource.getById(event.getParentId());
 		if(source==null)
 		{
 			logElementDoesNotExistError("Undo set reference", event.getParentId());
@@ -156,13 +156,13 @@ public class EmfCommandExecutor {
 			EObject oldObj=null;
 			if(oldId!=null)
 			{
-				oldObj=idSource.getById(resource, oldId);
+				oldObj=idSource.getById(oldId);
 			}
 			source.eSet(ref, oldObj);
 		}else
 		{
 			String id=event.getCreatedId();
-			EObject obj=idSource.getById(resource, id);
+			EObject obj=idSource.getById(id);
 			if(obj!=null)
 			{
 				removeFromEmfReference(source, ref, obj);
@@ -174,8 +174,8 @@ public class EmfCommandExecutor {
 			String fqId=event.getDeletedType();
 			EClass clazz=(EClass) getEClassifierFromId(fqId);
 			EObject created=clazz.getEPackage().getEFactoryInstance().create(clazz);
-			idSource.setId(resource, created, event.getDeletedId());
-			EObject parent=idSource.getById(resource, event.getSourceId());
+			idSource.setId(created, event.getDeletedId());
+			EObject parent=idSource.getById(event.getSourceId());
 			EReference ref=(EReference)parent.eClass().getEStructuralFeature(event.getReferenceName());
 			setRerefence(parent, ref, created, event.getRemovedPosition());
 		} catch (Exception e) {
@@ -184,28 +184,28 @@ public class EmfCommandExecutor {
 			String fqId=event.getDeletedType();
 			EClass clazz=(EClass) getEClassifierFromId(fqId);
 			EObject created=clazz.getEPackage().getEFactoryInstance().create(clazz);
-			idSource.setId(resource, created, event.getDeletedId());
-			EObject parent=idSource.getById(resource, event.getSourceId());
+			idSource.setId(created, event.getDeletedId());
+			EObject parent=idSource.getById(event.getSourceId());
 			EReference ref=(EReference)parent.eClass().getEStructuralFeature(event.getReferenceName());
 			setRerefence(parent, ref, created, event.getRemovedPosition());
 		}
 	}
 	private void undoRemove(EmfEventRemove event) {
-		EObject source=idSource.getById(resource, event.getSourceId());
-		EObject target=idSource.getById(resource, event.getRemovedId());
+		EObject source=idSource.getById(event.getSourceId());
+		EObject target=idSource.getById(event.getRemovedId());
 		String refName=event.getReferenceName();
 		EReference ref=(EReference)source.eClass().getEStructuralFeature(refName);
 		setRerefence(source, ref, target, event.getPosition());
 	}
 	private void undoMove(EmfEventMove event) {
-		EObject moved=idSource.getById(resource, event.getMovedId());
-		EObject parent=idSource.getById(resource, event.getParentId());
+		EObject moved=idSource.getById(event.getMovedId());
+		EObject parent=idSource.getById(event.getParentId());
 		EReference ref=(EReference)parent.eClass().getEStructuralFeature(event.getReferenceName());
 		moveInRerefence(parent, ref, moved, event.getOldPosition());
 	}
 	private void undoSetAttribute(EmfEventSetAttribute event) {
 		String objectId=event.getObjectId();
-		EObject o=idSource.getById(resource, objectId);
+		EObject o=idSource.getById(objectId);
 		if(o==null)
 		{
 			logElementDoesNotExistError("Undo set attribute", objectId);
@@ -232,8 +232,8 @@ public class EmfCommandExecutor {
 		System.out.flush();
 	}
 	private void executeSetReference(EmfEventSetReference event) {
-		EObject source=idSource.getById(resource, event.getParentId());
-		EObject target=idSource.getById(resource, event.getCreatedId());
+		EObject source=idSource.getById(event.getParentId());
+		EObject target=idSource.getById(event.getCreatedId());
 		String refName=event.getReferenceName();
 		if(source==null)
 		{
@@ -245,12 +245,12 @@ public class EmfCommandExecutor {
 	}
 	private void executeRemove(EmfEventRemove event) {
 		String sourceId=event.getSourceId();
-		EObject source=idSource.getById(resource, sourceId);
+		EObject source=idSource.getById(sourceId);
 		if(source!=null)
 		{
 			EReference ref=(EReference) source.eClass().getEStructuralFeature(event.getReferenceName());
 			String id=event.getRemovedId();
-			EObject obj=idSource.getById(resource, id);
+			EObject obj=idSource.getById(id);
 			if(obj!=null)
 			{
 				removeFromEmfReference(source, ref, obj);
@@ -259,7 +259,7 @@ public class EmfCommandExecutor {
 	}
 	private void executeDelete(EmfEventDelete event) {
 		String sourceId=event.getSourceId();
-		EObject source=idSource.getById(resource, sourceId);
+		EObject source=idSource.getById(sourceId);
 		if(source!=null)
 		{
 			EReference ref=(EReference) source.eClass().getEStructuralFeature(event.getReferenceName());
@@ -276,7 +276,7 @@ public class EmfCommandExecutor {
 			IdSource idSource)
 	{
 		String sourceId=event.getSourceId();
-		EObject source=idSource.getById(resource, sourceId);
+		EObject source=idSource.getById(sourceId);
 		int pos=event.getRemovedPosition();
 		if(pos<0)
 		{
@@ -303,8 +303,8 @@ public class EmfCommandExecutor {
 		}
 	}
 	private void executeMove(EmfEventMove event) {
-		EObject moved=idSource.getById(resource, event.getMovedId());
-		EObject parent=idSource.getById(resource, event.getParentId());
+		EObject moved=idSource.getById(event.getMovedId());
+		EObject parent=idSource.getById(event.getParentId());
 		EReference ref=(EReference)parent.eClass().getEStructuralFeature(event.getReferenceName());
 		moveInRerefence(parent, ref, moved, event.getPosition());
 	}
@@ -320,7 +320,7 @@ public class EmfCommandExecutor {
 	}
 	private void executeSetAttribute(EmfEventSetAttribute event) {
 		String objectId=event.getObjectId();
-		EObject o=idSource.getById(resource, objectId);
+		EObject o=idSource.getById(objectId);
 		if(o==null)
 		{
 			logElementDoesNotExistError("Set Attribute", objectId);
@@ -350,14 +350,14 @@ public class EmfCommandExecutor {
 		String fqId=event.getCreatedType();
 		EClass clazz=(EClass) getEClassifierFromId(fqId);
 		EObject created=clazz.getEPackage().getEFactoryInstance().create(clazz);
-		idSource.setId(resource, created, event.getCreatedId());
-		EObject parent=idSource.getById(resource, event.getParentId());
+		idSource.setId(created, event.getCreatedId());
+		EObject parent=idSource.getById(event.getParentId());
 		EReference ref=(EReference)parent.eClass().getEStructuralFeature(event.getReferenceName());
 		setRerefence(parent, ref, created, event.getPosition());
 	}
 	
 	private void undoCreate(EmfEventCreate event) {
-		EObject eo=idSource.getById(resource, event.getCreatedId());
+		EObject eo=idSource.getById(event.getCreatedId());
 		EObject parent=eo.eContainer();
 		EReference ref=(EReference) parent.eClass().getEStructuralFeature(event.getReferenceName());
 		removeFromEmfReference(parent, ref, eo);

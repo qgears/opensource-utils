@@ -1,11 +1,12 @@
-package hu.qgears.emfcollab.load;
+package hu.qgears.emfcollab.util;
 
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.resource.ResourceSet;
 
 /**
  * Visitor design pattern for EMF models.
- * @author rizsi
- *
+ * Useful because this avoids resolving proxies when visiting all nodes of the model.
  */
 public class UtilVisitor {
 	public interface Visitor
@@ -33,6 +34,23 @@ public class UtilVisitor {
 			if(ret==null)
 			{
 				ret=subret;
+			}
+		}
+		return ret;
+	}
+	public static Object visitModel(ResourceSet rs, Visitor visitor)
+	{
+		Object ret=null;
+		for(Resource r: rs.getResources())
+		{
+			for(EObject eo: r.getContents())
+			{
+				Object subret=null;
+				subret=visitModel(eo, visitor);
+				if(ret==null)
+				{
+					ret=subret;
+				}
 			}
 		}
 		return ret;

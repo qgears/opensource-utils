@@ -2,6 +2,7 @@ package hu.qgears.crossref;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class Ref extends CrossRefObject {
 	Doc crossrefDoc;
@@ -43,7 +44,7 @@ public class Ref extends CrossRefObject {
 	 * (Method must be called within an update transaction)
 	 * @param found
 	 */
-	protected void setResolvedTo(List<Obj> found) {
+	protected void setResolvedTo(Set<Obj> found) {
 		if(resolvedTo!=null)
 		{
 			for(Obj o: resolvedTo)
@@ -51,7 +52,7 @@ public class Ref extends CrossRefObject {
 				o.referencesTargetingThis.remove(this);
 			}
 		}
-		resolvedTo=found;
+		resolvedTo=found==null?null:new ArrayList<>(found);
 		if(resolvedTo!=null)
 		{
 			for(Obj o: resolvedTo)
@@ -59,7 +60,7 @@ public class Ref extends CrossRefObject {
 				o.referencesTargetingThis.add(this);
 			}
 		}
-		notifyListeners(found);
+		notifyListeners(resolvedTo);
 	}
 	public List<Obj> getResolvedTo() {
 		return resolvedTo;

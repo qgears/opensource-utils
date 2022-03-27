@@ -5,6 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 
 import hu.qgears.commons.UtilFile;
 import hu.qgears.commons.UtilTime;
@@ -16,6 +18,7 @@ import hu.qgears.emfcollab.util.UtilEmfModelIO;
 abstract public class FileResourceLoader implements IResourceLoader {
 	private File dir;
 	private IdSource idSource;
+	private ResourceSet resourceSet=new ResourceSetImpl();
 
 	/**
 	 * Create a new file resource loader with a default
@@ -25,7 +28,7 @@ abstract public class FileResourceLoader implements IResourceLoader {
 	public FileResourceLoader(File dir) {
 		super();
 		this.dir = dir;
-		this.idSource=new XmiIdSource();
+		this.idSource=new XmiIdSource(resourceSet);
 	}
 	public FileResourceLoader(File dir, IdSource idSource) {
 		super();
@@ -48,7 +51,7 @@ abstract public class FileResourceLoader implements IResourceLoader {
 		{
 			throw new FileNotFoundException("File can not be written by user: "+g.getAbsolutePath());
 		}
-		Resource res=UtilEmfModelIO.loadFile(g);
+		Resource res=UtilEmfModelIO.loadFile(resourceSet, g);
 		LoadedResource r=new LoadedResource(res, idSource);
 		File historyf=getHistoryFile(resourceName);
 		ResourceHistory history=loadHistory(historyf);
