@@ -257,7 +257,7 @@ public class EmfCollabEditorExtension {
 			IFile f,
 			EmfCredentials credentials) throws Exception {
 		this.credentials=credentials;
-		idSource = new XmiIdSource();
+		idSource = new XmiIdSource(resourceSet);
 		String address = UtilFile.loadAsString(f
 				.getContents());
 		List<String> pieces = UtilString.split(address, "\r\n");
@@ -284,7 +284,7 @@ public class EmfCollabEditorExtension {
 					.getFullPath().toString(), initialState.getXmiFile(),
 					resourceSet);
 			emfCommandExecutor.init(new LoadedResource(res, idSource));
-			sync.init(res, idSource);
+			sync.init(resourceSet, idSource);
 			List<EmfCommand> commands=initialState.getCurrentUndoStack();
 			for(EmfCommand command:commands)
 			{
