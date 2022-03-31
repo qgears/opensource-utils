@@ -4,7 +4,7 @@ Export-Package: hu.qgears.commons,
  hu.qgears.commons.mem,
  hu.qgears.commons.signal
 Bundle-SymbolicName: hu.qgears.commons
-Bundle-Version: 10.4.1.qualifier
+Bundle-Version: 10.4.2.qualifier
 Bundle-Name: Commons
 Require-Bundle: org.apache.log4j;bundle-version="1.2.0"
 Bundle-ManifestVersion: 2
