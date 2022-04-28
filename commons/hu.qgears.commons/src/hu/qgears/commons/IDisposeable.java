@@ -3,10 +3,10 @@ package hu.qgears.commons;
 /**
  * Marker interface that marks objects that must be disposed
  * to release resources. (eg. native resource, reference as listener etc...)
- * @author rizsi
- *
+ * Extends the standard {@link AutoCloseable} interface so that it is possible to use in constructs that 
+ * require that interface.
  */
-public interface IDisposeable {
+public interface IDisposeable extends NoExceptionAutoClosable {
 	/**
 	 * Free resources allocated by this object.
 	 */
@@ -16,4 +16,11 @@ public interface IDisposeable {
 	 * @return
 	 */
 	boolean isDisposed();
+	/**
+	 * {@link AutoCloseable} interface - routed to dispose this object.
+	 */
+	@Override
+	default void close() {
+		dispose();
+	};
 }

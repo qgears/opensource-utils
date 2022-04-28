@@ -2,6 +2,7 @@ package hu.qgears.commons.signal;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimerTask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -9,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import hu.qgears.commons.INamed;
+import hu.qgears.commons.UtilTimer;
 
 /**
  * This class implements the SignalFuture interface. Allows the user of this
@@ -30,6 +32,7 @@ public class SignalFutureWrapper<T> implements SignalFuture<T>, Callable<T>, INa
 	private List<Slot<SignalFuture<T>>> listeners=null;
 	private T ret;
 	private String name="";
+	private TimerTask timeout; 
 
 	/**
 	 * Call this method when you want to finish
@@ -44,6 +47,7 @@ public class SignalFutureWrapper<T> implements SignalFuture<T>, Callable<T>, INa
 	private boolean ready(T ret, Throwable exc, boolean cancel) {
 		boolean finishedNow=false;
 		List<Slot<SignalFuture<T>>> ls;
+		TimerTask toCancel=null;
 		synchronized (this) {
 			if(!done)
 			{
@@ -56,6 +60,8 @@ public class SignalFutureWrapper<T> implements SignalFuture<T>, Callable<T>, INa
 			}
 			ls=listeners;
 			listeners=null;
+			toCancel=timeout;
+			timeout=null;
 		}
 		if(finishedNow&&ls!=null)
 		{
@@ -64,24 +70,45 @@ public class SignalFutureWrapper<T> implements SignalFuture<T>, Callable<T>, INa
 				listener.signal(this);
 			}
 		}
+		if(toCancel!=null)
+		{
+			toCancel.cancel();
+		}
 		return finishedNow;
 	}
-
+	/**
+	 * Create a future wrapper that is in initial state
+	 * and can be waited for the result.
+	 * @param callable Set the task that is executed by this future
+	 * @param name set the name of this signal.
+	 */
 	public SignalFutureWrapper(Callable<T> callable, String name) {
 		super();
 		this.callable = callable;
 		this.name=name;
 	}
-
+	/**
+	 * Create a future wrapper that is in initial state
+	 * and can be waited for the result.
+	 * @param name set the name of the object.
+	 */
 	public SignalFutureWrapper(String name) {
 		super();
 		this.name=name;
 	}
+	/**
+	 * Create a future wrapper that is in initial state
+	 * and the callable is already set.
+	 * @param callable
+	 */
 	public SignalFutureWrapper(Callable<T> callable) {
 		super();
 		this.callable = callable;
 	}
-
+	/**
+	 * Create a future wrapper that is in initial state
+	 * and can be waited for the result.
+	 */
 	public SignalFutureWrapper() {
 		super();
 	}
@@ -120,6 +147,30 @@ public class SignalFutureWrapper<T> implements SignalFuture<T>, Callable<T>, INa
 					if(!this.done)
 					{
 						throw new TimeoutException("Timeout: "+timeout+" "+unit+" '"+name+"'");
+					}
+				}
+			}
+			return get();	
+		}
+	}
+	/**
+	 * Same as get but returns null in case of timeout
+	 * @param timeout
+	 * @param unit
+	 * @return
+	 * @throws InterruptedException
+	 * @throws ExecutionException
+	 */
+	public T getAllowNull(long timeout, TimeUnit unit) throws InterruptedException,
+			ExecutionException {
+		synchronized (this) {
+			if(!this.done)
+			{
+				unit.timedWait(this, timeout);
+				synchronized (this) {
+					if(!this.done)
+					{
+						return null;
 					}
 				}
 			}
@@ -191,6 +242,11 @@ public class SignalFutureWrapper<T> implements SignalFuture<T>, Callable<T>, INa
 			return ret;
 		}
 	}
+	/**
+	 * Set the name of this task.
+	 * The name of the task is mostly used for debug purposes.
+	 * @param name
+	 */
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -198,5 +254,42 @@ public class SignalFutureWrapper<T> implements SignalFuture<T>, Callable<T>, INa
 	@Override
 	public String getName() {
 		return name;
+	}
+	/**
+	 * Set up a timeout to fail this future with {@link TimeoutException}.
+	 * If there is already a timeout set up then that is cancelled.
+	 * If task is done than this is noop.
+	 * @param timeoutMillis
+	 * @return this future self
+	 */
+	public SignalFutureWrapper<T> setTimeout(final long timeoutMillis) {
+		TimerTask toCancel=null;
+		TimerTask toStart=null;
+		synchronized (this) {
+			if(!done)
+			{
+				if(timeout!=null)
+				{
+					toCancel=timeout;
+					timeout=null;
+				}
+				toStart=new TimerTask() {
+					@Override
+					public void run() {
+						ready(null, new TimeoutException("Timeout millis: "+timeoutMillis));
+					}
+				};
+				timeout=toStart;
+			}			
+		}
+		if(toCancel!=null)
+		{
+			toCancel.cancel();
+		}
+		if(toStart!=null)
+		{
+			UtilTimer.javaTimer.schedule(toStart, timeoutMillis);
+		}
+		return this;
 	}
 }

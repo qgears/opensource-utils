@@ -8,8 +8,6 @@ import java.util.List;
 
 /**
  * Simple file system visitor that visits a folder with all subfolders and files.
- * @author rizsi
- *
  */
 public class UtilFileVisitor {
 	

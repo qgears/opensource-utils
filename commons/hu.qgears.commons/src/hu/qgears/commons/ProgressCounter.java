@@ -10,8 +10,11 @@ import java.util.concurrent.CancellationException;
  * Subtasks created have a name and the current status is the name of the task stack concatenated.
  * 
  * Subtasks are marked finished by closing the created object.
+ * 
+ * There is a static accessor to the current progress counter that never returns null and so
+ * it is always safe to report progress even if there is no listener installed.
  */
-public class ProgressCounter
+public class ProgressCounter implements AutoCloseable
 {
 	/**
 	 * Callback interface to update the progress GUI.
@@ -24,16 +27,44 @@ public class ProgressCounter
 		 * @param current the current state of the whole progress (in scale [0.0,1.0])
 		 */
 		void setProgressStatus(String name, double current);
+		/**
+		 * Called when the whole task has finished.
+		 */
+		default void progressFinished(){}
+		/**
+		 * Event that a task was finished.
+		 * @param tasks current task stack after finished task was removed from the stack
+		 * @param st the task that was just finished.
+		 */
+		default void taskFinished(Stack<ProgressCounterSubTask> tasks, ProgressCounterSubTask st){}
+		/**
+		 * Event that a task was started.
+		 * @param tasks current task stack _after_ task was started and added onto the top.
+		 */
+		default void taskStarted(Stack<ProgressCounterSubTask> tasks){}
+		default void progressStatusUpdate(Stack<ProgressCounterSubTask> tasks){}
 	}
 	/**
-	 * Extended callback interface to update the progress GUI.
+	 * Basic implementation with no features.
+	 * Implementations that require only partial features may extend this class.
 	 */
-	public interface IProgressCounterHost2 extends IProgressCounterHost
+	public static class AbstractProgressCounterHost implements IProgressCounterHost
 	{
-		/**
-		 * Called when the progress has finsihed.
-		 */
-		void progressFinished();
+		@Override
+		public void setProgressStatus(String name, double current) {
+		}
+		@Override
+		public void progressFinished() {
+		}
+		@Override
+		public void taskFinished(Stack<ProgressCounterSubTask> tasks, ProgressCounterSubTask st) {
+		}
+		@Override
+		public void taskStarted(Stack<ProgressCounterSubTask> tasks) {
+		}
+		@Override
+		public void progressStatusUpdate(Stack<ProgressCounterSubTask> tasks) {
+		}
 	}
 	private volatile boolean cancelled=false;
 	private volatile String currentProcessName;
@@ -52,20 +83,23 @@ public class ProgressCounter
 		currentProcessName=name;
 		tasks.add(new ProgressCounterSubTask(this, null, name, 1.0));
 	}
-	public void setCurrent()
+	/**
+	 * Set this progress counter as current on the current thread.
+	 * @return this same object (usable to chain expressions into a single line)
+	 */
+	public ProgressCounter setCurrent()
 	{
 		threadProgess.set(this);
+		return this;
 	}
+	@Override
 	public void close()
 	{
 		threadProgess.set(null);
 		finished=true;
 		currentProcessName="Finished";
 		currentProgress=1.0;
-		if(host instanceof IProgressCounterHost2)
-		{
-			((IProgressCounterHost2)host).progressFinished();
-		}
+		host.progressFinished();
 		host=null;
 	}
 	public boolean isCancelled()
@@ -74,6 +108,7 @@ public class ProgressCounter
 	}
 	/**
 	 * Throw a {@link CancellationException} in case the current task is cancelled.
+	 * @throws CancellationException
 	 */
 	public void checkCancelled()
 	{
@@ -113,6 +148,8 @@ public class ProgressCounter
 			if(host!=null)
 			{
 				host.setProgressStatus(currentProcessName, currentProgress);
+				host.taskFinished(tasks, st);
+				host.progressStatusUpdate(tasks);
 			}
 		}
 	}
@@ -140,6 +177,8 @@ public class ProgressCounter
 		if(host!=null)
 		{
 			host.setProgressStatus(ret.getName(), whole.getCurrent());
+			host.taskStarted(tasks);
+			host.progressStatusUpdate(tasks);
 		}
 		return ret;
 	}
@@ -158,11 +197,22 @@ public class ProgressCounter
 	public String getCurrentProcessName() {
 		return currentProcessName;
 	}
+	public String getCurrentProgressStatus() {
+		
+		return currentProcessName;
+	}
 	/**
 	 * Get the fnished state of this counter.
 	 * @return true means this process is finished.
 	 */
 	public boolean isFinished() {
 		return finished;
+	}
+	protected void setWork(double d) {
+		currentProgress=d;
+		if(host!=null)
+		{
+			host.progressStatusUpdate(tasks);
+		}
 	}
 }

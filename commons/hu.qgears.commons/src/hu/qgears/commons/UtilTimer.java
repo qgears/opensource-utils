@@ -1,5 +1,6 @@
 package hu.qgears.commons;
 
+import java.util.Timer;
 import java.util.concurrent.Callable;
 
 import org.apache.log4j.Logger;
@@ -14,14 +15,18 @@ import hu.qgears.commons.signal.SignalFutureWrapper;
  *
  * Current implementation starts a new thread for each timer.
  * 
- * @author rizsi
- *
  */
 public class UtilTimer {
 	
 	private static final Logger LOG = Logger.getLogger(UtilTimer.class);
 	
 	private static final UtilTimer INSTANCE = new UtilTimer();
+	/**
+	 * Single instance timer.
+	 * Each timer creates a separate thread so it is useful to use a single instance for
+	 * multiple goals. Users should not execute any long processing task on the timers.
+	 */
+	public static final Timer javaTimer=new Timer(true);
 	
 	private UtilTimer() {
 		// disable constructor of singleton class

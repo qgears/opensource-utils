@@ -9,8 +9,9 @@ package hu.qgears.commons;
  * @param <T>
  */
 public class UtilListenableProperty<T> {
+	private String name;
 	private T property;
-	private final UtilEvent<T> propertyChangedEvent=new UtilEvent<T>(); 
+	private UtilEvent<T> propertyChangedEvent=null; 
 	
 	public UtilListenableProperty() {
 		super();
@@ -22,7 +23,18 @@ public class UtilListenableProperty<T> {
 	}
 
 	public UtilEvent<T> getPropertyChangedEvent() {
-		return propertyChangedEvent;
+		synchronized (this) {
+			if(propertyChangedEvent==null)
+			{
+				propertyChangedEvent=new UtilEvent<>();
+			}
+			return propertyChangedEvent;
+		}
+	}
+	public UtilEvent<T> getPropertyChangedEventOrNull() {
+		synchronized (this) {
+			return propertyChangedEvent;
+		}
 	}
 
 	public T getProperty() {
@@ -40,6 +52,50 @@ public class UtilListenableProperty<T> {
 			return;
 		}
 		this.property = property;
-		propertyChangedEvent.eventHappened(property);
+		UtilEvent<T> propertyChangedEvent=getPropertyChangedEventOrNull();
+		if(propertyChangedEvent!=null)
+		{
+			propertyChangedEvent.eventHappened(property);
+		}
+	}
+	/**
+	 * Add a listener and execute listener with the current value of the property.
+	 * @param l
+	 * @return closeable object that removes the listener when closed
+	 */
+	public NoExceptionAutoClosable addListenerWithInitialTrigger(UtilEventListener<T> l)
+	{
+		getPropertyChangedEvent().addListener(l);
+		l.eventHappened(getProperty());
+		return new NoExceptionAutoClosable() {
+			@Override
+			public void close() {
+				getPropertyChangedEvent().removeListener(l);
+			}
+		};
+	}
+	public void setName(String name) {
+		this.name=name;
+	}
+	@Override
+	public String toString() {
+		return ""+name+": "+property;
+	}
+	/**
+	 * Clone an ohter property object by copying that's current value
+	 * and tracking its value by adding a listener to that.
+	 * @param toClone
+	 * @return Colsable object that when closed then the listener is removed
+	 */
+	public NoExceptionAutoClosable cloneProperty(UtilListenableProperty<T> toClone)
+	{
+		UtilEventListener<T> l=s->setProperty(s);
+		toClone.getPropertyChangedEvent().addListener(l);
+		setProperty(toClone.getProperty());
+		return new NoExceptionAutoClosable() {
+			public void close() {
+				toClone.getPropertyChangedEvent().removeListener(l);
+			};
+		};
 	}
 }

@@ -34,6 +34,23 @@ public class UtilEvent<T> implements UtilEventListener<T> {
 		}
 	}
 	/**
+	 * Add a listener to this event. Also create a disposable that is used to remove this listener.
+	 * @param l listener to be added
+	 * @return closeable that removes the listener on close. Can be used to implement some auto disposal feature to prevent leaks through forget to remove listeners. 
+	 */
+	public NoExceptionAutoClosable addListenerDisposable(UtilEventListener<T> l)
+	{
+		synchronized (listeners) {
+			listeners.add(l);
+		}
+		return new NoExceptionAutoClosable() {
+			@Override
+			public void close() {
+				removeListener(l);
+			}
+		};
+	}
+	/**
 	 * Remove a listener from this event.
 	 * @param l listener to be removed
 	 */

@@ -38,6 +38,25 @@ public class UtilMd5 {
 
 	}
 	/**
+	 * Md5 hash the data (transformed to binary using UTF-8)
+	 * @param data
+	 * @return
+	 */
+	public static byte[] getMd5Bytes(byte[] data)
+	{
+		try {
+			// Cryptgraphic hash is not required here, but specifically MD5 is 
+			@SuppressWarnings("squid:S2070")
+			MessageDigest m = MessageDigest.getInstance("MD5");
+			m.update(data);
+			return m.digest();
+		} catch (NoSuchAlgorithmException e) {
+			// Never happens as MD5 is part of JVM
+			throw new RuntimeException(e);
+		}
+
+	}
+	/**
 	 * MD5 hash of the 'file'.
 	 * @param f
 	 * @return
@@ -77,6 +96,14 @@ public class UtilMd5 {
 	 */
 	public static String toMd5String(MessageDigest m)
 	{
-		return UtilString.padLeft(new BigInteger(1, m.digest()).toString(16), HASHLENGTH, '0');
+		return md5SumByteArrayToString(m.digest());
+	}
+	/**
+	 * Convert an md5sum digest result to string.
+	 * @return
+	 */
+	public static String md5SumByteArrayToString(byte[] digest)
+	{
+		return UtilString.padLeft(new BigInteger(1, digest).toString(16), HASHLENGTH, '0');
 	}
 }

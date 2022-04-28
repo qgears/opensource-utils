@@ -270,7 +270,14 @@ public class UtilString {
 		}
 		return ret.toString();
 	}
-	public static <T> String concat(List<T> list, UtilComma utilComma, CompatFunction<T, String> nameProvider) {
+	/**
+	 * Concatenate elements of the collection into a single string.
+	 * @param list collection to be converted to a string
+	 * @param utilComma separator and bracketing
+	 * @param nameProvider convert objects in collection to string
+	 * @return The concatenated string.
+	 */
+	public static <T> String concat(Collection<T> list, UtilComma utilComma, CompatFunction<T, String> nameProvider) {
 		StringBuilder ret=new StringBuilder();
 		try {
 			concat(ret, list, utilComma, nameProvider);
@@ -279,7 +286,15 @@ public class UtilString {
 		}
 		return ret.toString();
 	}
-	public static <T> void concat(Appendable ret, List<T> list, UtilComma utilComma, CompatFunction<T, String> nameProvider) throws IOException {
+	/**
+	 * Concatenate elements of the collection into a single string.
+	 * @param ret The target to collect the result into.
+	 * @param list collection to be converted to a string
+	 * @param utilComma separator and bracketing
+	 * @param nameProvider convert objects in collection to string
+	 * @throws IOException exception possible in case the ret parameter throws it
+	 */
+	public static <T> void concat(Appendable ret, Collection<T> list, UtilComma utilComma, CompatFunction<T, String> nameProvider) throws IOException {
 		for(T t: list)
 		{
 			ret.append(utilComma.getSeparator());

@@ -596,5 +596,28 @@ public final class UtilFile {
 		}
 		return null;
 	}
-	
+	/**
+	 * Convert arbitrary string to valid filename.
+	 * Useful when files have to be created by strings that are not designed to be valid file names.
+	 * @param string
+	 * @return
+	 */
+	public static String escapeToValidFileName(String string) {
+		StringBuilder ret=new StringBuilder();
+		for(int i=0;i<string.length();++i)
+		{
+			char c=string.charAt(i);
+			if(Character.isAlphabetic(c) || Character.isDigit(c) ||
+					c=='.' || c=='-' || c=='_')
+			{
+				ret.append(c);
+			}else
+			{
+				ret.append("_");
+				ret.append(Integer.toString(c));
+				ret.append("_");
+			}
+		}
+		return ret.toString();
+	}
 }

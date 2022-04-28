@@ -83,6 +83,20 @@ public class ConnectStreams extends Thread {
 	 */
 	public static void doStream(final InputStream source,
 			final OutputStream target, boolean closeOutput, int bufferSize) throws IOException {
+		doStream(source, target, closeOutput, bufferSize, true);
+	}
+	/**
+	 * Copy all data from input stream to the output stream using this thread.
+	 * @param source
+	 * @param target
+	 * @param closeOutput target is closed after input was consumed if true
+	 * @param bufferSize size of the buffer used when copying
+	 * @param flushEachIteration When set to true then each iteration calls a flush on the target. Useful when real time streams are connected.
+	 * 			Should be set to false when it is only used to copy data without real time requirement.
+	 * @throws IOException
+	 */
+	public static void doStream(final InputStream source,
+			final OutputStream target, boolean closeOutput, int bufferSize, boolean flushEachIteration) throws IOException {
 		try
 		{
 			try {
@@ -90,7 +104,10 @@ public class ConnectStreams extends Thread {
 				byte[] cbuf = new byte[bufferSize];
 				while ((n = source.read(cbuf)) > -1) {
 					target.write(cbuf, 0, n);
-					target.flush();
+					if(flushEachIteration)
+					{
+						target.flush();
+					}
 				}
 			} finally {
 				if(source!=null)

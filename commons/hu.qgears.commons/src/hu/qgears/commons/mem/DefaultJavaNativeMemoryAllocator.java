@@ -11,6 +11,8 @@ public class DefaultJavaNativeMemoryAllocator implements INativeMemoryAllocator 
 	
 	private DefaultJavaNativeMemoryAllocator() {
 		//prevent direct instantiation - use getInstance
+		// In case there is a dispose issue that will surface earlier.
+		allocateNativeMemory(8).dispose();
 	}
 	
 	@Override

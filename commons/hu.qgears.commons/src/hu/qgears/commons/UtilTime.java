@@ -81,4 +81,11 @@ public class UtilTime {
 			UtilString.fillLeft(""+(c.get(Calendar.MILLISECOND)/100),
 							2, '0');
 	}
+	/**
+	 * System.nanoTime()/1000l/1000l - guaranteed to be monotonic but milli instead of nano.
+	 * @return
+	 */
+	public static long millisSinceBoot() {
+		return System.nanoTime()/1000l/1000l;
+	}
 }
