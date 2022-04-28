@@ -21,6 +21,11 @@ public class Ref extends CrossRefObject {
 		listenersAsArray=null;
 		return this;
 	}
+	public void removeListener(IRefListener rl)
+	{
+		listeners.remove(rl);
+		listenersAsArray=null;
+	}
 	/**
 	 * Get an onmodified copy for iteration.
 	 * TODO make it faster
@@ -61,6 +66,7 @@ public class Ref extends CrossRefObject {
 			}
 		}
 		notifyListeners(resolvedTo);
+		crossrefDoc.refResolvedChanged(this);
 	}
 	public List<Obj> getResolvedTo() {
 		return resolvedTo;

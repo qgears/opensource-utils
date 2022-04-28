@@ -22,6 +22,7 @@ public class CrossRefManager {
 	// Objects stored to process when transaction was finished.
 	private Set<Doc> toDelete=new HashSet<>();
 	private Set<Ref> toResolve=new HashSet<>();
+	private Set<Doc> changedDocs=new HashSet<>();
 	private Object syncObj=new Object();
 	/** Objects by their identifier. */
 	private MultiMapTreeImpl<String, Obj> objects=new MultiMapTreeImpl<>();
@@ -65,7 +66,7 @@ public class CrossRefManager {
 		}
 		Obj ret=new Obj(owner, fqId, type);
 		synchronized (syncObj) {
-			owner.objs.add(ret);
+			owner.addObject(ret);
 			objects.putSingle(fqId, ret);
 			objectsByLocalId.putSingle(ret.getLocalId(), ret);
 			objectsByTypeAndLocalId.putSingle(ret.getTypeAndLocalId(), ret);
@@ -114,11 +115,11 @@ public class CrossRefManager {
 		toDelete=new HashSet<>();
 		for(Doc d: ds)
 		{
-			for(Ref r: new ArrayList<>(d.refs))
+			for(Ref r: d.getRefsSnapshot())
 			{
 				r.close();
 			}
-			for(Obj o: new ArrayList<>(d.objs))
+			for(Obj o: d.getObjsSnapshot())
 			{
 				o.close();
 			}
@@ -138,7 +139,14 @@ public class CrossRefManager {
 				l.resolveCycleFinished();
 			}
 		}
-		for(ICrossRefManagerListener l: getListenersCopy())
+		List<Doc> ch=new ArrayList<>(changedDocs);
+		changedDocs.clear();
+		ICrossRefManagerListener[] ls=getListenersCopy();
+		for(Doc d: ch)
+		{
+			d.notifyChanges(ls);
+		}
+		for(ICrossRefManagerListener l: ls)
 		{
 			l.transactionFinished();
 		}
@@ -179,7 +187,7 @@ public class CrossRefManager {
 		}
 		Ref ref=new Ref(crossrefDoc, scope);
 		synchronized (syncObj) {
-			crossrefDoc.refs.add(ref);
+			crossrefDoc.addRef(ref);
 			toResolve.add(ref);
 			refs.add(ref);
 			scope.seal();
@@ -305,7 +313,7 @@ public class CrossRefManager {
 			objects.removeSingle(ret.getFqId(), ret);
 			objectsByLocalId.removeSingle(ret.getLocalId(), ret);
 			objectsByTypeAndLocalId.removeSingle(ret.getTypeAndLocalId(), ret);
-			ret.doc.objs.remove(ret);
+			ret.doc.removeObj(ret);
 			for(Ref r: ret.referencesTargetingThis)
 			{
 				if(!r.isClosed())
@@ -317,7 +325,7 @@ public class CrossRefManager {
 		else if(crossRefObject instanceof Ref)
 		{
 			Ref r=(Ref) crossRefObject;
-			r.crossrefDoc.refs.remove(r);
+			r.crossrefDoc.removeRef(r);
 			if(r.scope.gidSearch!=null)
 			{
 				for(GidSearch gs: r.scope.gidSearch)
@@ -408,4 +416,14 @@ public class CrossRefManager {
 	 * Free to all cache.
 	 */
 	public MultiMapHashToHashSetImpl<String, Object> caches=new MultiMapHashToHashSetImpl<>();
+	/**
+	 * Called when a document has change notifications.
+	 * @param doc
+	 */
+	public void registerChangedDoc(Doc doc) {
+		synchronized (syncObj)
+		{
+			changedDocs.add(doc);
+		}
+	}
 }
