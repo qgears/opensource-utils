@@ -1,0 +1,126 @@
+/*
+	Language definition for parsing xtext grammars definitions.
+	The goal is to automatically convert xtext grammars to qgears.parser grammars.
+ */
+ws="whitespace";
+comment="comment";
+singleLineComment="singleLineComment";
+cDSlash="const" "//";
+tComma="const" ",";
+cSlash="const" "/";
+cBOpen="const" "[";
+tBracketOpen="const" "(";
+tBracketClose="const" ")";
+tCompoundBracketOpen="const" "{";
+tCompoundBracketClose="const" "}";
+tQEqu="const" "?=";
+tAddEqu="const" "+=";
+tAdd="const" "+";
+cArrowRight="const" "->";
+tSub="const" "-";
+cBClose="const" "]";
+tMul="const" "*";
+tId="id";
+cAttrib="const" "@";
+tNumber="anyNumber";
+cFromTo="const" "..";
+cThis="const" ".";
+cDoubleColon="const" "::";
+cColon="const" ":";
+cSemicolon="const" ";";
+cEqu="const" "=";
+cNEqu="const" "<>";
+cPipe="const" "|";
+tString1="stringConst";
+tString2="stringConst2";
+cQuestionMark="const" "?";
+cGt="const" ">";
+cLt="const" "<";
+cExclamation="const" "!";
+cAmp="const" "&";
+
+tString:=tString1|tString2;
+
+$ws;
+$comment;
+$singleLineComment;
+%doc;
+#tId;
+#expAdd;
+#expMul;
+#expMinus;
+#fnCall;
+#tString;
+doc:=statementList;
+#doc;
+
+fqId:=tId+*(cThis+tId);
+#fqId;
+
+reference:=fqId;
+#reference;
+
+statementList:=*statement;
+statement:=stGrammar|stImport|stRule|stTerminal|stEnum;
+#stGrammar;
+stGrammar:=tId~="grammar"+fqId+(!|(tId~="with"+fqId))+tId~="hidden"+tBracketOpen+tId+*(tComma+tId)+tBracketClose;
+#stImport;
+stImport:=tId~="import"+tString + !|(tId~="as"+tId);
+#stRule;
+stRule:=tId+(!|ruleReturnTypeSpec)+cColon+ruleExpression+cSemicolon;
+#ruleExpression;
+ruleExpression:=expression;
+#ruleReturnTypeSpec;
+ruleReturnTypeSpec:=tId~="returns"+scopedId;
+#scopedId;
+scopedId:=scopeOrNothing+tId;
+#scopeOrNothing;
+scopeOrNothing:=!|(tId+cDoubleColon);
+#stTerminal;
+stTerminal:=tId~="terminal"+tId+(!|ruleReturnTypeSpec)+cColon+expression+cSemicolon;
+// stValue:=tId+tId~="returns"+fqId+ cDoubleColon+tId+cColon+expression+cSemicolon;
+#stEnum;
+stEnum:=tId~="enum"+tId+cColon+enumValue+*(cPipe+enumValue)+cSemicolon;
+#enumValue;
+enumValue:=tId+(!|(cEqu+tString));
+
+//argumentList:=!;
+//constDouble="const" "0.0";
+//constLong="const" "0";
+
+EXPRESSION_LANGUAGE_START
+// The non-terminal that this expession language hooks to
+@expression
+// The id of an expression with one level lower precedence 
+$lower
+// The string constant hook that will be replaced with this expression language in the hooking language.
+%INSERT_EXPRESSION_LANGUAGE_HERE
+
+// Expression with  precedence 100 id expAdd
+// and language term definition fragment : "(lower+tAdd)+lower"
+// where lower will be replaced with the generated id of the expressions with precedenece 200 
+!25:expOr:this+cPipe+lower
+!30:expConcatenate:this+lower
+!40:unorderedOption:lower+*1(cAmp+lower)
+!50:any:this+tMul
+!50:zeroOrOne:this+cQuestionMark
+!50:oneOrMore:this+tAdd
+!100:expQEqu:(tId+tQEqu)+lower
+!100:expAddEqu:(tId+tAddEqu)+lower
+//!100:expAdd:(this+tAdd)+lower
+!200:expFromTo:(this+cFromTo)+lower
+!200:expStartEnd:(this+cArrowRight)+lower
+!200:expLet:tId+cEqu+lower
+// !200:expFun:tId+tBracketOpen+argumentList+tBracketClose
+!270:expUnary: cExclamation+lower
+!280:createEObject:tCompoundBracketOpen+tId+tCompoundBracketClose
+!280:setHostParameter:tCompoundBracketOpen+tId+cThis+tId+cEqu+tId~="current"+tCompoundBracketClose
+!280:bracketed:tBracketOpen+expression+tBracketClose
+!280:reference:cBOpen+scopedId+*(cPipe+scopedId)+cBClose
+!300:variable:tId
+//!300:constDoubleNumber:constDouble
+//!300:constInt:constLong
+!300:constString:tString
+!300:constAnyChar:cThis
+EXPRESSION_LANGUAGE_END
+

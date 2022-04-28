@@ -1,0 +1,12 @@
+= Convert XText languages to QParser infrastrucutre
+
+ * Definition of XText language to parse and process XText grammar.
+ * Generate QParser language definition
+ * Generate parser that converts QParser tree to EMF objects.
+
+The goal is to convert xtext projects to qgears.parser based re-implementation.
+
+This project does not handle cross references.
+
+Why? Together with hu.qgears.crossref a very well performing implementation is possible with fast initial and incremental build of text based model.
+
