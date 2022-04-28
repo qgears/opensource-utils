@@ -84,7 +84,7 @@ public class JMallocMemory extends AbstractReferenceCountedDisposeable implement
 	 * May not dispose the object if 0 is not reached.
 	 */
 	@Override
-	public void close() throws Exception {
+	public void close() {
 		decrementReferenceCounter();
 	}
 }
