@@ -3,7 +3,7 @@ package hu.qgears.emfcollab.backref;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 
-import hu.qgears.emfcollab.backref.EmfBackReferenceImpl.ReferencesAdapter;
+import hu.qgears.emfcollab.backref.EmfBackReferenceImpl.EmfObjectReferencesAdapter;
 
 /**
  * Wrapper class for storing source, refType, target trio.
@@ -15,8 +15,8 @@ public class EmfReferenceImpl implements EmfReference {
 	private EReference refType;
 	private EObject source;
 	private EObject target;
-	private ReferencesAdapter sourceAdapter;
-	private ReferencesAdapter targetAdapter;
+	private EmfObjectReferencesAdapter sourceAdapter;
+	private EmfObjectReferencesAdapter targetAdapter;
 	private int hashCode;
 	@Override
 	public int hashCode() {
@@ -31,7 +31,7 @@ public class EmfReferenceImpl implements EmfReference {
 	public EObject getTarget() {
 		return target;
 	}
-	public EmfReferenceImpl(ReferencesAdapter sourceAdapter, EReference refType, ReferencesAdapter targetAdapter) {
+	public EmfReferenceImpl(EmfObjectReferencesAdapter sourceAdapter, EReference refType, EmfObjectReferencesAdapter targetAdapter) {
 		super();
 		this.sourceAdapter=sourceAdapter;
 		this.targetAdapter=targetAdapter;
@@ -55,10 +55,10 @@ public class EmfReferenceImpl implements EmfReference {
 		}
 		return super.equals(obj);
 	}
-	public ReferencesAdapter getSourceAdapter() {
+	public EmfObjectReferencesAdapter getSourceAdapter() {
 		return sourceAdapter;
 	}
-	public ReferencesAdapter getTargetAdapter() {
+	public EmfObjectReferencesAdapter getTargetAdapter() {
 		return targetAdapter;
 	}
 }

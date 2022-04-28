@@ -13,10 +13,14 @@ import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EContentAdapter;
 
+import hu.qgears.commons.MultiMapHashImpl;
 import hu.qgears.commons.MultiMapHashToHashSetImpl;
+import hu.qgears.commons.UtilEventListener;
 import hu.qgears.emfcollab.util.UtilEmf;
 import hu.qgears.emfcollab.util.UtilVisitor;
 
@@ -31,7 +35,8 @@ public class EmfBackReferenceImpl implements EmfBackReference {
 		@Override
 		public void notifyChanged(Notification notification) {
 			super.notifyChanged(notification);
-			if (notification.getNotifier() instanceof EObject) {
+			Object notifier=notification.getNotifier();
+			if (notifier instanceof EObject) {
 				EObject o = (EObject) notification.getNotifier();
 				Object feature = notification.getFeature();
 				if (feature instanceof EReference) {
@@ -42,7 +47,8 @@ public class EmfBackReferenceImpl implements EmfBackReference {
 					case Notification.ADD_MANY:
 						addReference(o, ref, notification);
 						if (containment) {
-							addElementRecursive(o, ref, notification);
+							// addElement(o);
+							addElementRecursive(notification);
 						}
 						break;
 					case Notification.MOVE:
@@ -59,7 +65,7 @@ public class EmfBackReferenceImpl implements EmfBackReference {
 						removeReference(o, ref, notification);
 						addReference(o, ref, notification);
 						if (containment) {
-							addElementRecursive(o, ref, notification);
+							addElementRecursive(notification);
 						}
 						break;
 					case Notification.UNSET:
@@ -70,16 +76,60 @@ public class EmfBackReferenceImpl implements EmfBackReference {
 						break;
 					}
 				}
+			}else if(notifier instanceof Resource)
+			{
+				switch (notification.getEventType()) {
+				case Notification.ADD:
+					// EObject newContent=(EObject)notification.getNewValue();
+					addElementRecursive(notification);
+					break;
+				case Notification.REMOVE:
+					EObject oldContent=(EObject)notification.getOldValue();
+					removeElement(oldContent);
+					break;
+				}
+				// System.out.println("R notif: "+notification);
+			}else if(notifier instanceof ResourceSet)
+			{
+				switch (notification.getEventType()) {
+				case Notification.REMOVE:
+					Resource oldContent=(Resource)notification.getOldValue();
+					for(EObject eo: oldContent.getContents())
+					{
+						removeElementRecursive(eo);
+					}
+					// System.out.println("Remove Resource: "+oldContent);
+					// removeElement(oldContent);
+					break;
+				}
+				// System.out.println("RS notif: "+notification);
 			}
 		}
 	}
-	class ReferencesAdapter implements Adapter
+	public class EmfObjectReferencesAdapter implements Adapter, EmfObjectReferences
 	{
 		private Notifier target;
 		private Set<EmfReferenceImpl> sources = new HashSet<>();
 		private Set<EmfReferenceImpl> targets = new HashSet<>();
+		private MultiMapHashImpl<EStructuralFeature, UtilEventListener<Notification>> listeners=null;
 		@Override
 		public void notifyChanged(Notification notification) {
+			if(listeners!=null)
+			{
+				if (notification.getNotifier() instanceof EObject) {
+					Object feature = notification.getFeature();
+					if (feature instanceof EStructuralFeature) {
+						List<UtilEventListener<Notification>> l=listeners.getPossibleNull((EStructuralFeature)feature);
+						if(l!=null)
+						{
+							for(UtilEventListener<Notification> note: l)
+							{
+								note.eventHappened(notification);
+							}
+						}
+					}
+				}
+			}
 		}
 		@Override
 		public Notifier getTarget() {
@@ -95,44 +145,66 @@ public class EmfBackReferenceImpl implements EmfBackReference {
 		}
 		@Override
 		public boolean isAdapterForType(Object type) {
-			return type==ReferencesAdapter.class;
+			return type==EmfObjectReferencesAdapter.class;
+		}
+		@Override
+		public void addReferenceListener(EStructuralFeature ref, UtilEventListener<Notification> event, boolean fireNow) {
+			if(listeners==null)
+			{
+				listeners=new MultiMapHashImpl<>();
+			}
+			listeners.putSingle(ref, event);
+			if(fireNow)
+			{
+				event.eventHappened(null);
+			}
 		}
 	}
 	private MyAdapter contentAdapter=new MyAdapter();
 	private MultiMapHashToHashSetImpl<EClass, EObject> instances = new MultiMapHashToHashSetImpl<EClass, EObject>();
 	private ResourceSet rs;
 	/**
+	 * Get the references adapter for an object.
 	 * Lazy init getter.
 	 * @param n
 	 * @return
 	 */
-	public ReferencesAdapter getAdapter(Notifier n) {
+	public EmfObjectReferencesAdapter getAdapter(Notifier n) {
 		for(Adapter adapter: n.eAdapters())
 		{
-			if(adapter instanceof ReferencesAdapter)
+			if(adapter instanceof EmfObjectReferencesAdapter)
 			{
-				return (ReferencesAdapter)adapter;
+				return (EmfObjectReferencesAdapter)adapter;
 			}
 		}
-		ReferencesAdapter ret=new ReferencesAdapter();
+		EmfObjectReferencesAdapter ret=new EmfObjectReferencesAdapter();
 		n.eAdapters().add(ret);
 		return ret;
+	}
+	/**
+	 * Addapter that can be used to listen Reference target values.
+	 * @param n
+	 * @return
+	 */
+	public EmfObjectReferences getEmfReferencesAdapter(Notifier n)
+	{
+		return getAdapter(n);
 	}
 	private void removeReference(EObject o, EReference ref,
 			Notification notification) {
 		if (!ref.isTransient()&&!ref.isContainment()) {
-			ReferencesAdapter srcAdapter=getAdapter(o);
+			EmfObjectReferencesAdapter srcAdapter=getAdapter(o);
 			List<EObject> target = getEObjects(notification.getOldValue());
 			for (EObject t : target) {
-				ReferencesAdapter tgAdapter=getAdapter(t);
+				EmfObjectReferencesAdapter tgAdapter=getAdapter(t);
 				EmfReferenceImpl emfRef = new EmfReferenceImpl(srcAdapter, ref, tgAdapter);
 				removeReference(emfRef);
 			}
 		}
 	}
 	private void removeReference(EmfReferenceImpl emfRef) {
-		ReferencesAdapter srcAdapter=emfRef.getSourceAdapter();
-		ReferencesAdapter tgAdapter=emfRef.getTargetAdapter();
+		EmfObjectReferencesAdapter srcAdapter=emfRef.getSourceAdapter();
+		EmfObjectReferencesAdapter tgAdapter=emfRef.getTargetAdapter();
 		srcAdapter.sources.remove(emfRef);
 		tgAdapter.targets.remove(emfRef);
 	}
@@ -140,17 +212,19 @@ public class EmfBackReferenceImpl implements EmfBackReference {
 			Notification notification) {
 		List<EObject> target = getEObjects(notification.getOldValue());
 		for (EObject t : target) {
-			UtilVisitor.visitModel(t, new UtilVisitor.Visitor() {
-				@Override
-				public Object visit(EObject element) {
-					removeElement(element);
-					return null;
-				}
-			});
+			removeElementRecursive(t);
 		}
 	}
-	private void addElementRecursive(EObject o, EReference ref,
-			Notification notification) {
+	private void removeElementRecursive(EObject t) {
+		UtilVisitor.visitModel(t, new UtilVisitor.Visitor() {
+			@Override
+			public Object visit(EObject element) {
+				removeElement(element);
+				return null;
+			}
+		});
+	}
+	private void addElementRecursive(Notification notification) {
 		List<EObject> target = getEObjects(notification.getNewValue());
 		for (EObject t : target) {
 			UtilVisitor.visitModel(t, new UtilVisitor.Visitor() {
@@ -165,7 +239,7 @@ public class EmfBackReferenceImpl implements EmfBackReference {
 	private void addReference(EObject o, EReference ref,
 			Notification notification) {
 		if (!ref.isTransient()&&!ref.isContainment()) {
-			ReferencesAdapter sourceAdapter=getAdapter(o);
+			EmfObjectReferencesAdapter sourceAdapter=getAdapter(o);
 			List<EObject> target;
 			if(notification!=null)
 			{
@@ -175,10 +249,10 @@ public class EmfBackReferenceImpl implements EmfBackReference {
 				target=UtilEmf.getReferenceValues(o, ref);
 			}
 			for (EObject t : target) {
-				ReferencesAdapter targetAdapter=getAdapter(t);
+				EmfObjectReferencesAdapter targetAdapter=getAdapter(t);
 				EmfReferenceImpl emfRef = new EmfReferenceImpl(sourceAdapter, ref, targetAdapter);
-				ReferencesAdapter srcAdapter=getAdapter(o);
-				ReferencesAdapter tgAdapter=getAdapter(t);
+				EmfObjectReferencesAdapter srcAdapter=getAdapter(o);
+				EmfObjectReferencesAdapter tgAdapter=getAdapter(t);
 				srcAdapter.sources.add(emfRef);
 				tgAdapter.targets.add(emfRef);
 			}
@@ -221,7 +295,7 @@ public class EmfBackReferenceImpl implements EmfBackReference {
 	 *            list of elements changed by this method. Output parameter
 	 */
 	private void removeElement(EObject element) {
-		ReferencesAdapter adapter=getAdapter(element);
+		EmfObjectReferencesAdapter adapter=getAdapter(element);
 		if(adapter!=null)
 		{
 			List<EmfReferenceImpl> toRemove = new ArrayList<EmfReferenceImpl>(adapter.sources
@@ -252,7 +326,7 @@ public class EmfBackReferenceImpl implements EmfBackReference {
 	}
 	@Override
 	public void print(EObject singleSelectedDomainObject) {
-		ReferencesAdapter ra=getAdapter(singleSelectedDomainObject);
+		EmfObjectReferencesAdapter ra=getAdapter(singleSelectedDomainObject);
 		for (EmfReferenceImpl ref : ra.sources) {
 			System.out.println("SRC " + ref.getSource().eClass().getName()
 					+ " " + ref.getTarget().eClass().getName() + " "
@@ -267,7 +341,7 @@ public class EmfBackReferenceImpl implements EmfBackReference {
 	@Override
 	public Set<EmfReference> getTargetReferencesByType(EObject target,
 			EReference type) {
-		ReferencesAdapter targetAdapter=getAdapter(target);
+		EmfObjectReferencesAdapter targetAdapter=getAdapter(target);
 		Set<EmfReference> ret = new HashSet<>();
 		for (EmfReferenceImpl ref : targetAdapter.targets) {
 			if (ref.getRefType().equals(type)) {
@@ -279,7 +353,7 @@ public class EmfBackReferenceImpl implements EmfBackReference {
 
 	@Override
 	public Set<EmfReference> getTargetReferences(EObject target) {
-		ReferencesAdapter targetAdapter=getAdapter(target);
+		EmfObjectReferencesAdapter targetAdapter=getAdapter(target);
 		Set<EmfReference> ret = new HashSet<>();
 		for (EmfReferenceImpl ref : targetAdapter.targets) {
 			ret.add(ref);
@@ -288,7 +362,7 @@ public class EmfBackReferenceImpl implements EmfBackReference {
 	}
 	@Override
 	public Set<EmfReference> getSourceReferences(EObject source) {
-		ReferencesAdapter sourceAdapter=getAdapter(source);
+		EmfObjectReferencesAdapter sourceAdapter=getAdapter(source);
 		Set<EmfReference> ret = new HashSet<>();
 		for (EmfReferenceImpl ref : sourceAdapter.sources) {
 			ret.add(ref);
@@ -316,7 +390,8 @@ public class EmfBackReferenceImpl implements EmfBackReference {
 		HashSet<T> ret = new HashSet<>();
 		for (EClass c : instances.keySet()) {
 			if (clazz.isSuperTypeOf(c)) {
-				for(EObject o: instances.get(c))
+				HashSet<EObject> l=instances.get(c);
+				for(EObject o: l)
 				{
 					ret.add(castTo.cast(o));
 				}

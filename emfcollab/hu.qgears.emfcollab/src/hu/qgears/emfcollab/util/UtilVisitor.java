@@ -43,14 +43,25 @@ public class UtilVisitor {
 		Object ret=null;
 		for(Resource r: rs.getResources())
 		{
-			for(EObject eo: r.getContents())
+			Object subret=null;
+			subret=visitModel(r, visitor);
+			if(ret==null)
 			{
-				Object subret=null;
-				subret=visitModel(eo, visitor);
-				if(ret==null)
-				{
-					ret=subret;
-				}
+				ret=subret;
+			}
+		}
+		return ret;
+	}
+	public static Object visitModel(Resource r, Visitor visitor)
+	{
+		Object ret=null;
+		for(EObject eo: r.getContents())
+		{
+			Object subret=null;
+			subret=visitModel(eo, visitor);
+			if(ret==null)
+			{
+				ret=subret;
 			}
 		}
 		return ret;
