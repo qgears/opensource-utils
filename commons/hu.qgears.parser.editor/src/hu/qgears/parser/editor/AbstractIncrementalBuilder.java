@@ -41,7 +41,6 @@ abstract public class AbstractIncrementalBuilder {
 	public SignalFutureWrapper<Void> processFile(IFile file) {
 		deleteMarkers(file);
 		try {
-			String path=file.getFullPath().toPortableString();
 			try(InputStream is=file.getContents())
 			{
 				String source=UtilFile.loadAsString(is);
@@ -92,20 +91,28 @@ abstract public class AbstractIncrementalBuilder {
 	 * @param project 
 	 */
 	abstract protected void beforeFullBuild(IProject project, IProgressMonitor monitor);
-	public void incrementalBuild(IProject iProject, Set<IFile> changed) {
+	public void incrementalBuild(IProject iProject, Set<IFile> changed, IProgressMonitor monitor) {
 		System.out.println("Delta build: "+changed);
+		beforeIncrementalBuild(iProject, changed, monitor);
 		for(IFile f: changed)
 		{
 			try {
-				rebuild(f);
+				processFile(f);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
+		try {
+			afterIncrementalBuild(iProject, changed, monitor);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
-	abstract protected void rebuild(IFile f) throws Exception;
-	protected void addMarker(IFile file, String message, int lineNumber, int from, int to,
+	abstract protected void afterIncrementalBuild(IProject iProject, Set<IFile> changed, IProgressMonitor monitor) throws Exception;
+	abstract protected void beforeIncrementalBuild(IProject iProject, Set<IFile> changed, IProgressMonitor monitor);
+	protected IMarker addMarker(IFile file, String message, int lineNumber, int from, int to,
 			int severity) {
 		try {
 			IMarker m=file.createMarker(getMarkerType());
@@ -117,8 +124,10 @@ abstract public class AbstractIncrementalBuilder {
 			}
 			m.setAttribute(IMarker.CHAR_START, from);
 			m.setAttribute(IMarker.CHAR_END, to);
+			return m;
 		} catch (CoreException e) {
 		}
+		return null;
 	}
 	abstract protected String getMarkerType();
 	protected void deleteMarkers(IFile file) {
@@ -126,5 +135,12 @@ abstract public class AbstractIncrementalBuilder {
 			file.deleteMarkers(getMarkerType(), false, IResource.DEPTH_ZERO);
 		} catch (CoreException ce) {
 		}
+	}
+	public void dispose() {
+		// TODO Auto-generated method stub
+		
+	}
+	public static String getFileIdentifier(IFile file) {
+		return file.getFullPath().toPortableString();
 	}
 }

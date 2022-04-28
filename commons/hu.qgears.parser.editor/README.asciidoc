@@ -2,3 +2,9 @@
 == Dependencies
 
 org.eclipse.ui.genericeditor - Available since Eclipse 4.7 http://download.eclipse.org/eclipse/updates/4.7
+
+== Threading
+
+Builder is executed on its own thread and resource set is updated on this builder thread.
+
+UI may access the resource set for read by synchronizing to the ResourceSet object.
