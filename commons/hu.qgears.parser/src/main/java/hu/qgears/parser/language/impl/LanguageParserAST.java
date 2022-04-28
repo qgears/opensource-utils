@@ -188,9 +188,14 @@ public class LanguageParserAST extends AbstractLanguageParser {
 		for (ITreeElem e : root.getSubs()) {
 			String name = e.getTypeName();
 			if ("defTerm".equals(name)) {
-				String na = e.getSubs().get(0).getString();
+				int zeroIndex=0;
+				if("markAcceptTerm".equals(e.getSubs().get(0).getTypeName()))
+				{
+					zeroIndex=1;
+				}
+				String na = e.getSubs().get(zeroIndex).getString();
 				TermParser tp = new TermParser();
-				tp.createTerm(e.getSubs().get(1), na);
+				tp.createTerm(e.getSubs().get(zeroIndex+1), na);
 				ret.addAll(tp.terms);
 			}
 		}
@@ -222,6 +227,12 @@ public class LanguageParserAST extends AbstractLanguageParser {
 			if ("defAcceptTerm".equals(name)) {
 				String na = e.getSubs().get(0).getString();
 				ret.add(na);
+			}else if ("defTerm".equals(name)) {
+				if("markAcceptTerm".equals(e.getSubs().get(0).getTypeName()))
+				{
+					String na = e.getSubs().get(1).getString();
+					ret.add(na);
+				}
 			}
 		}
 		return ret;

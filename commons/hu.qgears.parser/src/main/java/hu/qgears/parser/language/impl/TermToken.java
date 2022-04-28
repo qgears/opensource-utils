@@ -8,8 +8,6 @@ import hu.qgears.parser.language.Matcher;
 
 /**
  * symbol that references a token.
- * @author rizsi
- *
  */
 public class TermToken extends Term {
 	private ITokenType tokenType;

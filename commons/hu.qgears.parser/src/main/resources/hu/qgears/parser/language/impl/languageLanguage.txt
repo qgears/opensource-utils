@@ -46,8 +46,8 @@ defFilterToken:=(dollar+id)+semicolon;
 defAcceptTerm:=(hashmark+id)+semicolon;
 defRoot:=(percent+id)+semicolon;
 defToken:=(((id+eq)+str)+(str|!))+semicolon;
-defTerm:=((id+def)+expression)+semicolon;
-
+defTerm:=((((markAcceptTerm|!)+id)+def)+expression)+semicolon;
+markAcceptTerm:=hashmark;
 
 //INSERT_EXPRESSION_LANGUAGE_HERE
 
@@ -67,4 +67,4 @@ defTerm:=((id+def)+expression)+semicolon;
 #termOneOrMore;
 #termEps;
 #termTokenWithRestriction;
-
+#markAcceptTerm;

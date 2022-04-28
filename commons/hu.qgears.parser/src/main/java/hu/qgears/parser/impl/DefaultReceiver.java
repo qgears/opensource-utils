@@ -15,7 +15,7 @@ public class DefaultReceiver implements IParserReceiver
 				+" '"
 				+ t.getSource().lastChars(t.getPos(), 20) + "'|'"
 				+ t.getSource().firstChars(t.getPos(), 20) + "'"
-				+ "...");
+				+ "...").setPosition(t.getPos());
 	}
 
 	@Override
