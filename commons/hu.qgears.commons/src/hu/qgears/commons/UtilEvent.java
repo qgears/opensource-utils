@@ -40,8 +40,13 @@ public class UtilEvent<T> implements UtilEventListener<T> {
 	 */
 	public NoExceptionAutoClosable addListenerDisposable(UtilEventListener<T> l)
 	{
-		synchronized (listeners) {
+		synchronized (this) {
+			if(listeners==null)
+			{
+				listeners=new ArrayList<>();
+			}
 			listeners.add(l);
+			listenersArray=null;
 		}
 		return new NoExceptionAutoClosable() {
 			@Override

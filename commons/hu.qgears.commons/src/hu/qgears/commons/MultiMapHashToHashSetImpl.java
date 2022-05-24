@@ -47,4 +47,12 @@ public class MultiMapHashToHashSetImpl<K, V> extends HashMap<K, Collection<V>> i
 		HashSet<V> ret=(HashSet<V>)super.get(key);
 		return ret;
 	}
+	public HashSet<V> getPossibleDefault(String key, HashSet<V> def) {
+		HashSet<V> ret=(HashSet<V>)super.get(key);
+		if(ret==null)
+		{
+			ret=def;
+		}
+		return ret;
+	}
 }
