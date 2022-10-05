@@ -125,6 +125,7 @@ public class ConnectStreams extends Thread {
 	}
 	/**
 	 * Start a new thread that streams data from input to output.
+	 * Output stream is not closed after all input was processed.
 	 * @param is
 	 * @param os
 	 * @return New thread that copies data from is to os. Thread exits when the source or target is closed. 

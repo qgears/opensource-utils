@@ -85,7 +85,7 @@ public class UtilListenableProperty<T> {
 	 * Clone an ohter property object by copying that's current value
 	 * and tracking its value by adding a listener to that.
 	 * @param toClone
-	 * @return Colsable object that when closed then the listener is removed
+	 * @return Closable object that when closed then the listener is removed
 	 */
 	public NoExceptionAutoClosable cloneProperty(UtilListenableProperty<T> toClone)
 	{
