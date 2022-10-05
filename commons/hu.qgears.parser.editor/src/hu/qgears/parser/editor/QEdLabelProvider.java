@@ -6,6 +6,7 @@ import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ViewerCell;
 
 import hu.qgears.crossref.Obj;
+import hu.qgears.emfcollab.backref.EmfReference;
 import hu.qgears.xtextgrammar.CRAEObject;
 import hu.qgears.xtextgrammar.CRAEReference;
 
@@ -40,6 +41,17 @@ public class QEdLabelProvider extends CellLabelProvider {
 				ret.append(getNameAndIcon(rit.tg));
 				ret.append(" - ");
 				ret.append(getNameObjectId(rit.tg));
+				cell.setText(ret.toString());
+			}else if(o instanceof EmfReference)
+			{
+				EmfReference rit=(EmfReference) o;
+				StringBuilder ret=new StringBuilder();
+				ret.append(""+rit+" ");
+				ret.append(rit.getRefType().getName());
+				ret.append(": ");
+				ret.append(getNameAndIcon(rit.getTarget()));
+				ret.append(" - ");
+				ret.append(getNameObjectId(rit.getTarget()));
 				cell.setText(ret.toString());
 			}
 			else if(o instanceof Resource)

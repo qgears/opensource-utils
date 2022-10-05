@@ -26,6 +26,7 @@ import hu.qgears.commons.NoExceptionAutoClosable;
 import hu.qgears.commons.Pair;
 import hu.qgears.commons.UtilEventListener;
 import hu.qgears.commons.UtilListenableProperty;
+import hu.qgears.emfcollab.backref.EmfReference;
 import hu.qgears.emfcollab.util.UtilVisitor;
 import hu.qgears.parser.coloring.StyleBasedColoring;
 import hu.qgears.parser.editor.coloring.SwtStyleBasedColoring;
@@ -150,6 +151,18 @@ abstract public class AbstractQParserEditor extends AbstractDecoratedTextEditor 
 										// System.out.println("Ref: "+cri.r.getName()+" "+sr.getLength());
 										if(cri.r!=null && cri.targetA!=null && cri.targetA.getTarget() instanceof EObject)
 										{
+//											EmfBackReferenceImpl bri=EmfBackReferenceImpl.getByEobject(element);
+//											if(bri!=null)
+//											{
+//												EObject target=(EObject)cri.targetA.getTarget();
+//												Object tg1=element.eGet(cri.r);
+//												System.out.println("Target1 and 2"+target+" "+tg1);
+//												EmfReferenceImpl ref=bri.getSourceReference(element, cri.r, (EObject)tg1, 0);
+//												if(ref!=null)
+//												{
+//													possibles.add(createTextSelection(ref, sr));
+//												}
+//											}
 											RefInTree ref=RefInTree.create(element, cri.r, (EObject)cri.targetA.getTarget(), cri.index);
 											possibles.add(createTextSelection(ref, sr));
 										}
@@ -168,18 +181,22 @@ abstract public class AbstractQParserEditor extends AbstractDecoratedTextEditor 
 			}
 		}
 		Collections.sort(possibles);
-		System.out.println("List once: ");
-		for(TextSelection cra: possibles)
-		{
-			System.out.println("Cross ref adatper: "+(cra.getRef()==null?"null":cra.getRef().r.getName())+" "+cra.getLength()+" "+cra.getTarget());
-		}
+//		System.out.println("List once: ");
+//		for(TextSelection cra: possibles)
+//		{
+//			System.out.println("Text Selection: "+cra);
+//		}
 		if(possibles.size()>0)
 		{
 			TextSelection ts=possibles.get(0);
 			// outline.setSelection(ts);
 			RefInTree ref=ts.getRef();
+			EmfReference eref=ts.getERef();
 			EObject eo=(EObject)ts.getTarget();
-			if(ref!=null)
+			if(eref!=null)
+			{
+				outline.setSelectedEmfRef(eref);
+			}else if(ref!=null)
 			{
 				outline.setSelectedEmfRef(ref);
 			}else if(eo!=null)
@@ -194,6 +211,9 @@ abstract public class AbstractQParserEditor extends AbstractDecoratedTextEditor 
 		}
 	}
 	protected TextSelection createTextSelection(RefInTree ref, SourceReference sr) {
+		return new TextSelection(ref, sr);
+	}
+	protected TextSelection createTextSelection(EmfReference ref, SourceReference sr) {
 		return new TextSelection(ref, sr);
 	}
 	protected TextSelection createTextSelection(SourceReference sr, EObject eo) {

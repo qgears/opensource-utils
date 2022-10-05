@@ -12,6 +12,7 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
+import hu.qgears.emfcollab.backref.EmfReference;
 import hu.qgears.xtextgrammar.CRAResource;
 
 public class QEdContentProvider implements ITreeContentProvider {
@@ -72,11 +73,29 @@ public class QEdContentProvider implements ITreeContentProvider {
 							int index=0;
 							for(Object tg: ((List<?>)v))
 							{
+//								EmfBackReferenceImpl bri=EmfBackReferenceImpl.getByEobject(o);
+//								if(bri!=null)
+//								{
+//									EmfReferenceImpl ref=bri.getSourceReference(o, r, (EObject) tg, index);
+//									if(ref!=null)
+//									{
+//										ret.add(ref);
+//									}
+//								}
 								ret.add(RefInTree.create(o, r, (EObject)tg, index));
 								index++;
 							}
 						}else if(v instanceof EObject)
 						{
+//							EmfBackReferenceImpl bri=EmfBackReferenceImpl.getByEobject(o);
+//							if(bri!=null)
+//							{
+//								EmfReferenceImpl ref=bri.getSourceReference(o, r, (EObject) v, 0);
+//								if(ref!=null)
+//								{
+//									ret.add(ref);
+//								}
+//							}
 							ret.add(RefInTree.create(o, r, (EObject)v, 0));
 						}
 					}
@@ -101,6 +120,12 @@ public class QEdContentProvider implements ITreeContentProvider {
 			{
 				return eo.eResource();
 			}
+		}else if(element instanceof EmfReference)
+		{
+			return ((EmfReference)element).getSource();
+		}else if(element instanceof RefInTree)
+		{
+			return ((RefInTree)element).host;
 		}
 		return null;
 	}

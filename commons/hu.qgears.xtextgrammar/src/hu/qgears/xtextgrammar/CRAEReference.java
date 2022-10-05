@@ -262,11 +262,13 @@ public class CRAEReference implements IRefListener {
 	public SourceReference getSourceReference() {
 		return sourceReference;
 	}
-	public void copyMetadataOnto(CRAEObject host, EReference eReference, int i) {
+	public CRAEReference copyMetadataOnto(CRAEObject host, EReference eReference, int i, CRAEObject target) {
 		CRAEReference newCri=host.createNewCrossReferenceInstance();
 		newCri.r=eReference;
 		newCri.setSourceParameters((EObject)host.getTarget(), eReference, i);
 		newCri.setSourceReference(sourceReference);
+		newCri.targetA=target;
 		host.addManagedReference(eReference, i, newCri);
+		return newCri;
 	}
 }

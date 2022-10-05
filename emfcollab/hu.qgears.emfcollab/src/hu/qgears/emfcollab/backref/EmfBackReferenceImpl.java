@@ -2,8 +2,10 @@ package hu.qgears.emfcollab.backref;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.emf.common.notify.Adapter;
@@ -105,12 +107,16 @@ public class EmfBackReferenceImpl implements EmfBackReference {
 				// System.out.println("RS notif: "+notification);
 			}
 		}
+
+		public EmfBackReferenceImpl getHost() {
+			return EmfBackReferenceImpl.this;
+		}
 	}
 	public class EmfObjectReferencesAdapter implements Adapter, EmfObjectReferences
 	{
 		private Notifier target;
-		private Set<EmfReferenceImpl> sources = new HashSet<>();
-		private Set<EmfReferenceImpl> targets = new HashSet<>();
+		private Map<EmfReferenceImpl, EmfReferenceImpl> sources = new HashMap<>();
+		private Map<EmfReferenceImpl, EmfReferenceImpl> targets = new HashMap<>();
 		private MultiMapHashImpl<EStructuralFeature, UtilEventListener<Notification>> listeners=null;
 		@Override
 		public void notifyChanged(Notification notification) {
@@ -253,8 +259,8 @@ public class EmfBackReferenceImpl implements EmfBackReference {
 				EmfReferenceImpl emfRef = new EmfReferenceImpl(sourceAdapter, ref, targetAdapter);
 				EmfObjectReferencesAdapter srcAdapter=getAdapter(o);
 				EmfObjectReferencesAdapter tgAdapter=getAdapter(t);
-				srcAdapter.sources.add(emfRef);
-				tgAdapter.targets.add(emfRef);
+				srcAdapter.sources.put(emfRef, emfRef);
+				tgAdapter.targets.put(emfRef, emfRef);
 			}
 		}
 	}
@@ -277,6 +283,17 @@ public class EmfBackReferenceImpl implements EmfBackReference {
 			return ret;
 		}
 		return new ArrayList<EObject>(0);
+	}
+	public static EmfBackReferenceImpl getByEobject(EObject eo)
+	{
+		for(Adapter a: eo.eAdapters())
+		{
+			if(a instanceof MyAdapter)
+			{
+				return ((MyAdapter) a).getHost();
+			}
+		}
+		return null;
 	}
 	/**
 	 * Call this method exactly once to start tracking the model.
@@ -301,8 +318,8 @@ public class EmfBackReferenceImpl implements EmfBackReference {
 			List<EmfReferenceImpl> toRemove = new ArrayList<EmfReferenceImpl>(adapter.sources
 					.size()
 					+ adapter.targets.size());
-			toRemove.addAll(adapter.sources);
-			toRemove.addAll(adapter.targets);
+			toRemove.addAll(adapter.sources.keySet());
+			toRemove.addAll(adapter.targets.keySet());
 			for (EmfReferenceImpl ref : toRemove) {
 				removeReference(ref);
 			}
@@ -327,12 +344,12 @@ public class EmfBackReferenceImpl implements EmfBackReference {
 	@Override
 	public void print(EObject singleSelectedDomainObject) {
 		EmfObjectReferencesAdapter ra=getAdapter(singleSelectedDomainObject);
-		for (EmfReferenceImpl ref : ra.sources) {
+		for (EmfReferenceImpl ref : ra.sources.keySet()) {
 			System.out.println("SRC " + ref.getSource().eClass().getName()
 					+ " " + ref.getTarget().eClass().getName() + " "
 					+ ref.getRefType().getName());
 		}
-		for (EmfReferenceImpl ref : ra.targets) {
+		for (EmfReferenceImpl ref : ra.targets.keySet()) {
 			System.out.println("TRG " + ref.getSource().eClass().getName()
 					+ " " + ref.getTarget().eClass().getName() + " "
 					+ ref.getRefType().getName());
@@ -343,7 +360,7 @@ public class EmfBackReferenceImpl implements EmfBackReference {
 			EReference type) {
 		EmfObjectReferencesAdapter targetAdapter=getAdapter(target);
 		Set<EmfReference> ret = new HashSet<>();
-		for (EmfReferenceImpl ref : targetAdapter.targets) {
+		for (EmfReferenceImpl ref : targetAdapter.targets.keySet()) {
 			if (ref.getRefType().equals(type)) {
 				ret.add(ref);
 			}
@@ -355,7 +372,7 @@ public class EmfBackReferenceImpl implements EmfBackReference {
 	public Set<EmfReference> getTargetReferences(EObject target) {
 		EmfObjectReferencesAdapter targetAdapter=getAdapter(target);
 		Set<EmfReference> ret = new HashSet<>();
-		for (EmfReferenceImpl ref : targetAdapter.targets) {
+		for (EmfReferenceImpl ref : targetAdapter.targets.keySet()) {
 			ret.add(ref);
 		}
 		return ret;
@@ -364,7 +381,7 @@ public class EmfBackReferenceImpl implements EmfBackReference {
 	public Set<EmfReference> getSourceReferences(EObject source) {
 		EmfObjectReferencesAdapter sourceAdapter=getAdapter(source);
 		Set<EmfReference> ret = new HashSet<>();
-		for (EmfReferenceImpl ref : sourceAdapter.sources) {
+		for (EmfReferenceImpl ref : sourceAdapter.sources.keySet()) {
 			ret.add(ref);
 		}
 		return ret;
@@ -438,5 +455,11 @@ public class EmfBackReferenceImpl implements EmfBackReference {
 	@Override
 	public ResourceSet getResourceSet() {
 		return rs;
+	}
+	public EmfReferenceImpl getSourceReference(EObject o, EReference r, EObject tg, int index) {
+		EmfObjectReferencesAdapter sourceAdapter=getAdapter(o);
+		EmfObjectReferencesAdapter targetAdapter=getAdapter(tg);
+		EmfReferenceImpl ri=new EmfReferenceImpl(sourceAdapter, r, targetAdapter);
+		return sourceAdapter.sources.get(ri);
 	}
 }

@@ -15,6 +15,7 @@ import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 import hu.qgears.commons.NoExceptionAutoClosable;
 import hu.qgears.commons.UtilEventListener;
 import hu.qgears.commons.UtilListenableProperty;
+import hu.qgears.emfcollab.backref.EmfReference;
 
 public class QEditorOutlinePage extends ContentOutlinePage {
 	@SuppressWarnings("unused")
@@ -167,6 +168,13 @@ public class QEditorOutlinePage extends ContentOutlinePage {
 		if(getTreeViewer()!=null)
 		{
 			getTreeViewer().setSelection(new StructuredSelection(ref), true);
+		}
+	}
+	public void setSelectedEmfRef(EmfReference eref) {
+		if(getTreeViewer()!=null)
+		{
+			System.out.println("Select: "+eref);
+			getTreeViewer().setSelection(new StructuredSelection(eref), true);
 		}
 	}
 }

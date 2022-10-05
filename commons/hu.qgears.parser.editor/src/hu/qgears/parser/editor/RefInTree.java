@@ -31,7 +31,6 @@ public class RefInTree {
 		return hashCode;
 	}
 	public static RefInTree create(EObject element, EReference r2, EObject target, int index) {
-		// TODO Auto-generated method stub
-		return null;
+		return new RefInTree(element, r2, target);
 	}
 }
