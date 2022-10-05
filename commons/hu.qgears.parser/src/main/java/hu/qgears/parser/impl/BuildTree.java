@@ -1,6 +1,7 @@
 package hu.qgears.parser.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import hu.qgears.parser.ParserLogger;
@@ -35,6 +36,12 @@ public class BuildTree {
 			buildTree(te);
 		}
 	}
+	
+	@SuppressWarnings("unchecked")
+	private static List<TreeElem> readonlyEmptyList()
+	{
+		return (List<TreeElem>)Collections.EMPTY_LIST;
+	}
 
 	/**
 	 * Build the children list of a tree element.
@@ -63,17 +70,19 @@ public class BuildTree {
 		case zeroormore:
 		case oneormore: {
 			if (e.dotPos == 0) {
-				return new ArrayList<TreeElem>(0);
+				return readonlyEmptyList();
 			} else {
 				Term subType = ((TermMore) (termType)).getSub();
 				for (int i = 0; i < e.dotPos; ++i)
+				{
 					types.add(subType);
+				}
 				break;
 			}
 		}
 		case token:
 		case epsilon:
-			return new ArrayList<TreeElem>(0);
+			return readonlyEmptyList();
 		case reference: {
 			List<TreeElem> ret;
 			ret = findElements(lastChildType(e), e.from, e.getGroup(), e

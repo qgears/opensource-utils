@@ -5,8 +5,6 @@ import hu.qgears.parser.language.ITokenType;
 /**
  * A token that is recognized for a type.
  * A token is a sub-string of the text at a declared position and length.
- * @author rizsi
- *
  */
 public interface IToken {
 	ITokenType getTokenType();

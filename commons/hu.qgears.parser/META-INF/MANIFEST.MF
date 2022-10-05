@@ -6,6 +6,7 @@ Bundle-Version: 10.4.2.qualifier
 Bundle-Vendor: Q-Gears Kft.
 Export-Package: hu.qgears.parser,
  hu.qgears.parser.coloring,
+ hu.qgears.parser.contentassist,
  hu.qgears.parser.expression,
  hu.qgears.parser.impl,
  hu.qgears.parser.language,

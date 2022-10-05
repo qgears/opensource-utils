@@ -6,8 +6,6 @@ import hu.qgears.parser.language.impl.Term;
 
 /**
  * Tree element in the parse result.
- * @author rizsi
- *
  */
 public interface ITreeElem {
 	public List<? extends ITreeElem> getSubs();
@@ -39,4 +37,9 @@ public interface ITreeElem {
 	 * @return
 	 */
 	Term getType();
+	
+	/**
+	 * Drop data that was created while parsing but not important to hold any longer.
+	 */
+	void stripParseDataRecursive();
 }

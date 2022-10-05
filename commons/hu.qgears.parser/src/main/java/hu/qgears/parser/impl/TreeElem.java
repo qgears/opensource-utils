@@ -1,6 +1,7 @@
 package hu.qgears.parser.impl;
 
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +9,7 @@ import java.util.Map;
 import hu.qgears.parser.ITreeElem;
 import hu.qgears.parser.language.EType;
 import hu.qgears.parser.language.impl.Term;
+import hu.qgears.parser.tokenizer.ITextSource;
 import hu.qgears.parser.tokenizer.IToken;
 
 
@@ -23,8 +25,15 @@ public class TreeElem implements ITreeElem {
 	 */
 	protected int from;
 	private int group;
+	private Term type;
+	private IToken token;
 	private ElemBuffer buffer;
-	List<TreeElem> subs = new ArrayList<TreeElem>();
+	private ITextSource textSource;
+	private int textIndexFrom;
+	private int textIndexTo;
+
+	@SuppressWarnings("unchecked")
+	List<TreeElem> subs = Collections.EMPTY_LIST;
 
 	public List<TreeElem> getSubs() {
 		return subs;
@@ -59,14 +68,11 @@ public class TreeElem implements ITreeElem {
 	 * @return
 	 */
 	public Term getType() {
-		return buffer.resolve(typeId);
+		return type;
 	}
 
 	public IToken getToken() {
-		if (EType.token.equals(getType().getType())) {
-			return buffer.getTokenOfGroup(from);
-		}
-		return null;
+		return token;
 	}
 
 	public String getTypeName() {
@@ -76,19 +82,12 @@ public class TreeElem implements ITreeElem {
 	@Override
 	public int getTextIndexFrom()
 	{
-		int f = getBuffer().getTokenOfGroup(from).getPos();
-		return f;
+		return textIndexFrom;
 	}
 	@Override
 	public int getTextIndexTo()
 	{
-		if(group==0)
-		{
-			return 0;
-		}
-		IToken tok = getBuffer().getTokenOfGroup(group - 1);
-		int t = tok.getPos() + tok.getLength();
-		return t;
+		return textIndexTo;
 	}
 	public String getString() {
 		int f = getTextIndexFrom();
@@ -97,7 +96,7 @@ public class TreeElem implements ITreeElem {
 		{
 			return "";
 		}
-		return getBuffer().getSource().firstChars(f, t - f);
+		return textSource.firstChars(f, t - f);
 	}
 
 	public TreeElem(ElemBuffer buffer, int dotPos, int typeId, int choice, int from, int group) {
@@ -108,6 +107,18 @@ public class TreeElem implements ITreeElem {
 		this.choice=choice;
 		this.from=from;
 		this.group = group;
+		textSource=buffer.getSource();
+		type=buffer.resolve(typeId);
+		token=EType.token.equals(getType().getType())?buffer.getTokenOfGroup(from):null;
+		textIndexFrom=getBuffer().getTokenOfGroup(from).getPos();
+		if(group==0)
+		{
+			textIndexTo=0;
+		}else
+		{
+			IToken tok = getBuffer().getTokenOfGroup(group - 1);
+			textIndexTo = tok.getPos() + tok.getLength();
+		}
 	}
 
 	public TreeElem(ElemBuffer buf, int absoluteIndex, int group) {
@@ -118,18 +129,94 @@ public class TreeElem implements ITreeElem {
 	@Override
 	public String toString() {
 		IToken tok = getToken();
-		return ""+getTypeName()+" at: " + group + " " + buffer.toString(dotPos, typeId, choice, from) + " "
-				+ (tok == null ? "" : "" + tok);
+		if(buffer!=null)
+		{
+			return ""+getTypeName()+" at: " + group + " " + buffer.toString(dotPos, typeId, choice, from) + " "
+					+ (tok == null ? "" : "" + tok);
+		}else
+		{
+			return ""+getTypeName()+" at: " + group + " " + (token==null?"null":token.toString()) + " "
+					+ (tok == null ? "" : "" + tok);
+		}
 	}
 
-	private Map<String, Object> userObjects=new HashMap<String, Object>();
+	private static final int maxKeysSimple=3;
+	/**
+	 * User objects storage map implemented as an array when small to spare RAM.
+	 */
+	private Object userObjects = null;
 	@Override
 	public void setUserObject(String key, Object value) {
-		userObjects.put(key, value);
+		if(userObjects instanceof Map)
+		{
+			@SuppressWarnings("unchecked")
+			Map<String, Object> map=(Map<String, Object>)userObjects;
+			map.put(key, value);
+		}else if(userObjects instanceof Object[])
+		{
+			Object[] arr=(Object[]) userObjects;
+			int l=arr.length/2;
+			for(int i=0;i<l;++i)
+			{
+				if(key==null?arr[i*2]==null:key.equals(arr[i*2]))
+				{
+					arr[i*2+1]=value;
+					return;
+				}
+			}
+			if(l==maxKeysSimple)
+			{
+				Map<String, Object> map=new HashMap<>();
+				for(int i=0;i<l;++i)
+				{
+					map.put((String)arr[i*2], arr[i*2+1]);
+				}
+				map.put(key, value);
+				userObjects=map;
+			}else
+			{
+				Object[] newArr=Arrays.copyOf(arr, arr.length+2);
+				newArr[l*2]=key;
+				newArr[l*2+1]=value;
+				userObjects=newArr;
+			}
+		}else
+		{
+			Object[] arr=new Object[2];
+			userObjects=arr;
+		}
 	}
 
 	@Override
 	public Object getUserObject(String key) {
-		return userObjects.get(key);
+		if(userObjects instanceof Map)
+		{
+			@SuppressWarnings("unchecked")
+			Map<String, Object> map=(Map<String, Object>)userObjects;
+			return map.get(key);
+		}else if(userObjects instanceof Object[])
+		{
+			Object[] arr=(Object[]) userObjects;
+			int l=arr.length/2;
+			for(int i=0;i<l;++i)
+			{
+				if(key==null?arr[i*2]==null:key.equals(arr[i*2]))
+				{
+					return arr[i*2+1];
+				}
+			}
+			return null;
+		}else
+		{
+			return null;
+		}
+	}
+	@Override
+	public void stripParseDataRecursive() {
+		buffer=null;
+		for(TreeElem te: subs)
+		{
+			te.stripParseDataRecursive();
+		}
 	}
 }

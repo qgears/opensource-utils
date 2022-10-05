@@ -277,7 +277,7 @@ public class CrossReferenceAdapter implements Adapter {
 		}
 		return parentProperty;
 	}
-	public List<CrossReferenceInstance> managedReferences=new ArrayList<CrossReferenceInstance>();
+	private List<CrossReferenceInstance> managedReferences=new ArrayList<CrossReferenceInstance>();
 	public void addManagedReference(EReference r, int index, CrossReferenceInstance crossReferenceInstance) {
 		managedReferences.add(crossReferenceInstance);
 		if(managedCrossReferenceListChangedEvent!=null)
@@ -319,5 +319,12 @@ public class CrossReferenceAdapter implements Adapter {
 			managedCrossReferenceListChangedEvent=new UtilEvent<>();
 		}
 		return managedCrossReferenceListChangedEvent;
+	}
+	/**
+	 * 
+	 * @return Internal object must be handled read only.
+	 */
+	public List<CrossReferenceInstance> getManagedReferences() {
+		return managedReferences;
 	}
 }

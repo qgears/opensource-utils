@@ -1,6 +1,7 @@
 package hu.qgears.crossref;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +35,8 @@ public class CrossRefManager {
 	 *  This is useful in cases when there are types that have global identifiers and we need a 
 	 *  performing way to find them. */
 	private MultiMapHashToHashSetImpl<String, Obj> objectsByTypeAndLocalId=new MultiMapHashToHashSetImpl<>();
+	/** Objects by their type. */
+	private MultiMapHashToHashSetImpl<String, Obj> objectsByType=new MultiMapHashToHashSetImpl<>();
 
 	private MultiMapHashToHashSetImpl<String, GidSearch> refByTypeAndLocalId=new MultiMapHashToHashSetImpl<>();
 	private MultiMapHashToHashSetImpl<String, GidSearch> refByFqId=new MultiMapHashToHashSetImpl<>();
@@ -70,6 +73,7 @@ public class CrossRefManager {
 			objects.putSingle(fqId, ret);
 			objectsByLocalId.putSingle(ret.getLocalId(), ret);
 			objectsByTypeAndLocalId.putSingle(ret.getTypeAndLocalId(), ret);
+			objectsByType.putSingle(ret.getType(), ret);
 			
 			signalSearches(refByFqId.getPossibleNull(fqId), ret);
 			signalSearches(refByTypeAndLocalId.getPossibleNull(fqId), ret);
@@ -313,6 +317,7 @@ public class CrossRefManager {
 			objects.removeSingle(ret.getFqId(), ret);
 			objectsByLocalId.removeSingle(ret.getLocalId(), ret);
 			objectsByTypeAndLocalId.removeSingle(ret.getTypeAndLocalId(), ret);
+			objectsByType.removeSingle(ret.getType(), ret);
 			ret.doc.removeObj(ret);
 			for(Ref r: ret.referencesTargetingThis)
 			{
@@ -383,6 +388,15 @@ public class CrossRefManager {
 	public List<Obj> findById(String id) {
 		List<Obj> ret=objects.getPossibleDefault(id, new ArrayList<>());
 		return new ArrayList<>(ret);
+	}
+	/**
+	 * Find objects by type.
+	 * @param id
+	 * @return all matches. The returned object is an unmodifiable set wrapped version of the internal storage. 
+	 */
+	public Set<Obj> findByType(String type) {
+		HashSet<Obj> ret=objectsByType.getPossibleDefault(type, new HashSet<Obj>());
+		return Collections.unmodifiableSet(ret);
 	}
 	public String getTypeAndLocalId(String type, String localId) {
 		return ""+type+"."+localId;
