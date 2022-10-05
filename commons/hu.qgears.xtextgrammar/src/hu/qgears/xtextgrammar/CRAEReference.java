@@ -28,12 +28,12 @@ import hu.qgears.crossref.Scope;
  *    (When a reference has multiple resolve targets found then it is kept in this state.)
  *  * {@link Ref} object is resolved.
  */
-public class CrossReferenceInstance implements IRefListener {
+public class CRAEReference implements IRefListener {
 	public Set<String> unresolvedReferenceAcceptedTypes;
 	public String unresolvedReferenceRawRecerenceString;
 	public String unresolvedReferenceType;
-	public CrossReferenceAdapter targetA;
-	public CrossReferenceAdapter source;
+	public CRAEObject targetA;
+	public CRAEObject source;
 	public EReference r;
 	public int index;
 	/**
@@ -43,11 +43,11 @@ public class CrossReferenceInstance implements IRefListener {
 	/**
 	 * In case this is resolved then this value is set.
 	 */
-	public CrossReferenceAdapter resolvedToAdapter;
+	public CRAEObject resolvedToAdapter;
 	/**
 	 * When this cross reference goes to unresolved state then this EObject is used as a placeholder for the reference.
 	 */
-	public CrossReferenceAdapter unresolvedObjectAdapter;
+	public CRAEObject unresolvedObjectAdapter;
 	/**
 	 * True means reference is not in  resolved state because multiple targets were found.
 	 */
@@ -60,13 +60,17 @@ public class CrossReferenceInstance implements IRefListener {
 	 * Trackable storage of resolved status.
 	 */
 	private UtilListenableProperty<Boolean> resolvedStatus;
-	private UtilListenableProperty<CrossReferenceAdapter> currentTarget;
-	public CrossReferenceInstance(CrossReferenceAdapter host) {
+	private UtilListenableProperty<CRAEObject> currentTarget;
+	/**
+	 * Source code reference that created this object.
+	 */
+	private SourceReference sourceReference;
+	public CRAEReference(CRAEObject host) {
 		this.targetA=host;
 	}
 	@Override
 	public void resolvedTo(List<Obj> target) {
-		CrossReferenceAdapter prev=resolvedToAdapter;
+		CRAEObject prev=resolvedToAdapter;
 		if(target==null || target.size()>1)
 		{
 			source.setReferenceTarget(this, r, index, resolvedToAdapter, null, (EObject)unresolvedObjectAdapter.getTarget());
@@ -83,7 +87,7 @@ public class CrossReferenceInstance implements IRefListener {
 		}else
 		{
 			Obj tg=target.get(0);
-			resolvedToAdapter=(CrossReferenceAdapter)tg.getUserObject(null);
+			resolvedToAdapter=(CRAEObject)tg.getUserObject(null);
 			source.setReferenceTarget(this, r, index, prev, resolvedToAdapter, (EObject)resolvedToAdapter.getTarget());
 			multiTargetError=false;
 			if(resolvedStatus!=null)
@@ -124,7 +128,7 @@ public class CrossReferenceInstance implements IRefListener {
 	public boolean isUnresolved() {
 		return resolvedToAdapter==null;
 	}
-	public CrossReferenceInstance setUnresolvedReference(String prefixproxyid, String unescape) {
+	public CRAEReference setUnresolvedReference(String prefixproxyid, String unescape) {
 		unresolvedReferenceRawRecerenceString=unescape;
 		unresolvedReferenceType=prefixproxyid;
 		return this;
@@ -194,7 +198,7 @@ public class CrossReferenceInstance implements IRefListener {
 	{
 		throw new RuntimeException("Must be overriden");
 	}
-	public UtilListenableProperty<CrossReferenceAdapter> getCurrentTarget() {
+	public UtilListenableProperty<CRAEObject> getCurrentTarget() {
 		if(currentTarget==null)
 		{
 			currentTarget=new UtilListenableProperty<>();
@@ -202,7 +206,7 @@ public class CrossReferenceInstance implements IRefListener {
 		}
 		return currentTarget;
 	}
-	private CrossReferenceAdapter getCurrentTargetValue() {
+	private CRAEObject getCurrentTargetValue() {
 		if(resolvedToAdapter!=null)
 		{
 			return resolvedToAdapter;
@@ -215,7 +219,7 @@ public class CrossReferenceInstance implements IRefListener {
 	public void duplicateThisReferenceTo(EObject newSourceObject, EReference eReference, int i) {
 		EObject tg=(EObject)unresolvedObjectAdapter.getTarget();
 		// EObject newTg=tg.eClass().getEPackage().getEFactoryInstance().create();
-		CrossReferenceAdapter cra=source.createNewUnresolvedReferenceTargetPlaceHolder(tg.eClass());
+		CRAEObject cra=source.createNewUnresolvedReferenceTargetPlaceHolder(tg.eClass());
 		EObject newTg=(EObject)cra.getTarget();
 		if(eReference.isMany())
 		{
@@ -224,9 +228,10 @@ public class CrossReferenceInstance implements IRefListener {
 		{
 			newSourceObject.eSet(eReference, newTg);
 		}
-		CrossReferenceInstance cri=cra.getOrCreateUnresolvedCrossReferenceObject();
+		CRAEReference cri=cra.getOrCreateUnresolvedCrossReferenceObject();
 		cri.setFeatureThatEndsInThis(eReference);
 		cri.setSourceParameters(newSourceObject, eReference, i);
+		cri.setSourceReference(sourceReference);
 		cri.unresolvedReferenceAcceptedTypes=unresolvedReferenceAcceptedTypes;
 		cri.unresolvedReferenceType=unresolvedReferenceType;
 		cri.unresolvedReferenceRawRecerenceString=unresolvedReferenceRawRecerenceString;
@@ -249,5 +254,19 @@ public class CrossReferenceInstance implements IRefListener {
 	}
 	public Object getDebugDynamicResolve() {
 		return debugDynamicResolve;
+	}
+	public CRAEReference setSourceReference(SourceReference sourceReference) {
+		this.sourceReference=sourceReference;
+		return this;
+	}
+	public SourceReference getSourceReference() {
+		return sourceReference;
+	}
+	public void copyMetadataOnto(CRAEObject host, EReference eReference, int i) {
+		CRAEReference newCri=host.createNewCrossReferenceInstance();
+		newCri.r=eReference;
+		newCri.setSourceParameters((EObject)host.getTarget(), eReference, i);
+		newCri.setSourceReference(sourceReference);
+		host.addManagedReference(eReference, i, newCri);
 	}
 }

@@ -12,7 +12,7 @@ public class TrackerAdapter extends EContentAdapter {
 		super.addAdapter(notifier);
 		if(notifier instanceof EObject)
 		{
-			CrossReferenceAdapter cra=CrossReferenceAdapter.getAllowNull((EObject) notifier);
+			CRAEObject cra=CRAEObject.getAllowNull((EObject) notifier);
 			if(cra!=null)
 			{
 				cra.notifyAttachEvent(this);

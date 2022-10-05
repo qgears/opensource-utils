@@ -6,8 +6,8 @@ import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ViewerCell;
 
 import hu.qgears.crossref.Obj;
-import hu.qgears.xtextgrammar.CrossReferenceAdapter;
-import hu.qgears.xtextgrammar.CrossReferenceInstance;
+import hu.qgears.xtextgrammar.CRAEObject;
+import hu.qgears.xtextgrammar.CRAEReference;
 
 public class QEdLabelProvider extends CellLabelProvider {
 	@Override
@@ -57,7 +57,7 @@ public class QEdLabelProvider extends CellLabelProvider {
 	}
 	protected String getNameObjectId(EObject eo)
 	{
-		CrossReferenceAdapter cra=CrossReferenceAdapter.getAllowNull(eo);
+		CRAEObject cra=CRAEObject.getAllowNull(eo);
 		if(cra!=null)
 		{
 			Obj o=cra.getNameObject();
@@ -68,7 +68,7 @@ public class QEdLabelProvider extends CellLabelProvider {
 			}
 			if(cra.getUnresolvedCrossReference()!=null)
 			{
-				CrossReferenceInstance cri=cra.getUnresolvedCrossReference();
+				CRAEReference cri=cra.getUnresolvedCrossReference();
 				sb.append("REF: "+cri.unresolvedReferenceRawRecerenceString);
 				if(cri.ref!=null)
 				{

@@ -11,7 +11,7 @@ import hu.qgears.parser.coloring.StyleBasedColoring;
 /**
  * Adapter that manages cross reference information regarding the resource.
  */
-public class ResourceCrossReferenceAdapter implements Adapter {
+public class CRAResource implements Adapter {
 	private Notifier target;
 	private Doc doc;
 	private StyleBasedColoring coloring;
@@ -28,18 +28,18 @@ public class ResourceCrossReferenceAdapter implements Adapter {
 	}
 	@Override
 	public boolean isAdapterForType(Object type) {
-		return type==ResourceCrossReferenceAdapter.class;
+		return type==CRAResource.class;
 	}
-	public static ResourceCrossReferenceAdapter get(Resource r)
+	public static CRAResource get(Resource r)
 	{
 		for(Adapter a: r.eAdapters())
 		{
-			if(a instanceof ResourceCrossReferenceAdapter)
+			if(a instanceof CRAResource)
 			{
-				return (ResourceCrossReferenceAdapter)a;
+				return (CRAResource)a;
 			}
 		}
-		ResourceCrossReferenceAdapter ret=new ResourceCrossReferenceAdapter();
+		CRAResource ret=new CRAResource();
 		r.eAdapters().add(ret);
 		return ret;
 	}

@@ -2,7 +2,6 @@ package hu.qgears.parser.editor;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -30,8 +29,10 @@ import hu.qgears.commons.UtilListenableProperty;
 import hu.qgears.emfcollab.util.UtilVisitor;
 import hu.qgears.parser.coloring.StyleBasedColoring;
 import hu.qgears.parser.editor.coloring.SwtStyleBasedColoring;
-import hu.qgears.xtextgrammar.CrossReferenceAdapter;
-import hu.qgears.xtextgrammar.ResourceCrossReferenceAdapter;
+import hu.qgears.parser.editor.textselection.TextSelection;
+import hu.qgears.xtextgrammar.CRAEObject;
+import hu.qgears.xtextgrammar.CRAEReference;
+import hu.qgears.xtextgrammar.CRAResource;
 import hu.qgears.xtextgrammar.SourceReference;
 
 abstract public class AbstractQParserEditor extends AbstractDecoratedTextEditor {
@@ -46,7 +47,7 @@ abstract public class AbstractQParserEditor extends AbstractDecoratedTextEditor 
 			ResourceSet rs=getResourceSet();
 			if(rs!=null)
 			{
-				ResourceCrossReferenceAdapter rcra=getResourceOfEditor();
+				CRAResource rcra=getResourceOfEditor();
 				if(rcra!=null)
 				{
 					StyleBasedColoring sbc=rcra.getColoring();
@@ -127,27 +128,37 @@ abstract public class AbstractQParserEditor extends AbstractDecoratedTextEditor 
 		});
 	}
 	private void updateSelection(int caretOffset) {
-		List<CrossReferenceAdapter> possibles=new ArrayList<CrossReferenceAdapter>();
+		List<TextSelection> possibles=new ArrayList<>();
 		ResourceSet rs=getResourceSet();
 		if(rs!=null)
 		{
 			synchronized (rs) {
-				ResourceCrossReferenceAdapter rcra=getResourceOfEditor();
+				CRAResource rcra=getResourceOfEditor();
 				if(rcra!=null)
 				{
 					UtilVisitor.visitModel(rcra.getResource(), new UtilVisitor.Visitor(){
 						@Override
 						public Object visit(EObject element) {
-							CrossReferenceAdapter cra=CrossReferenceAdapter.getAllowNull(element);
+							CRAEObject cra=CRAEObject.getAllowNull(element);
 							if(cra!=null)
 							{
-								SourceReference sr=cra.getSourceReference();
-								if(sr!=null)
+								for(CRAEReference cri: cra.getManagedReferences())
 								{
-									if(sr.getTextIndexFrom()<=caretOffset && sr.getTextIndexTo()>caretOffset)
+									SourceReference sr=cri.getSourceReference();
+									if(TextSelection.isCaretInside(sr, caretOffset))
 									{
-										possibles.add(cra);
+										// System.out.println("Ref: "+cri.r.getName()+" "+sr.getLength());
+										if(cri.r!=null && cri.targetA!=null && cri.targetA.getTarget() instanceof EObject)
+										{
+											RefInTree ref=RefInTree.create(element, cri.r, (EObject)cri.targetA.getTarget(), cri.index);
+											possibles.add(createTextSelection(ref, sr));
+										}
 									}
+								}
+								SourceReference sr=cra.getSourceReference();
+								if(TextSelection.isCaretInside(sr, caretOffset))
+								{
+									possibles.add(createTextSelection(sr, element));
 								}
 							}
 							return null;
@@ -156,20 +167,41 @@ abstract public class AbstractQParserEditor extends AbstractDecoratedTextEditor 
 				}
 			}
 		}
-		Collections.sort(possibles, new Comparator<CrossReferenceAdapter>() {
-			@Override
-			public int compare(CrossReferenceAdapter o1, CrossReferenceAdapter o2) {
-				return o1.getSourceReference().getLength()-o2.getSourceReference().getLength();
-			}
-		});
+		Collections.sort(possibles);
+		System.out.println("List once: ");
+		for(TextSelection cra: possibles)
+		{
+			System.out.println("Cross ref adatper: "+(cra.getRef()==null?"null":cra.getRef().r.getName())+" "+cra.getLength()+" "+cra.getTarget());
+		}
 		if(possibles.size()>0)
 		{
-			EObject eo=(EObject)possibles.get(0).getTarget();
-			outline.setSelectedEmfObject(eo);
-			QEditorSelectionSingleton.getInstance().selectionEvent.eventHappened(
-					new Pair<IProject, EObject>(file.getProject(), eo));
+			TextSelection ts=possibles.get(0);
+			// outline.setSelection(ts);
+			RefInTree ref=ts.getRef();
+			EObject eo=(EObject)ts.getTarget();
+			if(ref!=null)
+			{
+				outline.setSelectedEmfRef(ref);
+			}else if(eo!=null)
+			{
+				outline.setSelectedEmfObject(eo);
+			}
+			if(eo!=null)
+			{
+				QEditorSelectionSingleton.getInstance().selectionEvent.eventHappened(
+						new Pair<IProject, EObject>(file.getProject(), eo));
+			}
 		}
 	}
+	protected TextSelection createTextSelection(RefInTree ref, SourceReference sr) {
+		return new TextSelection(ref, sr);
+	}
+	protected TextSelection createTextSelection(SourceReference sr, EObject eo) {
+		return new TextSelection(eo, sr);
+	}
+//	protected TextSelection createTextSelection(CrossReferenceInstance cri) {
+//		return new TextSelection(cri.);
+//	}
 	private ResourceSet getResourceSet() {
 		AbstractBuilder current=builder.getProperty();
 		if(current !=null && getEditorInput() instanceof IFileEditorInput)
@@ -181,29 +213,29 @@ abstract public class AbstractQParserEditor extends AbstractDecoratedTextEditor 
 		}
 		return null;
 	}
-	private ResourceCrossReferenceAdapter getResourceOfEditor() {
+	private CRAResource getResourceOfEditor() {
 		AbstractBuilder current=builder.getProperty();
 		if(current !=null && getEditorInput() instanceof IFileEditorInput)
 		{
 			IFileEditorInput fei=(IFileEditorInput) getEditorInput();
 			String id=AbstractIncrementalBuilder.getFileIdentifier(fei.getFile());
 			ResourceSet rs=current.buildResult.getProperty();
-			List<CrossReferenceAdapter> possibles=new ArrayList<CrossReferenceAdapter>();
+			List<CRAEObject> possibles=new ArrayList<CRAEObject>();
 			if(rs!=null)
 			{
 				synchronized (rs) {
-					ResourceCrossReferenceAdapter rcra=findResouceForEditor(rs, id);
+					CRAResource rcra=findResouceForEditor(rs, id);
 					return rcra;
 				}
 			}
 		}
 		return null;
 	}
-	private ResourceCrossReferenceAdapter findResouceForEditor(ResourceSet rs, String id) {
+	private CRAResource findResouceForEditor(ResourceSet rs, String id) {
 		synchronized (rs) {
 			for(Resource r: rs.getResources())
 			{
-				ResourceCrossReferenceAdapter rcra=ResourceCrossReferenceAdapter.get(r);
+				CRAResource rcra=CRAResource.get(r);
 				if(rcra!=null)
 				{
 					if(rcra.getDoc().id.equals(id))

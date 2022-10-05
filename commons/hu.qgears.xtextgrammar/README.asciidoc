@@ -10,3 +10,7 @@ This project does not handle cross references.
 
 Why? Together with hu.qgears.crossref a very well performing implementation is possible with fast initial and incremental build of text based model.
 
+EObject mappings:
+
+ * CRAEObject: EObject additional info which part of the source code generated it
+ * CRAEReference: EReference additional info which part of the source code generated it

@@ -212,6 +212,7 @@ public class RuntimeMappings {
 				}
 				case "boolean":
 				{
+					@SuppressWarnings("unused")
 					RMCommand prev=commands.put(token, (t)->{
 						boolean value=Boolean.parseBoolean(t.getString());
 						currentObject=value;
@@ -223,13 +224,13 @@ public class RuntimeMappings {
 				case ProcessXtextFile.localCrossReference:
 				{
 					commands.put(token, (t)->{
-						CrossReferenceAdapter cra=createUnresolvedReferencePlaceHolder(currentReferenceType);
+						CRAEObject cra=createUnresolvedReferencePlaceHolder(currentReferenceType);
 						EObject o=(EObject)cra.getTarget();
 						currentObject=o;
 						cra.getOrCreateUnresolvedCrossReferenceObject()
 							.setUnresolvedReference(prefixProxyId, RecognizerId.unescape(t.getString(), "^"))
+							.setSourceReference(new SourceReference(doc, t))
 							.setFeatureThatEndsInThis(currentFeature);
-							;
 						cra.setSourceReference(new SourceReference(doc, t));
 						return null;
 					});
@@ -238,11 +239,12 @@ public class RuntimeMappings {
 				case ProcessXtextFile.fqidCrossReference:
 				{
 					commands.put(token, (t)->{
-						CrossReferenceAdapter cra=createUnresolvedReferencePlaceHolder(currentReferenceType);
+						CRAEObject cra=createUnresolvedReferencePlaceHolder(currentReferenceType);
 						EObject o=(EObject)cra.getTarget();
 						currentObject=o;
 						cra.getOrCreateUnresolvedCrossReferenceObject()
 							.setUnresolvedReference(prefixProxyId, RecognizerId.unescape(t.getString(), "^"))
+							.setSourceReference(new SourceReference(doc, t))
 							.setFeatureThatEndsInThis(currentFeature);
 						cra.setSourceReference(new SourceReference(doc, t));
 						return null;
@@ -253,11 +255,12 @@ public class RuntimeMappings {
 				{
 					String proxyPrefix=unescape(pieces.get(3));
 					commands.put(token, (t)->{
-						CrossReferenceAdapter cra=createUnresolvedReferencePlaceHolder(currentReferenceType);
+						CRAEObject cra=createUnresolvedReferencePlaceHolder(currentReferenceType);
 						EObject o=(EObject)cra.getTarget();
 						currentObject=o;
 						cra.getOrCreateUnresolvedCrossReferenceObject()
 							.setUnresolvedReference(proxyPrefix, RecognizerId.unescape(t.getString(), "^"))
+							.setSourceReference(new SourceReference(doc, t))
 							.setFeatureThatEndsInThis(currentFeature);
 						cra.setSourceReference(new SourceReference(doc, t));
 						return null;
@@ -285,7 +288,7 @@ public class RuntimeMappings {
 		return this;
 	}
 
-	protected CrossReferenceAdapter createUnresolvedReferencePlaceHolder(EClass cla) {
+	protected CRAEObject createUnresolvedReferencePlaceHolder(EClass cla) {
 		EObject ret=cla.getEPackage().getEFactoryInstance().create(cla);
 		return createCrossReferenceAdapter(ret);
 	}
@@ -350,6 +353,7 @@ public class RuntimeMappings {
 		}
 		return null;
 	}
+	@SuppressWarnings("unused")
 	private UnresolvedReferenceFactory createUnresolvedReferenceFactory(String claName, EStructuralFeature r, String featureName) {
 		EClass _host=(EClass)getClassifier(claName);
 		EClass host=findFirstNotAbstractSubClass(_host, (c)->true);
@@ -416,13 +420,13 @@ public class RuntimeMappings {
 		ITreeElem te=currentObjectCreatingElem.peek();
 		if(currentObject instanceof EObject)
 		{
-			CrossReferenceAdapter c=createCrossReferenceAdapter((EObject)currentObject).setDoc(doc);
+			CRAEObject c=createCrossReferenceAdapter((EObject)currentObject).setDoc(doc);
 			c.setSourceReference(new SourceReference(doc, te.getTextIndexFrom(), te.getTextIndexTo()));
 		}
 	}
 
-	protected CrossReferenceAdapter createCrossReferenceAdapter(EObject o) {
-		CrossReferenceAdapter ret=CrossReferenceAdapter.get(o);
+	protected CRAEObject createCrossReferenceAdapter(EObject o) {
+		CRAEObject ret=CRAEObject.get(o);
 		ret.setDoc(doc);
 		return ret;
 	}
@@ -438,10 +442,10 @@ public class RuntimeMappings {
 		}
 		if(toAdd instanceof EObject)
 		{
-			CrossReferenceAdapter craUnresolvedReference=CrossReferenceAdapter.get((EObject)toAdd);
+			CRAEObject craUnresolvedReference=CRAEObject.get((EObject)toAdd);
 			if(craUnresolvedReference.isUnresolvedReference())
 			{
-				CrossReferenceInstance cri=craUnresolvedReference.getUnresolvedCrossReference();
+				CRAEReference cri=craUnresolvedReference.getUnresolvedCrossReference();
 				cri.setSourceParameters(host, (EReference)r, index);
 				cri.unresolvedReferenceAcceptedTypes=acceptedTypes;
 				int finalIndex=index;

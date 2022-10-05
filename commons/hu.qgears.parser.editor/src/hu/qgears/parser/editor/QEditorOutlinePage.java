@@ -17,6 +17,7 @@ import hu.qgears.commons.UtilEventListener;
 import hu.qgears.commons.UtilListenableProperty;
 
 public class QEditorOutlinePage extends ContentOutlinePage {
+	@SuppressWarnings("unused")
 	private IEditorInput editorInput;
 	private UtilListenableProperty<AbstractBuilder> builder;
 	private Object nullInput=new Object[]{"Model not parsed yet - enable builder to see outline"};
@@ -160,6 +161,12 @@ public class QEditorOutlinePage extends ContentOutlinePage {
 		if(getTreeViewer()!=null)
 		{
 			getTreeViewer().setSelection(new StructuredSelection(eo), true);
+		}
+	}
+	public void setSelectedEmfRef(RefInTree ref) {
+		if(getTreeViewer()!=null)
+		{
+			getTreeViewer().setSelection(new StructuredSelection(ref), true);
 		}
 	}
 }

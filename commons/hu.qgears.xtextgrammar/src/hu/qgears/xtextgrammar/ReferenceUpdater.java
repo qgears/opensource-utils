@@ -12,10 +12,10 @@ import hu.qgears.emfcollab.backref.EmfObjectReferences;
 
 public class ReferenceUpdater <T extends EObject> {
 	private EmfBackReferenceImpl ebr;
-	private CrossReferenceInstance cri;
+	private CRAEReference cri;
 	private List<Pair<EObject, EReference>> musts=new ArrayList<Pair<EObject,EReference>>();
 	private T host;
-	public ReferenceUpdater(EmfBackReferenceImpl ebr, CrossReferenceInstance cri, Class<T> class1, EObject host) {
+	public ReferenceUpdater(EmfBackReferenceImpl ebr, CRAEReference cri, Class<T> class1, EObject host) {
 		this.ebr=ebr;
 		this.cri=cri;
 		this.host=class1.cast(host);
@@ -46,7 +46,7 @@ public class ReferenceUpdater <T extends EObject> {
 				return;
 			}else
 			{
-				CrossReferenceAdapter cra=CrossReferenceAdapter.getAllowNull((EObject)v);
+				CRAEObject cra=CRAEObject.getAllowNull((EObject)v);
 				if(cra==null||cra.isUnresolvedReference())
 				{
 					cri.setReferenceSearchScope(null);

@@ -23,7 +23,7 @@ import hu.qgears.crossref.Obj;
 /**
  * An object that keeps track of all proxy object references on an EObject.
  */
-public class CrossReferenceAdapter implements Adapter {
+public class CRAEObject implements Adapter {
 	private EObject host;
 	protected Doc doc;
 	/**
@@ -38,12 +38,12 @@ public class CrossReferenceAdapter implements Adapter {
 	 * In case this is an unresolved reference placeholder (like a proxy but not eIsProxy()) object
 	 * then this object is not nutt.
 	 */
-	private CrossReferenceInstance proxyCrossReference;
-	private UtilEvent<CrossReferenceAdapter> managedCrossReferenceListChangedEvent;
+	private CRAEReference proxyCrossReference;
+	private UtilEvent<CRAEObject> managedCrossReferenceListChangedEvent;
 	/**
 	 * Store all source cross references of the host object.
 	 */
-	public CrossReferenceAdapter(EObject o) {
+	public CRAEObject(EObject o) {
 		this.host=o;
 		if(getAllowNull(o)!=null)
 		{
@@ -53,14 +53,14 @@ public class CrossReferenceAdapter implements Adapter {
 		EObject c=o.eContainer();
 		if(c!=null)
 		{
-			CrossReferenceAdapter cra=CrossReferenceAdapter.getAllowNull(c);
+			CRAEObject cra=CRAEObject.getAllowNull(c);
 			if(cra!=null)
 			{
 				doc=cra.getDoc();
 			}
 		}
 	}
-	public CrossReferenceInstance getOrCreateUnresolvedCrossReferenceObject()
+	public CRAEReference getOrCreateUnresolvedCrossReferenceObject()
 	{
 		if(proxyCrossReference==null)
 		{
@@ -69,13 +69,13 @@ public class CrossReferenceAdapter implements Adapter {
 		}
 		return proxyCrossReference;
 	}
-	protected CrossReferenceInstance createNewCrossReferenceInstance()
+	protected CRAEReference createNewCrossReferenceInstance()
 	{
-		return new CrossReferenceInstance(this);
+		return new CRAEReference(this);
 	}
-	public CrossReferenceAdapter getOrCreateForObject(EObject eo)
+	public CRAEObject getOrCreateForObject(EObject eo)
 	{
-		return CrossReferenceAdapter.get(eo);
+		return CRAEObject.get(eo);
 	}
 	@Override
 	public void notifyChanged(Notification notification) {
@@ -91,19 +91,19 @@ public class CrossReferenceAdapter implements Adapter {
 	public boolean isAdapterForType(Object type) {
 		return false;
 	}
-	public static CrossReferenceAdapter get(EObject o) {
+	public static CRAEObject get(EObject o) {
 		EList<Adapter> adapters=o.eAdapters();
 		for(Adapter a: adapters)
 		{
-			if(a instanceof CrossReferenceAdapter)
+			if(a instanceof CRAEObject)
 			{
-				return (CrossReferenceAdapter)a;
+				return (CRAEObject)a;
 			}
 		}
-		CrossReferenceAdapter ret=new CrossReferenceAdapter(o);
+		CRAEObject ret=new CRAEObject(o);
 		return ret;
 	}
-	protected void registerUnresolvedSourceCrossRef(CrossReferenceInstance cri) {
+	protected void registerUnresolvedSourceCrossRef(CRAEReference cri) {
 	}
 	public void registerName(String name) {
 		Doc doc=getDoc();
@@ -119,7 +119,7 @@ public class CrossReferenceAdapter implements Adapter {
 	public Doc getDoc() {
 		return doc;
 	}
-	public CrossReferenceAdapter setDoc(Doc doc) {
+	public CRAEObject setDoc(Doc doc) {
 		this.doc = doc;
 		return this;
 	}
@@ -154,10 +154,10 @@ public class CrossReferenceAdapter implements Adapter {
 		}
 	}
 	private void printIfProxyTg(String prefix, Writer fw, EObject val) throws IOException {
-		CrossReferenceAdapter pa=CrossReferenceAdapter.getAllowNull(val);
+		CRAEObject pa=CRAEObject.getAllowNull(val);
 		if(pa!=null)
 		{
-			CrossReferenceInstance cri=pa.getUnresolvedCrossReference();
+			CRAEReference cri=pa.getUnresolvedCrossReference();
 			if(cri!=null)
 			{
 				if(cri.resolvedToAdapter==null)
@@ -179,20 +179,20 @@ public class CrossReferenceAdapter implements Adapter {
 			}
 		}
 	}
-	public static CrossReferenceAdapter getAllowNull(EObject o) {
+	public static CRAEObject getAllowNull(EObject o) {
 		EList<Adapter> adapters=o.eAdapters();
 		for(Adapter a: adapters)
 		{
-			if(a instanceof CrossReferenceAdapter)
+			if(a instanceof CRAEObject)
 			{
-				return (CrossReferenceAdapter)a;
+				return (CRAEObject)a;
 			}
 		}
 		return null;
 	}
 	@SuppressWarnings("unchecked")
-	public void setReferenceTarget(CrossReferenceInstance cri, EReference r, int index, CrossReferenceAdapter prev, 
-			CrossReferenceAdapter resolvedToAdapter,
+	public void setReferenceTarget(CRAEReference cri, EReference r, int index, CRAEObject prev, 
+			CRAEObject resolvedToAdapter,
 			EObject eObject) {
 		// TODO maintain cross reference caches!
 		if(r.isMany())
@@ -223,7 +223,7 @@ public class CrossReferenceAdapter implements Adapter {
 			registerResolvedSourceCrossRef(cri);
 		}
 	}
-	protected void registerResolvedSourceCrossRef(CrossReferenceInstance cri) {
+	protected void registerResolvedSourceCrossRef(CRAEReference cri) {
 	}
 	private UtilListenableProperty<Boolean> parentProperty=null;
 	public void notifyAttachEvent(TrackerAdapter trackerAdapter) {
@@ -248,7 +248,7 @@ public class CrossReferenceAdapter implements Adapter {
 			}
 		}
 	}
-	public CrossReferenceInstance getUnresolvedCrossReference() {
+	public CRAEReference getUnresolvedCrossReference() {
 		return proxyCrossReference;
 	}
 	
@@ -277,16 +277,16 @@ public class CrossReferenceAdapter implements Adapter {
 		}
 		return parentProperty;
 	}
-	private List<CrossReferenceInstance> managedReferences=new ArrayList<CrossReferenceInstance>();
-	public void addManagedReference(EReference r, int index, CrossReferenceInstance crossReferenceInstance) {
+	private List<CRAEReference> managedReferences=new ArrayList<CRAEReference>();
+	public void addManagedReference(EReference r, int index, CRAEReference crossReferenceInstance) {
 		managedReferences.add(crossReferenceInstance);
 		if(managedCrossReferenceListChangedEvent!=null)
 		{
 			managedCrossReferenceListChangedEvent.eventHappened(this);
 		}
 	}
-	public CrossReferenceInstance getManagedReference(EReference r, Integer idx) {
-		for(CrossReferenceInstance c: managedReferences)
+	public CRAEReference getManagedReference(EReference r, Integer idx) {
+		for(CRAEReference c: managedReferences)
 		{
 			if(c.r==r && (idx==null || idx==c.index))
 			{
@@ -295,17 +295,17 @@ public class CrossReferenceAdapter implements Adapter {
 		}
 		return null;
 	}
-	public CrossReferenceAdapter createNewUnresolvedReferenceTargetPlaceHolder(EClass eClass) {
+	public CRAEObject createNewUnresolvedReferenceTargetPlaceHolder(EClass eClass) {
 		EObject ret=eClass.getEPackage().getEFactoryInstance().create(eClass);
-		CrossReferenceAdapter cra=createNewAdapter(ret);
+		CRAEObject cra=createNewAdapter(ret);
 		cra.setDoc(doc);
 		return cra;
 	}
-	protected CrossReferenceAdapter createNewAdapter(EObject o) {
-		return new CrossReferenceAdapter(o);
+	protected CRAEObject createNewAdapter(EObject o) {
+		return new CRAEObject(o);
 	}
-	public CrossReferenceAdapter copyMetadataOnto(EObject ret) {
-		CrossReferenceAdapter cra=getOrCreateForObject(ret);
+	public CRAEObject copyMetadataOnto(EObject ret) {
+		CRAEObject cra=getOrCreateForObject(ret);
 		cra.setDoc(doc);
 		cra.sourceReference=sourceReference;
 		return cra;
@@ -313,7 +313,7 @@ public class CrossReferenceAdapter implements Adapter {
 	public Obj getNameObject() {
 		return nameObject;
 	}
-	public UtilEvent<CrossReferenceAdapter> getManagedCrossReferenceListChangedEvent() {
+	public UtilEvent<CRAEObject> getManagedCrossReferenceListChangedEvent() {
 		if(managedCrossReferenceListChangedEvent==null)
 		{
 			managedCrossReferenceListChangedEvent=new UtilEvent<>();
@@ -324,7 +324,7 @@ public class CrossReferenceAdapter implements Adapter {
 	 * 
 	 * @return Internal object must be handled read only.
 	 */
-	public List<CrossReferenceInstance> getManagedReferences() {
+	public List<CRAEReference> getManagedReferences() {
 		return managedReferences;
 	}
 }

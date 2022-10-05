@@ -12,9 +12,10 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
-import hu.qgears.xtextgrammar.ResourceCrossReferenceAdapter;
+import hu.qgears.xtextgrammar.CRAResource;
 
 public class QEdContentProvider implements ITreeContentProvider {
+	@SuppressWarnings("unused")
 	private Object input;
 	private Object[] empty=new Object[]{};
 	@Override
@@ -41,8 +42,8 @@ public class QEdContentProvider implements ITreeContentProvider {
 				Collections.sort(ret, new Comparator<Resource>() {
 					@Override
 					public int compare(Resource o1, Resource o2) {
-						ResourceCrossReferenceAdapter a1=ResourceCrossReferenceAdapter.get(o1);
-						ResourceCrossReferenceAdapter a2=ResourceCrossReferenceAdapter.get(o2);
+						CRAResource a1=CRAResource.get(o1);
+						CRAResource a2=CRAResource.get(o2);
 						return a1.getDocId().compareTo(a2.getDocId());
 					}
 				});
@@ -68,13 +69,15 @@ public class QEdContentProvider implements ITreeContentProvider {
 						Object v=o.eGet(r);
 						if(v instanceof List<?>)
 						{
+							int index=0;
 							for(Object tg: ((List<?>)v))
 							{
-								ret.add(new RefInTree(o, r, (EObject)tg));
+								ret.add(RefInTree.create(o, r, (EObject)tg, index));
+								index++;
 							}
 						}else if(v instanceof EObject)
 						{
-							ret.add(new RefInTree(o, r, (EObject)v));
+							ret.add(RefInTree.create(o, r, (EObject)v, 0));
 						}
 					}
 				}
