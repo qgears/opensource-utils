@@ -24,7 +24,7 @@ import hu.qgears.crossref.Obj;
  * An object that keeps track of all proxy object references on an EObject.
  */
 public class CRAEObject implements Adapter {
-	private EObject host;
+	protected EObject host;
 	protected Doc doc;
 	/**
 	 * In case this object delegates a referencable object to crossref then that is stored here.

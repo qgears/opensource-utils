@@ -2,7 +2,9 @@ package hu.qgears.parser.editor;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -11,8 +13,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.TextPresentation;
+import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jface.text.source.SourceViewer;
+import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Composite;
@@ -59,6 +64,14 @@ abstract public class AbstractQParserEditor extends AbstractDecoratedTextEditor 
 			}
 		}
 	};
+	@Override
+	protected void initializeEditor() {
+		super.initializeEditor();
+		setSourceViewerConfiguration(createSourceViewerConfiguration());
+	}
+	private SourceViewerConfiguration createSourceViewerConfiguration() {
+		return new QPViewerConfiguration(this);
+	}
 	@Override
 	protected void doSetInput(IEditorInput input) throws CoreException {
 		super.doSetInput(input);
@@ -127,6 +140,60 @@ abstract public class AbstractQParserEditor extends AbstractDecoratedTextEditor 
 					}
 				});
 		});
+	}
+	public IHyperlink[] findLink(IRegion region)
+	{
+		Map<TextSelection, IHyperlink> ret=new HashMap<>();
+		region.getOffset();
+
+		List<TextSelection> possibles=new ArrayList<>();
+		ResourceSet rs=getResourceSet();
+		if(rs!=null)
+		{
+			synchronized (rs) {
+				CRAResource rcra=getResourceOfEditor();
+				if(rcra!=null)
+				{
+					UtilVisitor.visitModel(rcra.getResource(), new UtilVisitor.Visitor(){
+						@Override
+						public Object visit(EObject element) {
+							CRAEObject cra=CRAEObject.getAllowNull(element);
+							if(cra!=null)
+							{
+								for(CRAEReference cri: cra.getManagedReferences())
+								{
+									SourceReference sr=cri.getSourceReference();
+									if(TextSelection.isCaretInside(sr, region.getOffset()))
+									{
+										System.out.println("Ref: "+cri.r.getName()+" "+sr.getLength());
+										CRAEObject targetWrap=cri.getCurrentTarget().getProperty();
+										if(cri.r!=null && targetWrap!=null && targetWrap.getTarget() instanceof EObject)
+										{
+											SourceReference srt=targetWrap.getSourceReference();
+											if(srt!=null)
+											{
+												RefInTree ref=RefInTree.create(element, cri.r, (EObject)cri.targetA.getTarget(), cri.index);
+												TextSelection ts=createTextSelection(ref, sr);
+												possibles.add(ts);
+												ret.put(ts, ResourceHyperlink.createForElement(sr, srt));
+											}
+										}
+									}
+								}
+							}
+							return null;
+						}
+					});
+				}
+			}
+		}
+		Collections.sort(possibles);
+		if(possibles.size()>0)
+		{
+			IHyperlink hl=ret.get(possibles.get(0));
+			return new IHyperlink[]{hl};
+		}
+		return null;
 	}
 	private void updateSelection(int caretOffset) {
 		List<TextSelection> possibles=new ArrayList<>();
