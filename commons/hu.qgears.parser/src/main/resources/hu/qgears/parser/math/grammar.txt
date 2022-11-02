@@ -1,0 +1,58 @@
+/*
+	Simple grammar file for interpreting mathematical expressions.
+	Supports the 4 usual operations (+,-,*,/), bracketing, and allows
+	to use variables beside the numerical constants. 
+ */
+ws="whitespace";
+comment="comment";
+tBracketOpen="const" "(";
+tBracketClose="const" ")";
+tAdd="const" "+";
+tSub="const" "-";
+tMul="const" "*";
+tSlash="const" "/";
+
+tDouble="anyNumber";
+tNumber="number";
+tId="xtextId";
+$ws;
+$comment;
+%doc;
+#tId;
+#expAdd;
+#expMul;
+#expMinus;
+//#fnCall;
+//#tString;
+doc:=declaration;
+declaration:=expression;
+#doc;
+
+constLong:=(!|tSub|tAdd)+tNumber;
+constDouble:=(!|tSub|tAdd)+tDouble;
+
+EXPRESSION_LANGUAGE_START
+// The non-terminal that this expession language hooks to
+@expression
+// The id of an expression with one level lower precedence 
+$lower
+// The string constant hook that will be replaced with this expression language in the hooking language.
+%INSERT_EXPRESSION_LANGUAGE_HERE
+
+// Expression with  precedence 100 id expAdd
+// and language term definition fragment : "(lower+tAdd)+lower"
+// where lower will be replaced with the generated id of the expressions with precedenece 200 
+!100:expAdd:(this +tAdd)+lower
+!100:expSub:(this+tSub)+lower
+
+!110:expMul:(this+tMul)+lower
+!110:expDiv:(this+tSlash)+lower
+
+!280:bracketed:tBracketOpen+expression+tBracketClose
+!300:variable:tId
+!310:constInt:constLong
+!320:constDoubleNumber:constDouble
+
+EXPRESSION_LANGUAGE_END
+
+
