@@ -10,6 +10,7 @@ import hu.qgears.parser.tokenizer.ITokenRecognizer;
 import hu.qgears.parser.tokenizer.ITokenRecognizerFactory;
 import hu.qgears.parser.tokenizer.TokenizerException;
 import hu.qgears.parser.tokenizer.recognizer.RecognizerAnyCaseConst;
+import hu.qgears.parser.tokenizer.recognizer.RecognizerCDecimal;
 import hu.qgears.parser.tokenizer.recognizer.RecognizerCStyleHexa;
 import hu.qgears.parser.tokenizer.recognizer.RecognizerComment;
 import hu.qgears.parser.tokenizer.recognizer.RecognizerConst;
@@ -40,6 +41,7 @@ public class Fact implements ITokenRecognizerFactory {
 	
 		types.put("cStyleHexa", (type, id, config)->new RecognizerCStyleHexa(type));
 		types.put("number", (type, id, config)->new RecognizerNumber(type));
+		types.put("cDecimal", (type, id, config)->new RecognizerCDecimal(type));
 		types.put("whitespace", (type, id, config)->new RecognizerWhiteSpace(type));
 		types.put("id", (type, id, config)->new RecognizerId(type));
 		types.put("xtextId", (type, id, config)->new RecognizerXtextId(type));

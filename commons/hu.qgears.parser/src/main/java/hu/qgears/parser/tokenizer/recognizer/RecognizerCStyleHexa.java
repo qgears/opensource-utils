@@ -64,4 +64,8 @@ public class RecognizerCStyleHexa implements ITokenRecognizer {
 		// This feature is not supported
 		return null;
 	}
+	public static long valueOf(String s)
+	{
+		return Long.parseLong(s.substring(2), 16);
+	}
 }
