@@ -31,9 +31,12 @@ public class NativeLibPng extends NativeLibPngConnector
 	}
 	public NativeImage loadImage(byte[] imageData, INativeMemoryAllocator allocator, int alignment)
 	{
-		ByteBuffer data=ByteBuffer.allocateDirect(imageData.length);
-		data.put(imageData);
-		return loadImage(data, allocator, alignment);
+		try(INativeMemory nm=DefaultJavaNativeMemoryAllocator.getInstance().allocateNativeMemory(imageData.length))
+		{
+			ByteBuffer data=nm.getJavaAccessor();
+			data.put(imageData);
+			return loadImage(data, allocator, alignment);
+		}
 	}
 	public NativeImage loadImage(ByteBuffer imageData, INativeMemoryAllocator allocator, int alignment)
 	{
