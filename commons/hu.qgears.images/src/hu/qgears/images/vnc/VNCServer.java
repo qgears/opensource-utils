@@ -16,7 +16,10 @@ import java.util.concurrent.Executors;
 
 import hu.qgears.commons.NamedThreadFactory;
 import hu.qgears.commons.UtilChannel;
+import hu.qgears.commons.UtilListenableProperty;
 import hu.qgears.commons.mem.DefaultJavaNativeMemoryAllocator;
+import hu.qgears.commons.mem.INativeMemory;
+import hu.qgears.commons.mem.INativeMemoryAllocator;
 import hu.qgears.images.ENativeImageComponentOrder;
 import hu.qgears.images.NativeImage;
 import hu.qgears.images.SizeInt;
@@ -38,7 +41,10 @@ public class VNCServer
 	private String serverName="Simple embedded VNC Server";
 	private RingBuffer events;
 	private long updateCount=0;
+	private INativeMemory eventsMemory;
+	private INativeMemoryAllocator allocator=DefaultJavaNativeMemoryAllocator.getInstance();
 	private List<VNCServerConnection> connections=Collections.synchronizedList(new ArrayList<VNCServerConnection>());
+	public final UtilListenableProperty<String> clipboardContent=new UtilListenableProperty<String>();
 	private class VNCServerQuery
 	{
 		int x,y,w,h;
@@ -59,8 +65,10 @@ public class VNCServer
 		private long thisUpdateCount;
 		private volatile VNCServerQuery currentUpdateQuery;
 		private ExecutorService exec=Executors.newSingleThreadExecutor(new NamedThreadFactory("VNC frame sender").setDaemon(true));
-		private ByteBuffer sendByteBuffer=ByteBuffer.allocateDirect(Math.max(size.getWidth()*4+32, 1024)).order(ByteOrder.BIG_ENDIAN);
-		private ByteBuffer frameByteBuffer=ByteBuffer.allocateDirect(Math.max(size.getWidth()*size.getHeight()*4+32*size.getHeight(), 1024)).order(ByteOrder.BIG_ENDIAN);
+		private ByteBuffer sendByteBuffer;
+		private ByteBuffer frameByteBuffer;
+		private INativeMemory sendByteBufferMem;
+		private INativeMemory frameByteBufferMem;
 		public VNCServerConnection(SocketChannel s) {
 			this.s=s;
 			current.validate();
@@ -69,8 +77,12 @@ public class VNCServer
 		public void run() {
 			try {
 				connections.add(this);
-				prevImage=NativeImage.create(size, currentImage.getComponentOrder(), DefaultJavaNativeMemoryAllocator.getInstance());
-				nextImage=NativeImage.create(size, currentImage.getComponentOrder(), DefaultJavaNativeMemoryAllocator.getInstance());
+				sendByteBufferMem=allocator.allocateNativeMemory(Math.max(size.getWidth()*4+32, 1024));
+				sendByteBuffer=sendByteBufferMem.getJavaAccessor().order(ByteOrder.BIG_ENDIAN);
+				frameByteBufferMem=allocator.allocateNativeMemory(Math.max(size.getWidth()*size.getHeight()*4+32*size.getHeight(), 1024));
+				frameByteBuffer=frameByteBufferMem.getJavaAccessor().order(ByteOrder.BIG_ENDIAN);
+				prevImage=NativeImage.create(size, currentImage.getComponentOrder(), allocator);
+				nextImage=NativeImage.create(size, currentImage.getComponentOrder(), allocator);
 				prevImageBuff=prevImage.getBuffer().getJavaAccessor();
 				nextImageBuff=nextImage.getBuffer().getJavaAccessor();
 				step=prevImage.getStep();
@@ -120,11 +132,16 @@ public class VNCServer
 				}
 				connections.remove(this);
 				exec.shutdown();
+				prevImage.close();
+				nextImage.close();
+				sendByteBufferMem.close();
+				frameByteBufferMem.close();
 			}
 		}
 		private void messageClientCutText() throws IOException {
 			UtilChannel.readNBytes(s, sendByteBuffer, 3);
-			VNCClient.readString(s, sendByteBuffer);	// TODO we ignore this
+			String clipboardContent=VNCClient.readString(s, sendByteBuffer);
+			VNCServer.this.clipboardContent.setProperty(clipboardContent);
 		}
 		private void messagePointerEvent() throws IOException {
 			sendByteBuffer.clear();
@@ -477,7 +494,8 @@ public class VNCServer
 		this.size=size;
 		pixelFormat=new PixelFormat();
 		pixelFormat.init();
-		events=new RingBuffer(ByteBuffer.allocateDirect(1024).order(ByteOrder.nativeOrder()));
+		eventsMemory=allocator.allocateNativeMemory(1024);
+		events=new RingBuffer(eventsMemory.getJavaAccessor().order(ByteOrder.nativeOrder()));
 		currentImage=NativeImage.create(size, ENativeImageComponentOrder.ARGB, DefaultJavaNativeMemoryAllocator.getInstance());
 	}
 	public void start(SocketAddress address, boolean daemon) throws IOException
@@ -498,9 +516,13 @@ public class VNCServer
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
+				}finally
+				{
+					eventsMemory.close();
 				}
 			}
 		};
+		eventsMemory.incrementReferenceCounter();
 		th.setDaemon(daemon);
 		th.start();
 	}
@@ -513,6 +535,7 @@ public class VNCServer
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		eventsMemory.close();
 	}
 	public void updateFrame(NativeImage frameBuffer) {
 		synchronized (currentImage) {

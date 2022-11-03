@@ -4,6 +4,7 @@ import hu.qgears.commons.UtilChannel;
 import hu.qgears.commons.mem.DefaultJavaNativeMemory;
 import hu.qgears.commons.mem.DefaultJavaNativeMemoryAllocator;
 import hu.qgears.commons.mem.INativeMemory;
+import hu.qgears.commons.mem.INativeMemoryAllocator;
 import hu.qgears.images.ENativeImageComponentOrder;
 import hu.qgears.images.LazyNativeImage;
 import hu.qgears.images.NativeImage;
@@ -43,8 +44,10 @@ public class VNCClient implements AutoCloseable {
 	private String host="localhost";
 	private int port=5902;
 	private volatile int changeCounter=0;
+	private INativeMemoryAllocator allocator=DefaultJavaNativeMemoryAllocator.getInstance();
 
-	private ByteBuffer sendByteBuffer=ByteBuffer.allocateDirect(1000).order(ByteOrder.BIG_ENDIAN);
+	private INativeMemory sendByteBufferMemory;
+	private ByteBuffer sendByteBuffer;
 	private SocketChannel channel;
 	private PixelFormat pixelFormat;
 	private short width;
@@ -61,12 +64,19 @@ public class VNCClient implements AutoCloseable {
 	{
 		this.host=host;
 		this.port=port;
+		sendByteBufferMemory=allocator.allocateNativeMemory(1000);
+		sendByteBuffer=sendByteBufferMemory.getJavaAccessor().order(ByteOrder.BIG_ENDIAN);
 		new Thread("VNC client"){
 			public void run() {
 				try {
 					VNCClient.this.run();
 				} catch (IOException e) {
 					LOG.error("Error in method run",e);
+				} finally
+				{
+					sendByteBufferMemory.close();
+					sendByteBufferMemory=null;
+					sendByteBuffer=null;
 				}
 			};
 		}.start();
@@ -165,30 +175,33 @@ public class VNCClient implements AutoCloseable {
 	private void processServerMessages() throws IOException {
 		image.getImage(new SizeInt(width, height), componentOrder, DefaultJavaNativeMemoryAllocator.getInstance());
 		nextImage.getImage(new SizeInt(width, height), componentOrder, DefaultJavaNativeMemoryAllocator.getInstance());
-		ByteBuffer bb=ByteBuffer.allocateDirect(4*width*height).order(ByteOrder.BIG_ENDIAN);
-		while(!exit)
+		try(INativeMemory nm=allocator.allocateNativeMemory(4*width*height))
 		{
-			bb.clear();
-			UtilChannel.readNBytes(channel, bb, 1);
-			bb.flip();
-			byte command=bb.get();
-			switch (command) {
-			case 0:
-				processFrameBufferUpdate(bb);
-				connected=true;
-				frameBufferUpdateRequest();
-				break;
-			case 1:
-				processSetColourMapEntries(bb);
-				break;
-			case 2:
-				processBell(bb);
-				break;
-			case 3:
-				processServerCutText(bb);
-				break;
-			default:
-				break;
+			ByteBuffer bb=nm.getJavaAccessor().order(ByteOrder.BIG_ENDIAN);
+			while(!exit)
+			{
+				bb.clear();
+				UtilChannel.readNBytes(channel, bb, 1);
+				bb.flip();
+				byte command=bb.get();
+				switch (command) {
+				case 0:
+					processFrameBufferUpdate(bb);
+					connected=true;
+					frameBufferUpdateRequest();
+					break;
+				case 1:
+					processSetColourMapEntries(bb);
+					break;
+				case 2:
+					processBell(bb);
+					break;
+				case 3:
+					processServerCutText(bb);
+					break;
+				default:
+					break;
+				}
 			}
 		}
 	}
@@ -453,8 +466,9 @@ public class VNCClient implements AutoCloseable {
 	 * Send a key press and release event (two events) to the server.
 	 * @param code keycode that is pressed. (See RFB specification for valid codes)
 	 * @param timeStamp ignored
+	 * @param inbetween Will be executed between sending key down and key up. 
 	 */
-	public void keyboardEvent(int code, long timeStamp) throws IOException {
+	public void keyboardEvent(int code, long timeStamp, Runnable inbetween) throws IOException {
 		if(connected)
 		{
 			synchronized (sendByteBuffer) {
@@ -465,6 +479,7 @@ public class VNCClient implements AutoCloseable {
 				sendByteBuffer.putInt(code);
 				sendByteBuffer.flip();
 				UtilChannel.writeNBytes(channel, sendByteBuffer);
+				inbetween.run();
 				sendByteBuffer.clear();
 				sendByteBuffer.put((byte)4);
 				sendByteBuffer.put((byte)0);
@@ -474,6 +489,14 @@ public class VNCClient implements AutoCloseable {
 				UtilChannel.writeNBytes(channel, sendByteBuffer);
 			}
 		}
+	}
+	/**
+	 * Send a key press and release event (two events) to the server.
+	 * @param code keycode that is pressed. (See RFB specification for valid codes)
+	 * @param timeStamp ignored
+	 */
+	public void keyboardEvent(int code, long timeStamp) throws IOException {
+		keyboardEvent(code, timeStamp, ()->{});
 	}
 	/**
 	 * Send a key press or release event to the server.
@@ -489,6 +512,26 @@ public class VNCClient implements AutoCloseable {
 				sendByteBuffer.put((byte)(down?1:0));
 				sendByteBuffer.putShort((short)0);
 				sendByteBuffer.putInt(code);
+				sendByteBuffer.flip();
+				UtilChannel.writeNBytes(channel, sendByteBuffer);
+			}
+		}
+	}
+	/**
+	 * Send clipboard content to the VNC server.
+	 * @param content the string content of the clipboard to send to the server.
+	 */
+	public void sendClipboardEvent(String content) throws IOException
+	{
+		if(connected)
+		{
+			synchronized (sendByteBuffer) {
+				sendByteBuffer.clear();
+				sendByteBuffer.put((byte)6);
+				sendByteBuffer.put((byte)0);
+				sendByteBuffer.put((byte)0);
+				sendByteBuffer.put((byte)0);
+				writeStringAndLength(sendByteBuffer, content);
 				sendByteBuffer.flip();
 				UtilChannel.writeNBytes(channel, sendByteBuffer);
 			}
