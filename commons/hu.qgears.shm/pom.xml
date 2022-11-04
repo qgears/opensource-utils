@@ -6,13 +6,13 @@
 	<parent>
 		<groupId>hu.qgears</groupId>
 		<artifactId>opensource-utils-parent</artifactId>
-		<version>10.4.2-SNAPSHOT</version>
+		<version>10.5.0-SNAPSHOT</version>
 		<relativePath>../../build/opensource-utils-parent/</relativePath>
 	</parent>
 	<groupId>hu.qgears</groupId>
 	<artifactId>hu.qgears.shm</artifactId>
 	<packaging>eclipse-plugin</packaging>
-	<version>10.4.2-SNAPSHOT</version>
+	<version>10.5.0-SNAPSHOT</version>
 	
 	<description>Custom effective shared memory implementation.</description>
 	

@@ -7,7 +7,7 @@ Export-Package: hu.qgears.shm,
  hu.qgears.shm.part,
  hu.qgears.shm.sem
 Bundle-Name: Shm
-Bundle-Version: 10.4.2.qualifier
+Bundle-Version: 10.5.0.qualifier
 Require-Bundle: hu.qgears.commons;bundle-version="2.0.0",hu.qgears.nat
  iveloader;bundle-version="1.0.0";visibility:=reexport,org.apache.log4
  j;bundle-version="1.2.0"

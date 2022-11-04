@@ -5,7 +5,7 @@ Export-Package: hu.qgears.coolrmi,
  hu.qgears.coolrmi.remoter,
  hu.qgears.coolrmi.streams
 Bundle-SymbolicName: hu.qgears.coolrmi
-Bundle-Version: 10.4.2.qualifier
+Bundle-Version: 10.5.0.qualifier
 Bundle-Name: CoolRmi Plug-in
 Require-Bundle: hu.qgears.commons;bundle-version="6.4.1"
 Bundle-ManifestVersion: 2
