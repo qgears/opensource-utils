@@ -1,5 +1,7 @@
 package hu.qgears.parser.tokenizer.recognizer;
 
+import java.util.function.Consumer;
+
 import hu.qgears.parser.language.ITokenType;
 import hu.qgears.parser.tokenizer.ITextSource;
 import hu.qgears.parser.tokenizer.IToken;
@@ -32,5 +34,8 @@ public class RecognizerStringInside extends RecognizerAbstract implements
 			return new SimpleToken(getTokenType(), src, ctr);
 		else
 			return null;
+	}
+	@Override
+	public void collectPorposals(String tokenTypeName, String prefix, Consumer<String> collector) {
 	}
 }

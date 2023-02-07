@@ -1,5 +1,7 @@
 package hu.qgears.parser.tokenizer.recognizer;
 
+import java.util.function.Consumer;
+
 import hu.qgears.parser.language.ITokenType;
 import hu.qgears.parser.tokenizer.ITextSource;
 import hu.qgears.parser.tokenizer.IToken;
@@ -15,5 +17,8 @@ public class RecognizerEOF extends RecognizerAbstract implements
 
 	public RecognizerEOF(ITokenType tokenType) {
 		super(tokenType);
+	}
+	@Override
+	public void collectPorposals(String tokenTypeName, String prefix, Consumer<String> collector) {
 	}
 }

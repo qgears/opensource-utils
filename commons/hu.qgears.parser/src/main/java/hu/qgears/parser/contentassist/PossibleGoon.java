@@ -2,10 +2,14 @@ package hu.qgears.parser.contentassist;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import hu.qgears.parser.language.impl.Term;
 
-public class PossibleGoon {
+/**
+ * Possible content assist reply at a given position.
+ */
+public class PossibleGoon implements Consumer<String> {
 	public Term t;
 	
 	public PossibleGoon(Term t) {
@@ -13,10 +17,11 @@ public class PossibleGoon {
 		this.t = t;
 	}
 	public List<String> prefixes=new ArrayList<>();
-	public void add(String s) {
+	public void addContentAssistProposal(String s) {
 		prefixes.add(s);
 	}
-	public void add(String packageName, String string) {
-		prefixes.add(packageName);
+	@Override
+	public void accept(String proposal) {
+		addContentAssistProposal(proposal);
 	}
 }

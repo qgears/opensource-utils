@@ -21,6 +21,9 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 import hu.qgears.commons.UtilEvent;
 import hu.qgears.commons.UtilListenableProperty;
 
+/**
+ * Implement Eclipse builder API
+ */
 abstract public class AbstractBuilder extends IncrementalProjectBuilder {
 	private AbstractIncrementalBuilder incBuilder;
 	private Set<IFile> changed=new HashSet<>();
@@ -108,6 +111,8 @@ abstract public class AbstractBuilder extends IncrementalProjectBuilder {
 	protected void clean(IProgressMonitor monitor) throws CoreException {
 		// delete markers set and files created
 		getProject().deleteMarkers(getMarkerType(), true, IResource.DEPTH_INFINITE);
+		incBuilder.clean();
+		modelUpdated.eventHappened(buildResult.getProperty());
 	}
 	abstract protected String getMarkerType();
 	private IResourceChangeListener rcl;
@@ -148,4 +153,7 @@ abstract public class AbstractBuilder extends IncrementalProjectBuilder {
 	 * @return
 	 */
 	abstract protected String getBuilderId();
+	public AbstractIncrementalBuilder getIncrementalBuilder() {
+		return incBuilder;
+	}
 }

@@ -5,14 +5,33 @@ import java.util.TreeMap;
 
 import hu.qgears.parser.IParserReceiver;
 import hu.qgears.parser.ITreeElem;
+import hu.qgears.parser.impl.ElemBuffer;
+import hu.qgears.parser.impl.ParseException;
 import hu.qgears.parser.tokenizer.IToken;
+import hu.qgears.parser.tokenizer.TokenizerException;
 import hu.qgears.parser.util.TreeVisitor;
 
+/**
+ * See also SwtStyleBasedColoring
+ */
 public class StyleBasedColoring {
 	protected TreeMap<Integer, Range> froms=new TreeMap<>();
 	private TreeMap<Integer, Range> tos=new TreeMap<>();
 	private int length;
-	private class ParserCallback implements IParserReceiver {
+	public class ParserCallback implements IParserReceiver {
+		public ParseErrorFeedback parseErrorFeedback;
+		@Override
+		public void stucked(ElemBuffer buffer, IToken t) throws ParseException {
+			parseErrorFeedback=new ParseErrorFeedback("Can not parse", t.getPos(), t.getLength());
+		}
+		@Override
+		public void parseProblemUnknown(ElemBuffer buffer) throws ParseException {
+			parseErrorFeedback=new ParseErrorFeedback("Can not parse", 0, 1);
+		}
+		@Override
+		public void tokenizeError(TokenizerException exc) throws TokenizerException {
+			parseErrorFeedback=new ParseErrorFeedback(exc.getMessage(), exc.getPosition(), 1);
+		}
 		public void tokensUnfiltered(java.util.List<IToken> tokensUnfiltered) {
 			for(IToken t: tokensUnfiltered)
 			{
@@ -43,7 +62,7 @@ public class StyleBasedColoring {
 			}
 		}
 	}
-	public IParserReceiver createParserCallback()
+	public ParserCallback createParserCallback()
 	{
 		return new ParserCallback();
 	}

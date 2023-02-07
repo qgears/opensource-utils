@@ -1,6 +1,7 @@
 package hu.qgears.parser.language;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Matcher is used to check a possible token match whether it
@@ -44,5 +45,14 @@ public class Matcher {
 	public void collectPossibleValues(List<String> collect)
 	{
 		collect.add(value);
+	}
+	/**
+	 * Add the possible token contents that would match this matcher.
+	 * Used by context sensitive content assist recommendation subsystem.
+	 * @param collect
+	 */
+	public void collectPossibleValues(Consumer<String> collect)
+	{
+		collect.accept(value);
 	}
 }

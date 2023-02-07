@@ -4,7 +4,10 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
+import org.apache.log4j.Logger;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -14,6 +17,7 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import hu.qgears.commons.NamedThreadFactory;
 import hu.qgears.commons.UtilFile;
 import hu.qgears.commons.signal.SignalFutureWrapper;
 
@@ -21,6 +25,8 @@ import hu.qgears.commons.signal.SignalFutureWrapper;
  * A single instance is maintained for each project.
  */
 abstract public class AbstractIncrementalBuilder {
+	protected static Logger log=Logger.getLogger(AbstractIncrementalBuilder.class);
+	private ExecutorService es=Executors.newSingleThreadExecutor(new NamedThreadFactory("QParser editor bg thread").setDaemon(true));
 	public class Visitor implements IResourceVisitor
 	{
 		private List<IFile> collected=new ArrayList<>();
@@ -54,6 +60,7 @@ abstract public class AbstractIncrementalBuilder {
 	}
 	abstract protected SignalFutureWrapper<Void> processFile(IFile file, String source);
 	public void fullBuild(IProject project, IProgressMonitor monitor, IWorkspace workspace) {
+		log.info("Full build requested");
 		beforeFullBuild(project, monitor);
 		try {
 			Visitor v=new Visitor();
@@ -92,7 +99,7 @@ abstract public class AbstractIncrementalBuilder {
 	 */
 	abstract protected void beforeFullBuild(IProject project, IProgressMonitor monitor);
 	public void incrementalBuild(IProject iProject, Set<IFile> changed, IProgressMonitor monitor) {
-		System.out.println("Delta build: "+changed);
+		// log.info("Incremental build requested");
 		beforeIncrementalBuild(iProject, changed, monitor);
 		for(IFile f: changed)
 		{
@@ -142,5 +149,13 @@ abstract public class AbstractIncrementalBuilder {
 	}
 	public static String getFileIdentifier(IFile file) {
 		return file.getFullPath().toPortableString();
+	}
+	public void clean() {
+		log.info("Clean requested");
+	}
+	public boolean executeOnBuilderThread(Runnable r)
+	{
+		es.submit(r);
+		return true;
 	}
 }

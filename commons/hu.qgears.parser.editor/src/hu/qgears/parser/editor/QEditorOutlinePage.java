@@ -22,6 +22,7 @@ public class QEditorOutlinePage extends ContentOutlinePage {
 	private IEditorInput editorInput;
 	private UtilListenableProperty<AbstractBuilder> builder;
 	private Object nullInput=new Object[]{"Model not parsed yet - enable builder to see outline"};
+	private boolean blockSelectionRecursion = false;
 	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
@@ -38,7 +39,10 @@ public class QEditorOutlinePage extends ContentOutlinePage {
 	@Override
 	public void selectionChanged(SelectionChangedEvent event) {
 		super.selectionChanged(event);
-		QEditorSelectionSingleton.getInstance().outlineSelectionEvent.eventHappened(event);
+		if(!blockSelectionRecursion)
+		{
+			QEditorSelectionSingleton.getInstance().outlineSelectionEvent.eventHappened(event);
+		}
 	}
 	@Override
 	public void setSelection(ISelection selection) {
@@ -161,20 +165,43 @@ public class QEditorOutlinePage extends ContentOutlinePage {
 	public void setSelectedEmfObject(EObject eo) {
 		if(getTreeViewer()!=null)
 		{
-			getTreeViewer().setSelection(new StructuredSelection(eo), true);
+			boolean pre=blockSelectionRecursion;
+			try
+			{
+				blockSelectionRecursion = true;
+				getTreeViewer().setSelection(new StructuredSelection(eo), true);
+			}finally
+			{
+				blockSelectionRecursion = pre;
+			}
 		}
 	}
 	public void setSelectedEmfRef(RefInTree ref) {
 		if(getTreeViewer()!=null)
 		{
-			getTreeViewer().setSelection(new StructuredSelection(ref), true);
+			boolean pre=blockSelectionRecursion;
+			try
+			{
+				blockSelectionRecursion = true;
+				getTreeViewer().setSelection(new StructuredSelection(ref), true);
+			}finally
+			{
+				blockSelectionRecursion = pre;
+			}
 		}
 	}
 	public void setSelectedEmfRef(EmfReference eref) {
 		if(getTreeViewer()!=null)
 		{
-			System.out.println("Select: "+eref);
-			getTreeViewer().setSelection(new StructuredSelection(eref), true);
+			boolean pre=blockSelectionRecursion;
+			try
+			{
+				blockSelectionRecursion = true;
+				getTreeViewer().setSelection(new StructuredSelection(eref), true);
+			}finally
+			{
+				blockSelectionRecursion = pre;
+			}
 		}
 	}
 }

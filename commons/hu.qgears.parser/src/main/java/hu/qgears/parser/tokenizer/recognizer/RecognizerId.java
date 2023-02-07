@@ -13,7 +13,6 @@ public class RecognizerId extends RecognizerConcat {
 		addSubToken(new RecognizerIdStart(new TokenType("dummy"), startEscapeChar), true);
 		addSubToken(new RecognizerIdInside(new TokenType("dummy")), false);
 	}
-	
 	public static String unescape(String inDoc, String startEscapeChar)
 	{
 		if(inDoc.startsWith(startEscapeChar))
@@ -24,5 +23,4 @@ public class RecognizerId extends RecognizerConcat {
 			return inDoc;
 		}
 	}
-
 }

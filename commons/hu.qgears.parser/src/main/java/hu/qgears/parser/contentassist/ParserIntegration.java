@@ -114,11 +114,12 @@ public class ParserIntegration {
 						m.collectPossibleValues(p);
 						for(String s: p)
 						{
-							collect.add(s);
+							collect.addContentAssistProposal(s);
 						}
 					}else
 					{
-						collect.add(tt.getName());
+						// ITokenType tokenType=tt.getTokenType();
+						proposalContext.collectPossibilities(collect, tt, "");
 					}
 					break;
 				case and:

@@ -2,6 +2,7 @@ package hu.qgears.parser.tokenizer.recognizer;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 
 import hu.qgears.parser.language.ITokenType;
 import hu.qgears.parser.language.Matcher;
@@ -67,5 +68,9 @@ public class RecognizerCStyleHexa implements ITokenRecognizer {
 	public static long valueOf(String s)
 	{
 		return Long.parseLong(s.substring(2), 16);
+	}
+	@Override
+	public void collectPorposals(String tokenTypeName, String prefix, Consumer<String> collector) {
+		collector.accept("0xhexa");
 	}
 }

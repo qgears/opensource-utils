@@ -2,6 +2,7 @@ package hu.qgears.parser.tokenizer.recognizer;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 
 import hu.qgears.parser.language.ITokenType;
 import hu.qgears.parser.language.Matcher;
@@ -63,5 +64,9 @@ public class RecognizerCDecimal implements ITokenRecognizer {
 	@Override
 	public Matcher createMatcher(String matchingString) {
 		return new Matcher(true, matchingString);
+	}
+	@Override
+	public void collectPorposals(String tokenTypeName, String prefix, Consumer<String> collector) {
+		collector.accept("decimalNumber");
 	}
 }

@@ -34,7 +34,10 @@ public class TermToken extends Term {
 	public String getReferenced() {
 		return getName();
 	}
-
+	/**
+	 * Get matcher if exists.
+	 * @return
+	 */
 	public Matcher getMatchingValue() {
 		return matchingValue;
 	}

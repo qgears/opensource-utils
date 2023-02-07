@@ -2,6 +2,7 @@ package hu.qgears.parser.tokenizer.recognizer;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 
 import hu.qgears.parser.language.ITokenType;
 import hu.qgears.parser.language.Matcher;
@@ -187,5 +188,9 @@ public class RecognizerDoubleNumber implements ITokenRecognizer {
 	public RecognizerDoubleNumber setAcceptPrevAndFollowingDot(boolean b) {
 		acceptPrevAndFollowingDot=b;
 		return this;
+	}
+	@Override
+	public void collectPorposals(String tokenTypeName, String prefix, Consumer<String> collector) {
+		collector.accept("doubleNumber");
 	}
 }

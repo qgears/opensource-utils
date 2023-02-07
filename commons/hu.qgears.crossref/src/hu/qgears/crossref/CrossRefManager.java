@@ -10,6 +10,7 @@ import java.util.TreeMap;
 
 import hu.qgears.commons.MultiMapHashToHashSetImpl;
 import hu.qgears.commons.MultiMapTreeImpl;
+import hu.qgears.commons.NoExceptionAutoClosable;
 
 /**
  * Cross reference manager for incremental builders.
@@ -368,10 +369,15 @@ public class CrossRefManager {
 	{
 		return listeners.toArray(new ICrossRefManagerListener[] {});
 	}
-	public CrossRefManager addListener(ICrossRefManagerListener l)
+	public NoExceptionAutoClosable addListener(ICrossRefManagerListener l)
 	{
 		listeners.add(l);
-		return this;
+		return new NoExceptionAutoClosable() {
+			@Override
+			public void close() {
+				listeners.remove(l);
+			}
+		};
 	}
 	/**
 	 * Names of all objects known by this cross ref manager.
@@ -439,5 +445,14 @@ public class CrossRefManager {
 		{
 			changedDocs.add(doc);
 		}
+	}
+	/**
+	 * Get the internal storage of documents.
+	 * Handle with care! (dont modify and don't use after and CRM method is called)
+	 * @return
+	 */
+	public Map<String, Doc> getDocs()
+	{
+		return docs;
 	}
 }

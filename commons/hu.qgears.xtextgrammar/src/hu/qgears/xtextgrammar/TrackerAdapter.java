@@ -32,4 +32,15 @@ public class TrackerAdapter extends EContentAdapter {
 	}
 	protected void notificationSet(Notification notification) {
 	}
+	@Override
+	protected void removeAdapter(Notifier notifier) {
+		if(notifier instanceof EObject)
+		{
+			CRAEObject cra=CRAEObject.getAllowNull((EObject) notifier);
+			if(cra!=null)
+			{
+				cra.notifyRemoveAdapter(this);
+			}
+		}
+	}
 }

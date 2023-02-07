@@ -36,7 +36,7 @@ public class CRAEObject implements Adapter {
 	private SourceReference sourceReference;
 	/**
 	 * In case this is an unresolved reference placeholder (like a proxy but not eIsProxy()) object
-	 * then this object is not nutt.
+	 * then this object is not null.
 	 */
 	private CRAEReference proxyCrossReference;
 	private UtilEvent<CRAEObject> managedCrossReferenceListChangedEvent;
@@ -113,8 +113,12 @@ public class CRAEObject implements Adapter {
 			nameObject=null;
 		}
 		CrossRefManager crm=doc.getHost();
-		nameObject=crm.createObj(doc, name, RuntimeMappings.getEMFClassName(host.eClass()));
-		nameObject.setUserObject(null, this);
+		Obj newNameObject=crm.createObj(doc, name, RuntimeMappings.getEMFClassName(host.eClass()));
+		newNameObject.setUserObject(null, this);
+		setNameObject(newNameObject);
+	}
+	protected void setNameObject(Obj newNameObject) {
+		this.nameObject=newNameObject;
 	}
 	public Doc getDoc() {
 		return doc;
@@ -195,6 +199,7 @@ public class CRAEObject implements Adapter {
 			CRAEObject resolvedToAdapter,
 			EObject eObject) {
 		// TODO maintain cross reference caches!
+		cri.duplicateError=false;
 		if(r.isMany())
 		{
 			List<EObject> l=null;
@@ -202,13 +207,19 @@ public class CRAEObject implements Adapter {
 				l=(List<EObject>)host.eGet(r);
 				l.set(index, eObject);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				System.err.println("Error details host: "+host);
-				System.err.println("Error details ref: "+r);
-				System.err.println("Error details prev list: "+l);
-				System.err.println("Error details to set: "+index+" "+eObject);
-				System.err.println("Error details resource: "+host.eResource().getURI());
-				e.printStackTrace();
+				if(e instanceof IllegalArgumentException && e.getMessage().contains("'no duplicates'"))
+				{
+					cri.duplicateError=true;
+				}else
+				{
+					// TODO Auto-generated catch block
+					System.err.println("Error details host: "+host);
+					System.err.println("Error details ref: "+r);
+					System.err.println("Error details prev list: "+l);
+					System.err.println("Error details to set: "+index+" "+eObject);
+					System.err.println("Error details resource: "+host.eResource().getURI());
+					e.printStackTrace();
+				}
 			}
 		}else
 		{
@@ -326,5 +337,17 @@ public class CRAEObject implements Adapter {
 	 */
 	public List<CRAEReference> getManagedReferences() {
 		return managedReferences;
+	}
+	public void notifyRemoveAdapter(TrackerAdapter trackerAdapter) {
+		if(nameObject!=null)
+		{
+			// TODO also close references and stuff
+			nameObject.close();
+			nameObject=null;
+		}
+		for(CRAEReference managedReference: new ArrayList<>(getManagedReferences()))
+		{
+			managedReference.dispose();
+		}
 	}
 }

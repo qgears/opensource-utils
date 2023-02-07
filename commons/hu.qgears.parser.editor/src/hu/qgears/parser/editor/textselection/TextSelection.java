@@ -2,13 +2,14 @@ package hu.qgears.parser.editor.textselection;
 
 import org.eclipse.emf.ecore.EObject;
 
+import hu.qgears.crossref.Doc;
 import hu.qgears.emfcollab.backref.EmfReference;
 import hu.qgears.parser.editor.RefInTree;
 import hu.qgears.xtextgrammar.SourceReference;
 
 public class TextSelection implements Comparable<TextSelection>{
-	public static boolean isCaretInside(SourceReference sr, int caretOffset) {
-		if(sr==null)
+	public static boolean isCaretInside(SourceReference sr, Doc doc, int caretOffset) {
+		if(sr==null || doc!=sr.getDoc())
 		{
 			return false;
 		}

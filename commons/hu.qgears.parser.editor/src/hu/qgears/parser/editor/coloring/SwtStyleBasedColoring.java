@@ -9,10 +9,13 @@ import org.eclipse.swt.custom.StyleRange;
 
 import hu.qgears.parser.coloring.Range;
 import hu.qgears.parser.coloring.StyleBasedColoring;
+import hu.qgears.parser.coloring.StyleBasedColoringConfiguration;
 
 /**
  * Default coloring implementation of text editors.
  * Maps style identifiers to {@link SwtStyle} objects.
+ * See {@link StyleBasedColoring}
+ * {@link StyleBasedColoringConfiguration}
  */
 public class SwtStyleBasedColoring {
 	private Map<String, SwtStyle> styles=new HashMap<>();

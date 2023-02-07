@@ -181,7 +181,7 @@ public class ProjectContentAssistProcessor {
 					List<PossibleGoon> pgs=new ArrayList<>();
 					for(Term t: pc.found)
 					{
-						t.getName();
+						String name=t.getName();
 						PossibleGoon pg=new PossibleGoon(t);
 						pgs.add(pg);
 						ParserIntegration pi=new ParserIntegration(proposalContext, buffer, 0, prefix, context);
@@ -194,12 +194,11 @@ public class ProjectContentAssistProcessor {
 							}
 						}
 					}
-					// Set<String> prefixesUsed=
 					for(String key: byToken.keySet())
 					{
 						String toInsert=key.substring(prefix.length());
 						PossibleGoon pg=byToken.get(key);
-						ret.add(new CompletionProposal(toInsert, offset, 0, toInsert.length(), null, key, null, ""+pg.t.getName()));
+						ret.add(new QCompletionProposal(key, offset-prefix.length(), prefix.length(), toInsert.length(), null, key, null, ""+pg.t.getName()));
 					}
 					throw new RuntimeException(markerException);
 				}

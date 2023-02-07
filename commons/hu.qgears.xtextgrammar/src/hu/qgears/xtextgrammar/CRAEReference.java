@@ -128,8 +128,8 @@ public class CRAEReference implements IRefListener {
 	public boolean isUnresolved() {
 		return resolvedToAdapter==null;
 	}
-	public CRAEReference setUnresolvedReference(String prefixproxyid, String unescape) {
-		unresolvedReferenceRawRecerenceString=unescape;
+	public CRAEReference setUnresolvedReference(String prefixproxyid, String unescaped) {
+		unresolvedReferenceRawRecerenceString=unescaped;
 		unresolvedReferenceType=prefixproxyid;
 		return this;
 	}
@@ -249,6 +249,7 @@ public class CRAEReference implements IRefListener {
 		});
 	}
 	private Object debugDynamicResolve;
+	public boolean duplicateError;
 	public void setDebugDynamicResolve(Object doubleReferenceListener) {
 		this.debugDynamicResolve=doubleReferenceListener;
 	}
@@ -270,5 +271,9 @@ public class CRAEReference implements IRefListener {
 		newCri.targetA=target;
 		host.addManagedReference(eReference, i, newCri);
 		return newCri;
+	}
+	public void dispose() {
+		// TODO Auto-generated method stub
+		
 	}
 }

@@ -27,8 +27,11 @@ import hu.qgears.parser.ITreeElem;
 import hu.qgears.parser.tokenizer.recognizer.RecognizerId;
 import hu.qgears.parser.tokenizer.recognizer.RecognizerString;
 import hu.qgears.parser.util.TreeVisitor;
+import hu.qgears.xtextgrammar.contentassist.CrossReference;
 
 /**
+ * When parsing an XText file instance execute commands that build the model.
+ * Based on the preprocessed language file created from the XText file.
  * Can only be used on a single thread.
  */
 public class RuntimeMappings {
@@ -50,6 +53,7 @@ public class RuntimeMappings {
 	private EStructuralFeature currentFeature;
 	protected Doc doc;
 	public Map<String,String> consts=new TreeMap<String, String>();
+	public Map<String,CrossReference> setFeatures=new HashMap<>();
 	public RuntimeMappings() {
 	}
 	public RuntimeMappings process(String langFile) {
@@ -114,6 +118,8 @@ public class RuntimeMappings {
 				{
 					String claName=unescape(pieces.get(3));
 					String featureName=unescape(pieces.get(4));
+					CrossReference crossReference=new CrossReference(claName, featureName);
+					setFeatures.put(token, crossReference);
 					EStructuralFeature r=(EStructuralFeature)findFeature(claName, featureName);
 					if(r==null)
 					{
@@ -123,6 +129,7 @@ public class RuntimeMappings {
 					EClass pf=findFeatureTypeForUnresolvedObject(claName, r, featureName);
 					currentFeature=r;
 					Set<String> acceptedTypes=findAcceptedTypes(r);
+					crossReference.acceptedTypes=acceptedTypes;
 					commands.put(token, (t)->{
 						instantiateIfNecessary(t);
 						EObject reset=(EObject)currentObject;
@@ -150,9 +157,12 @@ public class RuntimeMappings {
 				{
 					String claName=unescape(pieces.get(3));
 					String featureName=unescape(pieces.get(4));
+					CrossReference crossReference=new CrossReference(claName, featureName);
+					setFeatures.put(token, crossReference);
 					EStructuralFeature r=(EStructuralFeature)findFeature(claName, featureName);
 					EStructuralFeature resetFeature=currentFeature;
 					Set<String> acceptedTypes=findAcceptedTypes(r);
+					crossReference.acceptedTypes=acceptedTypes;
 					EClass pf=findFeatureTypeForUnresolvedObject(claName, r, featureName);
 					currentFeature=r;
 					commands.put(token, (t)->{
@@ -228,7 +238,7 @@ public class RuntimeMappings {
 						EObject o=(EObject)cra.getTarget();
 						currentObject=o;
 						cra.getOrCreateUnresolvedCrossReferenceObject()
-							.setUnresolvedReference(prefixProxyId, RecognizerId.unescape(t.getString(), "^"))
+							.setUnresolvedReference(prefixProxyId, unescapeFqId(t))
 							.setSourceReference(new SourceReference(doc, t))
 							.setFeatureThatEndsInThis(currentFeature);
 						cra.setSourceReference(new SourceReference(doc, t));
@@ -243,7 +253,7 @@ public class RuntimeMappings {
 						EObject o=(EObject)cra.getTarget();
 						currentObject=o;
 						cra.getOrCreateUnresolvedCrossReferenceObject()
-							.setUnresolvedReference(prefixProxyId, RecognizerId.unescape(t.getString(), "^"))
+							.setUnresolvedReference(prefixProxyId, unescapeFqId(t))
 							.setSourceReference(new SourceReference(doc, t))
 							.setFeatureThatEndsInThis(currentFeature);
 						cra.setSourceReference(new SourceReference(doc, t));
@@ -259,7 +269,7 @@ public class RuntimeMappings {
 						EObject o=(EObject)cra.getTarget();
 						currentObject=o;
 						cra.getOrCreateUnresolvedCrossReferenceObject()
-							.setUnresolvedReference(proxyPrefix, RecognizerId.unescape(t.getString(), "^"))
+							.setUnresolvedReference(proxyPrefix, unescapeFqId(t))
 							.setSourceReference(new SourceReference(doc, t))
 							.setFeatureThatEndsInThis(currentFeature);
 						cra.setSourceReference(new SourceReference(doc, t));
@@ -288,6 +298,27 @@ public class RuntimeMappings {
 		return this;
 	}
 
+	private String unescapeFqId(ITreeElem t) {
+		List<? extends ITreeElem> subs=t.getSubs();
+		if(subs.size()>0)
+		{
+			StringBuilder bld=new StringBuilder();
+			boolean first=true;
+			for(ITreeElem sub: subs)
+			{
+				if(!first)
+				{
+					bld.append(".");
+				}
+				bld.append(RecognizerId.unescape(sub.getString(), "^"));
+				first=false;
+			}
+			return bld.toString();
+		}else
+		{
+			return RecognizerId.unescape(t.getString(), "^");
+		}
+	}
 	protected CRAEObject createUnresolvedReferencePlaceHolder(EClass cla) {
 		EObject ret=cla.getEPackage().getEFactoryInstance().create(cla);
 		return createCrossReferenceAdapter(ret);

@@ -34,6 +34,7 @@ import hu.qgears.commons.UtilListenableProperty;
 import hu.qgears.emfcollab.backref.EmfReference;
 import hu.qgears.emfcollab.util.UtilVisitor;
 import hu.qgears.parser.coloring.StyleBasedColoring;
+import hu.qgears.parser.contentassist.ICompletitionProposalContext;
 import hu.qgears.parser.editor.coloring.SwtStyleBasedColoring;
 import hu.qgears.parser.editor.textselection.TextSelection;
 import hu.qgears.xtextgrammar.CRAEObject;
@@ -47,6 +48,7 @@ abstract public class AbstractQParserEditor extends AbstractDecoratedTextEditor 
 	NoExceptionAutoClosable cl;
 	NoExceptionAutoClosable closeit;
 	private IFile file;
+	private Composite parentComposite;
 	private UtilEventListener<Set<IFile>> liRebuilt=e->{
 		if(e==null || e.contains(file))
 		{
@@ -124,6 +126,7 @@ abstract public class AbstractQParserEditor extends AbstractDecoratedTextEditor 
 	}
 	@Override
 	public void createPartControl(Composite parent) {
+		this.parentComposite=parent;
 		super.createPartControl(parent);
 		((StyledText)getAdapter(Control.class)).addCaretListener(e->{
 			int position=e.caretOffset;
@@ -163,7 +166,7 @@ abstract public class AbstractQParserEditor extends AbstractDecoratedTextEditor 
 								for(CRAEReference cri: cra.getManagedReferences())
 								{
 									SourceReference sr=cri.getSourceReference();
-									if(TextSelection.isCaretInside(sr, region.getOffset()))
+									if(TextSelection.isCaretInside(sr, getResourceOfEditor().getDoc(), region.getOffset()))
 									{
 										System.out.println("Ref: "+cri.r.getName()+" "+sr.getLength());
 										CRAEObject targetWrap=cri.getCurrentTarget().getProperty();
@@ -195,87 +198,126 @@ abstract public class AbstractQParserEditor extends AbstractDecoratedTextEditor 
 		}
 		return null;
 	}
-	private void updateSelection(int caretOffset) {
+	private class UpdateSelection implements Runnable
+	{
 		List<TextSelection> possibles=new ArrayList<>();
-		ResourceSet rs=getResourceSet();
-		if(rs!=null)
-		{
-			synchronized (rs) {
-				CRAResource rcra=getResourceOfEditor();
-				if(rcra!=null)
+		private int caretOffset;
+		private volatile boolean cancelled;
+		public UpdateSelection(int caretOffset) {
+			super();
+			this.caretOffset = caretOffset;
+		}
+
+		@Override
+		public void run() {
+			ResourceSet rs=getResourceSet();
+			if(rs!=null)
+			{
+				if(cancelled)
 				{
-					UtilVisitor.visitModel(rcra.getResource(), new UtilVisitor.Visitor(){
-						@Override
-						public Object visit(EObject element) {
-							CRAEObject cra=CRAEObject.getAllowNull(element);
-							if(cra!=null)
-							{
-								for(CRAEReference cri: cra.getManagedReferences())
+					return;
+				}
+				synchronized (rs) {
+					CRAResource rcra=getResourceOfEditor();
+					if(rcra!=null)
+					{
+						if(cancelled)
+						{
+							return;
+						}
+						UtilVisitor.visitModel(rcra.getResource(), new UtilVisitor.Visitor(){
+							@Override
+							public Object visit(EObject element) {
+								CRAEObject cra=CRAEObject.getAllowNull(element);
+								if(cra!=null)
 								{
-									SourceReference sr=cri.getSourceReference();
-									if(TextSelection.isCaretInside(sr, caretOffset))
+									for(CRAEReference cri: cra.getManagedReferences())
 									{
-										// System.out.println("Ref: "+cri.r.getName()+" "+sr.getLength());
-										if(cri.r!=null && cri.targetA!=null && cri.targetA.getTarget() instanceof EObject)
+										SourceReference sr=cri.getSourceReference();
+										if(TextSelection.isCaretInside(sr, rcra.getDoc(), caretOffset))
 										{
-//											EmfBackReferenceImpl bri=EmfBackReferenceImpl.getByEobject(element);
-//											if(bri!=null)
-//											{
-//												EObject target=(EObject)cri.targetA.getTarget();
-//												Object tg1=element.eGet(cri.r);
-//												System.out.println("Target1 and 2"+target+" "+tg1);
-//												EmfReferenceImpl ref=bri.getSourceReference(element, cri.r, (EObject)tg1, 0);
-//												if(ref!=null)
+											// System.out.println("Ref: "+cri.r.getName()+" "+sr.getLength());
+											if(cri.r!=null && cri.targetA!=null && cri.targetA.getTarget() instanceof EObject)
+											{
+//												EmfBackReferenceImpl bri=EmfBackReferenceImpl.getByEobject(element);
+//												if(bri!=null)
 //												{
-//													possibles.add(createTextSelection(ref, sr));
+//													EObject target=(EObject)cri.targetA.getTarget();
+//													Object tg1=element.eGet(cri.r);
+//													System.out.println("Target1 and 2"+target+" "+tg1);
+//													EmfReferenceImpl ref=bri.getSourceReference(element, cri.r, (EObject)tg1, 0);
+//													if(ref!=null)
+//													{
+//														possibles.add(createTextSelection(ref, sr));
+//													}
 //												}
-//											}
-											RefInTree ref=RefInTree.create(element, cri.r, (EObject)cri.targetA.getTarget(), cri.index);
-											possibles.add(createTextSelection(ref, sr));
+												RefInTree ref=RefInTree.create(element, cri.r, (EObject)cri.targetA.getTarget(), cri.index);
+												possibles.add(createTextSelection(ref, sr));
+											}
 										}
 									}
+									SourceReference sr=cra.getSourceReference();
+									if(TextSelection.isCaretInside(sr, rcra.getDoc(), caretOffset))
+									{
+										possibles.add(createTextSelection(sr, element));
+									}
 								}
-								SourceReference sr=cra.getSourceReference();
-								if(TextSelection.isCaretInside(sr, caretOffset))
-								{
-									possibles.add(createTextSelection(sr, element));
-								}
+								return null;
 							}
-							return null;
+						});
+					}
+				}
+				if(cancelled)
+				{
+					return;
+				}
+				Collections.sort(possibles);
+				if(possibles.size()>0)
+				{
+					parentComposite.getDisplay().asyncExec(()->{
+						TextSelection ts=possibles.get(0);
+						// outline.setSelection(ts);
+						RefInTree ref=ts.getRef();
+						EmfReference eref=ts.getERef();
+						EObject eo=(EObject)ts.getTarget();
+						if(eref!=null)
+						{
+							outline.setSelectedEmfRef(eref);
+						}else if(ref!=null)
+						{
+							outline.setSelectedEmfRef(ref);
+						}else if(eo!=null)
+						{
+							outline.setSelectedEmfObject(eo);
+						}
+						if(eo!=null)
+						{
+							QEditorSelectionSingleton.getInstance().selectionEvent.eventHappened(
+									new Pair<IProject, EObject>(file.getProject(), eo));
 						}
 					});
 				}
 			}
+//			System.out.println("List once: ");
+//			for(TextSelection cra: possibles)
+//			{
+//				System.out.println("Text Selection: "+cra);
+//			}
 		}
-		Collections.sort(possibles);
-//		System.out.println("List once: ");
-//		for(TextSelection cra: possibles)
-//		{
-//			System.out.println("Text Selection: "+cra);
-//		}
-		if(possibles.size()>0)
+
+		public void cancel() {
+			cancelled=true;
+		}
+	}
+	private UpdateSelection updateSelectionCallable;
+	private void updateSelection(int caretOffset) {
+		if(updateSelectionCallable!=null)
 		{
-			TextSelection ts=possibles.get(0);
-			// outline.setSelection(ts);
-			RefInTree ref=ts.getRef();
-			EmfReference eref=ts.getERef();
-			EObject eo=(EObject)ts.getTarget();
-			if(eref!=null)
-			{
-				outline.setSelectedEmfRef(eref);
-			}else if(ref!=null)
-			{
-				outline.setSelectedEmfRef(ref);
-			}else if(eo!=null)
-			{
-				outline.setSelectedEmfObject(eo);
-			}
-			if(eo!=null)
-			{
-				QEditorSelectionSingleton.getInstance().selectionEvent.eventHappened(
-						new Pair<IProject, EObject>(file.getProject(), eo));
-			}
+			updateSelectionCallable.cancel();
+			updateSelectionCallable=null;
 		}
+		updateSelectionCallable=new UpdateSelection(caretOffset);
+		executeOnBuilderThread(updateSelectionCallable);
 	}
 	protected TextSelection createTextSelection(RefInTree ref, SourceReference sr) {
 		return new TextSelection(ref, sr);
@@ -289,6 +331,16 @@ abstract public class AbstractQParserEditor extends AbstractDecoratedTextEditor 
 //	protected TextSelection createTextSelection(CrossReferenceInstance cri) {
 //		return new TextSelection(cri.);
 //	}
+	private boolean executeOnBuilderThread(Runnable r)
+	{
+		AbstractBuilder current=builder.getProperty();
+		if(current !=null)
+		{
+			AbstractIncrementalBuilder incb=current.getIncrementalBuilder();
+			return incb.executeOnBuilderThread(r);
+		}
+		return false;
+	}
 	private ResourceSet getResourceSet() {
 		AbstractBuilder current=builder.getProperty();
 		if(current !=null && getEditorInput() instanceof IFileEditorInput)
@@ -350,4 +402,8 @@ abstract public class AbstractQParserEditor extends AbstractDecoratedTextEditor 
 	 * @return
 	 */
 	abstract public String getBuilderId();
+	abstract public ICompletitionProposalContext getProposalContext();
+	public UtilListenableProperty<AbstractBuilder> getBuilder() {
+		return builder;
+	}
 }

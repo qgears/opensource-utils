@@ -6,9 +6,6 @@ import hu.qgears.parser.impl.ElemBuffer;
 
 /**
  * Logger that logs some data of the parsing.
- * 
- * @author rizsi
- * 
  */
 public class ParserLogger {
 	private PrintStream err;

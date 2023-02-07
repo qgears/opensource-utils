@@ -1,5 +1,8 @@
 package hu.qgears.parser.editor;
 
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.contentassist.ContentAssistant;
+import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
@@ -27,11 +30,23 @@ public class QPViewerConfiguration extends SourceViewerConfiguration {
 //		};
 //	}
 	private IHyperlinkDetector[] hyperlinkDetectors;
+	private ContentAssistant contentAssistant=new ContentAssistant();
 	public QPViewerConfiguration(AbstractQParserEditor editor) {
 		hyperlinkDetectors=new IHyperlinkDetector[]{new QPHyperlinkDetector(editor)};
+		QContentAssistProcessor proc=new QContentAssistProcessor(editor);
+		// contentAssistant.
+		contentAssistant.setContentAssistProcessor (proc, 
+				IDocument.DEFAULT_CONTENT_TYPE);
+/*		contentAssistant.setContentAssistProcessor (proc, 
+				"com.bbraun.spaceii.qparser.editor.dslgui");*/
+//		contentAssistant.set
 	}
 	@Override
 	public IHyperlinkDetector[] getHyperlinkDetectors(ISourceViewer sourceViewer) {
 		return hyperlinkDetectors;
+	}
+	@Override
+	public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
+		return contentAssistant;
 	}
 }

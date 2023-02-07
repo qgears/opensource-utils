@@ -1,5 +1,7 @@
 package hu.qgears.parser.tokenizer.recognizer;
 
+import java.util.function.Consumer;
+
 import hu.qgears.parser.language.ITokenType;
 import hu.qgears.parser.tokenizer.ITextSource;
 import hu.qgears.parser.tokenizer.IToken;
@@ -35,5 +37,13 @@ public class RecognizerConst extends RecognizerAbstract implements
 		if (c.length() < 1)
 			throw new IllegalArgumentException("invalid token: = length constant");
 		this.c = c;
+	}
+
+	@Override
+	public void collectPorposals(String tokenTypeName, String prefix, Consumer<String> collector) {
+		if(c.startsWith(prefix))
+		{
+			collector.accept(c);
+		}
 	}
 }

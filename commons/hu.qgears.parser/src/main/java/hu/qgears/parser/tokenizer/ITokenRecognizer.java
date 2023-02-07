@@ -1,17 +1,13 @@
 package hu.qgears.parser.tokenizer;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 import hu.qgears.parser.language.ITokenType;
 import hu.qgears.parser.language.Matcher;
 
-
-
 /**
  * Tokenizer module that recognizes a token on a stream.
- * 
- * @author rizsi
- * 
  */
 public interface ITokenRecognizer {
 	/**
@@ -35,4 +31,12 @@ public interface ITokenRecognizer {
 	 * @return
 	 */
 	Matcher createMatcher(String matchingString);
+	
+	/**
+	 * Collect proposals by this token recognizer.
+	 * @param tokenTypeName
+	 * @param prefix
+	 * @param collector
+	 */
+	void collectPorposals(String tokenTypeName, String prefix, Consumer<String> collector);
 }

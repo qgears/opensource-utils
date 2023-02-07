@@ -1,5 +1,7 @@
 package hu.qgears.parser.tokenizer.recognizer;
 
+import java.util.function.Consumer;
+
 import hu.qgears.parser.language.ITokenType;
 import hu.qgears.parser.tokenizer.ITextSource;
 import hu.qgears.parser.tokenizer.IToken;
@@ -35,5 +37,9 @@ public class RecognizerAnyLetter extends RecognizerAbstract implements
 	public RecognizerAnyLetter(ITokenType tokenType, Character[] acceptedChars) {
 		super(tokenType);
 		this.acceptor = new LetterAcceptorSet(acceptedChars);
+	}
+
+	@Override
+	public void collectPorposals(String tokenTypeName, String prefix, Consumer<String> collector) {
 	}
 }
