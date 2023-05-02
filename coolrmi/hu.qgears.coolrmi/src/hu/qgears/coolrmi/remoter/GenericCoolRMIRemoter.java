@@ -404,7 +404,6 @@ abstract public class GenericCoolRMIRemoter {
 		CoolRMIServerSideObject ret = new CoolRMIServerSideObject(
 				getNextProxyId(), iface, impl);
 		synchronized (this) {
-			System.out.println("Created: "+ret.getProxyId()+" "+impl);
 			services.put(ret.getProxyId(), ret);
 		}
 		return ret;
