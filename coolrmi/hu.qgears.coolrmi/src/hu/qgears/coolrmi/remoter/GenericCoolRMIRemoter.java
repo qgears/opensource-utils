@@ -310,6 +310,7 @@ abstract public class GenericCoolRMIRemoter {
 
 	public void close() throws IOException {
 		List<CoolRMIFutureReply> cancelled=new ArrayList<CoolRMIFutureReply>();
+		List<CoolRMIServerSideObject> toDispose=new ArrayList<>();
 		synchronized (this) {
 			connected = false;
 			if(closed)
@@ -319,12 +320,22 @@ abstract public class GenericCoolRMIRemoter {
 			closed = true;
 			cancelled.addAll(replies.values());
 			replies.clear();
+			toDispose.addAll(services.values());
+			services.clear();
 		}
 		multiplexer.stop();
 		closeConnection();
 		for(CoolRMIFutureReply r: cancelled)
 		{
 			r.cancelled();
+		}
+		for(CoolRMIServerSideObject r: toDispose)
+		{
+			try {
+				r.dispose(this);
+			} catch (Exception e) {
+				log.logError(e);
+			}
 		}
 	}
 	abstract protected void closeConnection() throws IOException;
@@ -393,6 +404,7 @@ abstract public class GenericCoolRMIRemoter {
 		CoolRMIServerSideObject ret = new CoolRMIServerSideObject(
 				getNextProxyId(), iface, impl);
 		synchronized (this) {
+			System.out.println("Created: "+ret.getProxyId()+" "+impl);
 			services.put(ret.getProxyId(), ret);
 		}
 		return ret;

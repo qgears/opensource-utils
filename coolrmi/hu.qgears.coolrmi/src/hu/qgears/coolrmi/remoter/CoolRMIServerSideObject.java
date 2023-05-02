@@ -1,5 +1,6 @@
 package hu.qgears.coolrmi.remoter;
 
+import hu.qgears.coolrmi.ICoolRMIDisposable;
 import hu.qgears.coolrmi.UtilEvent;
 
 /**
@@ -38,6 +39,10 @@ public class CoolRMIServerSideObject {
 		return service;
 	}
 	public void dispose(GenericCoolRMIRemoter genericCoolRMIRemoter) {
+		if(service instanceof ICoolRMIDisposable)
+		{
+			((ICoolRMIDisposable) service).disposeWhenDisconnected();
+		}
 		disposed=true;
 		getDisposedEvent().eventHappened(null, genericCoolRMIRemoter);
 	}
