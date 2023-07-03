@@ -324,7 +324,6 @@ abstract public class GenericCoolRMIRemoter {
 			services.clear();
 		}
 		multiplexer.stop();
-		closeConnection();
 		for(CoolRMIFutureReply r: cancelled)
 		{
 			r.cancelled();
@@ -337,6 +336,8 @@ abstract public class GenericCoolRMIRemoter {
 				log.logError(e);
 			}
 		}
+		//CoolRMIServerSideObject dispose uses the executor, so connection must be closed only in the end
+		closeConnection();
 	}
 	abstract protected void closeConnection() throws IOException;
 
