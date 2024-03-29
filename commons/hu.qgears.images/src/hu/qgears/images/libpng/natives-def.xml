@@ -5,22 +5,22 @@
 			<platform distroId="ubuntu" distroVersion="14.04">
 				<lib id="libqpng" path="libqpng-ubuntu-14.04-x86_64.so" installPath="/opt/qgears/libqpng-ubuntu-14.04-x86_64.so" />
 			</platform>
-			<platform distroId="debian" distroVersion="9">			
+			<platform distroId="debian" distroVersion="9">
 				<lib id="libqpng" path="libqpng-debian-9-x86_64.so" installPath="/opt/qgears/libqpng-debian-9-x86_64.so" />
 			</platform>
-			<platform distroId="debian" distroVersion="10">			
+			<platform distroId="debian" distroVersion="10">
 				<lib id="libqpng" path="libqpng-debian-10-x86_64.so" installPath="/opt/qgears/libqpng-debian-10-x86_64.so" />
 			</platform>
 			<lib id="libqpng" path="libqpng-x86_64.so" installPath="/opt/qgears/libqpng-x86_64.so" />
 		</platform>
 		<platform arch="x86|i[3-6]86">
-			<platform distroId="ubuntu" distroVersion="14.04">			
+			<platform distroId="ubuntu" distroVersion="14.04">
 				<lib id="libqpng" path="libqpng-ubuntu-14.04-i686.so" installPath="/opt/qgears/libqpng-ubuntu-14.04-i686.so" />
 			</platform>
-			<platform distroId="debian" distroVersion="9">			
+			<platform distroId="debian" distroVersion="9">
 				<lib id="libqpng" path="libqpng-debian-9-i686.so" installPath="/opt/qgears/libqpng-debian-9-i686.so" />
 			</platform>
-			<platform distroId="debian" distroVersion="10">			
+			<platform distroId="debian" distroVersion="10">
 				<lib id="libqpng" path="libqpng-debian-10-i686.so" installPath="/opt/qgears/libqpng-debian-10-i686.so" />
 			</platform>
 			<lib id="libqpng" path="libqpng-i686.so" installPath="/opt/qgears/libqpng-i686.so" />
