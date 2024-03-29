@@ -10,8 +10,6 @@ import hu.qgears.parser.language.ILanguage;
 
 /**
  * Non-terminal symbol of the language.
- * @author rizsi
- *
  */
 abstract public class Term {
 	int id;

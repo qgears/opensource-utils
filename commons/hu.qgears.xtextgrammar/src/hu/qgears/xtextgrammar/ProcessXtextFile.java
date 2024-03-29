@@ -26,6 +26,7 @@ public class ProcessXtextFile {
 	private Map<String, String> importsWithName=new TreeMap<>();
 	private Set<String> importsNoName=new TreeSet<>();
 	public Set<String> omitRule=new HashSet<>();
+	public Set<String> keywordTerminals=new TreeSet<>();
 	private int terminalCounter;
 	public String qGrammar;
 	public String firstRuleName;
@@ -110,6 +111,7 @@ public class ProcessXtextFile {
 					if(isIdentifier(s))
 					{
 						type="wholeWord";
+						keywordTerminals.add(constants.get(s));
 					}else
 					{
 						type="const";

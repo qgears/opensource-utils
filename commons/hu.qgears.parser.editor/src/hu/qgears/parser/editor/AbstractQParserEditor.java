@@ -3,6 +3,7 @@ package hu.qgears.parser.editor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -19,6 +20,7 @@ import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -107,8 +109,23 @@ abstract public class AbstractQParserEditor extends AbstractDecoratedTextEditor 
 		outline.setBuilder(builder);
 	}
 	private void setColoring(StyleBasedColoring sbc) {
-		TextPresentation tp=getStyles().getTextParameters(sbc);
-		((SourceViewer)getSourceViewer()).changeTextPresentation(tp, true);
+		SourceViewer sv=((SourceViewer)getSourceViewer());
+		int length=sv.getDocument().getLength();
+		TextPresentation tp=getStyles().getTextParameters(sbc, length, sv.getDocument());
+		try
+		{
+//			StyleRange defaultStyleRange=tp.getDefaultStyleRange();
+//			if(defaultStyleRange!=null)
+//			{
+//				System.out.println("def range: "+defaultStyleRange.start+" l:"+defaultStyleRange.length);
+//			}
+//			Iterator<?> it=tp.getNonDefaultStyleRangeIterator();
+			sv.changeTextPresentation(tp, true);
+		}catch(Exception e)
+		{
+			e.printStackTrace();
+			// TODO handle apply coloring exception
+		}
 	}
 	abstract protected SwtStyleBasedColoring getStyles();
 	@Override

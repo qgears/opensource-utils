@@ -102,6 +102,7 @@ public class ProjectContentAssistProcessor {
         	textPreSemanticPoint=textPreCursor;
         }
         List<String> context=new ArrayList<>();
+        /*
         textIdentifierRemovedAndAdded=textPreSemanticPoint+" dummyPlaceHolder "+text.substring(textPreCursor.length());
         try {
 			proposalContext.parse(textIdentifierRemovedAndAdded, new IParserReceiver() {
@@ -165,18 +166,19 @@ public class ProjectContentAssistProcessor {
 				e.printStackTrace();
 			}
 		}
+		*/
         try {
 			proposalContext.parse(textPreSemanticPoint, new IParserReceiver() {
 				@Override
 				public void tableFilled(ElemBuffer buffer, int size) {
-					// System.out.println("Table filled!");
+					System.out.println("Content assist - Table filled! lasts: "+lasts);
 					String prefix="";
 					for(IToken t: lasts)
 					{
 						prefix+=t.getText().toString();
 					}
 					// System.out.println("prefix: "+prefix);
-					PossibleCollector pc=ParserIntegration.collectPossibleOngoing(buffer,0);
+					PossibleCollector pc=ParserIntegration.collectPossibleOngoing(buffer,0, proposalContext);
 					Map<String, PossibleGoon> byToken=new TreeMap<>();
 					List<PossibleGoon> pgs=new ArrayList<>();
 					for(Term t: pc.found)

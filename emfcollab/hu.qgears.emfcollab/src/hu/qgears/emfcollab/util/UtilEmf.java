@@ -210,4 +210,23 @@ public class UtilEmf {
 			}
 		}
 	}
+	public static void deleteEmfNodeRecursive(EObject d) {
+		for(EObject eo: new ArrayList<>(d.eContents()))
+		{
+			deleteEmfNodeRecursive(eo);
+		}
+		EObject container=d.eContainer();
+		EReference containementReference=d.eContainmentFeature();
+		if(container!=null && containementReference!=null)
+		{
+			removeReference(container, containementReference, d);
+		}
+	}
+	public static void deleteEmfResourceRecursive(Resource resource) {
+		for(EObject eo: resource.getContents())
+		{
+			deleteEmfNodeRecursive(eo);
+		}
+		resource.getContents().clear();
+	}
 }

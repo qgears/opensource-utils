@@ -16,7 +16,7 @@ import hu.qgears.parser.language.impl.TermToken;
 import hu.qgears.parser.language.impl.TermZeroOrMore;
 
 public class ParserIntegration {
-	public static PossibleCollector collectPossibleOngoing(ElemBuffer buffer, int groupOffsetToLast) {
+	public static PossibleCollector collectPossibleOngoing(ElemBuffer buffer, int groupOffsetToLast, ICompletitionProposalContext proposalContext) {
 		PossibleCollector pc=new PossibleCollector();
 		int lastGroup=buffer.getCurrentGroup();
 		if(lastGroup>=0)
@@ -29,6 +29,7 @@ public class ParserIntegration {
 				int dotPos=buffer.getDotPosition(i);
 				Term te=buffer.resolve(buffer.getTermTypeId(i));
 				pc.collectPossible(te, dotPos);
+				proposalContext.notifyParseState(buffer, i);
 			}
 		}
 		return pc;

@@ -225,7 +225,7 @@ public class GenerationRules {
 	 * @param tt
 	 * @return
 	 */
-	static private boolean generates(ElemBuffer eb, int absoluteIndex, Term tt) {
+	static public boolean generates(ElemBuffer eb, int absoluteIndex, Term tt) {
 		Term tt1 = getSub(eb, absoluteIndex, isPassed(eb, absoluteIndex));
 		if (tt1 == null)
 			return false;

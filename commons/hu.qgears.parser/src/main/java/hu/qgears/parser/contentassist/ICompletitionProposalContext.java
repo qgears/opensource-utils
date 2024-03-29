@@ -59,4 +59,10 @@ public interface ICompletitionProposalContext {
 	 * @param prefix prefix of existing token
 	 */
 	void collectPossibilities(PossibleGoon collect, TermToken termType, String prefix);
+	/**
+	 * Notify the completition context of a possible parse state. TODO document or remove
+	 * @param buffer
+	 * @param i
+	 */
+	default void notifyParseState(ElemBuffer buffer, int i){}
 }
