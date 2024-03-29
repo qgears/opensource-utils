@@ -44,6 +44,6 @@ public class CoolRMIServerSideObject {
 			((ICoolRMIDisposable) service).disposeWhenDisconnected();
 		}
 		disposed=true;
-		getDisposedEvent().eventHappened(null, genericCoolRMIRemoter);
+		getDisposedEvent().eventHappened(null);
 	}
 }

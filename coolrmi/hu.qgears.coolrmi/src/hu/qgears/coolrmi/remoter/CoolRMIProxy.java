@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
+import hu.qgears.commons.UtilEvent;
 import hu.qgears.coolrmi.CoolRMIException;
 import hu.qgears.coolrmi.CoolRMIReplyHandler;
 import hu.qgears.coolrmi.ICoolRMIProxy;
@@ -27,6 +28,7 @@ public class CoolRMIProxy implements InvocationHandler {
 	private boolean disposed=false;
 	private ICoolRMIProxy proxyObject;
 	private CallAggregatorClientSide callAggregator=new CallAggregatorClientSide(this);
+	public final UtilEvent<CoolRMIProxy> disposedEvent=new UtilEvent<>();
 	public ICoolRMIProxy getProxyObject() {
 		return proxyObject;
 	}
@@ -47,26 +49,41 @@ public class CoolRMIProxy implements InvocationHandler {
 	{
 		remoter.remove(this);
 		disposed=true;
+		disposedEvent.eventHappened(this);
 	}
 	public long getId() {
 		return id;
 	}
 	public Object invoke(Object proxy, Method method, Object[] args)
 			throws Throwable {
-		if(method.getName().equals("disposeProxy"))
+		switch(method.getName())
+		{
+		case "disposeProxy":
 		{
 			this.dispose();
 			return null;
-		}else if(method.getName().equals("isProxyDisposed"))
+		}
+		case "isProxyDisposed":
 		{
 			return disposed;
-		}else if(method.getName().equals("getProxyHome"))
+		}
+		case "getProxyHome":
 		{
 			return remoter;
-		}else if(method.getName().equals("getProxyObject"))
+		}
+		case "getProxyObject":
 		{
 			return this;
-		}else
+		}	
+		case "equals":
+		{
+			return args[0] == proxyObject;
+		}
+		case "hashCode":
+		{
+			return this.hashCode();
+		}
+		default:
 		{
 			if(disposed)
 			{
@@ -104,6 +121,7 @@ public class CoolRMIProxy implements InvocationHandler {
 			{
 				throw reply.getException();
 			}
+		}
 		}
 	}
 	public GenericCoolRMIRemoter getRemoter() {
