@@ -335,9 +335,10 @@ public class UtilNativeImageIo {
 	 * Compare two images if they are equal or not.
 	 * @param imSrc first image to be compared
 	 * @param imOut second image to be compared
+	 * @param triggerDiff difference number on any channel that triggers error - 1 means any difference is error. 2 means 1 difference is tolerated, etc
 	 * @return null if equal or error description if not equal.
 	 */
-	public static String isEqual(NativeImage imSrc, NativeImage imOut) {
+	public static String isEqual(NativeImage imSrc, NativeImage imOut, int triggerDiff) {
 		if(!imSrc.getComponentOrder().equals(imOut.getComponentOrder()))
 		{
 			return "Component order is different";
@@ -357,7 +358,7 @@ public class UtilNativeImageIo {
 				for(int c=0;c<nc;++c) {
 					int src=imSrc.getChannel(x, y, c);
 					int dst=imOut.getChannel(x, y, c);
-					if(src!=dst) {
+					if(Math.abs(src-dst)>=triggerDiff) {
 						int [] srcs = new int[nc]; 
 						int [] dsts = new int[nc]; 
 						for(int c2=0;c2<nc;++c2){
@@ -374,6 +375,15 @@ public class UtilNativeImageIo {
 			}
 		}
 		return null;
+	}
+	/**
+	 * Compare two images if they are equal or not.
+	 * @param imSrc first image to be compared
+	 * @param imOut second image to be compared
+	 * @return null if equal or error description if not equal.
+	 */
+	public static String isEqual(NativeImage imSrc, NativeImage imOut) {
+		return isEqual(imSrc, imOut, 1);
 	}
 	/**
 	 * Compare two images if they are equal or not.
