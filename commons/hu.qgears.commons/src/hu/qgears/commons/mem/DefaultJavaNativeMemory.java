@@ -12,8 +12,9 @@ import hu.qgears.commons.mem.BufferDisposal.Cleaner;
  * 
  * Does not support native pointer.
  * 
- * @see #programmaticDispose {@link BufferDisposal#programmaticDispose}  for memory disposal
- * policy 
+ * @see BufferDisposal {@link BufferDisposal}  class comment
+ * @see #programmaticDispose {@link BufferDisposal#programmaticDispose}  for 
+ * memory disposal policy 
  */
 public class DefaultJavaNativeMemory 
 extends AbstractReferenceCountedDisposeable implements INativeMemory {

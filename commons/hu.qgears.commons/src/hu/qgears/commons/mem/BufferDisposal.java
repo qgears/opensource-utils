@@ -24,10 +24,14 @@ public class BufferDisposal {
 	 * <ul>
 	 * <li>If {@code true}, {@link AbstractReferenceCountedDisposeable#dispose()}
 	 * will dispose allocated native memory. Note that onwards, accessing the
-	 * disposed memory must not be attempted.
+	 * disposed memory must not be attempted. If explicit disposal is turned
+	 * on, the following Java command line parameter must be set in case of
+	 * Java 9 or later:
+	 * {@code --add-opens=java.base/jdk.internal.ref=ALL-UNNAMED}
 	 * <li>If {@code false}, {@link AbstractReferenceCountedDisposeable#dispose()}
 	 * will have no effect. In this case, the JVM will free the allocated
-	 * memory, according to its default behavior.
+	 * direct buffers according to its default behavior.
+	 * <b>This is the default setting.</b>
 	 * </ul> 
 	 */
 	private static final boolean programmaticDispose =
