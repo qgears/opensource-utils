@@ -1,16 +1,24 @@
 package hu.qgears.commons.mem;
 
-import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 
 import hu.qgears.commons.AbstractReferenceCountedDisposeable;
-
+import hu.qgears.commons.mem.BufferDisposal.Cleaner;
 
 /**
- * The default Java implementation of native memory buffers.
+ * The default Java implementation of native memory buffers with optional
+ * {@link BufferDisposal#programmaticDispose programmatic memory disposal} and
+ * {@link AbstractReferenceCountedDisposeable reference counting}. 
+ * 
  * Does not support native pointer.
+ * 
+ * @see #programmaticDispose {@link BufferDisposal#programmaticDispose}  for memory disposal
+ * policy 
  */
-public class DefaultJavaNativeMemory extends AbstractReferenceCountedDisposeable implements INativeMemory {
+public class DefaultJavaNativeMemory 
+extends AbstractReferenceCountedDisposeable implements INativeMemory {
+	
+	private Cleaner cleaner = BufferDisposal.getCleanerInstance();
 	private ByteBuffer ptr;
 	
 	public DefaultJavaNativeMemory(long size) {
@@ -31,30 +39,8 @@ public class DefaultJavaNativeMemory extends AbstractReferenceCountedDisposeable
 	@SuppressWarnings("squid:S3011")
 	@Override
 	protected void singleDispose() {
-		Method cleanerMethod = null;
-		Method cleanMethod = null;
 		try {
-			cleanerMethod = ptr.getClass().getMethod("cleaner");
-			synchronized (cleanerMethod) {
-				try {
-					cleanerMethod.setAccessible(true);
-	
-					final Object cleanerInstance = cleanerMethod.invoke(ptr);
-	
-					cleanMethod = cleanerInstance.getClass().getMethod("clean");
-	
-					synchronized (cleanMethod) {
-						try {
-							cleanMethod.setAccessible(true);
-							cleanMethod.invoke(cleanerInstance);
-						} finally {
-							cleanMethod.setAccessible(false);
-						}
-					}
-				} finally {
-					cleanerMethod.setAccessible(false);
-				}
-			}
+			cleaner.clean(ptr);
 		} catch (final Exception e) {
 			throw new NativeMemoryException("Exception during disposal", e);
 		}

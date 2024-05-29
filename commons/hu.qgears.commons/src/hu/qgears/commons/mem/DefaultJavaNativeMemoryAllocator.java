@@ -7,7 +7,8 @@ package hu.qgears.commons.mem;
  */
 public class DefaultJavaNativeMemoryAllocator implements INativeMemoryAllocator {
 	private static final int align=1;
-	private static final DefaultJavaNativeMemoryAllocator instance=new DefaultJavaNativeMemoryAllocator();
+	private static final DefaultJavaNativeMemoryAllocator instance =
+			new DefaultJavaNativeMemoryAllocator();
 	
 	private DefaultJavaNativeMemoryAllocator() {
 		//prevent direct instantiation - use getInstance
