@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-SymbolicName: hu.qgears.images.test
 Bundle-Name: Test cases for hu.qgears.images
-Bundle-Version: 10.5.0.qualifier
+Bundle-Version: 11.0.0
 Require-Bundle: hu.qgears.images;bundle-version="9.0.0",
  org.junit;bundle-version="4.8.2",
  hu.qgears.nativeloader;bundle-version="9.0.0"
