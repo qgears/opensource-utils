@@ -1,6 +1,6 @@
 /**
- * Interface of fine controlled (exact allocation and free instead of Java default finalizer)
- * Java-JNI-Native memory buffer interfaces.
+ * Interface for direct byte buffers with explicit allocation and optionally
+ * explicit disposal instead of Java default finalizer behavior.
  */
 package hu.qgears.commons.mem;
 
