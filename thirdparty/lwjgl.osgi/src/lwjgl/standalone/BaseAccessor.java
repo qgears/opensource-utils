@@ -1,13 +1,12 @@
 package lwjgl.standalone;
 
-import hu.qgears.nativeloader.NativeLoadException;
-import hu.qgears.nativeloader.UtilNativeLoader;
-import hu.qgears.nativeloader.XmlNativeLoader;
-
-import java.awt.Frame;
 import java.io.File;
 
 import org.apache.log4j.Logger;
+
+import hu.qgears.nativeloader.NativeLoadException;
+import hu.qgears.nativeloader.UtilNativeLoader;
+import hu.qgears.nativeloader.XmlNativeLoader;
 
 public class BaseAccessor extends XmlNativeLoader {
 	
@@ -16,9 +15,10 @@ public class BaseAccessor extends XmlNativeLoader {
 	private static boolean inited = false;
 	
 	/**
-	 * When Xless implementation is used (KMS, OSMesa+VNC, etc) then this has to be set to true before initializing
-	 * this class to avoid error message: "java.awt.HeadlessException: 
-     * No X11 DISPLAY variable was set, but this program performed an operation which requires it."
+	 * When Xless implementation is used (KMS, OSMesa+VNC, etc) then this has
+	 * to be set to true before initializing this class to avoid error message:
+	 * "java.awt.HeadlessException: No X11 DISPLAY variable was set, but this
+	 * program performed an operation which requires it."
 	 */
 	public static boolean noX11 = false;
 
@@ -39,30 +39,7 @@ public class BaseAccessor extends XmlNativeLoader {
 			if (!noX11)
 			{
 				if ("Linux".equals(System.getProperty("os.name"))) {
-					// HACK - initialize AWT so it loads its native libs that lwjgl
-					// depend on: libmawt.so, libjawt.so
-					// A must on Linux but wine hangs on this call for some unknown
-					// reason :-)
-					{
-						try
-						{
-							// mawt is not on classpath because it has two versions:
-							// headless and x11. The correct version is selected dynamically 
-							// lwjgl requires the X11 enabled one
-							File mawt = findMawt(new File(System.getProperty("java.home")));
-							Runtime.getRuntime().load(mawt.getAbsolutePath());
-						}catch(Throwable t)
-						{
-							if((t.getMessage()!=null)&&t.getMessage().indexOf("already loaded")<0)
-							{
-								// Do not log already loaded exception!
-								LOG.error("Loading MAWT",t);
-							}
-							// Try fallback mawt loading techniqe: create and dispose a frame:
-							new Frame().dispose();
-						}
-					}
-					// manually load libjawt.so into vm, needed since Java 7
+					// manually load libjawt.so into vm, needed since Java 7+
 					try {
 						System.loadLibrary("jawt");					
 					}catch(Throwable e)
@@ -74,27 +51,5 @@ public class BaseAccessor extends XmlNativeLoader {
 			UtilNativeLoader.loadNatives(new BaseAccessor());
 			inited = true;
 		}
-	}
-	/**
-	 * Find the X11 enabled libmawt.so file in the JRE folder.
-	 * @param dir JRE folder (and subfolders on recursive calls)
-	 * @return
-	 */
-	private static File findMawt(File dir) {
-		if (dir.isDirectory()) {
-			if ("xawt".equals(dir.getName())) {
-				return new File(dir, "libmawt.so");
-			}
-			File[] fs = dir.listFiles();
-			if (fs != null) {
-				for (File f : fs) {
-					File mawt = findMawt(f);
-					if (mawt != null) {
-						return mawt;
-					}
-				}
-			}
-		}
-		return null;
 	}
 }
