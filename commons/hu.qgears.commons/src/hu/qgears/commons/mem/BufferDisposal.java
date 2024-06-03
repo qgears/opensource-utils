@@ -5,11 +5,12 @@ import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 
 import hu.qgears.commons.AbstractReferenceCountedDisposeable;
+import hu.qgears.commons.UtilJre;
 
 /**
  * Provides unified interface for 'direct byte buffer' disposal, choosing the
  * right implementation autodetected by {@link #programmaticDispose system 
- * property} and {@link #getJavaFeatureVersion() JRE version}. 
+ * property} and {@link UtilJre#getJavaFeatureVersion() JRE version}. 
  * 
  * @see #programmaticDispose
  * @author chreex
@@ -43,36 +44,6 @@ public class BufferDisposal {
 	}
 	
 	private static final Cleaner CLEANER_INSTANCE;
-
-	/**
-	 * Extracts the Java 'feature' version, which is: 
-	 * <ul>
-	 * <li>the JRE minor version if the JRE version starts with "1.", which 
-	 * will be true for JRE versions until 1.8.*
-	 * <li>the JRE major version, if the JRE major version is larger than or
-	 * equal to 9 
-	 * </ul>
-	 * @return the Java 'feature' version
-	 */
-	public static int getJavaFeatureVersion() {
-	    final String sysPropJavaVersion = System.getProperty("java.version");
-	    final String versionStr;
-	    
-	    if (sysPropJavaVersion.startsWith("1.")) {
-	        versionStr = sysPropJavaVersion.substring(2, 3);
-	    } else {
-	        final int dotIdx = sysPropJavaVersion.indexOf(".");
-	        
-	        if (dotIdx != -1) { 
-	        	versionStr = sysPropJavaVersion.substring(0, dotIdx); 
-        	} else {
-        		throw new IllegalStateException("Unexpected 'java.version' "
-        				+ "system property value");
-        	}
-	    }
-	    
-	    return Integer.parseInt(versionStr);
-	}
 
 	private static final class Java8Cleaner implements Cleaner {
 
@@ -127,7 +98,7 @@ public class BufferDisposal {
     
     static {
 		if (programmaticDispose) {
-			final int javaFeatureVersion = getJavaFeatureVersion();
+			final int javaFeatureVersion = UtilJre.getJavaFeatureVersion();
 			Cleaner tmpCleanerInstance = null;
 			
 			try {
@@ -149,4 +120,7 @@ public class BufferDisposal {
 		return CLEANER_INSTANCE;
 	}
 
+	private BufferDisposal() {
+		// Preventing instantiation
+	}
 }
