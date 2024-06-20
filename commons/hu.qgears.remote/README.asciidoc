@@ -1,0 +1,10 @@
+= Remoting library
+
+Simple remoting server that is capable of executing builds and tests on a remote computer. An integrated solution instead of ssh+sftp+rsync in a single no need to install jar.
+
+Features:
+
+ * Upload folder (synchronize content by hash implementation avoids unnecessary copying)
+ * Dowload folder (synchronize content by hash implementation avoids unnecessary copying)
+ * Remote execute command
+ * Easy to extend and integrate into Java based automation tools
