@@ -1,5 +1,9 @@
 package hu.qgears.commons;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -30,7 +34,7 @@ public class UtilMd5 {
 			@SuppressWarnings("squid:S2070")
 			MessageDigest m = MessageDigest.getInstance("MD5");
 			m.update(f.getBytes(StandardCharsets.UTF_8));
-			return UtilString.padLeft(new BigInteger(1, m.digest()).toString(16), HASHLENGTH, '0');
+			return toMd5String(m);
 		} catch (NoSuchAlgorithmException e) {
 			// Never happens as MD5 is part of JVM
 			throw new RuntimeException(e);
@@ -68,7 +72,39 @@ public class UtilMd5 {
 			@SuppressWarnings("squid:S2070")
 			MessageDigest m = MessageDigest.getInstance("MD5");
 			m.update(f);
-			return UtilString.padLeft(new BigInteger(1, m.digest()).toString(16), HASHLENGTH, '0');
+			return toMd5String(m);
+		} catch (NoSuchAlgorithmException e) {
+			// Never happens as MD5 is part of JVM
+			throw new RuntimeException(e);
+		}
+	}
+	/**
+	 * MD5 hash of the 'file'.
+	 * @param f file to be opened and hash counted
+	 * @return md5 hash of the file's content in canonical string format
+	 * @throws IOException 
+	 * @throws FileNotFoundException 
+	 */
+	public static String getMd5(File f) throws IOException
+	{
+		try {
+			byte[] buffer=new byte[UtilFile.defaultBufferSize.get()];
+			// Cryptgraphic hash is not required here, but specifically MD5 is 
+			@SuppressWarnings("squid:S2070")
+			MessageDigest m = MessageDigest.getInstance("MD5");
+			try(FileInputStream fis=new FileInputStream(f))
+			{
+				while(true)
+				{
+					int n=fis.read(buffer);
+					if(n<1)
+					{
+						break;
+					}
+					m.update(buffer, 0, n);
+				}
+			}
+			return toMd5String(m);
 		} catch (NoSuchAlgorithmException e) {
 			// Never happens as MD5 is part of JVM
 			throw new RuntimeException(e);
