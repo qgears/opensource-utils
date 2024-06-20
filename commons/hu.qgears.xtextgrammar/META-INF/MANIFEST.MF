@@ -11,6 +11,8 @@ Require-Bundle: hu.qgears.parser;bundle-version="10.2.0";visibility:=reexport,
  hu.qgears.rtemplate.runtime;bundle-version="3.1.0",
  org.eclipse.emf.ecore;bundle-version="2.11.0";visibility:=reexport,
  hu.qgears.crossref;bundle-version="1.0.0";visibility:=reexport,
- hu.qgears.emfcollab;bundle-version="10.4.1";visibility:=reexport
+ hu.qgears.emfcollab;bundle-version="10.4.1";visibility:=reexport,
+ org.json;bundle-version="1.0.0"
 Export-Package: hu.qgears.xtextgrammar,
- hu.qgears.xtextgrammar.contentassist
+ hu.qgears.xtextgrammar.contentassist,
+ hu.qgears.xtextgrammar.lsp

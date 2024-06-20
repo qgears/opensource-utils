@@ -112,7 +112,7 @@ public class CrossRefManager {
 	 * 
 	 * Resolve all references.
 	 * 
-	 * If there are new objects created during the close transaction phase then resolving is re-executed. 
+	 * If there are new objects created during the close transaction phase then resolving is re-executed.
 	 */
 	public void closeTransaction()
 	{

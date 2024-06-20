@@ -93,6 +93,7 @@ public class CoolRMIServer {
 
 	/**
 	 * Start listening for clients.
+	 * Returns once the server socket is bound and listen started.
 	 * @throws IOException 
 	 */
 	public void start() throws IOException {

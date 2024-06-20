@@ -194,6 +194,10 @@ public class ProcessXtextFile {
 		for(String s: importsNoName)
 		{
 			EPackage pack=(EPackage)EPackage.Registry.INSTANCE.get(s);
+			if(pack==null)
+			{
+				throw new RuntimeException("import Missing package: "+s);
+			}
 			EClassifier cla=pack.getEClassifier(id);
 			if(cla!=null)
 			{
