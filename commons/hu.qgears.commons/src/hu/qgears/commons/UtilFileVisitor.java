@@ -18,32 +18,50 @@ public class UtilFileVisitor {
 	{
 		visit(dir, "", 0);
 	}
+	private NoExceptionAutoClosable[] toClose=new NoExceptionAutoClosable[1];
 	private void visit(File dir, String localPath, int depth) throws Exception
 	{
 		boolean visitChildren=visited(dir, localPath);
 		visitChildren&=visited(dir, localPath, depth);
-		if(visitChildren&&dir.isDirectory())
+		toClose[0]=null;
+		visitChildren&=visited(dir, localPath, depth, toClose);
+		NoExceptionAutoClosable c=null;
+		if(toClose[0]!=null)
 		{
-			File[] fs=dir.listFiles();
-			if(fs!=null)
+			c=toClose[0];
+			toClose[0]=null;
+		}
+		try
+		{
+			if(visitChildren&&dir.isDirectory())
 			{
-				List<File> dirContent;
-				if (visitInAlphabeticOrder) {
-					dirContent = new ArrayList<>(Arrays.asList(fs));
-					Collections.sort(dirContent);
-				} else {
-					dirContent = Arrays.asList(fs);
-				}
-				
-				for(File f:dirContent)
+				File[] fs=dir.listFiles();
+				if(fs!=null)
 				{
-					String lp=localPath+f.getName();
-					if(f.isDirectory())
-					{
-						lp=lp+"/";
+					List<File> dirContent;
+					if (visitInAlphabeticOrder) {
+						dirContent = new ArrayList<>(Arrays.asList(fs));
+						Collections.sort(dirContent);
+					} else {
+						dirContent = Arrays.asList(fs);
 					}
-					visit(f, lp, depth+1);
+					
+					for(File f:dirContent)
+					{
+						String lp=localPath+f.getName();
+						if(f.isDirectory())
+						{
+							lp=lp+"/";
+						}
+						visit(f, lp, depth+1);
+					}
 				}
+			}
+		}finally
+		{
+			if(c!=null)
+			{
+				c.close();
 			}
 		}
 	}
@@ -80,6 +98,18 @@ public class UtilFileVisitor {
 	 * @throws Exception
 	 */
 	protected boolean visited(File dir, String localPath, int depth) throws Exception {
+		return true;
+	}
+	/**
+	 * Subclasses must override this method to implement useful feature.
+	 * @param dir folder or file currently visited.
+	 * @param localPath the local path of the file relative to the root folder of visiting.
+	 * @param depth depth below the entry folder. First folders are on depth level 0.
+	 * @param toClose output parameter array with length of 1. When toClose[0] is set to a {@link NoExceptionAutoClosable} object then that is called once the visiting of this subtree was finished.
+	 * @return true means that children must also be visited. False blocks visiting the children of current folder.
+	 * @throws Exception
+	 */
+	protected boolean visited(File dir, String localPath, int depth, NoExceptionAutoClosable[] toClose) throws Exception {
 		return true;
 	}
 	
