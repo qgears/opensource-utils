@@ -9,12 +9,10 @@ public class LspServer {
 		this.model=model;
 	}
 	public void run() throws Exception {
-		try(ServerSocket ss=new ServerSocket(5007))
-		{
-			while(true)
-			{
+		try(ServerSocket ss=new ServerSocket(5007))	{
+			while(true) {
 				Socket s=ss.accept();
-				new LspServerSession(s).start();
+				new LspServerSession(s, model).start();
 			}
 		}
 	}
