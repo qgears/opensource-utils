@@ -1,24 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-
-	<!-- Opensource utils category -->
-	<category-def name="Q-Gears lib tools" label="Q-Gears lib utilities" />
-	<category-def name="Q-Gears lib tools sources" label="Q-Gears lib utilities developer resources">
-		<description>
-			Source bundles for Q-Gears lib tools
-		</description>
-	</category-def>
-	<feature id="hu.qgears.utils.feature">
-		<category name="Q-Gears lib tools" />
-	</feature>
-	<feature id="hu.qgears.utils.feature.source">
-		<category name="Q-Gears lib tools sources" />
-	</feature>
-	<feature id="hu.qgears.emfcollab.feature">
-		<category name="Q-Gears lib tools" />
-	</feature>
-	<feature id="hu.qgears.emfcollab.feature.source">
-		<category name="Q-Gears lib tools sources" />
-	</feature>
-
+   <feature id="hu.qgears.utils.feature">
+      <category name="Q-Gears lib tools"/>
+   </feature>
+   <feature id="hu.qgears.utils.feature.source">
+      <category name="Q-Gears lib tools sources"/>
+   </feature>
+   <feature id="hu.qgears.emfcollab.feature">
+      <category name="Q-Gears lib tools"/>
+   </feature>
+   <feature id="hu.qgears.emfcollab.feature.source">
+      <category name="Q-Gears lib tools sources"/>
+   </feature>
+   <bundle id="hu.qgears.remote">
+      <category name="Q-Gears lib tools"/>
+   </bundle>
+   <bundle id="hu.qgears.remote.source">
+      <category name="Q-Gears lib tools sources"/>
+   </bundle>
+   <category-def name="Q-Gears lib tools" label="Q-Gears lib utilities"/>
+   <category-def name="Q-Gears lib tools sources" label="Q-Gears lib utilities developer resources">
+      <description>
+         Source bundles for Q-Gears lib tools
+      </description>
+   </category-def>
 </site>

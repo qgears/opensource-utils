@@ -10,3 +10,7 @@ location "https://buildserver.qgears.net/mirror/eclipse2020-03-mirror/" eclipse-
 	org.eclipse.equinox.launcher [1.5.700.v20200207-2156,1.5.700.v20200207-2156]
 	javax.annotation [1.2.0.v201602091430,1.2.0.v201602091430]
 }
+
+location "https://buildserver.qgears.net/update-sites/qgears-opensource-repo-nightly" qgears-opensource-repo {
+	joptsimple [1.6.0.20231205091505,1.6.0.20231205091505]
+}
