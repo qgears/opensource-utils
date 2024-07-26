@@ -6,12 +6,12 @@
 	<parent>
 		<groupId>hu.qgears</groupId>
 		<artifactId>opensource-utils-parent</artifactId>
-		<version>11.0.0-SNAPSHOT</version>
+		<version>11.1.0-SNAPSHOT</version>
 		<relativePath>../../build/opensource-utils-parent/</relativePath>
 	</parent>
 	<groupId>hu.qgears</groupId>
 	<artifactId>hu.qgears.images</artifactId>
-	<version>11.0.0-SNAPSHOT</version>
+	<version>11.1.0-SNAPSHOT</version>
 	<packaging>eclipse-plugin</packaging>
 	<description>Java bindings to native image handling libraries. Only libpng is used by the application.</description>
 	
