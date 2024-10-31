@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>hu.qgears</groupId>
 	<artifactId>hu.qgears.coolrmi</artifactId>
-	<version>10.4.2-SNAPSHOT</version>
+	<version>11.0.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<parent>
@@ -19,7 +19,7 @@
 		<dependency>
 			<groupId>hu.qgears</groupId>
 			<artifactId>hu.qgears.commons</artifactId>
-			<version>10.5.0-SNAPSHOT</version>
+			<version>11.0.0-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 
