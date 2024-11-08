@@ -1,5 +1,7 @@
 package hu.qgears.images;
 
+import java.nio.ByteOrder;
+
 /**
  * Pixel component orders of a native image in memory.
  * @author rizsi
@@ -12,11 +14,19 @@ public enum ENativeImageComponentOrder {
 		public int getNCHannels() {
 			return 3;
 		}
+		@Override
+		protected PixelFormat createPixelFormat() {
+			return new PixelFormat(8, 16, 8, 8, 8, 0, 0, 0, 24, ByteOrder.BIG_ENDIAN);
+		}
 	},
 	BGR	{
 		@Override
 		public int getNCHannels() {
 			return 3;
+		}
+		@Override
+		protected PixelFormat createPixelFormat() {
+			return new PixelFormat(8, 0, 8, 8, 8, 16, 0, 0, 24, ByteOrder.BIG_ENDIAN);
 		}
 	},
 	BGRA	{
@@ -28,6 +38,10 @@ public enum ENativeImageComponentOrder {
 		public int getAlphaChannel() {
 			return 3;
 		}
+		@Override
+		protected PixelFormat createPixelFormat() {
+			return new PixelFormat(8, 8, 8, 16, 8, 24, 8, 0, 32, ByteOrder.BIG_ENDIAN);
+		}
 	},
 	RGBA	{
 		@Override
@@ -37,6 +51,10 @@ public enum ENativeImageComponentOrder {
 		@Override
 		public int getAlphaChannel() {
 			return 3;
+		}
+		@Override
+		protected PixelFormat createPixelFormat() {
+			return new PixelFormat(8, 24, 8, 16, 8, 8, 8, 0, 32, ByteOrder.BIG_ENDIAN);
 		}
 	},
 	ARGB	{
@@ -48,6 +66,10 @@ public enum ENativeImageComponentOrder {
 		public int getAlphaChannel() {
 			return 0;
 		}
+		@Override
+		protected PixelFormat createPixelFormat() {
+			return new PixelFormat(8, 16, 8, 8, 8, 0, 8, 24, 32, ByteOrder.BIG_ENDIAN);
+		}
 	},
 	ABGR	{
 		@Override
@@ -58,11 +80,19 @@ public enum ENativeImageComponentOrder {
 		public int getAlphaChannel() {
 			return 0;
 		}
+		@Override
+		protected PixelFormat createPixelFormat() {
+			return new PixelFormat(8, 0, 8, 8, 8, 16, 8, 24, 32, ByteOrder.BIG_ENDIAN);
+		}
 	},
 	MONO	{
 		@Override
 		public int getNCHannels() {
 			return 1;
+		}
+		@Override
+		protected PixelFormat createPixelFormat() {
+			return null;
 		}
 	},
 	ALPHA	{
@@ -73,6 +103,10 @@ public enum ENativeImageComponentOrder {
 		@Override
 		public int getAlphaChannel() {
 			return 0;
+		}
+		@Override
+		protected PixelFormat createPixelFormat() {
+			return null;
 		}
 	},
 	/**
@@ -87,7 +121,17 @@ public enum ENativeImageComponentOrder {
 		public int getAlphaChannel() {
 			return 0;
 		}
+		@Override
+		protected PixelFormat createPixelFormat() {
+			return null;
+		}
 	};
+	private PixelFormat pf;
+	ENativeImageComponentOrder()
+	{
+		pf=createPixelFormat();
+	}
+	abstract protected PixelFormat createPixelFormat();
 	public int getNCHannels()
 	{
 		throw new RuntimeException("Not implemented");
@@ -99,5 +143,9 @@ public enum ENativeImageComponentOrder {
 	 */
 	public int getAlphaChannel() {
 		return -1;
+	}
+	public PixelFormat getPixelFormat()
+	{
+		return pf;
 	}
 }
