@@ -44,7 +44,7 @@ public class VncSnapShot implements AutoCloseable {
 	 * it.
 	 */
 	@Override
-	public void close() throws Exception {
+	public void close() {
 		client.released();
 	}
 }

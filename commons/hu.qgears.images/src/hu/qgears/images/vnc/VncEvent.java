@@ -30,4 +30,8 @@ public class VncEvent {
 	{
 		return bb.getInt(4);
 	}
+	@Override
+	public String toString() {
+		return "VNCEV: "+getEventType()+" "+getKey();
+	}
 }

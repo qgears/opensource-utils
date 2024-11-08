@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.channels.AsynchronousCloseException;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -146,6 +147,9 @@ public class VNCClient implements AutoCloseable {
 					channel.close();
 					changeCounter++;
 				}
+			}catch(AsynchronousCloseException e)
+			{
+				LOG.info("VNC closed");
 			}catch(Exception e)
 			{
 				LOG.error("Exception in VNC",e);
