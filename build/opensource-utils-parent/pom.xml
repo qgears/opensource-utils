@@ -7,7 +7,7 @@
 		<groupId>hu.qgears</groupId>
 		<artifactId>root</artifactId>
 		<version>1.0.0</version>
-		<relativePath>../repository-builder/parent-poms/root</relativePath>
+		<relativePath>../repository-builder/parent-poms/root-plain</relativePath>
 	</parent> 
 	
 	<groupId>hu.qgears</groupId>
@@ -30,48 +30,6 @@
 		</site>
 	</distributionManagement>
  	<url>${project_url}/modules/</url>
-
-	<build>
-		<plugins>
-			<plugin>
-			   <groupId>org.eclipse.tycho</groupId>
-			   <artifactId>target-platform-configuration</artifactId>
-			   <version>${tycho-version}</version>
-			   <configuration>
-				  <target>
-					 <artifact>
-						<groupId>hu.qgears</groupId>
-						<artifactId>hu.qgears.opensource.target</artifactId>
-						<version>${project.version}</version>
-					 </artifact>
-				  </target>
-			   </configuration>
-			</plugin>
-		</plugins>
-<!--			<plugin>
-    			<groupId>org.eclipse.tycho</groupId>
-		        <artifactId>tycho-packaging-plugin</artifactId>
-				<version>${tycho-version}</version>
-				<configuration>
-					<finalName>${project.artifactId}_${qualifiedVersion}</finalName>
-				</configuration>
-	        </plugin>
-		</plugins>
-		
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>org.eclipse.tycho</groupId>
-					<artifactId>tycho-source-plugin</artifactId>
-					<version>${tycho-version}</version>
-					<configuration>
-						<finalName>${project.artifactId}.source_${qualifiedVersion}</finalName>
-					</configuration>
-
-				</plugin>
-			</plugins>
-		</pluginManagement> -->
-	</build>
 
 	<profiles>
 		<!-- This profile is activated when the version bump script is executed.
