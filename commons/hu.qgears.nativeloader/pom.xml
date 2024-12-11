@@ -6,9 +6,10 @@
 	<parent>
 		<groupId>hu.qgears</groupId>
 		<artifactId>opensource-utils-parent</artifactId>
-		<version>11.1.0-SNAPSHOT</version>
+		<version>12.0.0-SNAPSHOT</version>
 		<relativePath>../../build/opensource-utils-parent/</relativePath>
 	</parent>
+	
 	<artifactId>hu.qgears.nativeloader</artifactId>
 	<packaging>jar</packaging>
 	<description>Generic native shared object loader implementation.</description>
@@ -16,7 +17,7 @@
 		<dependency>
 			<groupId>hu.qgears</groupId>
 			<artifactId>hu.qgears.commons</artifactId>
-			<version>11.1.0-SNAPSHOT</version>
+			<version>${internal-dep-version}</version>
 		</dependency>
 	</dependencies>
 </project>

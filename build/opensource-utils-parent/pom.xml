@@ -5,14 +5,14 @@
 
 	<parent>
 		<groupId>hu.qgears</groupId>
-		<artifactId>root</artifactId>
+		<artifactId>root.plain</artifactId>
 		<version>1.0.0</version>
-		<relativePath>../repository-builder/parent-poms/root-plain</relativePath>
+		<relativePath></relativePath>
 	</parent> 
 	
 	<groupId>hu.qgears</groupId>
 	<artifactId>opensource-utils-parent</artifactId>
-	<version>11.1.0-SNAPSHOT</version>
+	<version>12.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<properties>
@@ -21,6 +21,7 @@
 		<!-- used to postfix jar version when cross compile is not enabled. 
 			Only important on projects with native components. -->	
 		<version-postfix>-nox</version-postfix>
+		<internal-dep-version>[${project.version},)</internal-dep-version>
 	</properties>
 	<distributionManagement>
 		<site>
@@ -49,4 +50,5 @@
 			</modules>
 		</profile>
 	</profiles>
+	
 </project>

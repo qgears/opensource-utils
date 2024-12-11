@@ -1,35 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>hu.qgears</groupId>
 		<artifactId>opensource-utils-parent</artifactId>
-		<version>11.1.0-SNAPSHOT</version>
+		<version>12.0.0-SNAPSHOT</version>
 		<relativePath>../../build/opensource-utils-parent/</relativePath>
 	</parent>
-	<groupId>hu.qgears</groupId>
+	
 	<artifactId>hu.qgears.shm</artifactId>
-	<packaging>eclipse-plugin</packaging>
-	<version>11.1.0-SNAPSHOT</version>
+	<packaging>jar</packaging>
+	
 	
 	<description>Custom effective shared memory implementation.</description>
-	
+
 	<build>	
-		<plugins>
+		<sourceDirectory>src</sourceDirectory>
+	<!--	<plugins>
 			<plugin>
     			<groupId>org.eclipse.tycho</groupId>
 		        <artifactId>tycho-packaging-plugin</artifactId>
 				<version>${tycho-version}</version>
 				<configuration>
-					<!-- using version postfix if xcompile is disabled. See parent pom. -->
+					 using version postfix if xcompile is disabled. See parent pom. 
 					<forceContextQualifier>${forceContextQualifier}${version-postfix}</forceContextQualifier>
 				</configuration>
 	        </plugin>
 		</plugins>
+		-->
 	</build>
-			
+
 	<profiles>
 		<profile>
 			<!-- Build profile for enable building C libs on current platform
@@ -53,7 +56,8 @@
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>exec-maven-plugin</artifactId>
 						<version>${exec-plugin-version}</version>
-						<!-- Inheritance must be disabled, because the exec plugin run in all submodules by default-->
+						<!-- Inheritance must be disabled, because the exec
+						plugin run in all submodules by default-->
 						<inherited>false</inherited>
 						<executions>
 							<execution>
@@ -74,7 +78,8 @@
 		</profile>
 		<profile>
 			<!-- Build profile to package native connectors for every platform.
-			This profile intended to be used on build server, where precompiled libs are already created. -->
+			This profile intended to be used on build server, where precompiled libs are
+			already created. -->
 			<id>cross-compile</id>
 			<activation>
 				<property>
@@ -91,4 +96,11 @@
 		</profile>
 	</profiles>
 
+	<dependencies>
+		<dependency>
+			<groupId>hu.qgears</groupId>
+			<artifactId>hu.qgears.nativeloader</artifactId>
+			<version>${internal-dep-version}</version>
+		</dependency>
+	</dependencies>
 </project>
