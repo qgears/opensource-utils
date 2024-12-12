@@ -1,8 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-	xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>hu.qgears</groupId>
@@ -18,7 +14,6 @@
 	<description>Custom effective shared memory implementation.</description>
 
 	<build>	
-		<sourceDirectory>src</sourceDirectory>
 	<!--	<plugins>
 			<plugin>
     			<groupId>org.eclipse.tycho</groupId>
@@ -91,7 +86,7 @@
 				<!-- Do not postfix build when cross compile is enabled 
 				There are unit tests that check all libs are packaged
 				-->
-				<version-postfix></version-postfix>
+				<version-postfix/>
 			</properties>
 		</profile>
 	</profiles>
@@ -102,5 +97,12 @@
 			<artifactId>hu.qgears.nativeloader</artifactId>
 			<version>${internal-dep-version}</version>
 		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${junit-version}</version>
+			<scope>test</scope>
+		</dependency>
+		
 	</dependencies>
 </project>

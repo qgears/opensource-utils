@@ -16,7 +16,7 @@ SO_GENERIC_NAME:=libshm-${ARCHPOSTFIX}.so
 
 #used by the maven editor_platform_build process, see pom.xml in project.
 ifndef OUTPUTDIR
-    OUTPUTDIR = ../../src/hu/qgears/shm/natives
+    OUTPUTDIR = ../../src/main/resources/hu/qgears/shm/natives
 endif
 
 gnu_c:

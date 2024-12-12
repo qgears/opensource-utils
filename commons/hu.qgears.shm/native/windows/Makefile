@@ -6,7 +6,7 @@ CPP_WIN_FLAGS += -Wl,--add-stdcall-alias -D_REENTRANT -shared
 CROSSCPP=i586-mingw32msvc-g++ 
 
 gnu_c:
-	${CROSSCPP} -o ../../src/hu/qgears/shm/natives/shm.dll \
+	${CROSSCPP} -o ../../src/main/resources/hu/qgears/shm/natives/shm.dll \
 	${CPP_WIN_FLAGS} \
 	${JNI_INCLUDE} ../malloc.c \
 	 ../jniutil.cpp ../DlMallocPoolNative.cpp \
