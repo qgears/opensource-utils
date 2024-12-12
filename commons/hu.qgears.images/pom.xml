@@ -1,32 +1,29 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>hu.qgears</groupId>
 		<artifactId>opensource-utils-parent</artifactId>
-		<version>11.1.0-SNAPSHOT</version>
+		<version>12.0.0-SNAPSHOT</version>
 		<relativePath>../../build/opensource-utils-parent/</relativePath>
 	</parent>
-	<groupId>hu.qgears</groupId>
+	
 	<artifactId>hu.qgears.images</artifactId>
-	<version>11.1.0-SNAPSHOT</version>
-	<packaging>eclipse-plugin</packaging>
+	
+	<packaging>jar</packaging>
 	<description>Java bindings to native image handling libraries. Only libpng is used by the application.</description>
 	
 	<build>
-		<plugins>
+	<!-- 	<plugins>
 			<plugin>
     			<groupId>org.eclipse.tycho</groupId>
 		        <artifactId>tycho-packaging-plugin</artifactId>
 				<version>${tycho-version}</version>
 				<configuration>
-					<!-- using version postfix if xcompile is disabled. See parent pom. -->
+					 using version postfix if xcompile is disabled. See parent pom.
 					<forceContextQualifier>${forceContextQualifier}${version-postfix}</forceContextQualifier>
 				</configuration>
 	        </plugin>
-		</plugins>
+		</plugins> -->
 	</build>
 
 	<profiles>
@@ -98,8 +95,15 @@
 				<!-- Do not postfix build when cross compile is enabled 
 				There are unit tests that check all libs are packaged
 				-->
-				<version-postfix></version-postfix>
+				<version-postfix />
 			</properties>
 		</profile>
 	</profiles>
+	<dependencies>
+		<dependency>
+			<groupId>hu.qgears</groupId>
+			<artifactId>hu.qgears.nativeloader</artifactId>
+			<version>[12.0.0-SNAPSHOT,)</version>
+		</dependency>
+	</dependencies>
 </project>

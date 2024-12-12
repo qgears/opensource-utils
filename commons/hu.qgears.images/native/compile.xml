@@ -30,17 +30,17 @@
 		<javac
 			includeantruntime="false"
 			destdir="/tmp/jni-tmp"
-			srcdir="../src/hu/qgears/images/libpng/"
+			srcdir="../src/main/java/hu/qgears/images/libpng/"
 			includes="NativeLibPngConnector.java"
-			classpath="../bin:${env.QGEARSDEPS}"
+			classpath="../target/classes:${env.QGEARSDEPS}"
 			nativeheaderdir="./libpng"
 			/>
 	 	<javac
 			includeantruntime="false"
 			destdir="/tmp/jni-tmp"
-			srcdir="../src/hu/qgears/images/tiff/"
+			srcdir="../src/main/java/hu/qgears/images/tiff/"
 	 		includes="*Connector.java"
-			classpath="../bin:${env.QGEARSDEPS}"
+			classpath="../target/classes:${env.QGEARSDEPS}"
 	 		nativeheaderdir="./tiff/jni"
 			/>
 		<delete dir="/tmp/jni-tmp"/>

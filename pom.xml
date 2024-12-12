@@ -12,9 +12,9 @@
 		<module>commons/hu.qgears.commons</module>
 		<module>commons/hu.qgears.nativeloader</module>
 		<module>commons/hu.qgears.shm</module>
+		<module>commons/hu.qgears.images</module>
 <!--	
 		<module>commons/hu.qgears.opengl.commons</module>
-		<module>commons/hu.qgears.images</module>
 		<module>commons/hu.qgears.remote</module>
 		<module>commons/hu.qgears.utils.feature</module>
 		<module>coolrmi/hu.qgears.coolrmi</module>

@@ -15,7 +15,7 @@ SO_GENERIC_NAME:=libqpng-${ARCHPOSTFIX}.so
 
 #used by the maven editor_platform_build process, see pom.xml in project.
 ifndef OUTPUTDIR
-    OUTPUTDIR = ../../../src/hu/qgears/images/libpng
+    OUTPUTDIR = ../../../src/main/resources/hu/qgears/images/libpng
 endif
 
 gnu_c:

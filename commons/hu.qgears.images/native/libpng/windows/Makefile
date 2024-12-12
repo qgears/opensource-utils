@@ -6,7 +6,7 @@ LIBPNG_LIBS64 = -Ldeps/lib/win64/
 
 #used by the maven build process, see pom.xml in project.
 ifndef OUTPUTDIR
-    OUTPUTDIR = ../../../src/hu/qgears/images/libpng
+    OUTPUTDIR = ../../../src/main/resources/hu/qgears/images/libpng
 endif
 
 all : libqpng32 libqpng64

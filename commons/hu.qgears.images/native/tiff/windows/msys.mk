@@ -8,7 +8,7 @@ ARCHPOSTFIX='64'
 
 #used by the maven editor_platform_build process, see pom.xml in project.
 ifndef OUTPUTDIR
-    OUTPUTDIR = ../../../src/hu/qgears/images/tiff
+    OUTPUTDIR = ../../../src/main/resources/hu/qgears/images/tiff
 endif
 
 gnu_c:

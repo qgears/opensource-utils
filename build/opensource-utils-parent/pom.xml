@@ -7,7 +7,7 @@
 		<groupId>hu.qgears</groupId>
 		<artifactId>root.plain</artifactId>
 		<version>1.0.0</version>
-		<relativePath></relativePath>
+		<relativePath>../repository-builder/parent-poms/root-plain</relativePath>
 	</parent> 
 	
 	<groupId>hu.qgears</groupId>

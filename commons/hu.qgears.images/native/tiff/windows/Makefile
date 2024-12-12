@@ -2,7 +2,7 @@ JNI_INCLUDE:=-I../../libpng/windows/deps/include/java -I../../libpng/windows/dep
 
 #used by the maven editor_platform_build process, see pom.xml in project.
 ifndef OUTPUTDIR
-    OUTPUTDIR = ../../../src/hu/qgears/images/tiff
+    OUTPUTDIR = ../../../src/main/resources/hu/qgears/images/tiff
 endif
 all: tiffwin32 tiffwin64
 
