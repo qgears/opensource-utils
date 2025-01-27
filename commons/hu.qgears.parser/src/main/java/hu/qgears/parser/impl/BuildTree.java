@@ -74,11 +74,9 @@ public class BuildTree {
 				return readonlyEmptyList();
 			} else {
 				Term subType = ((TermMore) (termType)).getSub();
-				for (int i = 0; i < e.dotPos; ++i)
-				{
-					types.add(subType);
-				}
-				break;
+				List<TreeElem> ret = findSameElements(subType, e.dotPos, e.from, e.getGroup(), e
+						.getBuffer());
+				return ret;
 			}
 		}
 		case token:
@@ -238,6 +236,42 @@ public class BuildTree {
 			return null;
 		}
 		return ret.get(0);
+	}
+	/**
+	 * Find the nodes that constitute an iteration rule.
+	 * @param subType type of the node to be iterated
+	 * @param n number of iterations
+	 * @param from position where iteration starts
+	 * @param to position where iteration ends
+	 * @param buffer the parse result buffer
+	 * @return list of parsed nodes. Null in case of no solution (impossible in theory)
+	 * @throws ParseException in case of ambiguity
+	 */
+	private List<TreeElem> findSameElements(Term subType, int n, int from, int to, ElemBuffer buffer) throws ParseException {
+		List<TreeElem> ret=new ArrayList<TreeElem>();
+		for(int i=0;i<n;++i)
+		{
+			List<TreeElem> items=findElements(subType, to,	buffer);
+			if(items.size()>1)
+			{
+				List<Term> types=new ArrayList<Term>();
+				types.add(subType);
+				throw createAmbigousException2(types, from, to, buffer, null);
+			}
+			if(items.size()==0)
+			{
+				return null;
+			}
+			TreeElem current=items.get(0);
+			to=current.from;
+			ret.add(current);
+		}
+		if(to!=from)
+		{
+			throw new ParseException("Internal error: parse failed "+to+"!="+from);
+		}
+		Collections.reverse(ret);
+		return ret;
 	}
 
 	private ParseException createCannotParseException(List<Term> types, int from,
