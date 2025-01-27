@@ -49,6 +49,7 @@ public class Parser implements IParser {
 			if(receiver!=null)
 			{
 				receiver.tokensUnfiltered(tokensUnfiltered);
+				logger.logTokenizedUnfiltered();
 			}
 			toks = new TokenFilter(lang.getTokenFilterDef()).filter(tokensUnfiltered);
 			logger.logTokenized();
@@ -100,9 +101,7 @@ public class Parser implements IParser {
 				}
 			}
 			if (changeCount == 0) {
-				logger.println(buffer.print());
-				logger.println(
-						"'" + t.getSource().getFullSequence() + "'");
+				logger.logStateWhenParseStuck(buffer, src);
 				receiver.stucked(buffer, t);
 				return null;	// No tree because we could not build it
 			}

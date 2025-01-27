@@ -2,7 +2,9 @@ package hu.qgears.parser;
 
 import java.io.PrintStream;
 
+import hu.qgears.commons.UtilString;
 import hu.qgears.parser.impl.ElemBuffer;
+import hu.qgears.parser.tokenizer.ITextSource;
 
 /**
  * Logger that logs some data of the parsing.
@@ -30,7 +32,7 @@ public class ParserLogger {
 	public void logTableFilled(ElemBuffer buffer, int size, int currentGroup, int tokensSize) {
 		if(err!=null)
 		{
-			err.println("Table filled " + getElapsed() + "nanos " + size + " "
+			err.println("Table filled " + getElapsedString() + " size: " + size + " "
 				+ currentGroup + " " + tokensSize + " "
 				+ ((double) size / currentGroup)+" Nanos stored already search: "+buffer.getNanosStoredAlready()+" do generates: "+buffer.nanosDoGenerates);
 		}
@@ -46,27 +48,52 @@ public class ParserLogger {
 	public void logTokenized() {
 		if(err!=null)
 		{
-			err.println("Tokenized " + getElapsed()+"nanos");
+			err.println("Tokenized " + getElapsedString());
 		}
 	}
 
 	public void logTreeBuild() {
 		if(err!=null)
 		{
-			err.println("Tree build " + getElapsed()+"nanos");
+			err.println("Tree build " + getElapsedString());
 		}
 	}
 
 	public void logTreeFiltered() {
 		if(err!=null)
 		{
-			err.println("Tree filtered " + getElapsed()+"nanos");
+			err.println("Tree filtered " + getElapsedString());
 		}
+	}
+	private String getElapsedString() {
+		long t=getElapsed();
+		long last=t%1000;
+		t/=1000;
+		long last2=t%1000;
+		t/=1000;
+		long last3=t%1000;
+		// TODO Auto-generated method stub
+		return ""+last3+ ","+UtilString.padLeft(""+last2, 3, '0')+"," +UtilString.padLeft(""+last, 3, '0')+" nanos";
+	}
+	/**
+	 * State of the parse buffer when parsing stuck. Useful for the parser and grammar developer.
+	 * Default implementation does nothing.
+	 * {@link IParserReceiver} also receives the current buffer state
+	 * @param buffer
+	 * @param iTextSource 
+	 */
+	public void logStateWhenParseStuck(ElemBuffer buffer, ITextSource iTextSource) {
 	}
 	public void println(String print) {
 		if(err!=null)
 		{
 			err.println(print);
+		}
+	}
+	public void logTokenizedUnfiltered() {
+		if(err!=null)
+		{
+			err.println("Tokenized unfiltered" + getElapsedString());
 		}
 	}
 
