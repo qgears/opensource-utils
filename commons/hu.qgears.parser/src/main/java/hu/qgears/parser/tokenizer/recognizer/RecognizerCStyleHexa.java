@@ -1,15 +1,11 @@
 package hu.qgears.parser.tokenizer.recognizer;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.function.Consumer;
 
 import hu.qgears.parser.language.ITokenType;
 import hu.qgears.parser.language.Matcher;
-import hu.qgears.parser.tokenizer.ITextSource;
-import hu.qgears.parser.tokenizer.IToken;
 import hu.qgears.parser.tokenizer.ITokenRecognizer;
-import hu.qgears.parser.tokenizer.SimpleToken;
+import hu.qgears.parser.tokenizer.impl.TextSource;
 
 public class RecognizerCStyleHexa implements ITokenRecognizer {
 	ITokenType type;
@@ -30,7 +26,7 @@ public class RecognizerCStyleHexa implements ITokenRecognizer {
 	}
 
 	@Override
-	public IToken getGeneratedToken(ITextSource src) {
+	public int getGeneratedToken(TextSource src) {
 		if(src.startsWith(0, "0x")|| src.startsWith(0, "0X"))
 		{
 			int i=2;
@@ -40,10 +36,10 @@ public class RecognizerCStyleHexa implements ITokenRecognizer {
 			}
 			if(i>2)
 			{
-				return new SimpleToken(type, src, i);
+				return i;
 			}
 		}
-		return null;
+		return 0;
 	}
 
 	private boolean validHexaChar(Character charAt) {
@@ -56,8 +52,8 @@ public class RecognizerCStyleHexa implements ITokenRecognizer {
 	}
 
 	@Override
-	public List<ITokenType> getRecognizedTokenTypes() {
-		return Collections.singletonList(type);
+	public ITokenType getRecognizedTokenTypes() {
+		return type;
 	}
 
 	@Override

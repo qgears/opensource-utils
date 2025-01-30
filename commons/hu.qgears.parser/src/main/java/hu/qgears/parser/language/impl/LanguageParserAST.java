@@ -8,11 +8,11 @@ import java.util.Set;
 import hu.qgears.parser.ITreeElem;
 import hu.qgears.parser.TokenizerImplManager;
 import hu.qgears.parser.language.ITokenType;
-import hu.qgears.parser.tokenizer.ITokenFilterDef;
 import hu.qgears.parser.tokenizer.ITokenRecognizer;
 import hu.qgears.parser.tokenizer.ITokenizerDef;
 import hu.qgears.parser.tokenizer.TokenizerException;
 import hu.qgears.parser.tokenizer.impl.LanguageParseException;
+import hu.qgears.parser.tokenizer.impl.TokenFilterDef;
 import hu.qgears.parser.tokenizer.impl.TokenFilterParserAST;
 import hu.qgears.parser.tokenizer.impl.TokenizerParserAST;
 
@@ -144,7 +144,7 @@ public class LanguageParserAST extends AbstractLanguageParser {
 				ITokenRecognizer recog=null;
 				for(ITokenRecognizer tr: getLanguage().getTokenizerDef().getRecognizers())
 				{
-					for(ITokenType tti:tr.getRecognizedTokenTypes())
+					ITokenType tti=tr.getRecognizedTokenTypes();
 					{
 						if(typeRef.equals(tti.getName()))
 						{
@@ -203,7 +203,7 @@ public class LanguageParserAST extends AbstractLanguageParser {
 	}
 
 	@Override
-	protected ITokenFilterDef parseTokenFilter() throws LanguageParseException {
+	protected TokenFilterDef parseTokenFilter() throws LanguageParseException {
 		return new TokenFilterParserAST().parse(root);
 	}
 

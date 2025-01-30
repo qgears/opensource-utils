@@ -9,10 +9,11 @@ import org.junit.Test;
 import hu.qgears.parser.impl.DefaultReceiver;
 import hu.qgears.parser.language.ITokenType;
 import hu.qgears.parser.language.impl.IDGen;
+import hu.qgears.parser.language.impl.Language;
 import hu.qgears.parser.language.impl.TokenType;
-import hu.qgears.parser.tokenizer.ITextSource;
-import hu.qgears.parser.tokenizer.IToken;
 import hu.qgears.parser.tokenizer.ITokenRecognizer;
+import hu.qgears.parser.tokenizer.Token;
+import hu.qgears.parser.tokenizer.TokenArray;
 import hu.qgears.parser.tokenizer.impl.TextSource;
 import hu.qgears.parser.tokenizer.impl.Tokenizer;
 import hu.qgears.parser.tokenizer.impl.TokenizerDef;
@@ -36,14 +37,19 @@ public class TestTokenizer {
 		recogs.add(new RecognizerConst(new TokenType("="), "="));
 		List<ITokenType> types = new ArrayList<ITokenType>();
 		for (ITokenRecognizer rec : recogs) {
-			types.addAll(rec.getRecognizedTokenTypes());
+			types.add(rec.getRecognizedTokenTypes());
 		}
-		new IDGen().genTokenTypeIds(types);
-		Tokenizer tok = new Tokenizer(new TokenizerDef(recogs));
-		ITextSource ts = new TextSource("alma 2=nincs");
+		Language lang=new Language();
+		TokenizerDef td=new TokenizerDef(recogs);
+		lang.setTokenizerDef(td);
+		new IDGen().genTokenTypeIdsFromRecog(lang);
+		
+		Tokenizer tok = new Tokenizer(td);
+		TextSource ts = new TextSource("alma 2=nincs");
 		StringBuilder ret = new StringBuilder();
-		List<IToken> toks = tok.tokenize(ts, new DefaultReceiver());
-		for (IToken t : toks) {
+		TokenArray toks=new TokenArray(ts, lang);
+		tok.tokenize(toks, ts, new DefaultReceiver());
+		for (Token t : toks.getAllTokens()) {
 			ret.append(t);
 			ret.append("\n");
 		}
@@ -54,22 +60,22 @@ public class TestTokenizer {
 	@Test
 	public void testNumberTokenizer() {
 		RecognizerDoubleNumber rdn = new RecognizerDoubleNumber(null);
-		Assert.assertEquals(3, rdn.getGeneratedToken(new TextSource("112")).getLength());
-		Assert.assertEquals(5, rdn.getGeneratedToken(new TextSource(".10e6")).getLength());
+		Assert.assertEquals(3, rdn.getGeneratedToken(new TextSource("112")));
+		Assert.assertEquals(5, rdn.getGeneratedToken(new TextSource(".10e6")));
 	}
 
 	@Test
 	public void testHexaTokenizer() {
 		RecognizerCStyleHexa rdn = new RecognizerCStyleHexa(null);
-		Assert.assertEquals(5, rdn.getGeneratedToken(new TextSource("0x113")).getLength());
-		Assert.assertEquals(7, rdn.getGeneratedToken(new TextSource("0X42faB")).getLength());
+		Assert.assertEquals(5, rdn.getGeneratedToken(new TextSource("0x113")));
+		Assert.assertEquals(7, rdn.getGeneratedToken(new TextSource("0X42faB")));
 	}
 
 	@Test
 	public void testXtextIdTokenizer() {
 		RecognizerId rdn = new RecognizerId(null, '^');
-		Assert.assertEquals(4, rdn.getGeneratedToken(new TextSource("alma")).getLength());
-		Assert.assertEquals(5, rdn.getGeneratedToken(new TextSource("korte szolo")).getLength());
-		Assert.assertEquals(6, rdn.getGeneratedToken(new TextSource("^korte szolo")).getLength());
+		Assert.assertEquals(4, rdn.getGeneratedToken(new TextSource("alma")));
+		Assert.assertEquals(5, rdn.getGeneratedToken(new TextSource("korte szolo")));
+		Assert.assertEquals(6, rdn.getGeneratedToken(new TextSource("^korte szolo")));
 	}
 }

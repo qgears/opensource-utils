@@ -5,13 +5,8 @@ import java.util.List;
 
 import hu.qgears.parser.ITreeElem;
 
-
-
 /**
  * Build a token filter from AST.
- * 
- * @author rizsi
- * 
  */
 public class TokenFilterParserAST {
 	public TokenFilterDef parse(ITreeElem root) throws LanguageParseException {

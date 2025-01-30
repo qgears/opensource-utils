@@ -1,25 +1,19 @@
 package hu.qgears.parser.impl;
 
-import java.util.List;
-
 import hu.qgears.parser.IParser;
 import hu.qgears.parser.IParserReceiver;
 import hu.qgears.parser.ParserLogger;
 import hu.qgears.parser.language.ILanguage;
 import hu.qgears.parser.language.impl.Term;
-import hu.qgears.parser.tokenizer.ITextSource;
-import hu.qgears.parser.tokenizer.IToken;
-import hu.qgears.parser.tokenizer.SimpleToken;
+import hu.qgears.parser.tokenizer.Token;
+import hu.qgears.parser.tokenizer.TokenArray;
 import hu.qgears.parser.tokenizer.impl.TextSource;
 import hu.qgears.parser.tokenizer.impl.TokenFilter;
 import hu.qgears.parser.tokenizer.impl.Tokenizer;
 
 
 
-/**
- * Parser to parse a text. To be used once.
- * @author rizsi
- *
+/** Parser to parse a text. To be used once.
  */
 public class Parser implements IParser {
 	private ILanguage lang;
@@ -27,10 +21,11 @@ public class Parser implements IParser {
 	private boolean tokenized=false;
 	
 	private Tokenizer tok;
-	private ITextSource ts;
-	private List<IToken> toks;
-	private List<IToken> tokensUnfiltered;
+	private TextSource ts;
+	private TokenArray toks;
+//	private List<Token> tokensUnfiltered;
 	private ElemBuffer buffer;
+	private TokenArray tokensUnfiltered;
 	public Parser(ILanguage lang, String text,
 			ParserLogger logger) {
 		this.lang = lang;
@@ -40,12 +35,13 @@ public class Parser implements IParser {
 	}
 
 	@Override
-	public List<IToken> tokenize(IParserReceiver receiver)
+	public TokenArray tokenize(IParserReceiver receiver)
 			throws ParseException {
 		if(!tokenized)
 		{
 			logger.logStart();
-			tokensUnfiltered=tok.tokenize(ts, receiver);
+			tokensUnfiltered=new TokenArray(ts, lang);
+			tok.tokenize(tokensUnfiltered, ts, receiver);
 			if(receiver!=null)
 			{
 				receiver.tokensUnfiltered(tokensUnfiltered);
@@ -64,9 +60,9 @@ public class Parser implements IParser {
 			receiver=new DefaultReceiver();
 		}
 		// Be sure to have the text tokenized.
-		List<IToken> tokens=tokenize(receiver);
+		TokenArray tokens=tokenize(receiver);
 		receiver.tokens(tokens);
-		ITextSource src=ts;
+		TextSource src=ts;
 		Term[] terms = lang.getTerms();
 		// Create a buffer for registering early parsing elements
 		if(buffer==null)
@@ -75,13 +71,13 @@ public class Parser implements IParser {
 		}
 		buffer.reInit(terms, tokens, lang);
 		// Add EOF token to the token list
-		tokens.add(new SimpleToken(lang.getTokenizerDef().getEof(), src, 0));
+		tokens.addToken(lang.getTokenizerDef().getEof().getId(), src.getPosition(), 0);
 		// Create element generation rules
 		// Generate element of the sentence symbol.
 		GenerationRules.generateNonTerm(buffer, lang.getRootTerm(), 0, tokens.get(0), -1);
 		// Generate all elements for all tokens
 		for (int tokenIndex = 0; tokenIndex < tokens.size(); ++tokenIndex) {
-			IToken t = tokens.get(tokenIndex);
+			Token t = tokens.get(tokenIndex);
 			for (int i=buffer.getCurrentGroupStart();i<buffer.getCurrentGroupEnd();++i)
 			{
 				GenerationRules.generateOnSameGroup(i, tokenIndex, buffer, t);
@@ -133,7 +129,7 @@ public class Parser implements IParser {
 		}
 	}
 	@Override
-	public List<IToken> getTokensUnfiltered() {
+	public TokenArray getTokensUnfiltered() {
 		return tokensUnfiltered;
 	}
 

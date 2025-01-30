@@ -1,49 +1,39 @@
 package hu.qgears.parser.tokenizer.recognizer;
 
-import java.util.function.Consumer;
-
-import hu.qgears.parser.language.ITokenType;
-import hu.qgears.parser.tokenizer.ITextSource;
-import hu.qgears.parser.tokenizer.IToken;
-import hu.qgears.parser.tokenizer.RecognizerAbstract;
-import hu.qgears.parser.tokenizer.SimpleToken;
-
-public class RecognizerIdStart extends RecognizerAbstract {
-	Character escapeChar;
-	public RecognizerIdStart(ITokenType tokenType, Character escapeChar) {
-		super(tokenType);
-		this.escapeChar=escapeChar;
-	}
-
-	@Override
-	public IToken getGeneratedToken(ITextSource src) {
-		Character c=src.getCharAt(0);
-		if(c!=null)
+public class RecognizerIdStart {
+	public static int getGeneratedToken(char[] arr, int at, char escapeChar) {
+		if(arr.length>at)
 		{
-			char ch0=c;
-			if(this.escapeChar!=null)
+			char ch0=arr[at];
+			if(escapeChar==ch0)
 			{
-				if(src.getCharAt(0).charValue()==escapeChar.charValue())
+				if(at+1<arr.length)
 				{
-					c=src.getCharAt(1);
-					if(c!=null)
+					char c=arr[at+1];
+					if(Character.isJavaIdentifierStart(c))
 					{
-						ch0=c;
-						if(Character.isJavaIdentifierStart(ch0))
-						{
-							return new SimpleToken(tokenType, src, 2);
-						}
+						return 2;
 					}
 				}
-			}
-			if(Character.isJavaIdentifierStart(ch0))
+			}else
 			{
-				return new SimpleToken(tokenType, src, 1);
+				if(Character.isJavaIdentifierStart(ch0))
+				{
+					return 1;
+				}
 			}
 		}
-		return null;
+		return 0;
 	}
-	@Override
-	public void collectPorposals(String tokenTypeName, String prefix, Consumer<String> collector) {
+	public static int getGeneratedToken(char[] arr, int at) {
+		if(arr.length>at)
+		{
+			char ch0=arr[at];
+			if(Character.isJavaIdentifierStart(ch0))
+			{
+				return 1;
+			}
+		}
+		return 0;
 	}
 }

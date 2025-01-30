@@ -11,7 +11,7 @@ import hu.qgears.parser.language.impl.TermMore;
 import hu.qgears.parser.language.impl.TermOr;
 import hu.qgears.parser.language.impl.TermRef;
 import hu.qgears.parser.language.impl.TermToken;
-import hu.qgears.parser.tokenizer.IToken;
+import hu.qgears.parser.tokenizer.Token;
 
 
 /**
@@ -35,7 +35,7 @@ public class GenerationRules {
 	 * @param nextToken
 	 */
 	public static final void generateOnSameGroup(int absoluteIndex, int at, ElemBuffer eb,
-			IToken nextToken) {
+			Token nextToken) {
 		int typeId=eb.getTermTypeId(absoluteIndex);
 		Term term = eb.resolve(typeId);
 		boolean isPassed = isPassed(eb, absoluteIndex, term);
@@ -150,7 +150,7 @@ public class GenerationRules {
 	 * @param token
 	 * @return the number of elements added
 	 */
-	static public int generateOnNextGroup(ElemBuffer buffer, int absoluteIndex, int at, IToken token) {
+	static public int generateOnNextGroup(ElemBuffer buffer, int absoluteIndex, int at, Token token) {
 		int typeId=buffer.getTermTypeId(absoluteIndex);
 		Term term = buffer.resolve(typeId);
 		EType type = term.getType();
@@ -243,7 +243,7 @@ public class GenerationRules {
 	 * @param nextToken
 	 * @return
 	 */
-	public static final void generateNonTerm(ElemBuffer eb, Term term, int from, IToken nextToken, int generatedBy) {
+	public static final void generateNonTerm(ElemBuffer eb, Term term, int from, Token nextToken, int generatedBy) {
 		switch (term.getType()) {
 		case or: {
 			TermOr termO = (TermOr) term;
@@ -266,7 +266,7 @@ public class GenerationRules {
 		}
 	}
 
-	static private boolean matches(TermToken tt, IToken nextToken) {
+	static private boolean matches(TermToken tt, Token nextToken) {
 		ITokenType tokenType=tt.getTokenType();
 		boolean idMatch=tokenType.getId() == nextToken.getTokenType().getId();
 		boolean hasRestriction=tt.getMatchingValue()!=null;

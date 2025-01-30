@@ -3,11 +3,10 @@ package hu.qgears.parser.tokenizer.recognizer;
 import java.util.function.Consumer;
 
 import hu.qgears.parser.language.ITokenType;
-import hu.qgears.parser.tokenizer.ITextSource;
-import hu.qgears.parser.tokenizer.IToken;
 import hu.qgears.parser.tokenizer.ITokenRecognizer;
 import hu.qgears.parser.tokenizer.RecognizerAbstract;
-import hu.qgears.parser.tokenizer.SimpleToken;
+import hu.qgears.parser.tokenizer.TokenArray;
+import hu.qgears.parser.tokenizer.impl.TextSource;
 import hu.qgears.parser.util.ParseRuntimeException;
 
 public class RecognizerAnyCaseConst extends RecognizerAbstract implements
@@ -15,12 +14,13 @@ public class RecognizerAnyCaseConst extends RecognizerAbstract implements
 	String c;
 
 	@Override
-	public IToken getGeneratedToken(ITextSource src) {
+	public int getGeneratedToken(TextSource src) {
 		String head = src.firstChars(c.length());
 		if (head.toUpperCase().equals(c.toUpperCase())) {
-			return new SimpleToken(getTokenType(), src, c.length());
+			int l=c.length();
+			return l;
 		} else {
-			return null;
+			return 0;
 		}
 	}
 

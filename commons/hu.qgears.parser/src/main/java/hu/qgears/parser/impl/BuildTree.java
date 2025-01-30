@@ -11,7 +11,8 @@ import hu.qgears.parser.language.impl.TermAnd;
 import hu.qgears.parser.language.impl.TermMore;
 import hu.qgears.parser.language.impl.TermOr;
 import hu.qgears.parser.language.impl.TermRef;
-import hu.qgears.parser.tokenizer.IToken;
+import hu.qgears.parser.tokenizer.Token;
+import hu.qgears.parser.tokenizer.TokenArray;
 
 
 
@@ -114,16 +115,16 @@ public class BuildTree {
 
 	private String getString(TreeElem elem)
 	{
-		List<IToken> toks=elem.getBuffer().getTokens();
+		TokenArray toks=elem.getBuffer().getTokens();
 		int from=elem.from;
 		int to=elem.getGroup();
-		IToken fromToken=toks.get(from);
+		Token fromToken=toks.get(from);
 		return fromToken.getSource().getFullSequence().subSequence(from, to).toString();
 	}
 	private ParseException createAmbigousException(List<Term> types, int from,
 			int to, ElemBuffer buf, List<TreeElem> sub) {
-		IToken fromToken = buf.tokens.get(from);
-		IToken toToken = buf.tokens.get(to);
+		Token fromToken = buf.tokens.get(from);
+		Token toToken = buf.tokens.get(to);
 		int fromPos = fromToken.getPos();
 		int toPos = toToken.getPos() + toToken.getLength();
 //		logger.getErr().println(buf.print());
@@ -147,8 +148,8 @@ public class BuildTree {
 	}
 	private ParseException createAmbigousException2(List<Term> types, int from,
 			int to, ElemBuffer buf, List<List<TreeElem>> sub) {
-		IToken fromToken = buf.tokens.get(from);
-		IToken toToken = buf.tokens.get(to);
+		Token fromToken = buf.tokens.get(from);
+		Token toToken = buf.tokens.get(to);
 		int fromPos = fromToken.getPos();
 		int toPos = toToken.getPos() + toToken.getLength();
 //		logger.getErr().println(buf.print());
@@ -276,8 +277,8 @@ public class BuildTree {
 
 	private ParseException createCannotParseException(List<Term> types, int from,
 			int to, ElemBuffer buf) {
-		IToken fromToken = buf.tokens.get(from);
-		IToken toToken = buf.tokens.get(to);
+		Token fromToken = buf.tokens.get(from);
+		Token toToken = buf.tokens.get(to);
 		int fromPos = fromToken.getPos();
 		int toPos = toToken.getPos() + toToken.getLength();
 		logger.println(buf.print());

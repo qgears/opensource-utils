@@ -1,16 +1,15 @@
 package hu.qgears.parser.impl;
 
-import java.util.List;
-
 import hu.qgears.parser.IParserReceiver;
-import hu.qgears.parser.tokenizer.IToken;
+import hu.qgears.parser.tokenizer.Token;
+import hu.qgears.parser.tokenizer.TokenArray;
 import hu.qgears.parser.tokenizer.TokenizerException;
 
 public class DefaultReceiver implements IParserReceiver
 {
 	public TreeElem treeFiltered;
 	@Override
-	public void stucked(ElemBuffer buffer, IToken t) throws ParseException {
+	public void stucked(ElemBuffer buffer, Token t) throws ParseException {
 		throw new ParseException("parsing stucked at: "+t.getTokenType().getName()
 				+" '"
 				+ t.getSource().lastChars(t.getPos(), 20) + "'|'"
@@ -36,11 +35,11 @@ public class DefaultReceiver implements IParserReceiver
 	}
 
 	@Override
-	public void tokensUnfiltered(List<IToken> tokensUnfiltered) {
+	public void tokensUnfiltered(TokenArray tokensUnfiltered) {
 	}
 
 	@Override
-	public void tokens(List<IToken> tokens) {
+	public void tokens(TokenArray tokens) {
 	}
 
 	@Override

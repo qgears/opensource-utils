@@ -12,6 +12,7 @@ public class TokenizerDef implements ITokenizerDef {
 
 	List<ITokenRecognizer> recognizers;
 	ITokenType eof;
+	private ITokenType[] tokenTypesArray;
 
 	public ITokenType getEof() {
 		return eof;
@@ -30,4 +31,12 @@ public class TokenizerDef implements ITokenizerDef {
 		this.recognizers = recognizers;
 	}
 
+	@Override
+	public ITokenType tokenTypeById(int type) {
+		return tokenTypesArray[type];
+	}
+	public void setFlatTypesArray(List<ITokenType> flatTypes)
+	{
+		tokenTypesArray=flatTypes.toArray(new ITokenType[] {});
+	}
 }

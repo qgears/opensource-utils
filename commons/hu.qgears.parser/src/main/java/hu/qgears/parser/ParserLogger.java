@@ -4,7 +4,7 @@ import java.io.PrintStream;
 
 import hu.qgears.commons.UtilString;
 import hu.qgears.parser.impl.ElemBuffer;
-import hu.qgears.parser.tokenizer.ITextSource;
+import hu.qgears.parser.tokenizer.impl.TextSource;
 
 /**
  * Logger that logs some data of the parsing.
@@ -73,7 +73,7 @@ public class ParserLogger {
 		t/=1000;
 		long last3=t%1000;
 		// TODO Auto-generated method stub
-		return ""+last3+ ","+UtilString.padLeft(""+last2, 3, '0')+"," +UtilString.padLeft(""+last, 3, '0')+" nanos";
+		return ""+last3+ "millis "+UtilString.padLeft(""+last2, 3, '0')+"micros " +UtilString.padLeft(""+last, 3, '0')+" nanos";
 	}
 	/**
 	 * State of the parse buffer when parsing stuck. Useful for the parser and grammar developer.
@@ -82,7 +82,7 @@ public class ParserLogger {
 	 * @param buffer
 	 * @param iTextSource 
 	 */
-	public void logStateWhenParseStuck(ElemBuffer buffer, ITextSource iTextSource) {
+	public void logStateWhenParseStuck(ElemBuffer buffer, TextSource iTextSource) {
 	}
 	public void println(String print) {
 		if(err!=null)
@@ -93,7 +93,7 @@ public class ParserLogger {
 	public void logTokenizedUnfiltered() {
 		if(err!=null)
 		{
-			err.println("Tokenized unfiltered" + getElapsedString());
+			err.println("Tokenized unfiltered " + getElapsedString());
 		}
 	}
 

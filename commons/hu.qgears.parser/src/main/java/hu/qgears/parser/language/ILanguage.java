@@ -1,8 +1,8 @@
 package hu.qgears.parser.language;
 
 import hu.qgears.parser.language.impl.Term;
-import hu.qgears.parser.tokenizer.ITokenFilterDef;
 import hu.qgears.parser.tokenizer.ITokenizerDef;
+import hu.qgears.parser.tokenizer.impl.TokenFilterDef;
 
 /**
  * The grammar of a language.
@@ -28,7 +28,7 @@ public interface ILanguage {
 	 * Get the tokenizer filter definition of the language.
 	 * @return
 	 */
-	ITokenFilterDef getTokenFilterDef();
+	TokenFilterDef getTokenFilterDef();
 
 	/**
 	 * Non-Terminals (terms) of the language..

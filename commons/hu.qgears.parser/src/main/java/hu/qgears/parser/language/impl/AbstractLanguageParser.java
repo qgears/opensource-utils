@@ -7,11 +7,11 @@ import java.util.Set;
 import javax.xml.xpath.XPathExpressionException;
 
 import hu.qgears.parser.language.ITokenType;
-import hu.qgears.parser.tokenizer.ITokenFilterDef;
 import hu.qgears.parser.tokenizer.ITokenRecognizer;
 import hu.qgears.parser.tokenizer.ITokenizerDef;
 import hu.qgears.parser.tokenizer.TokenizerException;
 import hu.qgears.parser.tokenizer.impl.LanguageParseException;
+import hu.qgears.parser.tokenizer.impl.TokenFilterDef;
 
 
 
@@ -23,13 +23,13 @@ public abstract class AbstractLanguageParser {
 		return language;
 	}
 
-	private ITokenFilterDef tfd;
+	private TokenFilterDef tfd;
 
 	abstract protected ITokenizerDef parseTokenizer()
 			throws TokenizerException, LanguageParseException,
 			XPathExpressionException;
 
-	abstract protected ITokenFilterDef parseTokenFilter()
+	abstract protected TokenFilterDef parseTokenFilter()
 			throws LanguageParseException, XPathExpressionException;
 
 	abstract protected String parseRootName() throws XPathExpressionException;
@@ -55,9 +55,9 @@ public abstract class AbstractLanguageParser {
 					remainingTerms);
 			terms.addAll(parseTerms());
 			language.setRootName(rootName);
+			IDGen idgen=new IDGen();
+			idgen.genTokenTypeIdsFromRecog(language);
 			InitNumericIds.initNumericIds(language, terms);
-			new IDGen().genTokenTypeIdsFromRecog(language.getTokenizerDef()
-					.getRecognizers());
 		} catch (LanguageParseException e) {
 			throw e;
 		} catch (Exception e) {
@@ -68,7 +68,8 @@ public abstract class AbstractLanguageParser {
 	private List<Term> addTerminals() {
 		List<Term> terms=new ArrayList<Term>();
 		for (ITokenRecognizer recog : td.getRecognizers()) {
-			for (ITokenType type : recog.getRecognizedTokenTypes()) {
+			ITokenType type = recog.getRecognizedTokenTypes();
+			{
 				terms.add(new TermToken(type.getName(), type, null));
 			}
 		}

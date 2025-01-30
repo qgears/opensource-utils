@@ -9,4 +9,6 @@ public interface ITokenizerDef {
 	List<ITokenRecognizer> getRecognizers();
 
 	ITokenType getEof();
+
+	ITokenType tokenTypeById(int type);
 }

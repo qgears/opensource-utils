@@ -7,8 +7,9 @@ import java.util.Set;
 
 import hu.qgears.parser.language.ILanguage;
 import hu.qgears.parser.language.impl.Term;
-import hu.qgears.parser.tokenizer.ITextSource;
-import hu.qgears.parser.tokenizer.IToken;
+import hu.qgears.parser.tokenizer.Token;
+import hu.qgears.parser.tokenizer.TokenArray;
+import hu.qgears.parser.tokenizer.impl.TextSource;
 import hu.qgears.parser.util.UtilIntArrayFlexible;
 
 
@@ -39,7 +40,7 @@ final public class ElemBuffer {
 	/**
 	 * The list of tokens to be parsed. Constant.
 	 */
-	protected List<IToken> tokens;
+	protected TokenArray tokens;
 	/**
 	 * Position counted in the number of stored elements.
 	 */
@@ -76,7 +77,7 @@ final public class ElemBuffer {
 	 * @param tokens the text to be parsed as a list of tokens - output of the tokenizer
 	 * @param lang - reference to the language itself that is currently used to parse the text.
 	 */
-	public void reInit(Term[] terms, List<IToken> tokens, ILanguage lang)
+	public void reInit(Term[] terms, TokenArray tokens, ILanguage lang)
 	{
 		nanosStoredAlready=0;
 		nanosDoGenerates=0;
@@ -274,11 +275,11 @@ final public class ElemBuffer {
 		return ret.toString();
 	}
 
-	public List<IToken> getTokens() {
+	public TokenArray getTokens() {
 		return tokens;
 	}
 
-	IToken getTokenOfGroup(int grp) {
+	Token getTokenOfGroup(int grp) {
 		return tokens.get(grp);
 	}
 
@@ -297,8 +298,8 @@ final public class ElemBuffer {
 	 * 
 	 * @return the text source that this buffer is defined on.
 	 */
-	public ITextSource getSource() {
-		return tokens.get(0).getSource();
+	public TextSource getSource() {
+		return tokens.getSource();
 	}
 
 	public int getCurrentGroupEnd() {

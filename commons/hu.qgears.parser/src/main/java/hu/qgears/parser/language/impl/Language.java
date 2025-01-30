@@ -4,8 +4,8 @@ import java.io.StringWriter;
 
 import hu.qgears.parser.language.ILanguage;
 import hu.qgears.parser.language.ITermFilterDef;
-import hu.qgears.parser.tokenizer.ITokenFilterDef;
 import hu.qgears.parser.tokenizer.ITokenizerDef;
+import hu.qgears.parser.tokenizer.impl.TokenFilterDef;
 
 
 
@@ -40,13 +40,13 @@ public class Language implements ILanguage {
 		return tokenizerDef;
 	}
 
-	ITokenFilterDef tokenFilterDef;
+	TokenFilterDef tokenFilterDef;
 
-	public ITokenFilterDef getTokenFilterDef() {
+	public TokenFilterDef getTokenFilterDef() {
 		return tokenFilterDef;
 	}
 
-	public void setTokenFilterDef(ITokenFilterDef tokenFilterDef) {
+	public void setTokenFilterDef(TokenFilterDef tokenFilterDef) {
 		this.tokenFilterDef = tokenFilterDef;
 	}
 

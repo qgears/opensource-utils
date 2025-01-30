@@ -9,8 +9,8 @@ import java.util.Map;
 import hu.qgears.parser.ITreeElem;
 import hu.qgears.parser.language.EType;
 import hu.qgears.parser.language.impl.Term;
-import hu.qgears.parser.tokenizer.ITextSource;
-import hu.qgears.parser.tokenizer.IToken;
+import hu.qgears.parser.tokenizer.Token;
+import hu.qgears.parser.tokenizer.impl.TextSource;
 
 
 /**
@@ -26,9 +26,9 @@ public class TreeElem implements ITreeElem {
 	protected int from;
 	private int group;
 	private Term type;
-	private IToken token;
+	private Token token;
 	private ElemBuffer buffer;
-	private ITextSource textSource;
+	private TextSource textSource;
 	private int textIndexFrom;
 	private int textIndexTo;
 
@@ -71,7 +71,7 @@ public class TreeElem implements ITreeElem {
 		return type;
 	}
 
-	public IToken getToken() {
+	public Token getToken() {
 		return token;
 	}
 
@@ -116,7 +116,7 @@ public class TreeElem implements ITreeElem {
 			textIndexTo=0;
 		}else
 		{
-			IToken tok = getBuffer().getTokenOfGroup(group - 1);
+			Token tok = getBuffer().getTokenOfGroup(group - 1);
 			textIndexTo = tok.getPos() + tok.getLength();
 		}
 	}
@@ -128,7 +128,7 @@ public class TreeElem implements ITreeElem {
 
 	@Override
 	public String toString() {
-		IToken tok = getToken();
+		Token tok = getToken();
 		if(buffer!=null)
 		{
 			return ""+getTypeName()+" at: " + group + " " + buffer.toString(dotPos, typeId, choice, from) + " "

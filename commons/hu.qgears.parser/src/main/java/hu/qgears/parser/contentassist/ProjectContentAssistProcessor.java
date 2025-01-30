@@ -6,15 +6,13 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import hu.qgears.parser.IParserReceiver;
-import hu.qgears.parser.ITreeElem;
 import hu.qgears.parser.impl.ElemBuffer;
-import hu.qgears.parser.impl.TreeElem;
 import hu.qgears.parser.language.impl.Term;
-import hu.qgears.parser.tokenizer.IToken;
-import hu.qgears.parser.util.TreeVisitor;
+import hu.qgears.parser.tokenizer.Token;
+import hu.qgears.parser.tokenizer.TokenArray;
 
 public class ProjectContentAssistProcessor {
-	private List<IToken> lasts=new ArrayList<>();
+	private List<Token> lasts=new ArrayList<>();
 	private String textPreCursor;
 	private String textPreSemanticPoint;
 	private String textIdentifierRemovedAndAdded;
@@ -29,7 +27,7 @@ public class ProjectContentAssistProcessor {
 		try {
 			proposalContext.parse(textPreCursor, new IParserReceiver() {
 				@Override
-				public void tokensUnfiltered(List<IToken> tokensUnfiltered) {
+				public void tokensUnfiltered(TokenArray tokensUnfiltered) {
 					if(tokensUnfiltered.size()>0)
 					{
 						if(tokensUnfiltered.size()>0 && endsWithId(tokensUnfiltered, "cThis"))
@@ -38,19 +36,19 @@ public class ProjectContentAssistProcessor {
 						}
 						while(tokensUnfiltered.size()>0 && endsWithId(tokensUnfiltered, "tId"))
 						{
-							IToken last=removeLastIdAndPossibleWhiteSpaces(tokensUnfiltered);
+							Token last=removeLastIdAndPossibleWhiteSpaces(tokensUnfiltered);
 						}
 						System.out.println("Removed tokens for parse: '"+lasts+"'");
 					}
 					throw new RuntimeException(markerException);	// Restart parsing after finding out last tokens
 				}
-				private IToken removeLastIdAndPossibleWhiteSpaces(List<IToken> tokensUnfiltered) {
-					IToken ret=tokensUnfiltered.remove(tokensUnfiltered.size()-1);
-					IToken dot=null; 
+				private Token removeLastIdAndPossibleWhiteSpaces(TokenArray tokensUnfiltered) {
+					Token ret=tokensUnfiltered.remove(tokensUnfiltered.size()-1);
+					Token dot=null; 
 					int i;
 					for(i=tokensUnfiltered.size()-1; i>=0; --i)
 					{
-						IToken t=tokensUnfiltered.get(i);
+						Token t=tokensUnfiltered.get(i);
 						if(proposalContext.isFiltered(t))
 						{
 							// Go on
@@ -78,8 +76,8 @@ public class ProjectContentAssistProcessor {
 					}
 					return ret;
 				}
-				private boolean endsWithId(List<IToken> tokensUnfiltered, String type) {
-					IToken last=tokensUnfiltered.get(tokensUnfiltered.size()-1);
+				private boolean endsWithId(TokenArray tokensUnfiltered, String type) {
+					Token last=tokensUnfiltered.get(tokensUnfiltered.size()-1);
 					return type.equals(last.getTokenType().getName());
 				}
 			});
@@ -173,7 +171,7 @@ public class ProjectContentAssistProcessor {
 				public void tableFilled(ElemBuffer buffer, int size) {
 					System.out.println("Content assist - Table filled! lasts: "+lasts);
 					String prefix="";
-					for(IToken t: lasts)
+					for(Token t: lasts)
 					{
 						prefix+=t.getText().toString();
 					}

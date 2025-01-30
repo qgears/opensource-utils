@@ -1,26 +1,43 @@
 package hu.qgears.parser.tokenizer.impl;
 
-import hu.qgears.parser.tokenizer.ITextSource;
-
-public class TextSource implements ITextSource {
+public class TextSource {
 	CharSequence seq;
+	public char[] array;
 	int pos;
 
+	public TextSource(CharSequence seq, int pos, char[] array) {
+		super();
+		this.seq = seq;
+		this.pos = pos;
+		this.array = array;
+	}
 	public TextSource(CharSequence seq, int pos) {
 		super();
 		this.seq = seq;
 		this.pos = pos;
+		initlializeArray();
 	}
 
 	public TextSource(CharSequence seq) {
 		super();
 		this.seq = seq;
+		initlializeArray();
 	}
 
 	public TextSource(String seq) {
 		super();
 		assert (seq != null);
 		this.seq = seq;
+		initlializeArray();
+	}
+	
+	private void initlializeArray()
+	{
+		array=new char[seq.length()];
+		for(int i=0;i<array.length;++i)
+		{
+			array[i]=seq.charAt(i);
+		}
 	}
 
 	private int normalize(int index) {
@@ -52,12 +69,12 @@ public class TextSource implements ITextSource {
 		return pos == seq.length();
 	}
 
-	public ITextSource pass(int pass) {
+	public TextSource pass(int pass) {
 		pos = normalize(pass + pos);
 		return this;
 	}
 
-	public ITextSource setPosition(int pos) {
+	public TextSource setPosition(int pos) {
 		this.pos = pos;
 		return this;
 	}
@@ -71,7 +88,7 @@ public class TextSource implements ITextSource {
 	}
 
 	public TextSource getClone() {
-		return new TextSource(seq, pos);
+		return new TextSource(seq, pos, array);
 	}
 
 	public String firstChars(int from, int length) {
@@ -85,7 +102,6 @@ public class TextSource implements ITextSource {
 		return firstChars(10) + "...";
 	}
 
-	@Override
 	public boolean startsWith(int relPos, String s) {
 		int ptr=pos+relPos;
 		if(pos+s.length()>getLength())
@@ -104,12 +120,10 @@ public class TextSource implements ITextSource {
 		return true;
 	}
 
-	@Override
 	public int getLength() {
 		return seq.length();
 	}
 
-	@Override
 	public String lastChars(int from, int length) {
 		return seq.subSequence(Math.max(0, from-length), from).toString();
 	}

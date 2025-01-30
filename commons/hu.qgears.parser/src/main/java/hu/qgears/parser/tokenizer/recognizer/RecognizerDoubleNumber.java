@@ -1,15 +1,11 @@
 package hu.qgears.parser.tokenizer.recognizer;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.function.Consumer;
 
 import hu.qgears.parser.language.ITokenType;
 import hu.qgears.parser.language.Matcher;
-import hu.qgears.parser.tokenizer.ITextSource;
-import hu.qgears.parser.tokenizer.IToken;
 import hu.qgears.parser.tokenizer.ITokenRecognizer;
-import hu.qgears.parser.tokenizer.SimpleToken;
+import hu.qgears.parser.tokenizer.impl.TextSource;
 
 public class RecognizerDoubleNumber implements ITokenRecognizer {
 	private boolean acceptWholeNumber=true;
@@ -32,7 +28,7 @@ public class RecognizerDoubleNumber implements ITokenRecognizer {
 	}
 
 	@Override
-	public IToken getGeneratedToken(ITextSource src) {
+	public int getGeneratedToken(TextSource src) {
 		int i=0;
 		State state=State.init;
 		loop:
@@ -128,7 +124,7 @@ public class RecognizerDoubleNumber implements ITokenRecognizer {
 			{
 				if('.'==c || ':'==c)
 				{
-					return null;
+					return 0;
 				}
 			}
 			c=src.getCharAt(-1);
@@ -136,7 +132,7 @@ public class RecognizerDoubleNumber implements ITokenRecognizer {
 			{
 				if('.'==c || ':'==c || Character.isDigit(c))
 				{
-					return null;
+					return 0;
 				}
 			}
 		}
@@ -146,34 +142,34 @@ public class RecognizerDoubleNumber implements ITokenRecognizer {
 			if(!acceptWholeNumber)
 			{
 				// Do not accept whole numbers
-				return null;
+				return 0;
 			}
 		case hasEDigit:
 		case hasPartial:
 			// Valid number
-			return new SimpleToken(type, src, i);
+			return i;
 		case hasDot:
 			if(i>1)
 			{
 				// 1. is a valid number but . is not
-				return new SimpleToken(type, src, i);
+				return i;
 			}else
 			{
-				return null;
+				return 0;
 			}
 		case hasE:
 			// 1.0e is not a valid number
 		case hasESign:
 			// 1.0e+ or 1.0e- is not a valid number.
 		case init:
-			return null;
+			return 0;
 		}
-		return null;
+		return 0;
 	}
 
 	@Override
-	public List<ITokenType> getRecognizedTokenTypes() {
-		return Collections.singletonList(type);
+	public ITokenType getRecognizedTokenTypes() {
+		return type;
 	}
 
 	@Override

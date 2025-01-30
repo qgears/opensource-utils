@@ -1,26 +1,22 @@
 package hu.qgears.parser.tokenizer.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import hu.qgears.parser.tokenizer.IToken;
-import hu.qgears.parser.tokenizer.ITokenFilterDef;
-
-
+import hu.qgears.parser.tokenizer.TokenArray;
 
 public class TokenFilter {
-	ITokenFilterDef tokenFilterDef;
+	private TokenFilterDef tokenFilterDef;
 
-	public TokenFilter(ITokenFilterDef tokenFilterDef) {
+	public TokenFilter(TokenFilterDef tokenFilterDef) {
 		this.tokenFilterDef = tokenFilterDef;
 	}
 
-	public List<IToken> filter(List<IToken> toks) {
-		List<IToken> ret = new ArrayList<IToken>();
-		for (IToken t : toks) {
-			if (!tokenFilterDef.getToFilter().contains(
-					t.getTokenType().getName())) {
-				ret.add(t);
+	public TokenArray filter(TokenArray toks) {
+		TokenArray ret=new TokenArray(toks.getSource(), toks.getLanguage());
+		for(int i=0;i<toks.size();++i)
+		{
+			int type=toks.type(i);
+			if(!tokenFilterDef.contains(type))
+			{
+				ret.addToken(type, toks.pos(i), toks.length(i));
 			}
 		}
 		return ret;

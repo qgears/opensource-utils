@@ -1,11 +1,10 @@
 package hu.qgears.parser;
 
-import java.util.List;
-
 import hu.qgears.parser.impl.ElemBuffer;
 import hu.qgears.parser.impl.ParseException;
 import hu.qgears.parser.impl.TreeElem;
-import hu.qgears.parser.tokenizer.IToken;
+import hu.qgears.parser.tokenizer.Token;
+import hu.qgears.parser.tokenizer.TokenArray;
 import hu.qgears.parser.tokenizer.TokenizerException;
 
 /**
@@ -22,7 +21,7 @@ public interface IParserReceiver {
 	 * @param t the token that can not fit any grammar rule at its location.
 	 * @throws ParseException
 	 */
-	default void stucked(ElemBuffer buffer, IToken t) throws ParseException { }
+	default void stucked(ElemBuffer buffer, Token t) throws ParseException { }
 	/**
 	 * Internal error in the parser or a specific case that is not properly handled by the parser yet.
 	 * 
@@ -57,14 +56,14 @@ public interface IParserReceiver {
 	 * Receive the unfiltered list of parsed tokens.
 	 * @param tokensUnfiltered the internal array is passed but it should be handled read only
 	 */
-	default void tokensUnfiltered(List<IToken> tokensUnfiltered) {}
+	default void tokensUnfiltered(TokenArray tokensUnfiltered) {}
 
 	/**
 	 * Receive the filtered list of parsed tokens.
 	 * The receiver may modify the list and modifying it will have an effect on the ongoing parse process.
 	 * @param tokensUnfiltered  the internal array is passed but it should be handled read only
 	 */
-	default void tokens(List<IToken> tokens) {}
+	default void tokens(TokenArray tokens) {}
 
 	/**
 	 * Called in case tokenization finished with an error.

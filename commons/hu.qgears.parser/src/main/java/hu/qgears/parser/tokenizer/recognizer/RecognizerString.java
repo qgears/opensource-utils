@@ -1,10 +1,11 @@
 package hu.qgears.parser.tokenizer.recognizer;
 
+import java.util.function.Consumer;
+
 import hu.qgears.commons.EscapeString;
 import hu.qgears.parser.language.ITokenType;
-import hu.qgears.parser.language.impl.TokenType;
-import hu.qgears.parser.tokenizer.ITextSource;
-import hu.qgears.parser.tokenizer.IToken;
+import hu.qgears.parser.tokenizer.RecognizerAbstract;
+import hu.qgears.parser.tokenizer.impl.TextSource;
 
 /**
  * Recognizes string constants.
@@ -13,17 +14,13 @@ import hu.qgears.parser.tokenizer.IToken;
  * 
  * The String representation is intended to follow the Java specification of string constants.
  */
-public class RecognizerString extends RecognizerConcat {
-	@Override
-	public IToken getGeneratedToken(ITextSource _src) {
-		return super.getGeneratedToken(_src);
-	}
-
+public class RecognizerString extends RecognizerAbstract {
+	private String endingString;
+	private char endingCharacter;
 	public RecognizerString(ITokenType tokenType, char endingCharacter) {
 		super(tokenType);
-		addSubToken(new RecognizerConst(new TokenType("dummy"), ""+endingCharacter), true);
-		addSubToken(new RecognizerStringInside(new TokenType("dummy"), endingCharacter), false);
-		addSubToken(new RecognizerConst(new TokenType("dummy"), ""+endingCharacter), true);
+		endingString=""+endingCharacter;
+		this.endingCharacter=endingCharacter;
 	}
 	/**
 	 * Remove quotes and unescape the string. Convert the token content to a pure string.
@@ -37,5 +34,20 @@ public class RecognizerString extends RecognizerConcat {
 
 	public static String toEscapedConstant(String c) {
 		return "\""+EscapeString.escapeJava(c)+"\"";
+	}
+	@Override
+	public int getGeneratedToken(TextSource src) {
+		if(src.startsWith(0, endingString))
+		{
+			int ninside=RecognizerStringInside.getGeneratedToken(src.array, src.getPosition()+1, endingCharacter, '\\');
+			if(src.startsWith(1+ninside, endingString))
+			{
+				return ninside+2;
+			}
+		}
+		return 0;
+	}
+	@Override
+	public void collectPorposals(String tokenTypeName, String prefix, Consumer<String> collector) {
 	}
 }

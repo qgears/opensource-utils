@@ -7,7 +7,7 @@ import hu.qgears.parser.ITreeElem;
 import hu.qgears.parser.impl.ElemBuffer;
 import hu.qgears.parser.language.impl.Term;
 import hu.qgears.parser.language.impl.TermToken;
-import hu.qgears.parser.tokenizer.IToken;
+import hu.qgears.parser.tokenizer.Token;
 
 public interface ICompletitionProposalContext {
 	/**
@@ -22,7 +22,7 @@ public interface ICompletitionProposalContext {
 	 * @param t
 	 * @return
 	 */
-	boolean isFiltered(IToken t);
+	boolean isFiltered(Token t);
 	/**
 	 * Collect content assist proposals at the current AST node with a given prefix.
 	 * @param collect collector where context assist proposals are added to.

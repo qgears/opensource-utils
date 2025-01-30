@@ -3,47 +3,44 @@ package hu.qgears.parser.tokenizer.recognizer;
 import java.util.function.Consumer;
 
 import hu.qgears.parser.language.ITokenType;
-import hu.qgears.parser.language.impl.TokenType;
-import hu.qgears.parser.tokenizer.ITextSource;
-import hu.qgears.parser.tokenizer.IToken;
 import hu.qgears.parser.tokenizer.RecognizerAbstract;
-import hu.qgears.parser.tokenizer.SimpleToken;
+import hu.qgears.parser.tokenizer.impl.TextSource;
 
-public class RecognizerComment extends RecognizerConcat {
+public class RecognizerComment extends RecognizerAbstract {
 	private char exit0;
 	private char exit1;
-	class RecognizerCommentInside extends RecognizerAbstract {
-		public RecognizerCommentInside() {
-			super(new TokenType("dummy"));
-		}
-
-		@Override
-		public IToken getGeneratedToken(ITextSource src) {
+	String open;
+	String close;
+	private int recognizeInside(char[] data, int at) {
 			int ctr = 0;
-			while (true) {
-				Character cho = src.getCharAt(ctr);
-				if (cho == null) {
-					break;
-				}
-				char ch = cho.charValue();
+			int maxpos=data.length-1;
+			while (at<maxpos) {
+				char ch = data[at];
 				if (ch == exit0) {
-					Character chh = src.getCharAt(ctr + 1);
-					if (chh != null && chh.charValue() == exit1) {
+					char chh = data[at+1];
+					if (chh == exit1) {
 						break;
 					}
 				}
 				ctr++;
+				at++;
 			}
-			return new SimpleToken(tokenType, src, ctr);
+			return ctr;
 		}
-		@Override
-		public void collectPorposals(String tokenTypeName, String prefix, Consumer<String> collector) {
-		}
-	}
 
 	@Override
-	public IToken getGeneratedToken(ITextSource _src) {
-		return super.getGeneratedToken(_src);
+	public int getGeneratedToken(TextSource src) {
+		int at=src.getPosition();
+		if(src.startsWith(0, open))
+		{
+			int ninside=recognizeInside(src.array, at+open.length());
+			if(src.startsWith(open.length()+ninside, close))
+			{
+				int l=open.length()+ninside+close.length();
+				return l;
+			}
+		}
+		return 0;
 	}
 
 	public RecognizerComment(ITokenType tokenType, String open, String close) {
@@ -52,14 +49,16 @@ public class RecognizerComment extends RecognizerConcat {
 		{
 			throw new IllegalArgumentException("commend close string must have length of 2: '"+close+"'");
 		}
+		this.open=open;
+		this.close=close;
 		exit0=close.charAt(0);
 		exit1=close.charAt(1);
-		addSubToken(new RecognizerConst(new TokenType("dummy"), open), true);
-		addSubToken(new RecognizerCommentInside(), false);
-		addSubToken(new RecognizerConst(new TokenType("dummy"), close), true);
 	}
 	public RecognizerComment(ITokenType tokenType) {
 		this(tokenType, "/*", "*/");
 	}
 
+	@Override
+	public void collectPorposals(String tokenTypeName, String prefix, Consumer<String> collector) {
+	}
 }

@@ -1,13 +1,9 @@
 package hu.qgears.parser.tokenizer.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import hu.qgears.parser.IParserReceiver;
-import hu.qgears.parser.tokenizer.ITextSource;
-import hu.qgears.parser.tokenizer.IToken;
 import hu.qgears.parser.tokenizer.ITokenRecognizer;
 import hu.qgears.parser.tokenizer.ITokenizerDef;
+import hu.qgears.parser.tokenizer.TokenArray;
 import hu.qgears.parser.tokenizer.TokenizerException;
 
 
@@ -16,24 +12,15 @@ public class Tokenizer {
 	ITokenizerDef tDef;
 
 	// List<ITokenRecognizer> tokenizers=new ArrayList<ITokenRecognizer>();
-	public List<IToken> tokenize(ITextSource seq, IParserReceiver receiver) throws TokenizerException {
-		List<IToken> ret = new ArrayList<IToken>();
+	public void tokenize(TokenArray ret, TextSource seq, IParserReceiver receiver) throws TokenizerException {
 		while (!seq.isEmpty()) {
 			boolean couldTokenize = false;
 			for (ITokenRecognizer rec : tDef.getRecognizers()) {
-				IToken tok = rec.getGeneratedToken(seq);
-				if (tok != null) {
-					ret.add(tok);
-					if (tok.getLength() == 0)
-					{
-						TokenizerException exc=new TokenizerException(
-								"inernal error: zero length token "
-										+ tok.getTokenType().getName() + " : '"
-										+ seq.firstChars(10) + "'", seq.getPosition());
-						receiver.tokenizeError(exc);
-						return ret;
-					}
-					seq.pass(tok.getLength());
+				int pass = rec.getGeneratedToken(seq);
+				if(pass>0)
+				{
+					ret.addToken(rec.getRecognizedTokenTypes().getId(), seq.getPosition(), pass);
+					seq.pass(pass);
 					couldTokenize = true;
 					break;
 				}
@@ -42,10 +29,10 @@ public class Tokenizer {
 				TokenizerException exc=new TokenizerException("Cannot tokenize: '"
 						+ seq.firstChars(20) + "'", seq.getPosition());
 				receiver.tokenizeError(exc);
-				return ret;
+				return;
 			}
 		}
-		return ret;
+		return;
 	}
 
 	public Tokenizer(ITokenizerDef tDef) {

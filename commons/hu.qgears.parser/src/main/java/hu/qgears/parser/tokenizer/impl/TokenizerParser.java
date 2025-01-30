@@ -18,9 +18,6 @@ import hu.qgears.parser.util.UtilXml;
 
 /**
  * Parse a tokenizer definition from an XML element that defines a tokenizer.
- * 
- * @author rizsi
- * 
  */
 public class TokenizerParser {
 	public TokenizerDef parse(Element tokDef) throws LanguageParseException,

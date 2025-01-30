@@ -1,9 +1,12 @@
 package hu.qgears.parser.language.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import hu.qgears.parser.language.ILanguage;
 import hu.qgears.parser.language.ITokenType;
 import hu.qgears.parser.tokenizer.ITokenRecognizer;
+import hu.qgears.parser.tokenizer.impl.TokenizerDef;
 
 /**
  * Generate number ids for token types.
@@ -28,12 +31,21 @@ public class IDGen {
 	 * 
 	 * @param types
 	 */
-	public void genTokenTypeIdsFromRecog(List<ITokenRecognizer> types) {
+	public void genTokenTypeIdsFromRecog(ILanguage language) {
+		List<ITokenRecognizer> types = language.getTokenizerDef().getRecognizers();
 		int ctr = 0;
+		List<ITokenType> flatTypes=new ArrayList<ITokenType>();
 		for (ITokenRecognizer tr : types) {
-			for (ITokenType t : tr.getRecognizedTokenTypes()) {
+			ITokenType t = tr.getRecognizedTokenTypes();
+			{
+				flatTypes.add(t);
 				t.setId(ctr++);
 			}
+		}
+		((TokenizerDef)language.getTokenizerDef()).setFlatTypesArray(flatTypes);
+		if(language.getTokenFilterDef()!=null)
+		{
+			language.getTokenFilterDef().setupIds(flatTypes);
 		}
 	}
 }

@@ -1,20 +1,15 @@
 package hu.qgears.parser;
 
-import java.util.List;
-
 import hu.qgears.parser.impl.ElemBuffer;
 import hu.qgears.parser.impl.ParseException;
-import hu.qgears.parser.tokenizer.IToken;
+import hu.qgears.parser.tokenizer.TokenArray;
 
-/**
- * Interface for a parser instance.
- * @author rizsi
- *
+/** Interface for a parser instance.
  */
 public interface IParser {
 
-	List<IToken> tokenize(IParserReceiver receiver) throws ParseException;
-	List<IToken> getTokensUnfiltered();
+	TokenArray tokenize(IParserReceiver receiver) throws ParseException;
+	TokenArray getTokensUnfiltered();
 
 	/**
 	 * Execute parsing of current input.

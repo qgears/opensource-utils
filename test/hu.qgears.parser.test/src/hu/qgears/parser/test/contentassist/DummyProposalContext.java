@@ -15,7 +15,7 @@ import hu.qgears.parser.language.ILanguage;
 import hu.qgears.parser.language.impl.Term;
 import hu.qgears.parser.language.impl.TermToken;
 import hu.qgears.parser.math.MathExpressionLanguage;
-import hu.qgears.parser.tokenizer.IToken;
+import hu.qgears.parser.tokenizer.Token;
 
 public class DummyProposalContext implements ICompletitionProposalContext {
 
@@ -29,7 +29,7 @@ public class DummyProposalContext implements ICompletitionProposalContext {
 	}
 
 	@Override
-	public boolean isFiltered(IToken t) {
+	public boolean isFiltered(Token t) {
 		// TODO Auto-generated method stub
 		return false;
 	}

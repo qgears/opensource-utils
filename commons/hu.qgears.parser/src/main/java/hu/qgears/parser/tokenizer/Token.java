@@ -1,14 +1,15 @@
 package hu.qgears.parser.tokenizer;
 
 import hu.qgears.parser.language.ITokenType;
+import hu.qgears.parser.tokenizer.impl.TextSource;
 
-public class SimpleToken implements IToken {
+public class Token {
 	ITokenType type;
-	ITextSource source;
+	TextSource source;
 	int pos;
 	int length;
 
-	public SimpleToken(ITokenType type, ITextSource source, int pos, int length) {
+	public Token(ITokenType type, TextSource source, int pos, int length) {
 		super();
 		this.type = type;
 		this.source = source;
@@ -16,7 +17,7 @@ public class SimpleToken implements IToken {
 		this.length = length;
 	}
 
-	public SimpleToken(ITokenType type, ITextSource source, int length) {
+	public Token(ITokenType type, TextSource source, int length) {
 		super();
 		this.type = type;
 		this.source = source;
@@ -45,7 +46,7 @@ public class SimpleToken implements IToken {
 		return pos;
 	}
 
-	public ITextSource getSource() {
+	public TextSource getSource() {
 		return source;
 	}
 }

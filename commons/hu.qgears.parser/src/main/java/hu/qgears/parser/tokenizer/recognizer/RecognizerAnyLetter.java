@@ -3,18 +3,16 @@ package hu.qgears.parser.tokenizer.recognizer;
 import java.util.function.Consumer;
 
 import hu.qgears.parser.language.ITokenType;
-import hu.qgears.parser.tokenizer.ITextSource;
-import hu.qgears.parser.tokenizer.IToken;
 import hu.qgears.parser.tokenizer.ITokenRecognizer;
 import hu.qgears.parser.tokenizer.RecognizerAbstract;
-import hu.qgears.parser.tokenizer.SimpleToken;
+import hu.qgears.parser.tokenizer.impl.TextSource;
 
 public class RecognizerAnyLetter extends RecognizerAbstract implements
 		ITokenRecognizer {
 	ILetterAcceptor acceptor;
 
 	@Override
-	public IToken getGeneratedToken(ITextSource src) {
+	public int getGeneratedToken(TextSource src) {
 		int ctr = 0;
 		char ch = src.getCharAt(ctr);
 		while (acceptor.accept(ch)) {
@@ -25,8 +23,8 @@ public class RecognizerAnyLetter extends RecognizerAbstract implements
 			ch = c;
 		}
 		if (ctr == 0)
-			return null;
-		return new SimpleToken(tokenType, src, ctr);
+			return 0;
+		return ctr;
 	}
 
 	public RecognizerAnyLetter(ITokenType tokenType, ILetterAcceptor acceptor) {

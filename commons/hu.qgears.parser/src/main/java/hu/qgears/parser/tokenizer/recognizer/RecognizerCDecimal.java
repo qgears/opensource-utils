@@ -1,31 +1,25 @@
 package hu.qgears.parser.tokenizer.recognizer;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.function.Consumer;
 
 import hu.qgears.parser.language.ITokenType;
 import hu.qgears.parser.language.Matcher;
-import hu.qgears.parser.tokenizer.ITextSource;
-import hu.qgears.parser.tokenizer.IToken;
 import hu.qgears.parser.tokenizer.ITokenRecognizer;
-import hu.qgears.parser.tokenizer.SimpleToken;
+import hu.qgears.parser.tokenizer.impl.TextSource;
 
 /**
  * Recognize decimal number with postfix allowed. (u, U, l, L)
  */
 public class RecognizerCDecimal implements ITokenRecognizer {
 	private ITokenType tokenType;
-	private List<ITokenType> l;
 	public RecognizerCDecimal(ITokenType tokenType) {
 		this.tokenType=tokenType;
-		l=Collections.singletonList(tokenType);
 	}
 	public static Number valueOf(String string) {
 		return Long.parseLong(string);
 	}
 	@Override
-	public IToken getGeneratedToken(ITextSource src) {
+	public int getGeneratedToken(TextSource src) {
 		int ctr = 0;
 		char ch = src.getCharAt(ctr);
 		int l=src.getLength();
@@ -38,7 +32,7 @@ public class RecognizerCDecimal implements ITokenRecognizer {
 			ch = src.getCharAt(ctr);
 		}
 		if (ctr == 0)
-			return null;
+			return 0;
 		if(l>ctr)
 		{
 			ch = src.getCharAt(ctr);
@@ -55,11 +49,11 @@ public class RecognizerCDecimal implements ITokenRecognizer {
 				ctr++;
 			}
 		}
-		return new SimpleToken(tokenType, src, ctr);
+		return ctr;
 	}
 	@Override
-	public List<ITokenType> getRecognizedTokenTypes() {
-		return l;
+	public ITokenType getRecognizedTokenTypes() {
+		return tokenType;
 	}
 	@Override
 	public Matcher createMatcher(String matchingString) {
