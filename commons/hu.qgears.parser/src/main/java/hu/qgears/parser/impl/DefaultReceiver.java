@@ -1,7 +1,6 @@
 package hu.qgears.parser.impl;
 
 import hu.qgears.parser.IParserReceiver;
-import hu.qgears.parser.tokenizer.Token;
 import hu.qgears.parser.tokenizer.TokenArray;
 import hu.qgears.parser.tokenizer.TokenizerException;
 
@@ -9,12 +8,12 @@ public class DefaultReceiver implements IParserReceiver
 {
 	public TreeElem treeFiltered;
 	@Override
-	public void stucked(ElemBuffer buffer, Token t) throws ParseException {
-		throw new ParseException("parsing stucked at: "+t.getTokenType().getName()
+	public void stucked(ElemBuffer buffer, TokenArray tokens, int tIndex) throws ParseException {
+		throw new ParseException("parsing stucked at: "+tokens.getLanguage().getTokenizerDef().tokenTypeById(tokens.type(tIndex)).getName()
 				+" '"
-				+ t.getSource().lastChars(t.getPos(), 20) + "'|'"
-				+ t.getSource().firstChars(t.getPos(), 20) + "'"
-				+ "...").setPosition(t.getPos());
+				+ tokens.getSource().lastChars(tokens.pos(tIndex), 20) + "'|'"
+				+ tokens.getSource().firstChars(tokens.pos(tIndex), 20) + "'"
+				+ "...").setPosition(tokens.pos(tIndex));
 	}
 
 	@Override

@@ -17,9 +17,6 @@ import hu.qgears.parser.util.UtilString;
 
 /**
  * Parse tokenizer definition from an AST of a language file.
- * 
- * @author rizsi
- * 
  */
 public class TokenizerParserAST {
 	public TokenizerDef parse(TokenizerImplManager man, ITreeElem root) throws LanguageParseException,

@@ -10,21 +10,27 @@ import hu.qgears.parser.tokenizer.impl.TextSource;
 public class RecognizerConst extends RecognizerAbstract implements
 		ITokenRecognizer {
 	String c;
+	char[] carr;
 	private boolean wholeWord=false;
 	@Override
 	public int getGeneratedToken(TextSource src) {
-		String head = src.firstChars(c.length());
-		if (head.equals(c)) {
-			Character next=src.getCharAt(c.length());
-			if(wholeWord && next!=null && Character.isJavaIdentifierPart(next))
+		int at=src.getPosition();
+		int max=at+carr.length;
+		if(max>src.getLength())
+		{
+			return 0;
+		}
+		char[] arr=src.array;
+		for(int i=0;i<carr.length;++i)
+		{
+			char c=arr[at+i];
+			char u=carr[i];
+			if(c!=u)
 			{
 				return 0;
 			}
-			int l=c.length();
-			return l;
-		} else {
-			return 0;
 		}
+		return carr.length;
 	}
 
 	public RecognizerConst(ITokenType tokenType, String c) {
@@ -36,6 +42,7 @@ public class RecognizerConst extends RecognizerAbstract implements
 		if (c.length() < 1)
 			throw new IllegalArgumentException("invalid token: = length constant");
 		this.c = c;
+		carr=c.toCharArray();
 	}
 
 	@Override

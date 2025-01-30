@@ -9,14 +9,14 @@ import java.util.Map;
 import hu.qgears.parser.ITreeElem;
 import hu.qgears.parser.language.EType;
 import hu.qgears.parser.language.impl.Term;
-import hu.qgears.parser.tokenizer.Token;
+import hu.qgears.parser.tokenizer.TokenArray;
 import hu.qgears.parser.tokenizer.impl.TextSource;
 
 
 /**
  * Implementation of a parse result node.
  */
-public class TreeElem implements ITreeElem {
+final public class TreeElem implements ITreeElem {
 	protected int dotPos;
 	protected int choice;
 	private int typeId;
@@ -26,11 +26,12 @@ public class TreeElem implements ITreeElem {
 	protected int from;
 	private int group;
 	private Term type;
-	private Token token;
+	private TokenArray tokens;
 	private ElemBuffer buffer;
 	private TextSource textSource;
 	private int textIndexFrom;
 	private int textIndexTo;
+	private boolean isToken;
 
 	@SuppressWarnings("unchecked")
 	List<TreeElem> subs = Collections.EMPTY_LIST;
@@ -51,14 +52,6 @@ public class TreeElem implements ITreeElem {
 		return buffer;
 	}
 
-//	/**
-//	 * The corresponding element in the early parse tables.
-//	 * @return
-//	 */
-//	public Elem getElem() {
-//		return elem;
-//	}
-
 	public int getGroup() {
 		return group;
 	}
@@ -69,10 +62,6 @@ public class TreeElem implements ITreeElem {
 	 */
 	public Term getType() {
 		return type;
-	}
-
-	public Token getToken() {
-		return token;
 	}
 
 	public String getTypeName() {
@@ -109,15 +98,18 @@ public class TreeElem implements ITreeElem {
 		this.group = group;
 		textSource=buffer.getSource();
 		type=buffer.resolve(typeId);
-		token=EType.token.equals(getType().getType())?buffer.getTokenOfGroup(from):null;
-		textIndexFrom=getBuffer().getTokenOfGroup(from).getPos();
+		isToken=EType.token.equals(getType().getType());
+		textIndexFrom=buffer.getTokens().pos(from);
+		tokens=buffer.getTokens();
 		if(group==0)
 		{
 			textIndexTo=0;
 		}else
 		{
-			Token tok = getBuffer().getTokenOfGroup(group - 1);
-			textIndexTo = tok.getPos() + tok.getLength();
+			int lastTokenIndex=group -1;
+			int pos = tokens.pos(lastTokenIndex);
+			int l = tokens.length(lastTokenIndex);
+			textIndexTo = pos + l;
 		}
 	}
 
@@ -128,15 +120,14 @@ public class TreeElem implements ITreeElem {
 
 	@Override
 	public String toString() {
-		Token tok = getToken();
 		if(buffer!=null)
 		{
 			return ""+getTypeName()+" at: " + group + " " + buffer.toString(dotPos, typeId, choice, from) + " "
-					+ (tok == null ? "" : "" + tok);
+					+ (tokens.toString(from, group));
 		}else
 		{
-			return ""+getTypeName()+" at: " + group + " " + (token==null?"null":token.toString()) + " "
-					+ (tok == null ? "" : "" + tok);
+			return ""+getTypeName()+" at: " + group + " "
+					+ tokens.toString(from, group);
 		}
 	}
 
@@ -218,5 +209,13 @@ public class TreeElem implements ITreeElem {
 		{
 			te.stripParseDataRecursive();
 		}
+	}
+
+	public String getSourceString() {
+		return tokens.getSource().substring(textIndexFrom, textIndexTo).toString();
+	}
+
+	public boolean isToken() {
+		return isToken;
 	}
 }

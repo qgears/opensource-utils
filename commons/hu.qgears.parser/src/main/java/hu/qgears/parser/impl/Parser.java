@@ -5,12 +5,10 @@ import hu.qgears.parser.IParserReceiver;
 import hu.qgears.parser.ParserLogger;
 import hu.qgears.parser.language.ILanguage;
 import hu.qgears.parser.language.impl.Term;
-import hu.qgears.parser.tokenizer.Token;
 import hu.qgears.parser.tokenizer.TokenArray;
 import hu.qgears.parser.tokenizer.impl.TextSource;
 import hu.qgears.parser.tokenizer.impl.TokenFilter;
 import hu.qgears.parser.tokenizer.impl.Tokenizer;
-
 
 
 /** Parser to parse a text. To be used once.
@@ -74,13 +72,13 @@ public class Parser implements IParser {
 		tokens.addToken(lang.getTokenizerDef().getEof().getId(), src.getPosition(), 0);
 		// Create element generation rules
 		// Generate element of the sentence symbol.
-		GenerationRules.generateNonTerm(buffer, lang.getRootTerm(), 0, tokens.get(0), -1);
+		GenerationRules.generateNonTerm(buffer, lang.getRootTerm(), tokens, 0, -1);
 		// Generate all elements for all tokens
 		for (int tokenIndex = 0; tokenIndex < tokens.size(); ++tokenIndex) {
-			Token t = tokens.get(tokenIndex);
+			// Token t = tokens.get(tokenIndex);
 			for (int i=buffer.getCurrentGroupStart();i<buffer.getCurrentGroupEnd();++i)
 			{
-				GenerationRules.generateOnSameGroup(i, tokenIndex, buffer, t);
+				GenerationRules.generateOnSameGroup(i,tokens, tokenIndex, buffer);
 			}
 			if (tokenIndex >= tokens.size() - 1)
 			{
@@ -93,12 +91,12 @@ public class Parser implements IParser {
 				buffer.newGroup();
 				for(int i=from;i<to;++i)
 				{
-					changeCount += GenerationRules.generateOnNextGroup(buffer, i, tokenIndex, t);
+					changeCount += GenerationRules.generateOnNextGroup(buffer, i, tokens, tokenIndex);
 				}
 			}
 			if (changeCount == 0) {
 				logger.logStateWhenParseStuck(buffer, src);
-				receiver.stucked(buffer, t);
+				receiver.stucked(buffer, tokens, tokenIndex);
 				return null;	// No tree because we could not build it
 			}
 		}

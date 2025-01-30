@@ -11,9 +11,10 @@ public class RecognizerSComment extends RecognizerAbstract {
 		super(tokenType);
 	}
 
+	private char[] prefix="//".toCharArray();
 	@Override
 	public int getGeneratedToken(TextSource src) {
-		if(src.startsWith(0, "//"))
+		if(src.startsWith(0, prefix))
 		{
 			char[] arr=src.array;
 			int at=src.getPosition()+2;

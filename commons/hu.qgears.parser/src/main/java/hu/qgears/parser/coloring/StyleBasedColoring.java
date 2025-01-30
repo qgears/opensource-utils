@@ -8,6 +8,7 @@ import hu.qgears.parser.ITreeElem;
 import hu.qgears.parser.impl.ElemBuffer;
 import hu.qgears.parser.impl.ParseException;
 import hu.qgears.parser.tokenizer.Token;
+import hu.qgears.parser.tokenizer.TokenArray;
 import hu.qgears.parser.tokenizer.TokenizerException;
 import hu.qgears.parser.util.TreeVisitor;
 
@@ -21,8 +22,8 @@ public class StyleBasedColoring {
 	public class ParserCallback implements IParserReceiver {
 		public ParseErrorFeedback parseErrorFeedback;
 		@Override
-		public void stucked(ElemBuffer buffer, Token t) throws ParseException {
-			parseErrorFeedback=new ParseErrorFeedback("Can not parse", t.getPos(), t.getLength());
+		public void stucked(ElemBuffer buffer, TokenArray tokens, int tIndex) throws ParseException {
+			parseErrorFeedback=new ParseErrorFeedback("Can not parse", tokens.pos(tIndex), tokens.length(tIndex));
 		}
 		@Override
 		public void parseProblemUnknown(ElemBuffer buffer) throws ParseException {

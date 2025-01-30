@@ -3,6 +3,8 @@ package hu.qgears.parser.language;
 import java.util.List;
 import java.util.function.Consumer;
 
+import hu.qgears.parser.tokenizer.TokenArray;
+
 /**
  * Matcher is used to check a possible token match whether it
  * matches a symbol or not.
@@ -14,23 +16,48 @@ import java.util.function.Consumer;
 public class Matcher {
 	private boolean caseSensitive;
 	private String value;
+	private String valueUpperCase;
+	private String valueLowerCase;
 	public Matcher(boolean caseSensitive, String value) {
 		super();
 		this.caseSensitive = caseSensitive;
 		this.value = value;
+		this.valueUpperCase=value.toUpperCase();
+		this.valueLowerCase=value.toLowerCase();
 	}
 	/**
 	 * Check if this matcher matches the token content.
 	 * @param txt
 	 * @return
 	 */
-	public boolean matches(String txt) {
+	public boolean matches(TokenArray tokens, int tokenIndex) {
+		int pos=tokens.pos(tokenIndex);
+		int l=tokens.length(tokenIndex);
+		if(l!=value.length())
+		{
+			return false;
+		}
+		char [] arr=tokens.getSource().array;
 		if(caseSensitive)
 		{
-			return value.equals(txt);
+			for(int i=0;i<l;++i)
+			{
+				if(arr[pos+i]!=value.charAt(i))
+				{
+					return false;
+				}
+			}
+			return true;
 		}else
 		{
-			return value.toUpperCase().equals(txt.toUpperCase());
+			for(int i=0;i<l;++i)
+			{
+				if(arr[pos+i]!=valueLowerCase.charAt(i) && arr[pos+i]!=valueUpperCase.charAt(i))
+				{
+					return false;
+				}
+			}
+			return true;
 		}
 	}
 	@Override

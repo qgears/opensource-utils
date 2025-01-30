@@ -1,6 +1,6 @@
 package hu.qgears.parser.tokenizer.impl;
 
-public class TextSource {
+final public class TextSource {
 	CharSequence seq;
 	public char[] array;
 	int pos;
@@ -91,6 +91,12 @@ public class TextSource {
 		return new TextSource(seq, pos, array);
 	}
 
+	/**
+	 * Copy operation: should not be used in the hot loop
+	 * @param from
+	 * @param length
+	 * @return
+	 */
 	public String firstChars(int from, int length) {
 		TextSource ch = getClone();
 		ch.setPosition(from);
@@ -102,7 +108,7 @@ public class TextSource {
 		return firstChars(10) + "...";
 	}
 
-	public boolean startsWith(int relPos, String s) {
+/*	public boolean startsWith(int relPos, String s) {
 		int ptr=pos+relPos;
 		if(pos+s.length()>getLength())
 		{
@@ -119,12 +125,45 @@ public class TextSource {
 		}
 		return true;
 	}
-
-	public int getLength() {
-		return seq.length();
+	*/
+	public boolean startsWith(int relPos, char[] s) {
+		int ptr=pos+relPos;
+		if(pos+s.length>getLength())
+		{
+			return false;
+		}
+		for(int i=0;i<s.length;++i)
+		{
+			char c=array[ptr];
+			if(!(c==s[i]))
+			{
+				return false;
+			}
+			ptr++;
+		}
+		return true;
 	}
 
+	public int getLength() {
+		return array.length;
+	}
+
+	/**
+	 * Copy operation: should not be used in hot loop
+	 * @param from
+	 * @param length
+	 * @return
+	 */
 	public String lastChars(int from, int length) {
 		return seq.subSequence(Math.max(0, from-length), from).toString();
+	}
+	/**
+	 * Copy operation: should not be used in the hot loop
+	 * @param pos
+	 * @param end
+	 * @return
+	 */
+	public CharSequence substring(int pos, int end) {
+		return seq.subSequence(pos, end);
 	}
 }

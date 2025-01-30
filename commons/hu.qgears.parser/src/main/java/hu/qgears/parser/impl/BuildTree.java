@@ -118,15 +118,15 @@ public class BuildTree {
 		TokenArray toks=elem.getBuffer().getTokens();
 		int from=elem.from;
 		int to=elem.getGroup();
-		Token fromToken=toks.get(from);
-		return fromToken.getSource().getFullSequence().subSequence(from, to).toString();
+		Token fromToken=toks.getToken(from);
+		return toks.toString(from, to);
 	}
 	private ParseException createAmbigousException(List<Term> types, int from,
 			int to, ElemBuffer buf, List<TreeElem> sub) {
-		Token fromToken = buf.tokens.get(from);
-		Token toToken = buf.tokens.get(to);
-		int fromPos = fromToken.getPos();
-		int toPos = toToken.getPos() + toToken.getLength();
+		//Token fromToken = buf.tokens.get(from);
+		//Token toToken = buf.tokens.get(to);
+		int fromPos = buf.tokens.pos(from);
+		int toPos = buf.tokens.pos(to) + buf.tokens.length(to);
 //		logger.getErr().println(buf.print());
 		return new ParseException("parse ambigous from:"
 				+ from
@@ -138,8 +138,7 @@ public class BuildTree {
 				+ toPos
 				+ ")"
 				+ "string: "
-				+ fromToken.getSource().getFullSequence().subSequence(fromPos,
-						toPos-1)
+				+ buf.tokens.toString(fromPos, toPos)
 				+ " possible solutions: "+sub
 //						+" foolowed by: "+
 //						fromToken.getSource().getFullSequence().subSequence(toPos,
@@ -148,10 +147,9 @@ public class BuildTree {
 	}
 	private ParseException createAmbigousException2(List<Term> types, int from,
 			int to, ElemBuffer buf, List<List<TreeElem>> sub) {
-		Token fromToken = buf.tokens.get(from);
-		Token toToken = buf.tokens.get(to);
-		int fromPos = fromToken.getPos();
-		int toPos = toToken.getPos() + toToken.getLength();
+		int fromPos = buf.tokens.pos(from);
+		int toPos = buf.tokens.pos(to) + buf.tokens.length(to);
+
 //		logger.getErr().println(buf.print());
 /*		for(List<TreeElem> l: sub)
 		{
@@ -174,8 +172,7 @@ public class BuildTree {
 				+ toPos
 				+ ")"
 				+ "string: "
-				+ fromToken.getSource().getFullSequence().subSequence(fromPos,
-						toPos-1)
+				+ buf.tokens.toString(fromPos, toPos)
 //						+" foolowed by: "+
 //						fromToken.getSource().getFullSequence().subSequence(toPos,
 //								toPos+10)
@@ -277,8 +274,8 @@ public class BuildTree {
 
 	private ParseException createCannotParseException(List<Term> types, int from,
 			int to, ElemBuffer buf) {
-		Token fromToken = buf.tokens.get(from);
-		Token toToken = buf.tokens.get(to);
+		Token fromToken = buf.tokens.getToken(from);
+		Token toToken = buf.tokens.getToken(to);
 		int fromPos = fromToken.getPos();
 		int toPos = toToken.getPos() + toToken.getLength();
 		logger.println(buf.print());

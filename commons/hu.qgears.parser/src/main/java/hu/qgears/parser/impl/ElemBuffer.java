@@ -2,12 +2,10 @@ package hu.qgears.parser.impl;
 
 import java.io.PrintStream;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import hu.qgears.parser.language.ILanguage;
 import hu.qgears.parser.language.impl.Term;
-import hu.qgears.parser.tokenizer.Token;
 import hu.qgears.parser.tokenizer.TokenArray;
 import hu.qgears.parser.tokenizer.impl.TextSource;
 import hu.qgears.parser.util.UtilIntArrayFlexible;
@@ -277,10 +275,6 @@ final public class ElemBuffer {
 
 	public TokenArray getTokens() {
 		return tokens;
-	}
-
-	Token getTokenOfGroup(int grp) {
-		return tokens.get(grp);
 	}
 
 	public Term[] getTerms() {

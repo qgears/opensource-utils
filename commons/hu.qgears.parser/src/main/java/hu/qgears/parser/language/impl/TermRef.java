@@ -6,8 +6,6 @@ import hu.qgears.parser.language.EType;
 
 /**
  * Symbol that references an other symbol
- * @author rizsi
- *
  */
 public class TermRef extends Term {
 	private Term sub;

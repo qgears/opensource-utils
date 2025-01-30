@@ -48,7 +48,7 @@ public class ProjectContentAssistProcessor {
 					int i;
 					for(i=tokensUnfiltered.size()-1; i>=0; --i)
 					{
-						Token t=tokensUnfiltered.get(i);
+						Token t=tokensUnfiltered.getToken(i);
 						if(proposalContext.isFiltered(t))
 						{
 							// Go on
@@ -77,7 +77,7 @@ public class ProjectContentAssistProcessor {
 					return ret;
 				}
 				private boolean endsWithId(TokenArray tokensUnfiltered, String type) {
-					Token last=tokensUnfiltered.get(tokensUnfiltered.size()-1);
+					Token last=tokensUnfiltered.getToken(tokensUnfiltered.size()-1);
 					return type.equals(last.getTokenType().getName());
 				}
 			});

@@ -9,6 +9,8 @@ import hu.qgears.parser.tokenizer.impl.TextSource;
 
 public class RecognizerCStyleHexa implements ITokenRecognizer {
 	ITokenType type;
+	char[] prefix1="0x".toCharArray();
+	char[] prefix2="0X".toCharArray();
 	enum State
 	{
 		init,
@@ -27,7 +29,7 @@ public class RecognizerCStyleHexa implements ITokenRecognizer {
 
 	@Override
 	public int getGeneratedToken(TextSource src) {
-		if(src.startsWith(0, "0x")|| src.startsWith(0, "0X"))
+		if(src.startsWith(0, prefix1)|| src.startsWith(0, prefix2))
 		{
 			int i=2;
 			while(validHexaChar(src.getCharAt(i)))

@@ -9,8 +9,8 @@ import hu.qgears.parser.tokenizer.impl.TextSource;
 public class RecognizerComment extends RecognizerAbstract {
 	private char exit0;
 	private char exit1;
-	String open;
-	String close;
+	char[] open;
+	char[] close;
 	private int recognizeInside(char[] data, int at) {
 			int ctr = 0;
 			int maxpos=data.length-1;
@@ -33,10 +33,10 @@ public class RecognizerComment extends RecognizerAbstract {
 		int at=src.getPosition();
 		if(src.startsWith(0, open))
 		{
-			int ninside=recognizeInside(src.array, at+open.length());
-			if(src.startsWith(open.length()+ninside, close))
+			int ninside=recognizeInside(src.array, at+open.length);
+			if(src.startsWith(open.length+ninside, close))
 			{
-				int l=open.length()+ninside+close.length();
+				int l=open.length+ninside+close.length;
 				return l;
 			}
 		}
@@ -49,8 +49,8 @@ public class RecognizerComment extends RecognizerAbstract {
 		{
 			throw new IllegalArgumentException("commend close string must have length of 2: '"+close+"'");
 		}
-		this.open=open;
-		this.close=close;
+		this.open=open.toCharArray();
+		this.close=close.toCharArray();
 		exit0=close.charAt(0);
 		exit1=close.charAt(1);
 	}

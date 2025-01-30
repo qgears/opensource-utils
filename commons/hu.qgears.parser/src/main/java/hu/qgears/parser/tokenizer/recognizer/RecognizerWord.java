@@ -1,11 +1,36 @@
 package hu.qgears.parser.tokenizer.recognizer;
 
-import hu.qgears.parser.language.ITokenType;
+import java.util.function.Consumer;
 
-public class RecognizerWord extends RecognizerAnyLetter {
+import hu.qgears.parser.language.ITokenType;
+import hu.qgears.parser.tokenizer.RecognizerAbstract;
+import hu.qgears.parser.tokenizer.impl.TextSource;
+
+public class RecognizerWord extends RecognizerAbstract {
 
 	public RecognizerWord(ITokenType tokenType) {
-		super(tokenType, new LetterAcceptorWord());
+		super(tokenType);
+	}
+
+	@Override
+	public void collectPorposals(String tokenTypeName, String prefix, Consumer<String> collector) {
+	}
+
+	@Override
+	public int getGeneratedToken(TextSource src) {
+		int pos=src.getPosition();
+		int max=src.getLength()-pos;
+		char[] arr=src.array;
+		int i=0;
+		for(;i<max;++i)
+		{
+			char ch = arr[pos+i];
+			if(!Character.isLetter(ch))
+			{
+				return i;
+			}
+		}
+		return i;
 	}
 
 }

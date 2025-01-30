@@ -3,6 +3,7 @@ package hu.qgears.parser.tokenizer;
 import java.util.Arrays;
 
 import hu.qgears.parser.language.ILanguage;
+import hu.qgears.parser.language.ITokenType;
 import hu.qgears.parser.tokenizer.impl.TextSource;
 
 /** An array of token data - result of tokenizer. */
@@ -35,7 +36,7 @@ final public class TokenArray {
 		return n;
 	}
 	public Token remove(int index) {
-		Token ret=get(index);
+		Token ret=getToken(index);
 		for(int i=index*3; i<n*3;++i)
 		{
 			data[i]=data[i+3];
@@ -50,13 +51,10 @@ final public class TokenArray {
 		return source;
 	}
 	/**
-	 * 
-	 * @deprecated use API that do not instantiate this as an object
-	 * @param i
+	 * Costly: only tests and content assist should use it. But should not be done for each sources when loading model.
 	 * @return
 	 */
-	@Deprecated
-	public Token get(int i) {
+	public Token getToken(int i) {
 		return new Token(language.getTokenizerDef().tokenTypeById(type(i)), source, pos(i), length(i));
 	}
 	public int pos(int i) {
@@ -68,13 +66,25 @@ final public class TokenArray {
 	public ILanguage getLanguage() {
 		return language;
 	}
-	@Deprecated
+	/**
+	 * Costly: only tests and content assist should use it. But should not be done for each sources when loading model.
+	 * @return
+	 */
 	public Token[] getAllTokens() {
 		Token[] ret=new Token[n];
 		for(int i=0;i<n;++i)
 		{
-			ret[i]=get(i);
+			ret[i]=getToken(i);
 		}
 		return ret;
+	}
+	public String toString(int from, int toNotIncluding) {
+		int pos=pos(from);
+		int end=pos(toNotIncluding-1)+length(toNotIncluding-1);
+		return source.substring(pos, end).toString();
+	}
+	public ITokenType getTokenType(int i) {
+		int type=type(i);
+		return language.getTokenizerDef().tokenTypeById(type);
 	}
 }

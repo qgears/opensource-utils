@@ -24,7 +24,7 @@ public class TreeRenderer {
 		TreeElem root = (TreeElem) _root;
 		ret.append(prefix
 				+ root.getType().getName()
-				+ (root.getToken() != null ? " '" + root.getToken().getText()
+				+ ( root.isToken() ? " '" + root.getSourceString()
 						+ "'" : "") + "\n");
 		for (TreeElem ch : root.getSubs()) {
 			render2(ret, ch, prefix + "\t");

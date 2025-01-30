@@ -15,11 +15,11 @@ import hu.qgears.parser.tokenizer.impl.TextSource;
  * The String representation is intended to follow the Java specification of string constants.
  */
 public class RecognizerString extends RecognizerAbstract {
-	private String endingString;
+	private char[] endingString;
 	private char endingCharacter;
 	public RecognizerString(ITokenType tokenType, char endingCharacter) {
 		super(tokenType);
-		endingString=""+endingCharacter;
+		endingString=(""+endingCharacter).toCharArray();
 		this.endingCharacter=endingCharacter;
 	}
 	/**

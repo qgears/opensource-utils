@@ -11,7 +11,7 @@ import hu.qgears.parser.language.impl.TermMore;
 import hu.qgears.parser.language.impl.TermOr;
 import hu.qgears.parser.language.impl.TermRef;
 import hu.qgears.parser.language.impl.TermToken;
-import hu.qgears.parser.tokenizer.Token;
+import hu.qgears.parser.tokenizer.TokenArray;
 
 
 /**
@@ -34,8 +34,7 @@ public class GenerationRules {
 	 * @param eb elements are generated into this buffer
 	 * @param nextToken
 	 */
-	public static final void generateOnSameGroup(int absoluteIndex, int at, ElemBuffer eb,
-			Token nextToken) {
+	public static final void generateOnSameGroup(int absoluteIndex, TokenArray tokens, int at, ElemBuffer eb) {
 		int typeId=eb.getTermTypeId(absoluteIndex);
 		Term term = eb.resolve(typeId);
 		boolean isPassed = isPassed(eb, absoluteIndex, term);
@@ -44,7 +43,7 @@ public class GenerationRules {
 		}
 		Term sub = getSub(eb, absoluteIndex, isPassed);
 		if (sub != null) {
-			generateNonTerm(eb, sub, at, nextToken, absoluteIndex);
+			generateNonTerm(eb, sub, tokens, at, absoluteIndex);
 		}
 	}
 	/**
@@ -150,7 +149,7 @@ public class GenerationRules {
 	 * @param token
 	 * @return the number of elements added
 	 */
-	static public int generateOnNextGroup(ElemBuffer buffer, int absoluteIndex, int at, Token token) {
+	static public int generateOnNextGroup(ElemBuffer buffer, int absoluteIndex, TokenArray tokens, int at) {
 		int typeId=buffer.getTermTypeId(absoluteIndex);
 		Term term = buffer.resolve(typeId);
 		EType type = term.getType();
@@ -159,7 +158,7 @@ public class GenerationRules {
 			int dotPos=buffer.getDotPosition(absoluteIndex);
 			if (dotPos== 0) {
 				TermToken tt = (TermToken) term;
-				if (tt.getTokenType().getId() == token.getTokenType().getId()) {
+				if (tt.getTokenType().getId() == tokens.type(at)) {
 					// Token is found in source code.
 					return buffer.addElementCopyGenerator(dotPos+1, typeId, buffer.getChoice(absoluteIndex), buffer.getFrom(absoluteIndex), absoluteIndex);
 				} else {
@@ -243,7 +242,7 @@ public class GenerationRules {
 	 * @param nextToken
 	 * @return
 	 */
-	public static final void generateNonTerm(ElemBuffer eb, Term term, int from, Token nextToken, int generatedBy) {
+	public static final void generateNonTerm(ElemBuffer eb, Term term, TokenArray tokens, int from, int generatedBy) {
 		switch (term.getType()) {
 		case or: {
 			TermOr termO = (TermOr) term;
@@ -254,7 +253,7 @@ public class GenerationRules {
 		}
 		case token: {
 			TermToken tt = (TermToken) term;
-			if (matches(tt, nextToken)) {
+			if (matches(tt, tokens, from)) {
 				eb.addElement(0, term.getId(), 0, from, generatedBy);
 			}
 			break;
@@ -266,15 +265,14 @@ public class GenerationRules {
 		}
 	}
 
-	static private boolean matches(TermToken tt, Token nextToken) {
+	static private boolean matches(TermToken tt, TokenArray tokens, int at) {
 		ITokenType tokenType=tt.getTokenType();
-		boolean idMatch=tokenType.getId() == nextToken.getTokenType().getId();
+		boolean idMatch=tokenType.getId() == tokens.type(at);
 		boolean hasRestriction=tt.getMatchingValue()!=null;
 		if(idMatch&&hasRestriction)
 		{
 			Matcher mv=tt.getMatchingValue();
-			String txt=nextToken.getText().toString();
-			boolean match=mv.matches(txt);
+			boolean match=mv.matches(tokens, at);
 			return match;
 		}
 		return idMatch;

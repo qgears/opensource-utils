@@ -3,7 +3,6 @@ package hu.qgears.parser;
 import hu.qgears.parser.impl.ElemBuffer;
 import hu.qgears.parser.impl.ParseException;
 import hu.qgears.parser.impl.TreeElem;
-import hu.qgears.parser.tokenizer.Token;
 import hu.qgears.parser.tokenizer.TokenArray;
 import hu.qgears.parser.tokenizer.TokenizerException;
 
@@ -21,7 +20,7 @@ public interface IParserReceiver {
 	 * @param t the token that can not fit any grammar rule at its location.
 	 * @throws ParseException
 	 */
-	default void stucked(ElemBuffer buffer, Token t) throws ParseException { }
+	default void stucked(ElemBuffer buffer, TokenArray tokens, int tIndex) throws ParseException { }
 	/**
 	 * Internal error in the parser or a specific case that is not properly handled by the parser yet.
 	 * 
