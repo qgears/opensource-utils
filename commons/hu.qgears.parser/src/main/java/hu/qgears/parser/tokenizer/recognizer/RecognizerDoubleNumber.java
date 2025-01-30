@@ -31,14 +31,13 @@ public class RecognizerDoubleNumber implements ITokenRecognizer {
 	public int getGeneratedToken(TextSource src) {
 		int i=0;
 		State state=State.init;
+		int pos=src.getPosition();
+		int l=src.getLength();
+		char[] arr=src.array;
 		loop:
-		while(true)
+		for(; i<l-pos; ++i)
 		{
-			Character c=src.getCharAt(i);
-			if(c==null)
-			{
-				break;
-			}
+			Character c=arr[pos+i];
 			switch(state)
 			{
 			case init:
@@ -115,7 +114,6 @@ public class RecognizerDoubleNumber implements ITokenRecognizer {
 					break loop;
 				}
 			}
-			i++;
 		}
 		if(!acceptPrevAndFollowingDot)
 		{

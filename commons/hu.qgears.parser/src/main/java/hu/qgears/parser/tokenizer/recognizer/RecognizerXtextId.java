@@ -10,7 +10,7 @@ import hu.qgears.parser.tokenizer.impl.TextSource;
 
 public class RecognizerXtextId extends RecognizerAbstract {
 
-	private Character escapeChar='^';
+	private char escapeChar='^';
 	private static Set<Character> startCharacters=new HashSet<>();
 	private static Set<Character> goonCharacters=new HashSet<>();
 	{
@@ -23,6 +23,14 @@ public class RecognizerXtextId extends RecognizerAbstract {
 			goonCharacters.add(c);
 		}
 	}
+	private static boolean isStartCharacter(char ch)
+	{
+		return ch=='_'||(ch>='a' && ch<='z') ||(ch>='A' && ch<='Z');
+	}
+	private static boolean isGoonCharacter(char ch)
+	{
+		return (ch>='0' && ch<='9');
+	}
 	public RecognizerXtextId(ITokenType tokenType) {
 		this(tokenType, null);
 	}
@@ -31,23 +39,30 @@ public class RecognizerXtextId extends RecognizerAbstract {
 	}
 	@Override
 	public int getGeneratedToken(TextSource src) {
-		Character c=src.getCharAt(0);
+		int pos=src.getPosition();
+		int len=src.getLength();
+		char[] arr=src.array;
+		char c=arr[pos];
 		int at=0;
-		if(c!=null && this.escapeChar!=null && this.escapeChar.charValue()==c.charValue())
+		if(this.escapeChar==c)
 		{
 			at++;
 		}
-		Character c0=src.getCharAt(at);
-		if(c0!=null && startCharacters.contains(c0))
+		if(pos+at<len)
 		{
-			at++;
-			Character c1=src.getCharAt(at);
-			while(c1!=null && (startCharacters.contains(c1) || goonCharacters.contains(c1)))
+			char c0=arr[pos+at];
+			if(isStartCharacter(c0))
 			{
-				at++;
-				c1=src.getCharAt(at);
+				for(;at+pos<len;++at)
+				{
+					char c1=arr[pos+at];
+					if(!(isStartCharacter(c1) || isGoonCharacter(c1)))
+					{
+						break;
+					}
+				}
+				return at;
 			}
-			return at;
 		}
 		return 0;
 	}

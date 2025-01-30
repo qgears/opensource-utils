@@ -1,37 +1,33 @@
 package hu.qgears.parser.tokenizer.impl;
 
 final public class TextSource {
-	CharSequence seq;
+	// CharSequence seq;
 	public char[] array;
 	int pos;
 
-	public TextSource(CharSequence seq, int pos, char[] array) {
+	public TextSource(char[] array, int pos) {
 		super();
-		this.seq = seq;
 		this.pos = pos;
 		this.array = array;
 	}
 	public TextSource(CharSequence seq, int pos) {
 		super();
-		this.seq = seq;
 		this.pos = pos;
-		initlializeArray();
+		initlializeArray(seq);
 	}
 
 	public TextSource(CharSequence seq) {
 		super();
-		this.seq = seq;
-		initlializeArray();
+		initlializeArray(seq);
 	}
 
 	public TextSource(String seq) {
 		super();
 		assert (seq != null);
-		this.seq = seq;
-		initlializeArray();
+		initlializeArray(seq);
 	}
 	
-	private void initlializeArray()
+	private void initlializeArray(CharSequence seq)
 	{
 		array=new char[seq.length()];
 		for(int i=0;i<array.length;++i)
@@ -43,22 +39,25 @@ final public class TextSource {
 	private int normalize(int index) {
 		if (index < 0)
 			index = 0;
-		if (index > seq.length())
-			index = seq.length();
+		if (index > array.length)
+			index = array.length;
 		return index;
 	}
 
 	public String firstChars(int length) {
-		return seq.subSequence(pos, normalize(pos + length))
-				.toString();
+		if(pos+length>array.length)
+		{
+			length=array.length-pos;
+		}
+		return new String(array, pos, length);
 	}
 
 	public CharSequence getCurrentSequence() {
-		return seq.subSequence(pos, seq.length());
+		return new String(array, pos, normalize(array.length));
 	}
 
 	public CharSequence getFullSequence() {
-		return seq;
+		return new String(array);
 	}
 
 	public int getPosition() {
@@ -66,7 +65,7 @@ final public class TextSource {
 	}
 
 	public boolean isEmpty() {
-		return pos == seq.length();
+		return pos >= array.length;
 	}
 
 	public TextSource pass(int pass) {
@@ -81,14 +80,14 @@ final public class TextSource {
 
 	public Character getCharAt(int i) {
 		int p = pos + i;
-		if (p >= seq.length() || p < 0) {
+		if (p >= array.length || p < 0) {
 			return null;
 		}
-		return seq.charAt(pos + i);
+		return array[pos + i];
 	}
 
 	public TextSource getClone() {
-		return new TextSource(seq, pos, array);
+		return new TextSource(array, pos);
 	}
 
 	/**
@@ -155,7 +154,8 @@ final public class TextSource {
 	 * @return
 	 */
 	public String lastChars(int from, int length) {
-		return seq.subSequence(Math.max(0, from-length), from).toString();
+		int l=Math.min(length, from);
+		return new String(array, from-l, l);
 	}
 	/**
 	 * Copy operation: should not be used in the hot loop
@@ -164,6 +164,6 @@ final public class TextSource {
 	 * @return
 	 */
 	public CharSequence substring(int pos, int end) {
-		return seq.subSequence(pos, end);
+		return new String(array, pos, end-pos);
 	}
 }

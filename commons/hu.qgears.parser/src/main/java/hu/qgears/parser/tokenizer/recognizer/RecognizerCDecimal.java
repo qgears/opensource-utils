@@ -20,8 +20,10 @@ public class RecognizerCDecimal implements ITokenRecognizer {
 	}
 	@Override
 	public int getGeneratedToken(TextSource src) {
+		int pos=src.getPosition();
 		int ctr = 0;
-		char ch = src.getCharAt(ctr);
+		char[] arr=src.array;
+		char ch = arr[pos+ctr];
 		int l=src.getLength();
 		while (Character.isDigit(ch)) {
 			ctr++;
@@ -29,13 +31,13 @@ public class RecognizerCDecimal implements ITokenRecognizer {
 			{
 				break;
 			}
-			ch = src.getCharAt(ctr);
+			ch = arr[pos+ctr];
 		}
 		if (ctr == 0)
 			return 0;
 		if(l>ctr)
 		{
-			ch = src.getCharAt(ctr);
+			ch = arr[pos+ctr];
 			if(ch=='u'||ch=='U')
 			{
 				ctr++;
@@ -43,7 +45,7 @@ public class RecognizerCDecimal implements ITokenRecognizer {
 		}
 		if(l>ctr)
 		{
-			ch = src.getCharAt(ctr);
+			ch = arr[pos+ctr];
 			if(ch=='l'||ch=='L')
 			{
 				ctr++;
