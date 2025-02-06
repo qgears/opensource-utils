@@ -41,7 +41,7 @@ public class Ref extends CrossRefObject {
 	private void notifyListeners(List<Obj> finds) {
 		for(IRefListener l:getListenersCopy())
 		{
-			l.resolvedTo(finds);
+			l.resolvedTo(this,finds);
 		}
 	}
 	/**
