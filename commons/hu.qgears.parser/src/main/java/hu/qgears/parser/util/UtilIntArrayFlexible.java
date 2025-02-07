@@ -69,4 +69,14 @@ final public class UtilIntArrayFlexible {
 	 */
 	public void clear() {
 	}
+	/** Free internally allocated memory - becomes unusable.
+	 */
+	public void dispose() {
+		array=null;
+	}
+	/** Get the length of the internal int buffer. */
+	public int getInternalLength()
+	{
+		return array.length;
+	}
 }

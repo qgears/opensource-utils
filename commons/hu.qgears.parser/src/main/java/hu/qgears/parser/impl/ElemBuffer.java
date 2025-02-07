@@ -392,4 +392,20 @@ final public class ElemBuffer {
 		return elems.get(pos+offsetDotPos)==dotPos && elems.get(pos+offsetType)==type &&
 				elems.get(pos+offsetChoice)==choice && elems.get(pos+offsetFrom)==from;
 	}
+	/** Delete internal content - free memory but becomes unusable.
+	 */
+	public void dispose()
+	{
+		hashTable=null;
+		elems.dispose();
+		genBys.dispose();
+		groupStarts.dispose();
+	}
+	/** Statistics of memory usage in human readable format.
+	 * @return
+	 */
+	public String getMemoryStatistics()
+	{
+		return "ElemBuffer statistics: "+hashTable.length+" "+elems.getInternalLength()+" "+genBys.getInternalLength()+" "+groupStarts.getInternalLength();
+	}
 }
