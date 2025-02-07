@@ -62,6 +62,8 @@ public class CrossRefManager {
 		docs.put(identifier, ret);
 		return ret;
 	}
+	
+	
 	public Obj createObj(Doc owner, String fqId, String type)
 	{
 		if(owner.isClosed())
@@ -307,7 +309,7 @@ public class CrossRefManager {
 		}
 		if(ref.scope.filterFunction!=null)
 		{
-			return ref.scope.filterFunction.isPossibleTarget(o);
+			return ref.scope.filterFunction.isPossibleTarget(ref,o);
 		}
 		return true;
 	}

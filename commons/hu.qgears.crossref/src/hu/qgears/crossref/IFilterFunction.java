@@ -8,8 +8,9 @@ package hu.qgears.crossref;
 public interface IFilterFunction {
 	/**
 	 * Check whether a possible delegate for a reference target is a valid target or not.
-	 * @param target
+	 * @param ref The reference
+	 * @param target The Object which might be a valid target.
 	 * @return false means this delegate will not be reported as a found target.
 	 */
-	boolean isPossibleTarget(Obj target);
+	boolean isPossibleTarget(Ref ref, Obj target);
 }
