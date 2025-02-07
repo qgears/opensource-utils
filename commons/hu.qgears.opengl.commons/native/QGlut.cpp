@@ -386,19 +386,19 @@ METHODPREFIX(CLASS, void, mainLoopEvent)(ST_ARGS)
 
 METHODPREFIX(CLASS, jint, getScreenHeight)(ST_ARGS)
 {
-		glutGet(GLUT_SCREEN_HEIGHT);
+	return glutGet(GLUT_SCREEN_HEIGHT);
 }
 METHODPREFIX(CLASS, jint, getScreenWidth)(ST_ARGS)
 {
-		glutGet(GLUT_SCREEN_WIDTH);
+	return glutGet(GLUT_SCREEN_WIDTH);
 }
 METHODPREFIX(CLASS, jint, getWindowHeight)(ST_ARGS)
 {
-		glutGet(GLUT_WINDOW_HEIGHT);
+	return glutGet(GLUT_WINDOW_HEIGHT);
 }
 METHODPREFIX(CLASS, jint, getWindowWidth)(ST_ARGS)
 {
-		glutGet(GLUT_WINDOW_WIDTH);
+	return glutGet(GLUT_WINDOW_WIDTH);
 }
 METHODPREFIX(CLASS, void, setFullScreen)(ST_ARGS, jboolean fullscreen, jint width, jint height)
 {
