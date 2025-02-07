@@ -172,7 +172,7 @@ public class UtilNativeLoader {
 	 * <li>Scan all paths of the variable for the given .so name
 	 * <li>Compare first match to the required content
 	 * <li>If equals then ok
-	 * <li>If not equals then throw try to overwrite the file
+	 * <li>If not equals then try to overwrite the file
 	 * <li>If does not exist then create the file with the given content into 
 	 *  the first LD_LIBRARY_PATH folder.
 	 * </ul>
