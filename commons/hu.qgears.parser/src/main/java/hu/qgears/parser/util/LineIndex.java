@@ -1,6 +1,5 @@
 package hu.qgears.parser.util;
 
-import java.io.File;
 import java.util.Arrays;
 
 /**
@@ -17,14 +16,14 @@ import java.util.Arrays;
  */
 public class LineIndex {
 
-	private File sourceFile;
+	private String sourceFile;
 	private int[] lineBreakPositions;
 	private int lineBreakPositionsSize;
 	private int contentSize;
 	public class LineInfo {
 		public int line;
 		public int col;
-		public File srcFile;
+		public String srcFile;
 		public LineInfo(int line, int col) {
 			super();
 			this.line = line;
@@ -40,7 +39,7 @@ public class LineIndex {
 	 *          {@link LineInfo#srcFile} as well (useful for generating error
 	 *          messages).
 	 */
-	public LineIndex(File f) {
+	public LineIndex(String f) {
 		sourceFile = f;
 	}
 	
@@ -116,7 +115,7 @@ public class LineIndex {
 			}
 		}
 	}
-	public File getSourceFile() {
+	public String getSourceFile() {
 		return sourceFile;
 	}
 }
