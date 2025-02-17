@@ -9,11 +9,11 @@ import hu.qgears.parser.ITreeElem;
 import hu.qgears.parser.TokenizerImplManager;
 import hu.qgears.parser.language.ITokenType;
 import hu.qgears.parser.tokenizer.ITokenRecognizer;
-import hu.qgears.parser.tokenizer.ITokenizerDef;
 import hu.qgears.parser.tokenizer.TokenizerException;
 import hu.qgears.parser.tokenizer.impl.LanguageParseException;
 import hu.qgears.parser.tokenizer.impl.TokenFilterDef;
 import hu.qgears.parser.tokenizer.impl.TokenFilterParserAST;
+import hu.qgears.parser.tokenizer.impl.TokenizerDef;
 import hu.qgears.parser.tokenizer.impl.TokenizerParserAST;
 
 
@@ -41,7 +41,7 @@ public class LanguageParserAST extends AbstractLanguageParser {
 	}
 
 	@Override
-	protected ITokenizerDef parseTokenizer() throws TokenizerException,
+	protected TokenizerDef parseTokenizer() throws TokenizerException,
 			LanguageParseException {
 		return new TokenizerParserAST().parse(tokenManager, root);
 	}

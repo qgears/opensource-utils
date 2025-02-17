@@ -5,12 +5,11 @@ import java.util.function.Consumer;
 import hu.qgears.parser.language.ITokenType;
 import hu.qgears.parser.tokenizer.ITokenRecognizer;
 import hu.qgears.parser.tokenizer.RecognizerAbstract;
-import hu.qgears.parser.tokenizer.impl.TextSource;
 
 public class RecognizerEOF extends RecognizerAbstract implements
 		ITokenRecognizer {
 	@Override
-	public int getGeneratedToken(TextSource src) {
+	public int getGeneratedToken(char[] arr, int at) {
 		return 0;
 	}
 
@@ -19,5 +18,10 @@ public class RecognizerEOF extends RecognizerAbstract implements
 	}
 	@Override
 	public void collectPorposals(String tokenTypeName, String prefix, Consumer<String> collector) {
+	}
+
+	@Override
+	public boolean tokenCanStartWith(char c) {
+		return false;
 	}
 }

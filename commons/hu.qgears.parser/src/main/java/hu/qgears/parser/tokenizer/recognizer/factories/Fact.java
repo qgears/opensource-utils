@@ -21,7 +21,6 @@ import hu.qgears.parser.tokenizer.recognizer.RecognizerSComment;
 import hu.qgears.parser.tokenizer.recognizer.RecognizerString;
 import hu.qgears.parser.tokenizer.recognizer.RecognizerWhiteSpace;
 import hu.qgears.parser.tokenizer.recognizer.RecognizerWord;
-import hu.qgears.parser.tokenizer.recognizer.RecognizerXtextId;
 import hu.qgears.parser.tokenizer.recognizer.TokenTypeRegistry;
 import hu.qgears.parser.tokenizer.recognizer.TokenTypeRegistry.Factory;
 
@@ -44,7 +43,6 @@ public class Fact implements ITokenRecognizerFactory {
 		types.put("cDecimal", (type, id, config)->new RecognizerCDecimal(type));
 		types.put("whitespace", (type, id, config)->new RecognizerWhiteSpace(type));
 		types.put("id", (type, id, config)->new RecognizerId(type));
-		types.put("xtextId", (type, id, config)->new RecognizerXtextId(type));
 		types.put("const", (type, id, config)->new RecognizerConst(type, config, false));
 		types.put("anyCase", (type, id, config)->new RecognizerAnyCaseConst(type, config));
 		types.put("stringConst", (type, id, config)->new RecognizerString(type, '\"'));

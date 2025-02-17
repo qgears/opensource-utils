@@ -5,7 +5,6 @@ import java.util.function.Consumer;
 import hu.qgears.parser.language.ITokenType;
 import hu.qgears.parser.tokenizer.ITokenRecognizer;
 import hu.qgears.parser.tokenizer.RecognizerAbstract;
-import hu.qgears.parser.tokenizer.impl.TextSource;
 import hu.qgears.parser.util.ParseRuntimeException;
 
 public class RecognizerAnyCaseConst extends RecognizerAbstract implements
@@ -15,14 +14,12 @@ public class RecognizerAnyCaseConst extends RecognizerAbstract implements
 	private char[] arrLower;
 
 	@Override
-	public int getGeneratedToken(TextSource src) {
-		int at=src.getPosition();
+	public int getGeneratedToken(char[] arr, int at) {
 		int max=at+arrUpper.length;
-		if(max>src.getLength())
+		if(max>arr.length)
 		{
 			return 0;
 		}
-		char[] arr=src.array;
 		for(int i=0;i<arrUpper.length;++i)
 		{
 			char c=arr[at+i];
@@ -51,5 +48,10 @@ public class RecognizerAnyCaseConst extends RecognizerAbstract implements
 		{
 			collector.accept(c);
 		}
+	}
+	
+	@Override
+	public boolean tokenCanStartWith(char c) {
+		return c == arrLower[0] || c == arrUpper[0];
 	}
 }

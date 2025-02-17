@@ -14,7 +14,7 @@ tSlash="const" "/";
 
 tDouble="anyNumber";
 tNumber="number";
-tId="xtextId";
+tId="id";
 $ws;
 $comment;
 %doc;

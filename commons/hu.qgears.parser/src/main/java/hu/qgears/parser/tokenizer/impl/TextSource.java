@@ -85,6 +85,14 @@ final public class TextSource {
 		}
 		return array[pos + i];
 	}
+	
+	public static Character getCharAt(int pos, char[] array, int i) {
+		int p = pos + i;
+		if (p >= array.length || p < 0) {
+			return null;
+		}
+		return array[pos + i];
+	}
 
 	public TextSource getClone() {
 		return new TextSource(array, pos);
@@ -127,7 +135,24 @@ final public class TextSource {
 	*/
 	public boolean startsWith(int relPos, char[] s) {
 		int ptr=pos+relPos;
-		if(pos+s.length>getLength())
+		if(ptr+s.length>getLength())
+		{
+			return false;
+		}
+		for(int i=0;i<s.length;++i)
+		{
+			char c=array[ptr];
+			if(!(c==s[i]))
+			{
+				return false;
+			}
+			ptr++;
+		}
+		return true;
+	}
+	
+	public static boolean startsWith(char[] array, int ptr, char[] s) {
+		if(ptr+s.length>array.length)
 		{
 			return false;
 		}

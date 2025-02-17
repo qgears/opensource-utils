@@ -4,7 +4,6 @@ import java.util.function.Consumer;
 
 import hu.qgears.parser.language.ITokenType;
 import hu.qgears.parser.tokenizer.RecognizerAbstract;
-import hu.qgears.parser.tokenizer.impl.TextSource;
 
 public class RecognizerWhiteSpace extends RecognizerAbstract {
 	public RecognizerWhiteSpace(ITokenType tokenType) {
@@ -17,14 +16,12 @@ public class RecognizerWhiteSpace extends RecognizerAbstract {
 	}
 
 	@Override
-	public int getGeneratedToken(TextSource src) {
-		int pos=src.getPosition();
-		int max=src.getLength()-pos;
-		char[] arr=src.array;
+	public int getGeneratedToken(char[] arr, int at) {
+		int max=arr.length-at;
 		int i=0;
 		for(;i<max;++i)
 		{
-			char ch = arr[pos+i];
+			char ch = arr[at+i];
 			switch(ch)
 			{
 			case ' ':
@@ -37,5 +34,9 @@ public class RecognizerWhiteSpace extends RecognizerAbstract {
 			}
 		}
 		return i;
+	}
+	@Override
+	public boolean tokenCanStartWith(char c) {
+		return Character.isWhitespace(c);
 	}
 }

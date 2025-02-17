@@ -2,14 +2,13 @@ package hu.qgears.parser.tokenizer;
 
 import hu.qgears.parser.language.ITokenType;
 import hu.qgears.parser.language.Matcher;
-import hu.qgears.parser.tokenizer.impl.TextSource;
 
 
 
 public abstract class RecognizerAbstract implements ITokenRecognizer {
 	protected ITokenType tokenType;
 
-	abstract public int getGeneratedToken(TextSource src);
+	abstract public int getGeneratedToken(char [] array, int at);
 
 	public RecognizerAbstract(ITokenType tokenType) {
 		super();

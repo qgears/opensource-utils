@@ -8,15 +8,15 @@ import javax.xml.xpath.XPathExpressionException;
 
 import hu.qgears.parser.language.ITokenType;
 import hu.qgears.parser.tokenizer.ITokenRecognizer;
-import hu.qgears.parser.tokenizer.ITokenizerDef;
 import hu.qgears.parser.tokenizer.TokenizerException;
 import hu.qgears.parser.tokenizer.impl.LanguageParseException;
 import hu.qgears.parser.tokenizer.impl.TokenFilterDef;
+import hu.qgears.parser.tokenizer.impl.TokenizerDef;
 
 
 
 public abstract class AbstractLanguageParser {
-	private ITokenizerDef td;
+	private TokenizerDef td;
 	private Language language;
 
 	public Language getLanguage() {
@@ -25,7 +25,7 @@ public abstract class AbstractLanguageParser {
 
 	private TokenFilterDef tfd;
 
-	abstract protected ITokenizerDef parseTokenizer()
+	abstract protected TokenizerDef parseTokenizer()
 			throws TokenizerException, LanguageParseException,
 			XPathExpressionException;
 

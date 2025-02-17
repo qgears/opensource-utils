@@ -4,8 +4,8 @@ import java.io.StringWriter;
 
 import hu.qgears.parser.language.ILanguage;
 import hu.qgears.parser.language.ITermFilterDef;
-import hu.qgears.parser.tokenizer.ITokenizerDef;
 import hu.qgears.parser.tokenizer.impl.TokenFilterDef;
+import hu.qgears.parser.tokenizer.impl.TokenizerDef;
 
 
 
@@ -13,7 +13,7 @@ public class Language implements ILanguage {
 	Term[] terms;
 	String rootName;
 	Term rootTerm;
-	ITokenizerDef tokenizerDef;
+	TokenizerDef tokenizerDef;
 
 	public String getRootName() {
 		return rootName;
@@ -31,12 +31,12 @@ public class Language implements ILanguage {
 		this.terms = terms;
 	}
 
-	public void setTokenizerDef(ITokenizerDef tokenizerDef) {
+	public void setTokenizerDef(TokenizerDef tokenizerDef) {
 		this.tokenizerDef = tokenizerDef;
 	}
 
 
-	public ITokenizerDef getTokenizerDef() {
+	public TokenizerDef getTokenizerDef() {
 		return tokenizerDef;
 	}
 

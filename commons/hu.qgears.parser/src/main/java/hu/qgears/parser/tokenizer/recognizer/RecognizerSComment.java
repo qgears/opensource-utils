@@ -13,11 +13,10 @@ public class RecognizerSComment extends RecognizerAbstract {
 
 	private char[] prefix="//".toCharArray();
 	@Override
-	public int getGeneratedToken(TextSource src) {
-		if(src.startsWith(0, prefix))
+	public int getGeneratedToken(char[] arr, int at) {
+		if(TextSource.startsWith(arr, at, prefix))
 		{
-			char[] arr=src.array;
-			int at=src.getPosition()+2;
+			at+=2;
 			int ctr=2;
 			while(at<arr.length)
 			{
@@ -35,5 +34,9 @@ public class RecognizerSComment extends RecognizerAbstract {
 	}
 	@Override
 	public void collectPorposals(String tokenTypeName, String prefix, Consumer<String> collector) {	
+	}
+	@Override
+	public boolean tokenCanStartWith(char c) {
+		return c == prefix[0];
 	}
 }

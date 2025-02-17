@@ -28,16 +28,14 @@ public class RecognizerDoubleNumber implements ITokenRecognizer {
 	}
 
 	@Override
-	public int getGeneratedToken(TextSource src) {
+	public int getGeneratedToken(char[] arr, int at) {
 		int i=0;
 		State state=State.init;
-		int pos=src.getPosition();
-		int l=src.getLength();
-		char[] arr=src.array;
+		int l=arr.length;
 		loop:
-		for(; i<l-pos; ++i)
+		for(; i<l-at; ++i)
 		{
-			Character c=arr[pos+i];
+			Character c=arr[at+i];
 			switch(state)
 			{
 			case init:
@@ -117,7 +115,7 @@ public class RecognizerDoubleNumber implements ITokenRecognizer {
 		}
 		if(!acceptPrevAndFollowingDot)
 		{
-			Character c=src.getCharAt(i);
+			Character c=TextSource.getCharAt(at, arr, i);
 			if(c!=null)
 			{
 				if('.'==c || ':'==c)
@@ -125,7 +123,7 @@ public class RecognizerDoubleNumber implements ITokenRecognizer {
 					return 0;
 				}
 			}
-			c=src.getCharAt(-1);
+			c=TextSource.getCharAt(at, arr, -1);
 			if(c!=null)
 			{
 				if('.'==c || ':'==c || Character.isDigit(c))
@@ -186,5 +184,15 @@ public class RecognizerDoubleNumber implements ITokenRecognizer {
 	@Override
 	public void collectPorposals(String tokenTypeName, String prefix, Consumer<String> collector) {
 		collector.accept("doubleNumber");
+	}
+	
+	@Override
+	public boolean tokenCanStartWith(char c) {
+		if (Character.isDigit(c) || c == '.') {
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 }

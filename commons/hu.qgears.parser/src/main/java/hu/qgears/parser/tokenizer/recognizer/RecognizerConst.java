@@ -5,7 +5,6 @@ import java.util.function.Consumer;
 import hu.qgears.parser.language.ITokenType;
 import hu.qgears.parser.tokenizer.ITokenRecognizer;
 import hu.qgears.parser.tokenizer.RecognizerAbstract;
-import hu.qgears.parser.tokenizer.impl.TextSource;
 
 public class RecognizerConst extends RecognizerAbstract implements
 		ITokenRecognizer {
@@ -13,14 +12,12 @@ public class RecognizerConst extends RecognizerAbstract implements
 	char[] carr;
 	private boolean wholeWord=false;
 	@Override
-	public int getGeneratedToken(TextSource src) {
-		int at=src.getPosition();
+	public int getGeneratedToken(char[] arr, int at) {
 		int max=at+carr.length;
-		if(max>src.getLength())
+		if(max>arr.length)
 		{
 			return 0;
 		}
-		char[] arr=src.array;
 		for(int i=0;i<carr.length;++i)
 		{
 			char c=arr[at+i];
@@ -51,5 +48,10 @@ public class RecognizerConst extends RecognizerAbstract implements
 		{
 			collector.accept(c);
 		}
+	}
+	
+	@Override
+	public boolean tokenCanStartWith(char c) {
+		return c == carr[0];
 	}
 }

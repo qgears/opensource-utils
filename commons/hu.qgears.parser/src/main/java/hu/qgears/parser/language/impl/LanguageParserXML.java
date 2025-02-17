@@ -11,11 +11,11 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import hu.qgears.parser.language.ILanguage;
-import hu.qgears.parser.tokenizer.ITokenizerDef;
 import hu.qgears.parser.tokenizer.TokenizerException;
 import hu.qgears.parser.tokenizer.impl.LanguageParseException;
 import hu.qgears.parser.tokenizer.impl.TokenFilterDef;
 import hu.qgears.parser.tokenizer.impl.TokenFilterParser;
+import hu.qgears.parser.tokenizer.impl.TokenizerDef;
 import hu.qgears.parser.tokenizer.impl.TokenizerParser;
 import hu.qgears.parser.util.UtilXml;
 
@@ -146,11 +146,11 @@ public class LanguageParserXML extends AbstractLanguageParser {
 	}
 
 	@Override
-	protected ITokenizerDef parseTokenizer() throws TokenizerException,
+	protected TokenizerDef parseTokenizer() throws TokenizerException,
 			LanguageParseException, XPathExpressionException {
 		Element tokDef = UtilXml.selectSingleNode(doc.getDocumentElement(),
 				"tokenizer");
-		ITokenizerDef td = new TokenizerParser().parse(tokDef);
+		TokenizerDef td = new TokenizerParser().parse(tokDef);
 		return td;
 	}
 }

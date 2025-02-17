@@ -28,11 +28,11 @@ public class RecognizerCStyleHexa implements ITokenRecognizer {
 	}
 
 	@Override
-	public int getGeneratedToken(TextSource src) {
-		if(src.startsWith(0, prefix1)|| src.startsWith(0, prefix2))
+	public int getGeneratedToken(char[] arr, int at) {
+		if(TextSource.startsWith(arr, at, prefix1)|| TextSource.startsWith(arr, at, prefix2))
 		{
 			int i=2;
-			while(validHexaChar(src.getCharAt(i)))
+			while(validHexaChar(TextSource.getCharAt(at, arr, i)))
 			{
 				i++;
 			}
@@ -70,5 +70,9 @@ public class RecognizerCStyleHexa implements ITokenRecognizer {
 	@Override
 	public void collectPorposals(String tokenTypeName, String prefix, Consumer<String> collector) {
 		collector.accept("0xhexa");
+	}
+	@Override
+	public boolean tokenCanStartWith(char c) {
+		return c == prefix1[0] || c == prefix2[0];
 	}
 }

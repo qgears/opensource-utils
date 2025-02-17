@@ -4,7 +4,6 @@ import java.util.function.Consumer;
 
 import hu.qgears.parser.language.ITokenType;
 import hu.qgears.parser.tokenizer.RecognizerAbstract;
-import hu.qgears.parser.tokenizer.impl.TextSource;
 
 public class RecognizerId extends RecognizerAbstract {
 	Character startEscapeChar;
@@ -29,21 +28,31 @@ public class RecognizerId extends RecognizerAbstract {
 	public void collectPorposals(String tokenTypeName, String prefix, Consumer<String> collector) {
 	}
 	@Override
-	public int getGeneratedToken(TextSource src) {
-		int at=src.getPosition();
+	public int getGeneratedToken(char[] array, int at) {
 		int nstart;
 		if(startEscapeChar!=null)
 		{
-			nstart=RecognizerIdStart.getGeneratedToken(src.array, at, startEscapeChar);
+			nstart=RecognizerIdStart.getGeneratedToken(array, at, startEscapeChar);
 		}else
 		{
-			nstart=RecognizerIdStart.getGeneratedToken(src.array, at);
+			nstart=RecognizerIdStart.getGeneratedToken(array, at);
 		}
 		if(nstart>0)
 		{
-			int ninside=RecognizerIdInside.recognize(src.array, at+nstart);
+			int ninside=RecognizerIdInside.recognize(array, at+nstart);
 			return ninside+nstart;
 		}
 		return 0;
+	}
+	@Override
+	public boolean tokenCanStartWith(char c) {
+		if(startEscapeChar != null && c == startEscapeChar)
+		{
+			return true;
+		}
+		else
+		{
+			return Character.isJavaIdentifierStart(c);
+		}
 	}
 }

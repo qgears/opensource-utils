@@ -3,3 +3,8 @@
 '2' tokentype: number 3
 '=' tokentype: = 4
 'nincs' tokentype: id 1
+' ' tokentype: whitespace 0
+'/* comment */' tokentype: comment 5
+'
+' tokentype: whitespace 0
+'// single line comment' tokentype: singleLineComment 6

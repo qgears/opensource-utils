@@ -5,7 +5,6 @@ import java.util.function.Consumer;
 import hu.qgears.parser.language.ITokenType;
 import hu.qgears.parser.language.Matcher;
 import hu.qgears.parser.tokenizer.ITokenRecognizer;
-import hu.qgears.parser.tokenizer.impl.TextSource;
 
 /**
  * Recognize decimal number with postfix allowed. (u, U, l, L)
@@ -19,25 +18,23 @@ public class RecognizerCDecimal implements ITokenRecognizer {
 		return Long.parseLong(string);
 	}
 	@Override
-	public int getGeneratedToken(TextSource src) {
-		int pos=src.getPosition();
+	public int getGeneratedToken(char[] arr, int at) {
 		int ctr = 0;
-		char[] arr=src.array;
-		char ch = arr[pos+ctr];
-		int l=src.getLength();
+		char ch=arr[at+ctr];
+		int l=arr.length;
 		while (Character.isDigit(ch)) {
 			ctr++;
 			if(l<=ctr)
 			{
 				break;
 			}
-			ch = arr[pos+ctr];
+			ch = arr[at+ctr];
 		}
 		if (ctr == 0)
 			return 0;
 		if(l>ctr)
 		{
-			ch = arr[pos+ctr];
+			ch = arr[at+ctr];
 			if(ch=='u'||ch=='U')
 			{
 				ctr++;
@@ -45,7 +42,7 @@ public class RecognizerCDecimal implements ITokenRecognizer {
 		}
 		if(l>ctr)
 		{
-			ch = arr[pos+ctr];
+			ch = arr[at+ctr];
 			if(ch=='l'||ch=='L')
 			{
 				ctr++;
@@ -64,5 +61,9 @@ public class RecognizerCDecimal implements ITokenRecognizer {
 	@Override
 	public void collectPorposals(String tokenTypeName, String prefix, Consumer<String> collector) {
 		collector.accept("decimalNumber");
+	}
+	@Override
+	public boolean tokenCanStartWith(char c) {
+		return Character.isDigit(c);
 	}
 }

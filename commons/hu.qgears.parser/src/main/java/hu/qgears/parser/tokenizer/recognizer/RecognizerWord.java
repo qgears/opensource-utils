@@ -4,7 +4,6 @@ import java.util.function.Consumer;
 
 import hu.qgears.parser.language.ITokenType;
 import hu.qgears.parser.tokenizer.RecognizerAbstract;
-import hu.qgears.parser.tokenizer.impl.TextSource;
 
 public class RecognizerWord extends RecognizerAbstract {
 
@@ -17,14 +16,12 @@ public class RecognizerWord extends RecognizerAbstract {
 	}
 
 	@Override
-	public int getGeneratedToken(TextSource src) {
-		int pos=src.getPosition();
-		int max=src.getLength()-pos;
-		char[] arr=src.array;
+	public int getGeneratedToken(char[] arr, int at) {
+		int max=arr.length-at;
 		int i=0;
 		for(;i<max;++i)
 		{
-			char ch = arr[pos+i];
+			char ch = arr[at+i];
 			if(!Character.isLetter(ch))
 			{
 				return i;
@@ -33,4 +30,8 @@ public class RecognizerWord extends RecognizerAbstract {
 		return i;
 	}
 
+	@Override
+	public boolean tokenCanStartWith(char c) {
+		return Character.isLetter(c);
+	}
 }

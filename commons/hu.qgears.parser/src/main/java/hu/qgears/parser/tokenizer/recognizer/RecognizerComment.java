@@ -29,12 +29,11 @@ public class RecognizerComment extends RecognizerAbstract {
 		}
 
 	@Override
-	public int getGeneratedToken(TextSource src) {
-		int at=src.getPosition();
-		if(src.startsWith(0, open))
+	public int getGeneratedToken(char[] arr, int at) {
+		if(TextSource.startsWith(arr, at, open))
 		{
-			int ninside=recognizeInside(src.array, at+open.length);
-			if(src.startsWith(open.length+ninside, close))
+			int ninside=recognizeInside(arr, at+open.length);
+			if(TextSource.startsWith(arr, at+open.length+ninside, close))
 			{
 				int l=open.length+ninside+close.length;
 				return l;
@@ -60,5 +59,10 @@ public class RecognizerComment extends RecognizerAbstract {
 
 	@Override
 	public void collectPorposals(String tokenTypeName, String prefix, Consumer<String> collector) {
+	}
+	
+	@Override
+	public boolean tokenCanStartWith(char c) {
+		return c==open[0];
 	}
 }

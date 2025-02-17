@@ -1,11 +1,9 @@
 package hu.qgears.parser.tokenizer;
 
-import java.util.List;
 import java.util.function.Consumer;
 
 import hu.qgears.parser.language.ITokenType;
 import hu.qgears.parser.language.Matcher;
-import hu.qgears.parser.tokenizer.impl.TextSource;
 
 /**
  * Tokenizer module that recognizes a token on a stream.
@@ -19,7 +17,7 @@ public interface ITokenRecognizer {
 	 * 
 	 * @return 0 if the token can not be recognized
 	 */
-	int getGeneratedToken(TextSource src);
+	int getGeneratedToken(char[] array, int at);
 
 	/**
 	 * Get the token types that are recognized by this recognizer.
@@ -42,4 +40,12 @@ public interface ITokenRecognizer {
 	 * @param collector
 	 */
 	void collectPorposals(String tokenTypeName, String prefix, Consumer<String> collector);
+
+	/**
+	 * Check if token can start with the given character.
+	 * Used to optimize tokenization by filtering possible types by the next character of the input
+	 * @param c
+	 * @return true means that the token can start with the character. false means this token type never starts with the character.
+	 */
+	boolean tokenCanStartWith(char c);
 }

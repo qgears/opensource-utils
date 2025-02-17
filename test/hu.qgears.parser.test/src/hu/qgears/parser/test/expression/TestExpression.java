@@ -30,6 +30,7 @@ public class TestExpression {
 				LanguageHelper.createParser(iLang,
 						"a+b+c+d+e+f+g",
 						new ParserLogger(System.err) );
+			@SuppressWarnings("unused")
 			ITreeElem te =p.parse(null);
 			}
 			IParser p=

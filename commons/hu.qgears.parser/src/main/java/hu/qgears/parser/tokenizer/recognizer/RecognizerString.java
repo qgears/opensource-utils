@@ -36,11 +36,11 @@ public class RecognizerString extends RecognizerAbstract {
 		return "\""+EscapeString.escapeJava(c)+"\"";
 	}
 	@Override
-	public int getGeneratedToken(TextSource src) {
-		if(src.startsWith(0, endingString))
+	public int getGeneratedToken(char[] arr, int at) {
+		if(TextSource.startsWith(arr, at, endingString))
 		{
-			int ninside=RecognizerStringInside.getGeneratedToken(src.array, src.getPosition()+1, endingCharacter, '\\');
-			if(src.startsWith(1+ninside, endingString))
+			int ninside=RecognizerStringInside.getGeneratedToken(arr, at+1, endingCharacter, '\\');
+			if(TextSource.startsWith(arr, at+1+ninside, endingString))
 			{
 				return ninside+2;
 			}
@@ -49,5 +49,9 @@ public class RecognizerString extends RecognizerAbstract {
 	}
 	@Override
 	public void collectPorposals(String tokenTypeName, String prefix, Consumer<String> collector) {
+	}
+	@Override
+	public boolean tokenCanStartWith(char c) {
+		return c == endingCharacter;
 	}
 }
