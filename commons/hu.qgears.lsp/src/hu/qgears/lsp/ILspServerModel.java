@@ -1,4 +1,4 @@
-package hu.qgears.xtextgrammar.lsp;
+package hu.qgears.lsp;
 
 public interface ILspServerModel {
 

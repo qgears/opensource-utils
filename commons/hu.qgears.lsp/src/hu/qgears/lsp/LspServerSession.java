@@ -1,4 +1,4 @@
-package hu.qgears.xtextgrammar.lsp;
+package hu.qgears.lsp;
 
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;

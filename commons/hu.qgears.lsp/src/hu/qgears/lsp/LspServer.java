@@ -1,4 +1,4 @@
-package hu.qgears.xtextgrammar.lsp;
+package hu.qgears.lsp;
 
 import java.net.ServerSocket;
 import java.net.Socket;

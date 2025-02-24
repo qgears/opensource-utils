@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Lsp server stub
+Bundle-SymbolicName: hu.qgears.lsp
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Q-Gears Kft.
+Automatic-Module-Name: hu.qgears.lsp
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Require-Bundle: org.json;bundle-version="1.0.0"
