@@ -128,7 +128,7 @@ public class BuildTree {
 		int fromPos = buf.tokens.pos(from);
 		int toPos = buf.tokens.pos(to) + buf.tokens.length(to);
 //		logger.getErr().println(buf.print());
-		return new ParseException("parse ambigous from:"
+		ParseException p =  new ParseException("parse ambigous from:"
 				+ from
 				+ " to: "
 				+ to
@@ -144,6 +144,8 @@ public class BuildTree {
 //						fromToken.getSource().getFullSequence().subSequence(toPos,
 //								toPos+10)
 								);
+		p.setPosition(fromPos);
+		return p;
 	}
 	private ParseException createAmbigousException2(List<Term> types, int from,
 			int to, ElemBuffer buf, List<List<TreeElem>> sub) {
@@ -162,7 +164,7 @@ public class BuildTree {
 			}
 		}
 */
-		return new ParseException("parse ambigous from:"
+		ParseException p = new ParseException("parse ambigous from:"
 				+ from
 				+ " to: "
 				+ to
@@ -177,6 +179,8 @@ public class BuildTree {
 //						fromToken.getSource().getFullSequence().subSequence(toPos,
 //								toPos+10)
 								);
+		p.setPosition(fromPos);
+		return p;
 	}
 
 	/**

@@ -14,11 +14,15 @@ public class RecognizerConst extends RecognizerAbstract implements
 	@Override
 	public int getGeneratedToken(char[] arr, int at) {
 		int max=at+carr.length;
+		if (wholeWord) {
+			max++;
+		}
 		if(max>arr.length)
 		{
 			return 0;
 		}
-		for(int i=0;i<carr.length;++i)
+		int i=0;
+		for(i=0;i<carr.length;++i)
 		{
 			char c=arr[at+i];
 			char u=carr[i];
@@ -26,6 +30,9 @@ public class RecognizerConst extends RecognizerAbstract implements
 			{
 				return 0;
 			}
+		}
+		if (wholeWord && Character.isJavaIdentifierStart(arr[at+i])) {
+			return 0;
 		}
 		return carr.length;
 	}
