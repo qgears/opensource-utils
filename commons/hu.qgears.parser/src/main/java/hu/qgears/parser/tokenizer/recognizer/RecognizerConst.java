@@ -31,7 +31,7 @@ public class RecognizerConst extends RecognizerAbstract implements
 				return 0;
 			}
 		}
-		if (wholeWord && Character.isJavaIdentifierStart(arr[at+i])) {
+		if (wholeWord && Character.isJavaIdentifierPart(arr[at+i])) {
 			return 0;
 		}
 		return carr.length;
