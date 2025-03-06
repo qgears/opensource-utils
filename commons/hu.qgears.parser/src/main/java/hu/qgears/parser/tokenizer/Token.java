@@ -17,14 +17,6 @@ public class Token {
 		this.length = length;
 	}
 
-	public Token(ITokenType type, TextSource source, int length) {
-		super();
-		this.type = type;
-		this.source = source;
-		this.pos = source.getPosition();
-		this.length = length;
-	}
-
 	public int getLength() {
 		return length;
 	}

@@ -68,8 +68,6 @@ public class Parser implements IParser {
 			buffer=new ElemBuffer();
 		}
 		buffer.reInit(terms, tokens, lang);
-		// Add EOF token to the token list
-		tokens.addToken(lang.getTokenizerDef().getEof().getId(), src.getPosition(), 0);
 		// Create element generation rules
 		// Generate element of the sentence symbol.
 		GenerationRules.generateNonTerm(buffer, lang.getRootTerm(), tokens, 0, -1);

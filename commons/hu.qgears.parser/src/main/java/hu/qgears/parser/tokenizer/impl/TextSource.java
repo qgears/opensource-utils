@@ -3,17 +3,10 @@ package hu.qgears.parser.tokenizer.impl;
 final public class TextSource {
 	// CharSequence seq;
 	public char[] array;
-	int pos;
 
-	public TextSource(char[] array, int pos) {
+	public TextSource(char[] array) {
 		super();
-		this.pos = pos;
 		this.array = array;
-	}
-	public TextSource(CharSequence seq, int pos) {
-		super();
-		this.pos = pos;
-		initlializeArray(seq);
 	}
 
 	public TextSource(CharSequence seq) {
@@ -36,54 +29,12 @@ final public class TextSource {
 		}
 	}
 
-	private int normalize(int index) {
-		if (index < 0)
-			index = 0;
-		if (index > array.length)
-			index = array.length;
-		return index;
-	}
-
 	public String firstChars(int length) {
-		if(pos+length>array.length)
-		{
-			length=array.length-pos;
-		}
-		return new String(array, pos, length);
-	}
-
-	public CharSequence getCurrentSequence() {
-		return new String(array, pos, normalize(array.length));
+		return firstChars(0, length);
 	}
 
 	public CharSequence getFullSequence() {
 		return new String(array);
-	}
-
-	public int getPosition() {
-		return pos;
-	}
-
-	public boolean isEmpty() {
-		return pos >= array.length;
-	}
-
-	public TextSource pass(int pass) {
-		pos = normalize(pass + pos);
-		return this;
-	}
-
-	public TextSource setPosition(int pos) {
-		this.pos = pos;
-		return this;
-	}
-
-	public Character getCharAt(int i) {
-		int p = pos + i;
-		if (p >= array.length || p < 0) {
-			return null;
-		}
-		return array[pos + i];
 	}
 	
 	public static Character getCharAt(int pos, char[] array, int i) {
@@ -94,9 +45,6 @@ final public class TextSource {
 		return array[pos + i];
 	}
 
-	public TextSource getClone() {
-		return new TextSource(array, pos);
-	}
 
 	/**
 	 * Copy operation: should not be used in the hot loop
@@ -105,9 +53,7 @@ final public class TextSource {
 	 * @return
 	 */
 	public String firstChars(int from, int length) {
-		TextSource ch = getClone();
-		ch.setPosition(from);
-		return ch.firstChars(length);
+		return new String(array, from, Math.min(array.length - from, length));
 	}
 
 	@Override
@@ -133,23 +79,6 @@ final public class TextSource {
 		return true;
 	}
 	*/
-	public boolean startsWith(int relPos, char[] s) {
-		int ptr=pos+relPos;
-		if(ptr+s.length>getLength())
-		{
-			return false;
-		}
-		for(int i=0;i<s.length;++i)
-		{
-			char c=array[ptr];
-			if(!(c==s[i]))
-			{
-				return false;
-			}
-			ptr++;
-		}
-		return true;
-	}
 	
 	public static boolean startsWith(char[] array, int ptr, char[] s) {
 		if(ptr+s.length>array.length)
@@ -179,16 +108,22 @@ final public class TextSource {
 	 * @return
 	 */
 	public String lastChars(int from, int length) {
-		int l=Math.min(length, from);
-		return new String(array, from-l, l);
+		if (from < length) {
+			length = from;
+		}
+		return firstChars(from - length, length);
 	}
+	
 	/**
 	 * Copy operation: should not be used in the hot loop
-	 * @param pos
-	 * @param end
+	 * @param from
+	 * @param to
 	 * @return
 	 */
-	public CharSequence substring(int pos, int end) {
-		return new String(array, pos, end-pos);
+	public CharSequence substring(int from, int to) {
+		if (from < 0) {
+			from = 0;
+		}
+		return firstChars(from, to - from);
 	}
 }

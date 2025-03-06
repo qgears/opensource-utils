@@ -25,14 +25,14 @@ public class Tokenizer {
 				}
 			}
 			if (!couldTokenize) {
-				seq.pass(at);
 				TokenizerException exc=new TokenizerException("Cannot tokenize: '"
-						+ seq.firstChars(20) + "'", seq.getPosition());
+						+ seq.firstChars(at, 20) + "'", at);
 				receiver.tokenizeError(exc);
 				return;
 			}
 		}
-		seq.setPosition(at);
+		// Add EOF token to the token list
+		ret.addToken(ret.getLanguage().getTokenizerDef().getEof().getId(), at, 0);
 		return;
 	}
 
