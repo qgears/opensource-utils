@@ -1,10 +1,17 @@
-'alma' tokentype: id 1
+'alma' tokentype: id 2
 ' ' tokentype: whitespace 0
-'2' tokentype: number 3
-'=' tokentype: = 4
-'nincs' tokentype: id 1
+'2' tokentype: number 4
+'=' tokentype: = 5
+'nincs' tokentype: id 2
 ' ' tokentype: whitespace 0
-'/* comment */' tokentype: comment 5
+'print' tokentype: anyCaseConst 1
+'/* comment */' tokentype: comment 6
 '
 ' tokentype: whitespace 0
-'// single line comment' tokentype: singleLineComment 6
+'PrInT' tokentype: anyCaseConst 1
+'// single line comment' tokentype: singleLineComment 7
+'
+' tokentype: whitespace 0
+'"string"' tokentype: string 9
+'PRINT' tokentype: anyCaseConst 1
+'' tokentype: EOF 8

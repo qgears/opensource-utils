@@ -1,0 +1,13 @@
+'alma' tokentype: id 2
+' ' tokentype: whitespace 0
+'11' tokentype: cdecimal 1
+'nincs' tokentype: id 2
+' ' tokentype: whitespace 0
+'10l' tokentype: cdecimal 1
+'kiscica' tokentype: id 2
+' ' tokentype: whitespace 0
+'123u' tokentype: cdecimal 1
+' ' tokentype: whitespace 0
+'11u' tokentype: cdecimal 1
+'alma' tokentype: id 2
+'' tokentype: EOF 3
