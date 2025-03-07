@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import hu.qgears.parser.ITreeElem;
 import hu.qgears.parser.language.EType;
@@ -149,7 +150,7 @@ final public class TreeElem implements ITreeElem {
 			int l=arr.length/2;
 			for(int i=0;i<l;++i)
 			{
-				if(key==null?arr[i*2]==null:key.equals(arr[i*2]))
+				if(Objects.equals(key, arr[i*2]))
 				{
 					arr[i*2+1]=value;
 					return;
@@ -175,6 +176,8 @@ final public class TreeElem implements ITreeElem {
 		{
 			Object[] arr=new Object[2];
 			userObjects=arr;
+			arr[0] = key;
+			arr[1] = value;
 		}
 	}
 
