@@ -33,7 +33,8 @@ final public class TreeElem implements ITreeElem {
 	private int textIndexFrom;
 	private int textIndexTo;
 	private boolean isToken;
-
+	private ITreeElem parent;
+	
 	@SuppressWarnings("unchecked")
 	List<TreeElem> subs = Collections.EMPTY_LIST;
 
@@ -43,6 +44,9 @@ final public class TreeElem implements ITreeElem {
 
 	public void setSubs(List<TreeElem> subs) {
 		this.subs = subs;
+		for (TreeElem s : subs) {
+			s.parent = this;
+		}
 	}
 
 	/**
@@ -220,5 +224,10 @@ final public class TreeElem implements ITreeElem {
 
 	public boolean isToken() {
 		return isToken;
+	}
+
+	@Override
+	public ITreeElem getParent() {
+		return parent;
 	}
 }

@@ -42,4 +42,6 @@ public interface ITreeElem {
 	 * Drop data that was created while parsing but not important to hold any longer.
 	 */
 	void stripParseDataRecursive();
+	
+	public ITreeElem getParent();
 }

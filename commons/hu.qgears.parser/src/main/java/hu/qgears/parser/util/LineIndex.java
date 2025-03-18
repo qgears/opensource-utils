@@ -118,4 +118,8 @@ public class LineIndex {
 	public String getSourceFile() {
 		return sourceFile;
 	}
+	
+	public LineInfo getLastLine(){
+		return getLine(contentSize-1);
+	}
 }
