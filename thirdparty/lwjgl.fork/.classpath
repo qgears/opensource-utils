@@ -37,6 +37,6 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="src/main/classes" sourcepath="sources/lwjgl-source-2.5.zip"/>
+	<classpathentry exported="true" kind="lib" path="src/main/classes" sourcepath="sources/lwjgl-source-2.5.zip"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
