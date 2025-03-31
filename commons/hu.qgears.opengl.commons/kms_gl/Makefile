@@ -13,7 +13,7 @@ SO_NAME:=libkmsgljni-${POSTFIX}.so
 
 #used by the maven editor_platform_build process, see pom.xml in project.
 ifndef OUTPUTDIR
-    OUTPUTDIR = ../src/hu/qgears/opengl/kmsgl
+    OUTPUTDIR = ../src/main/resources/hu/qgears/opengl/kmsgl
 endif
 
 gnu_c:

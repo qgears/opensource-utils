@@ -11,7 +11,7 @@ SO_NAME:=libinputjni-`../platform_prefix.sh`${JNI_ARCHPOSTFIX}.so
 
 #used by the maven editor_platform_build process, see pom.xml in project.
 ifndef OUTPUTDIR
-    OUTPUTDIR = ../src/hu/qgears/opengl/libinput
+    OUTPUTDIR = ../src/main/resources/hu/qgears/opengl/libinput
 endif
 
 gnu_c:

@@ -15,7 +15,7 @@ SO_GENERIC_NAME:=libqglut-${ARCHPOSTFIX}.so
 
 #used by the maven editor_platform_build process, see pom.xml in project.
 ifndef OUTPUTDIR
-    OUTPUTDIR = ../../src/hu/qgears/opengl/glut
+    OUTPUTDIR = ../../src/main/resources/hu/qgears/opengl/glut
 endif
 
 #Add -DQGLUT_LOG to enable logging in generated binaries

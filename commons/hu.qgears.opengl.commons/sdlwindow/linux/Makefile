@@ -16,7 +16,7 @@ SO_GENERIC_NAME:=libsdlwindow-${ARCHPOSTFIX}.so
 
 #used by the maven editor_platform_build process, see pom.xml in project.
 ifndef OUTPUTDIR
-    OUTPUTDIR = ../../src/hu/qgears/sdlwindow/natives
+    OUTPUTDIR = ../../src/main/resources/hu/qgears/sdlwindow/natives
 endif
 
 gnu_c:

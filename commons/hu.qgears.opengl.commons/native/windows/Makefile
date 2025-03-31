@@ -29,7 +29,7 @@ QGLUT_LIB_32=-L$(FG_LIB_DIR32) -L./deps/w32/lib
 QGLUT_LIB_64=-L$(FG_LIB_DIR64) -L./deps/w64/lib 
 
 ifndef OUTPUTDIR
-    OUTPUTDIR = ../../src/hu/qgears/opengl/glut
+    OUTPUTDIR = ../../src/main/resources/hu/qgears/opengl/glut
 endif
 
 COMMAND_32 =   $(TOOL32)-gcc -m32 -o $(OUTPUTDIR)/w32_libqglut32.dll $(QGLUT_LIB_32) 

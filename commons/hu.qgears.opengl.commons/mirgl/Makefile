@@ -7,7 +7,7 @@ ARCHPOSTFIX=`uname -m |sed -e 's/x86_64/64/' -e 's/x86//' -e 's/i686//'`
 
 #used by the maven editor_platform_build process, see pom.xml in project.
 ifndef OUTPUTDIR
-    OUTPUTDIR = ../src/hu/qgears/opengl/mirgl
+    OUTPUTDIR = ../src/main/resources/hu/qgears/opengl/mirgl
 endif
 
 all:
