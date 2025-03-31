@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>hu.qgears</groupId>
+		<artifactId>opensource-utils-parent</artifactId>
+		<version>12.0.0-SNAPSHOT</version>
+		<relativePath>../../build/opensource-utils-parent/</relativePath>
+	</parent>
+
+	<artifactId>lwjgl.fork</artifactId>
+	<packaging>jar</packaging>
+	<description>Java OpenGL bindings implementation library.</description>
+	<licenses>
+		<license>
+			<name> Custom LWJG license</name>
+			<url>http://legacy.lwjgl.org/license.php.html</url>
+		</license>
+	</licenses>
+
+	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+			</resource>
+			<resource>
+				<directory>src/main/classes</directory>
+			</resource>
+		</resources>
+	</build>
+	<dependencies>
+		<dependency>
+			<groupId>hu.qgears</groupId>
+			<artifactId>hu.qgears.nativeloader</artifactId>
+			<version>${internal-dep-version}</version>
+		</dependency>
+	</dependencies>
+
+</project>
