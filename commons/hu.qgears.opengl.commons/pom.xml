@@ -52,12 +52,15 @@
 									<workingDirectory>./native/linux</workingDirectory>
 								</configuration>
 							</execution>
-							<execution>
 								<!-- Building OpenGL context factories for e. g.
 									* Xorgless OpenGL, 
 									* software framebuffer
 									* etc
+									
+									TODO is this necessary?
 								 -->
+<!--
+							<execution>
 								<id>opengl-context-factories</id>
 								<phase>generate-resources</phase>
 								<goals>
@@ -68,6 +71,7 @@
 									<workingDirectory>./makeall</workingDirectory>
 								</configuration>
 							</execution>
+							-->
 						</executions>
 					</plugin>
 				</plugins>
