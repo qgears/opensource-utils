@@ -2,13 +2,12 @@
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
-
 	<parent>
 		<groupId>hu.qgears</groupId>
 		<artifactId>root.plain</artifactId>
 		<version>1.0.0</version>
-		<relativePath>../repository-builder/parent-poms/root-plain</relativePath>
-	</parent> 
+		<relativePath>../../../repository-builder/parent-poms/root-plain</relativePath>
+	</parent>
 	
 	<groupId>hu.qgears</groupId>
 	<artifactId>opensource-utils-parent</artifactId>
@@ -22,7 +21,7 @@
 		<!-- used to postfix jar version when cross compile is not enabled. 
 			Only important on projects with native components. -->	
 		<version-postfix>-nox</version-postfix>
-		<internal-dep-version>[${project.version},)</internal-dep-version>
+		<internal-dep-version>${project.version}</internal-dep-version>
 	</properties>
 	<distributionManagement>
 		<site>

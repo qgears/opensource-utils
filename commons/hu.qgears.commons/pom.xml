@@ -13,7 +13,6 @@
 	<artifactId>hu.qgears.commons</artifactId>
 	<packaging>jar</packaging>
 	<description>Common helper classes and methods.</description>
-
 	<dependencies>
 		<dependency>
 			<groupId>log4j</groupId>
