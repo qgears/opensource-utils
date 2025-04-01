@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>hu.qgears</groupId>
+		<artifactId>opensource-utils-parent</artifactId>
+		<version>12.0.0-SNAPSHOT</version>
+		<relativePath>../../build/opensource-utils-parent/</relativePath>
+	</parent>
+	<artifactId>hu.qgears.crossref</artifactId>
+	<packaging>jar</packaging>
+	<description>Cross reference utility.</description>
+	<dependencies>
+		<dependency>
+			<groupId>hu.qgears</groupId>
+			<artifactId>hu.qgears.commons</artifactId>
+			<version>${internal-dep-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${junit-version}</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>
