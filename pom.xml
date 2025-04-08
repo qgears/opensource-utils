@@ -5,7 +5,7 @@
 
 	<groupId>hu.qgears</groupId>
 	<artifactId>opensource-utils</artifactId>
-	<version>1.0.0</version>
+	<version>12.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<modules>
@@ -13,23 +13,32 @@
 		<module>commons/hu.qgears.nativeloader</module>
 		<module>commons/hu.qgears.shm</module>
 		<module>commons/hu.qgears.images</module>
-<!--	
 		<module>commons/hu.qgears.opengl.commons</module>
+		<module>thirdparty/lwjgl.fork</module>
+		<module>commons/hu.qgears.parser</module>
+		<module>commons/hu.qgears.crossref</module>
+<!--	
+TODO mavenify these
 		<module>commons/hu.qgears.remote</module>
 		<module>commons/hu.qgears.utils.feature</module>
 		<module>coolrmi/hu.qgears.coolrmi</module>
 		<module>emfcollab/hu.qgears.emfcollab</module>
 		<module>emfcollab/hu.qgears.emfcollab.editor</module>
 		<module>emfcollab/hu.qgears.emfcollab.feature</module>
-		<module>test/hu.qgears.commons.test</module>
-		<module>test/hu.qgears.images.test</module>
-		<module>test/hu.qgears.opengl.commons.test</module>
-		<module>test/hu.qgears.shm.test</module>
-		<module>thirdparty/lwjgl.osgi</module>
 		<module>build/hu.qgears.opensource.target</module>
 		<module>build/hu.qgears.opensource.utils.p2</module>
-		<module>commons/hu.qgears.parser</module>
-		<module>test/hu.qgears.parser.test</module>
 		 -->
 	</modules>
+    <build>
+            <plugins>
+                    <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-deploy-plugin</artifactId>
+                            <version>2.7</version>
+                            <configuration>
+                                    <skip>true</skip>
+                            </configuration>
+                    </plugin>
+            </plugins>
+    </build>
 </project>

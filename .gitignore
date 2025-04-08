@@ -29,3 +29,7 @@ build/repository-builder
 build/repository-builder
 #Experiment with flattened poms
 **/.flattened-pom.xml
+#produced by maven version plugin
+**/pom.xml.versionsBackup
+
+
