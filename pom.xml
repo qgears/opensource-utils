@@ -17,11 +17,11 @@
 		<module>thirdparty/lwjgl.fork</module>
 		<module>commons/hu.qgears.parser</module>
 		<module>commons/hu.qgears.crossref</module>
+		<module>coolrmi/hu.qgears.coolrmi</module>
 <!--	
 TODO mavenify these
 		<module>commons/hu.qgears.remote</module>
 		<module>commons/hu.qgears.utils.feature</module>
-		<module>coolrmi/hu.qgears.coolrmi</module>
 		<module>emfcollab/hu.qgears.emfcollab</module>
 		<module>emfcollab/hu.qgears.emfcollab.editor</module>
 		<module>emfcollab/hu.qgears.emfcollab.feature</module>
