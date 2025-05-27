@@ -3,7 +3,7 @@ package hu.qgears.parser.util;
 import java.util.Arrays;
 
 /**
- * Utility to convert raw character position to line and column info and vice versa. 
+ * Utility to convert raw character position to line and column info and vice versa.
  * <p>
  * Usage:
  * <pre>
@@ -30,10 +30,10 @@ public class LineIndex {
 			this.col = col;
 			this.srcFile = sourceFile;
 		}
-		
-		
+
+
 	}
-	
+
 	/**
 	 * @param f The indexed file. Optional argument, to set up
 	 *          {@link LineInfo#srcFile} as well (useful for generating error
@@ -42,7 +42,7 @@ public class LineIndex {
 	public LineIndex(String f) {
 		sourceFile = f;
 	}
-	
+
 	/**
 	 * Builds up the line index from specified file content.
 	 * @param content
@@ -50,7 +50,7 @@ public class LineIndex {
 	public LineIndex buildIndex(String content) {
 		contentSize = content.length();
 		int estimatedLineCount = Math.max(10, contentSize / 40);
-		
+
 		lineBreakPositions = new int[estimatedLineCount];
 		int lineBreakPositionsIdx = 0;
 		for (int i = 0; i < contentSize; i++) {
@@ -67,21 +67,27 @@ public class LineIndex {
 		lineBreakPositionsSize = lineBreakPositionsIdx;
 		return this;
 	}
-	
+
 	/**
 	 * Computes the {@link LineInfo} from the raw position.
-	 * @param rawPosition The index of the character to map to line info.
+	 * @param rawPosition The index of the character/cursor-position to map to line info.
 	 * @return
 	 */
 	public LineInfo getLine(int rawPosition) {
-		if (rawPosition < 0 || rawPosition >= contentSize) {
+		//let's allow rawPosition == contentSize
+		//consider the following:
+		//contentSize == 0, and we would like to resolve raw positions describing a range: [0,0)
+		//0 is a sensible offset, referring to the only valid cursor position
+		//(character [0] does not exist but that is fine)
+		//the return value should be the one and only line.
+		if (rawPosition < 0 || contentSize < rawPosition) {
 			throw new IndexOutOfBoundsException(rawPosition);
 		}
-		int index = Arrays.binarySearch(lineBreakPositions, 0,lineBreakPositionsSize,rawPosition); 
+		int index = Arrays.binarySearch(lineBreakPositions, 0,lineBreakPositionsSize,rawPosition);
 		int insertionPoint;
 		if (index < 0) {
 			insertionPoint =(index * -1) - 1;
-			
+
 		} else {
 			//exact match
 			insertionPoint = index;
@@ -92,7 +98,7 @@ public class LineIndex {
 			return new LineInfo(insertionPoint+1,rawPosition - lineBreakPositions[insertionPoint-1]);
 		}
 	}
-	
+
 	/**
 	 * Returns the raw position of the character at specified line info.
 	 * @param lineInfo
@@ -101,7 +107,7 @@ public class LineIndex {
 	public int getRawposition(LineInfo lineInfo) {
 		return getRawposition(lineInfo.line,lineInfo.col);
 	}
-	
+
 	public int getRawposition(int line, int col) {
 		int lIdx;
 		if (line == 1) {
@@ -118,7 +124,7 @@ public class LineIndex {
 	public String getSourceFile() {
 		return sourceFile;
 	}
-	
+
 	public LineInfo getLastLine(){
 		return getLine(contentSize-1);
 	}
