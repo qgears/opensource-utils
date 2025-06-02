@@ -36,7 +36,7 @@ public class IDGen {
 		int ctr = 0;
 		List<ITokenType> flatTypes=new ArrayList<ITokenType>();
 		for (ITokenRecognizer tr : types) {
-			ITokenType t = tr.getRecognizedTokenTypes();
+			ITokenType t = tr.getRecognizedTokenType();
 			{
 				flatTypes.add(t);
 				t.setId(ctr++);

@@ -164,7 +164,7 @@ public class RecognizerDoubleNumber implements ITokenRecognizer {
 	}
 
 	@Override
-	public ITokenType getRecognizedTokenTypes() {
+	public ITokenType getRecognizedTokenType() {
 		return type;
 	}
 

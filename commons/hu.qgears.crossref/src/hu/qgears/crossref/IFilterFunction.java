@@ -5,6 +5,7 @@ package hu.qgears.crossref;
  * This is useful in cases when the filtering function is not possible to be presented to the crossRef system
  * in a declarative way.
  */
+@FunctionalInterface
 public interface IFilterFunction {
 	/**
 	 * Check whether a possible delegate for a reference target is a valid target or not.

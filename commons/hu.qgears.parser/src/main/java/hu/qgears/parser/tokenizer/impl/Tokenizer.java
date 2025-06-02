@@ -18,7 +18,7 @@ public class Tokenizer {
 				int pass = rec.getGeneratedToken(array, at);
 				if(pass>0)
 				{
-					ret.addToken(rec.getRecognizedTokenTypes().getId(), at, pass);
+					ret.addToken(rec.getRecognizedTokenType().getId(), at, pass);
 					at += pass;
 					couldTokenize = true;
 					break;

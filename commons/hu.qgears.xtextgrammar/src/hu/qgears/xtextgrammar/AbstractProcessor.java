@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import hu.qgears.parser.language.impl.TokenType;
-import hu.qgears.parser.tokenizer.ITextSource;
-import hu.qgears.parser.tokenizer.IToken;
-import hu.qgears.parser.tokenizer.impl.TextSource;
 import hu.qgears.parser.tokenizer.recognizer.RecognizerId;
 import hu.qgears.rtemplate.runtime.RQuickTemplate;
 
@@ -71,14 +68,14 @@ public class AbstractProcessor extends RQuickTemplate {
 	}
 	protected String idPrefix(String s)
 	{
-		ITextSource tx=new TextSource(s);
-		IToken t=new RecognizerId(new TokenType("dummy")).getGeneratedToken(tx);
-		if(t!=null)
+//		TextSource tx=new TextSource(s);
+		int t=new RecognizerId(new TokenType("dummy")).getGeneratedToken(s.toCharArray(), 0);
+		if(t!=0)
 		{
-			String remaining=s.substring(t.getLength());
+			String remaining=s.substring(t);
 			if(remaining.length()==0 || remaining.startsWith(" "))
 			{
-				return t.getText().toString();
+				return remaining;
 			}
 		}
 		return null;
