@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import hu.qgears.commons.signal.SignalFuture;
@@ -47,6 +48,22 @@ public class TestSignalFutureWrapper {
 			}
 		}
 	}
+	
+	@BeforeClass
+	public static void warmup() {
+		//Ensure all classes are loaded that are used in timeout tests.
+		//This fixes sporadic failure on the first executed test case in this class   
+		SignalFutureWrapper<Object> ret=new SignalFutureWrapper<Object>();
+		ret.addOnReadyHandler(o->{});
+		try
+		{
+			ret.get(15, TimeUnit.MILLISECONDS);
+		}catch(Exception e)
+		{
+			// Timeout exception is required
+		}
+	}
+	
 	@Test
 	public void testTimeoutMillis() throws InterruptedException, ExecutionException, TimeoutException
 	{
