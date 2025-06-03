@@ -50,7 +50,7 @@ public class TestTokenizer {
 		recogs.add(new RecognizerString(new TokenType("string"), '"'));
 		List<ITokenType> types = new ArrayList<ITokenType>();
 		for (ITokenRecognizer rec : recogs) {
-			types.add(rec.getRecognizedTokenTypes());
+			types.add(rec.getRecognizedTokenType());
 		}
 		Language lang=new Language();
 		TokenizerDef td=new TokenizerDef(recogs);
@@ -103,7 +103,7 @@ public class TestTokenizer {
 		recogs.add(new RecognizerConst(new TokenType("="), "ß"));
 		List<ITokenType> types = new ArrayList<ITokenType>();
 		for (ITokenRecognizer rec : recogs) {
-			types.add(rec.getRecognizedTokenTypes());
+			types.add(rec.getRecognizedTokenType());
 		}
 		Language lang=new Language();
 		TokenizerDef td=new TokenizerDef(recogs);
@@ -126,7 +126,7 @@ public class TestTokenizer {
 		recogs.add(new RecognizerEOF(r));
 		List<ITokenType> types = new ArrayList<ITokenType>();
 		for (ITokenRecognizer rec : recogs) {
-			types.add(rec.getRecognizedTokenTypes());
+			types.add(rec.getRecognizedTokenType());
 		}
 		Language lang=new Language();
 		TokenizerDef td=new TokenizerDef(recogs);
