@@ -2,8 +2,24 @@
 <natives-def>
 	<platform name="Linux">
 		<platform arch="(amd|x86_)64">
-			<preload fileName="libGL.so.1" resource="libGL-ubuntu-24.04-amd64.so.1"/>
-			<lib path="libqosmesa-ubuntu-24.04-amd64.so"
+			<platform distroId="ubuntu" distroVersion="24.04">			
+				<preload fileName="libGL.so.1" resource="libGL-ubuntu-24.04-amd64.so.1"/>
+				<lib path="libqosmesa-ubuntu-24.04-amd64.so"
+				installPath="/opt/qgears/libqosmesa64.so" />
+			</platform>
+			<platform distroId="ubuntu" distroVersion="22.04">			
+				<preload fileName="libGL.so.1" resource="libGL-ubuntu-22.04-amd64.so.1"/>
+				<lib path="libqosmesa-ubuntu-22.04-amd64.so"
+				installPath="/opt/qgears/libqosmesa64.so" />
+			</platform>
+			<platform distroId="debian">			
+				<preload fileName="libGL.so.1" resource="libGL-debian10-amd64.so.1"/>
+				<lib path="libqosmesa-debian10-amd64.so"
+				installPath="/opt/qgears/libqosmesa64.so" />
+			</platform>
+			<!-- The default -->
+			<preload fileName="libGL.so.1" resource="libGL-ubuntu-18.04-amd64.so.1"/>
+			<lib path="libqosmesa-ubuntu-18.04-amd64.so"
 			installPath="/opt/qgears/libqosmesa64.so" />
 		</platform>
 		<platform arch="(i386)">
