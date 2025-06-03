@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Bnd-LastModified: 1748884285391
+Build-Jdk: 11.0.9.1
+Built-By: deveushu
+Bundle-Description: Custom effective shared memory implementation.
+Bundle-ManifestVersion: 2
+Bundle-Name: hu.qgears.shm
+Bundle-SymbolicName: hu.qgears.shm
+Bundle-Version: 12.0.1.SNAPSHOT
+Created-By: Apache Maven Bundle Plugin
+Export-Package: hu.qgears.shm;uses:="hu.qgears.commons,hu.qgears.commons
+ .mem,hu.qgears.nativeloader,hu.qgears.shm.sem";version="12.0.1.SNAPSHOT
+ ",hu.qgears.shm.dlmalloc;uses:="hu.qgears.commons,hu.qgears.commons.mem
+ ,hu.qgears.nativeloader";version="12.0.1.SNAPSHOT",hu.qgears.shm.jmallo
+ c;uses:="hu.qgears.commons,hu.qgears.commons.mem";version="12.0.1.SNAPS
+ HOT",hu.qgears.shm.natives;uses:="hu.qgears.nativeloader";version="12.0
+ .1.SNAPSHOT",hu.qgears.shm.part;uses:="hu.qgears.commons,hu.qgears.comm
+ ons.mem";version="12.0.1.SNAPSHOT",hu.qgears.shm.sem;uses:="hu.qgears.c
+ ommons,hu.qgears.shm";version="12.0.1.SNAPSHOT"
+Import-Package: hu.qgears.commons;version="[12.0,13)",hu.qgears.commons.
+ mem;version="[12.0,13)",hu.qgears.nativeloader;version="[12.0,13)",org.
+ apache.log4j;version="[1.2,2)"
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=11))"
+Tool: Bnd-2.3.0.201405100607

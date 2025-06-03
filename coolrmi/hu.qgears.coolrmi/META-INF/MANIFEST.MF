@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bnd-LastModified: 1748884295841
+Build-Jdk: 11.0.9.1
+Built-By: deveushu
+Bundle-Description: Simple and effective RMI implementation for Java.
+Bundle-ManifestVersion: 2
+Bundle-Name: hu.qgears.coolrmi
+Bundle-SymbolicName: hu.qgears.coolrmi
+Bundle-Version: 12.0.1.SNAPSHOT
+Created-By: Apache Maven Bundle Plugin
+Export-Package: hu.qgears.coolrmi;uses:="hu.qgears.coolrmi.messages,hu.q
+ gears.coolrmi.remoter,hu.qgears.coolrmi.streams";version="12.0.1.SNAPSH
+ OT",hu.qgears.coolrmi.messages;uses:="hu.qgears.commons.signal,hu.qgear
+ s.coolrmi,hu.qgears.coolrmi.remoter";version="12.0.1.SNAPSHOT",hu.qgear
+ s.coolrmi.multiplexer;uses:="hu.qgears.coolrmi.messages";version="12.0.
+ 1.SNAPSHOT",hu.qgears.coolrmi.remoter;uses:="hu.qgears.commons,hu.qgear
+ s.coolrmi,hu.qgears.coolrmi.messages,hu.qgears.coolrmi.multiplexer,hu.q
+ gears.coolrmi.streams";version="12.0.1.SNAPSHOT",hu.qgears.coolrmi.stre
+ ams;version="12.0.1.SNAPSHOT"
+Import-Package: hu.qgears.commons;version="[12.0,13)",hu.qgears.commons.
+ signal;version="[12.0,13)"
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=11))"
+Tool: Bnd-2.3.0.201405100607
