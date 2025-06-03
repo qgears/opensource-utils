@@ -205,7 +205,7 @@ public class UtilNativeLoader {
 		
 		if(preloadPaths == null || preloadPaths.isEmpty()) {
 			LOG.error("ensurePreload: LD_LIBRARY_PATH is not "
-					+ "set up: can not create '" + preload + "' for preload.");
+					+ "set up: can not create '" + preload.getFileName() + "' for preload.");
 		} else {
 			iteratePreloadPaths:
 			for (final String p: preloadPaths) {
