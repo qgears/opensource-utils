@@ -69,7 +69,7 @@ public class CRAEReference implements IRefListener {
 		this.targetA=host;
 	}
 	@Override
-	public void resolvedTo(List<Obj> target) {
+	public void resolvedTo(Ref ref, List<Obj> target) {
 		CRAEObject prev=resolvedToAdapter;
 		if(target==null || target.size()>1)
 		{
@@ -146,7 +146,7 @@ public class CRAEReference implements IRefListener {
 			ref.close();
 			ref.removeListener(this);
 			ref=null;
-			resolvedTo(null);
+			resolvedTo(ref, null);
 		}
 		if(scope==null)
 		{

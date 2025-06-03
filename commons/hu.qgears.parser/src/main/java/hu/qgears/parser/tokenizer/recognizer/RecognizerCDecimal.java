@@ -51,7 +51,7 @@ public class RecognizerCDecimal implements ITokenRecognizer {
 		return ctr;
 	}
 	@Override
-	public ITokenType getRecognizedTokenTypes() {
+	public ITokenType getRecognizedTokenType() {
 		return tokenType;
 	}
 	@Override

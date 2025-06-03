@@ -23,7 +23,7 @@ public interface ITokenRecognizer {
 	 * Get the token types that are recognized by this recognizer.
 	 * @return
 	 */
-	ITokenType getRecognizedTokenTypes();
+	ITokenType getRecognizedTokenType();
 
 	/**
 	 * In case the token is used in the grammar with restriction then this method is used to create

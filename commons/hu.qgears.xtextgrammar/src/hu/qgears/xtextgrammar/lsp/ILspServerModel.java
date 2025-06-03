@@ -1,5 +1,11 @@
 package hu.qgears.xtextgrammar.lsp;
 
-public interface ILspServerModel {
+import java.io.File;
 
+import hu.qgears.xtextgrammar.lsp.IDefinitionProvider.Location;
+
+public interface ILspServerModel {
+	public  ITokenizer getTokenizer();
+	public IDefinitionProvider getLinkProvider();
+	public File getLogsFolder();
 }

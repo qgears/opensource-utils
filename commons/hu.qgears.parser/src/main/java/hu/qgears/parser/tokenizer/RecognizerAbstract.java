@@ -15,7 +15,7 @@ public abstract class RecognizerAbstract implements ITokenRecognizer {
 		this.tokenType = tokenType;
 	}
 
-	public ITokenType getRecognizedTokenTypes() {
+	public ITokenType getRecognizedTokenType() {
 		return tokenType;
 	}
 

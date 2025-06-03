@@ -68,7 +68,7 @@ public abstract class AbstractLanguageParser {
 	private List<Term> addTerminals() {
 		List<Term> terms=new ArrayList<Term>();
 		for (ITokenRecognizer recog : td.getRecognizers()) {
-			ITokenType type = recog.getRecognizedTokenTypes();
+			ITokenType type = recog.getRecognizedTokenType();
 			{
 				terms.add(new TermToken(type.getName(), type, null));
 			}

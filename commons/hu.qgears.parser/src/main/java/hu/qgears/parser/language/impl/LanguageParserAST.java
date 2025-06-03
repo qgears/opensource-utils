@@ -144,7 +144,7 @@ public class LanguageParserAST extends AbstractLanguageParser {
 				ITokenRecognizer recog=null;
 				for(ITokenRecognizer tr: getLanguage().getTokenizerDef().getRecognizers())
 				{
-					ITokenType tti=tr.getRecognizedTokenTypes();
+					ITokenType tti=tr.getRecognizedTokenType();
 					{
 						if(typeRef.equals(tti.getName()))
 						{

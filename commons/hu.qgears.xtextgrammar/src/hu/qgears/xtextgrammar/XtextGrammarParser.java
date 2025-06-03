@@ -6,7 +6,7 @@ import hu.qgears.parser.ITreeElem;
 import hu.qgears.parser.LanguageHelper;
 import hu.qgears.parser.ParserLogger;
 import hu.qgears.parser.impl.ElemBuffer;
-import hu.qgears.parser.tokenizer.IToken;
+import hu.qgears.parser.tokenizer.Token;
 
 /**
  * Instantiate parser and execute syntactic parsing of XText files.
@@ -23,7 +23,7 @@ public class XtextGrammarParser {
 		return te;
 	}
 
-	public boolean isFiltered(IToken iToken) {
+	public boolean isFiltered(Token iToken) {
 		return XTextParserLanguage.getInstance().getLang().getTokenFilterDef().getToFilter().contains(iToken.getTokenType().getName());
 	}
 }

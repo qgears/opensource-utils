@@ -14,7 +14,8 @@ import org.eclipse.emf.ecore.EPackage;
 
 import hu.qgears.parser.ITreeElem;
 import hu.qgears.parser.impl.DefaultReceiver;
-import hu.qgears.parser.tokenizer.IToken;
+import hu.qgears.parser.tokenizer.Token;
+import hu.qgears.parser.tokenizer.TokenArray;
 import hu.qgears.parser.tokenizer.recognizer.RecognizerId;
 import hu.qgears.parser.tokenizer.recognizer.RecognizerString;
 import hu.qgears.parser.util.TreeVisitor;
@@ -40,9 +41,10 @@ public class ProcessXtextFile {
 	public void process(String exampleXtext) throws Exception {
 		ITreeElem t=new XtextGrammarParser().parse(exampleXtext, new DefaultReceiver() {
 			@Override
-			public void tokensUnfiltered(List<IToken> tokensUnfiltered) {
-				for(IToken t: tokensUnfiltered)
+			public void tokensUnfiltered(TokenArray tokensUnfiltered) {
+				for(int i = 0; i < tokensUnfiltered.size(); i++)
 				{
+					Token t = tokensUnfiltered.getToken(i);
 //					System.out.println("TokenType: "+t.getTokenType().getName());
 //					System.out.println("Token: "+t.getText());
 				}
