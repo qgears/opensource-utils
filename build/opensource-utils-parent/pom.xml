@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>hu.qgears</groupId>
-		<artifactId>root.plain</artifactId>
+		<artifactId>root-plain</artifactId>
 		<version>1.0.0</version>
 		<relativePath>../../../repository-builder/parent-poms/root-plain</relativePath>
 	</parent>
@@ -31,7 +31,27 @@
 		</site>
 	</distributionManagement>
  	<url>${project_url}/modules/</url>
-
+	<repositories>
+		<repository>
+			<id>qgears-opensource-maven-public</id>
+			<name>Q-Gears opensource maven repository</name>
+			<url>https://qgears.com/opensource/maven/</url>
+			<layout>default</layout>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>qgears-opensource-maven-nightly</id>
+			<name>Q-Gears opensource maven repository snapshots</name>
+			<url>https://buildserver.qgears.net/update-sites/maven-repo/nightly/</url>
+			<layout>default</layout>
+			<snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+			</snapshots>
+		</repository>
+	</repositories>
 	<profiles>
 		<!-- This profile is activated when the version bump script is executed.
 			It adds each the aggregator pom of the component (../../) as a child module 
