@@ -2,12 +2,19 @@ package hu.qgears.commons;
 
 import java.util.TimerTask;
 
-//TODO it is just a mock, please delete me an commit the valid version
+import org.apache.log4j.Logger;
+
 public abstract class SafeTimerTask extends TimerTask {
 
+	private static final Logger LOG = Logger.getLogger(SafeTimerTask.class);
+	
 	@Override
 	public void run() {
-		doRun();
+		try {
+			doRun();
+		} catch (Exception e) {
+			LOG.error("Timer task failed",e);
+		}
 	}
 
 	protected abstract void doRun();
