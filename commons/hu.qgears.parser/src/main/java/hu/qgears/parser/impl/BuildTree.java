@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import hu.qgears.parser.ParserLogger;
+import hu.qgears.parser.language.IAmbiguousSolver;
 import hu.qgears.parser.language.impl.Term;
 import hu.qgears.parser.language.impl.TermAnd;
 import hu.qgears.parser.language.impl.TermMore;
@@ -20,10 +20,10 @@ import hu.qgears.parser.tokenizer.TokenArray;
  * After creating the table of early parse built the AST tree by reading it up.
  */
 public class BuildTree {
-	private ParserLogger logger;
-	public BuildTree(ParserLogger logger) {
+	IAmbiguousSolver ambiguousSolver;
+	public BuildTree(IAmbiguousSolver ambiguousSolver) {
 		super();
-		this.logger = logger;
+		this.ambiguousSolver=ambiguousSolver;
 	}
 
 
@@ -92,14 +92,16 @@ public class BuildTree {
 //			{
 //				ret.remove(ret.size()-1);
 //			}
-			if (ret.size() != 1) {
-				System.err.println(""+ret);
-//				System.out.println(e.getBuffer().print());
-				ret = findElements(lastChildType(e), e.from, e.getGroup(), e
-						.getBuffer());
-				throw createAmbigousException(types, e.from, e.getGroup(), e
-						.getBuffer(), ret);
-				// new ParseException("parse result is ambiguos!" + e);
+			if (ret.size() > 1) {
+				ret = solveAmbigousParse2(types, e.from, e.getGroup(), e.getBuffer(), ret);
+				if(ret.size()!=1)
+				{
+					throw new RuntimeException();
+				}
+			}
+			if(ret.size()==0)
+			{
+				throw new ParseException();
 			}
 			return ret;
 		}
@@ -147,23 +149,35 @@ public class BuildTree {
 		p.setPosition(fromPos);
 		return p;
 	}
-	private ParseException createAmbigousException2(List<Term> types, int from,
-			int to, ElemBuffer buf, List<List<TreeElem>> sub) {
+	/**
+	 * Solve ambiguous situation.
+	 * Possible solutions:
+	 *  * throw exception
+	 *  * find one possible solution
+	 * @param types
+	 * @param from
+	 * @param to
+	 * @param buf
+	 * @param sub
+	 * @return 1 possible solution
+	 * @throws ParseException 
+	 */
+	private List<List<TreeElem>> solveAmbigousParse(List<Term> types, int from,
+			int to, ElemBuffer buf, List<List<TreeElem>> sub) throws ParseException {
 		int fromPos = buf.tokens.pos(from);
 		int toPos = buf.tokens.pos(to) + buf.tokens.length(to);
 
-//		logger.getErr().println(buf.print());
-/*		for(List<TreeElem> l: sub)
+		List<TreeElem> ret=null;
+		if(ambiguousSolver!=null)
 		{
-			
-			System.out.println("possible parse: ");
-			for(TreeElem te:l)
-			{
-				System.out.println(" * "+te.getTypeName());
-				LanguageHelper.print(te);
-			}
+			ret=ambiguousSolver.solveAmbiguousParse(types, from, to, buf, sub);
 		}
-*/
+		if(ret!=null)
+		{
+			List<List<TreeElem>> r=new ArrayList<>();
+			r.add(ret);
+			return r;
+		}
 		ParseException p = new ParseException("parse ambigous from:"
 				+ from
 				+ " to: "
@@ -174,13 +188,13 @@ public class BuildTree {
 				+ toPos
 				+ ")"
 				+ "string: "
-				+ buf.tokens.toString(fromPos, toPos)
+				+ buf.tokens.toString(from, to)
 //						+" foolowed by: "+
 //						fromToken.getSource().getFullSequence().subSequence(toPos,
 //								toPos+10)
 								);
 		p.setPosition(fromPos);
-		return p;
+		throw p;
 	}
 
 	/**
@@ -200,9 +214,13 @@ public class BuildTree {
 		if (types.size() == 1) {
 			List<TreeElem> sub = (findElements(types.get(0), from, to, buf));
 			if (sub.size() > 1) {
-				sub = (findElements(types.get(0), from, to, buf));
-				throw createAmbigousException(types, from, to, buf, sub);
-			}else if(sub.size()==0)
+				sub = solveAmbigousParse2(types, from, to, buf, sub);
+				if(sub.size()!=1)
+				{
+					throw new RuntimeException();
+				}
+			}
+			if(sub.size()==0)
 			{
 				
 			}else
@@ -231,7 +249,11 @@ public class BuildTree {
 		}
 		if (ret.size() > 1)
 		{
-			throw createAmbigousException2(types, from, to, buf, ret);
+			ret=solveAmbigousParse(types, from, to, buf, ret);
+			if(ret.size()!=1)
+			{
+				throw new RuntimeException();
+			}
 		}
 		if (ret.size() == 0)
 		{
@@ -258,7 +280,11 @@ public class BuildTree {
 			{
 				List<Term> types=new ArrayList<Term>();
 				types.add(subType);
-				throw createAmbigousException2(types, from, to, buffer, null);
+				items = solveAmbigousParse2(types, from, to, buffer, items);
+				if(items.size()!=1)
+				{
+					throw new RuntimeException();
+				}
 			}
 			if(items.size()==0)
 			{
@@ -276,29 +302,22 @@ public class BuildTree {
 		return ret;
 	}
 
-	private ParseException createCannotParseException(List<Term> types, int from,
-			int to, ElemBuffer buf) {
-		Token fromToken = buf.tokens.getToken(from);
-		Token toToken = buf.tokens.getToken(to);
-		int fromPos = fromToken.getPos();
-		int toPos = toToken.getPos() + toToken.getLength();
-		logger.println(buf.print());
-		return new ParseException("cannot parse to type: "+types+" from:"
-				+ from
-				+ " to: "
-				+ to
-				+ "("
-				+ fromPos
-				+ ";"
-				+ toPos
-				+ ")"
-				+ "string: "
-				+ fromToken.getSource().getFullSequence().subSequence(fromPos,
-						toPos-1)
-//						+" foolowed by: "+
-//						fromToken.getSource().getFullSequence().subSequence(toPos,
-//								toPos+10)
-								);
+	private List<TreeElem> solveAmbigousParse2(List<Term> types, int from, int to, ElemBuffer buffer,
+			List<TreeElem> items) throws ParseException {
+		List<List<TreeElem>> l = new ArrayList<>();
+		for(TreeElem te: items)
+		{
+			List<TreeElem> ll=new ArrayList<>();
+			ll.add(te);
+			l.add(ll);
+		}
+		l =  solveAmbigousParse(types, from, to, buffer, l);
+		if(l.size()!=1)
+		{
+			throw new RuntimeException();
+		}
+		items = l.get(0);
+		return items;
 	}
 
 	/**

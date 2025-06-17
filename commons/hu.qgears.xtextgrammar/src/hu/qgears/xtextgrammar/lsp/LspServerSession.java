@@ -9,11 +9,13 @@ import java.io.InputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
 import org.eclipse.emf.common.util.URI;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import hu.qgears.xtextgrammar.lsp.ITokenizer.Token5;
@@ -22,10 +24,10 @@ import hu.qgears.xtextgrammar.lsp.ITokenizer.Token5;
  * Handle TCP connection of an LSP server communication session.
  */
 public class LspServerSession extends Thread {
-	Socket s;
-	ILspServerModel model;
+	private Socket s;
+	private ILspServerModel model;
 	public static final int MAX_LINE_LENGTH=1024;
-	Logger logger;
+	private Logger logger;
 
 	public LspServerSession(Socket s, ILspServerModel model) {
 		super("LspServerSession");
@@ -238,6 +240,7 @@ public class LspServerSession extends Thread {
 	}
 
 	private Object tokenize(URI uri) {
+//		ILspServerModel model = getModel(uri.path());
 		List<Token5> tokens = model.getTokenizer().tokenize(uri);
 		if (tokens == null) {
 			return JSONObject.NULL;
@@ -245,6 +248,11 @@ public class LspServerSession extends Thread {
 		return new JSONArray(tokens.stream().flatMap(it -> Stream.of(it.line, it.column, it.length, it.type, it.modifiers)).toList());
 	}
 
+
+//	private ILspServerModel getModel(String uri) throws Exception {
+//		return modelOpener.getModel(uri);
+//	}
+	
 	private void sendMessage(JSONObject message) throws IOException {
 		logger.log("_out", message.toString(1));
 		System.out.println(message.toString(1));

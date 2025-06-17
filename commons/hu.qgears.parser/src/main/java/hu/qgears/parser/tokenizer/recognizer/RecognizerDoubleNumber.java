@@ -195,4 +195,8 @@ public class RecognizerDoubleNumber implements ITokenRecognizer {
 			return false;
 		}
 	}
+	public static double parseDouble(String value)
+	{
+		return Double.parseDouble(value);
+	}
 }

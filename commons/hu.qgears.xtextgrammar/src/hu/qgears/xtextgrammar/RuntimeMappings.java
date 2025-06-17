@@ -24,6 +24,7 @@ import hu.qgears.commons.UtilEventListener;
 import hu.qgears.commons.UtilString;
 import hu.qgears.crossref.Doc;
 import hu.qgears.parser.ITreeElem;
+import hu.qgears.parser.tokenizer.recognizer.RecognizerDoubleNumber;
 import hu.qgears.parser.tokenizer.recognizer.RecognizerId;
 import hu.qgears.parser.tokenizer.recognizer.RecognizerString;
 import hu.qgears.parser.util.TreeVisitor;
@@ -142,7 +143,7 @@ public class RuntimeMappings {
 						currentReferenceType=null;
 						if(currentObject==null)
 						{
-							// Handles case when default string is used in grammear.
+							// Handles case when default string is used in grammar.
 							// Example: name=(ID|'default')
 							currentObject=t.getString();
 						}
@@ -202,6 +203,16 @@ public class RuntimeMappings {
 				{
 					commands.put(token, (t)->{
 						String c=RecognizerString.getString(t.getString());
+						currentObject=c;
+						return null;
+					});
+					consts.put(token, token);
+					break;
+				}
+				case "double":
+				{
+					commands.put(token, (t)->{
+						double c=RecognizerDoubleNumber.parseDouble(t.getString());
 						currentObject=c;
 						return null;
 					});

@@ -10,6 +10,7 @@ import hu.qgears.parser.ParserLogger;
 import hu.qgears.parser.contentassist.ICompletitionProposalContext;
 import hu.qgears.parser.contentassist.PossibleGoon;
 import hu.qgears.parser.impl.BuildTree;
+import hu.qgears.parser.impl.DefaultReceiver;
 import hu.qgears.parser.impl.ElemBuffer;
 import hu.qgears.parser.language.ILanguage;
 import hu.qgears.parser.language.impl.Term;
@@ -54,7 +55,7 @@ public class DummyProposalContext implements ICompletitionProposalContext {
 	}
 	@Override
 	public void notifyParseState(ElemBuffer buffer, int i) {
-		BuildTree bt=new BuildTree(new ParserLogger());
+		BuildTree bt=new BuildTree(null);
 		bt.incompleteTree(buffer, i, new HashSet<>(), "");
 		ICompletitionProposalContext.super.notifyParseState(buffer, i);
 	}

@@ -213,7 +213,7 @@ public class ProcessXtextFile {
 		RuntimeMappings rm=new RuntimeMappings().process(genericPartPre);
 		for(Map.Entry<String, String> ent: rm.consts.entrySet())
 		{
-			setTerminalId(ent.getKey(), ent.getValue());
+			// setTerminalId(ent.getKey(), ent.getValue());
 		}
 	}
 }

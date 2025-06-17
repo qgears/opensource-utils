@@ -7,6 +7,7 @@ import hu.qgears.parser.IParserReceiver;
 import hu.qgears.parser.ITreeElem;
 import hu.qgears.parser.impl.ElemBuffer;
 import hu.qgears.parser.impl.ParseException;
+import hu.qgears.parser.language.ILanguage;
 import hu.qgears.parser.tokenizer.Token;
 import hu.qgears.parser.tokenizer.TokenArray;
 import hu.qgears.parser.tokenizer.TokenizerException;
@@ -33,17 +34,26 @@ public class StyleBasedColoring {
 		public void tokenizeError(TokenizerException exc) throws TokenizerException {
 			parseErrorFeedback=new ParseErrorFeedback(exc.getMessage(), exc.getPosition(), 1);
 		}
-		public void tokensUnfiltered(java.util.List<Token> tokensUnfiltered) {
-			for(Token t: tokensUnfiltered)
-			{
+		@Override
+		public void tokensUnfiltered(TokenArray tokensUnfiltered) {
+			for(int i = 0; i < tokensUnfiltered.size(); i++) 
+			{ 
+				Token t = tokensUnfiltered.getToken(i);
+//				TODO:
+//				ILanguage d;
+//				
+//				d.getTokenizerDef().getRecognizers()
+				
 				String name=t.getTokenType().getName();
+				boolean matches = name.matches("^TERMINAL_\\d+[a-zA-Z][a-zA-Z0-9_]*$");
 				String styleId=styleBasedColoringConfiguration.tokenToStyle.get(name);
-				if(styleId!=null)
+				if(matches || styleId != null)
 				{
-					addRange(t.getPos(), t.getPos()+t.getLength(), styleId);
+					addRange(t.getPos(), t.getPos()+t.getLength(), styleId == null ? "keyword" : styleId);
 				}
 			}
 		};
+		@Override
 		public void treeUnfiltered(hu.qgears.parser.impl.TreeElem root) {
 			try {
 				new TreeVisitor() {
@@ -52,7 +62,7 @@ public class StyleBasedColoring {
 						String styleId=styleBasedColoringConfiguration.typeToStyle.get(te.getTypeName());
 						if(styleId!=null)
 						{
-							addRange(te.getTextIndexFrom(), te.getTextIndexTo(), "keyword");
+							addRange(te.getTextIndexFrom(), te.getTextIndexTo(), styleId);
 						}
 						return ()->{};
 					}

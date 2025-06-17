@@ -361,7 +361,8 @@ final public class ElemBuffer {
 		Term termType=resolve(getTermTypeId(absoluteIndex));
 		return termType.getName() + "("+getTermTypeId(absoluteIndex)+"): group/absIndex: "+getGroup(absoluteIndex)+"/"+absoluteIndex+": " + termType.getType() + " dotPos:"
 				+ getDotPosition(absoluteIndex) + " choice:" + 
-				getChoice(absoluteIndex) + " from: " + getFrom(absoluteIndex) + " "
+				getChoice(absoluteIndex) + " from: " + getFrom(absoluteIndex) + " genBy:"
+				+ getGeneratedBy(absoluteIndex) + " "
 				+ (GenerationRules.isPassed(termType, getDotPosition(absoluteIndex)) ? "PASSED" : "");
 	}
 

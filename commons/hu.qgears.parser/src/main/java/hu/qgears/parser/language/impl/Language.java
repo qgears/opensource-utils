@@ -2,6 +2,7 @@ package hu.qgears.parser.language.impl;
 
 import java.io.StringWriter;
 
+import hu.qgears.parser.language.IAmbiguousSolver;
 import hu.qgears.parser.language.ILanguage;
 import hu.qgears.parser.language.ITermFilterDef;
 import hu.qgears.parser.tokenizer.impl.TokenFilterDef;
@@ -14,6 +15,7 @@ public class Language implements ILanguage {
 	String rootName;
 	Term rootTerm;
 	TokenizerDef tokenizerDef;
+	private IAmbiguousSolver ambiguousSolver;
 
 	public String getRootName() {
 		return rootName;
@@ -77,5 +79,12 @@ public class Language implements ILanguage {
 			term.toString(ret, prefix + "\t");
 			ret.append("\n");
 		}
+	}
+	@Override
+	public IAmbiguousSolver getAmbiguousSolver() {
+		return ambiguousSolver;
+	}
+	public void setAmbiguousSolver(IAmbiguousSolver ambiguousSolver) {
+		this.ambiguousSolver = ambiguousSolver;
 	}
 }

@@ -96,5 +96,4 @@ public class ParserLogger {
 			err.println("Tokenized unfiltered " + getElapsedString());
 		}
 	}
-
 }

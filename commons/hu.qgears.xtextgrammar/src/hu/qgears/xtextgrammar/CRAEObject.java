@@ -205,7 +205,13 @@ public class CRAEObject implements Adapter {
 			List<EObject> l=null;
 			try {
 				l=(List<EObject>)host.eGet(r);
-				l.set(index, eObject);
+				if(l.size()>index)
+				{
+					l.set(index, eObject);
+				}else
+				{
+					l.add(eObject);
+				}
 			} catch (Exception e) {
 				if(e instanceof IllegalArgumentException && e.getMessage().contains("'no duplicates'"))
 				{

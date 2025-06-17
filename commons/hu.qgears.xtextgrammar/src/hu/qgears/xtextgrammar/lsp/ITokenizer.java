@@ -15,6 +15,8 @@ public abstract class ITokenizer {
 			this.type = type;
 			this.modifiers = modifiers;
 		}
+		
+		public Token5() {}
 	}
 	public abstract List<Token5> tokenize(URI uri);
 	public abstract List<String> getTokenTypes();

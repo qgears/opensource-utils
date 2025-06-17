@@ -107,7 +107,7 @@ public class Parser implements IParser {
 			// parse successful!
 			TreeElem root = new TreeElem(buffer, 1, lang.getRootTerm().getId(), 0, 0, buffer.getCurrentGroup());
 			// System.out.println(root);
-			new BuildTree(logger).buildTreeRoot(root);
+			new BuildTree(lang.getAmbiguousSolver()).buildTreeRoot(root);
 			logger.logTreeBuild();
 			receiver.treeUnfiltered(root);
 			// System.out.println(new TreeRenderer().render2(root, ""));

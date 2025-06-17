@@ -1,16 +1,19 @@
-package hu.qgears.parser.tokenizer.recognizer;
+package hu.qgears.xtextgrammar;
 
 import java.util.function.Consumer;
 
 import hu.qgears.parser.language.ITokenType;
 import hu.qgears.parser.tokenizer.RecognizerAbstract;
+import hu.qgears.parser.tokenizer.recognizer.LetterAcceptorId;
+import hu.qgears.parser.tokenizer.recognizer.RecognizerIdInside;
+import hu.qgears.parser.tokenizer.recognizer.RecognizerIdStart;
 
-public class RecognizerId extends RecognizerAbstract {
+public class RecognizerXtextId extends RecognizerAbstract {
 	private Character startEscapeChar;
-	public RecognizerId(ITokenType tokenType) {
+	public RecognizerXtextId(ITokenType tokenType) {
 		this(tokenType, null);
 	}
-	public RecognizerId(ITokenType tokenType, Character startEscapeChar) {
+	public RecognizerXtextId(ITokenType tokenType, Character startEscapeChar) {
 		super(tokenType);
 		this.startEscapeChar=startEscapeChar;
 	}
@@ -39,11 +42,25 @@ public class RecognizerId extends RecognizerAbstract {
 		}
 		if(nstart>0)
 		{
-			int ninside=RecognizerIdInside.recognize(array, at+nstart);
+			int ninside=recognizeIdInside(array, at+nstart);
 			return ninside+nstart;
 		}
 		return 0;
 	}
+	public static int recognizeIdInside(char[] arr, int at)
+	{
+		int ctr=0;
+		for(;ctr<arr.length-at;++ctr)
+		{
+			char ch = arr[at+ctr];
+			if(!Character.isJavaIdentifierPart(ch) || ch=='$')
+			{
+				return ctr;
+			}
+		}
+		return ctr;
+	}
+
 	@Override
 	public boolean tokenCanStartWith(char c) {
 		if(startEscapeChar != null && c == startEscapeChar)

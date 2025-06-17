@@ -7,8 +7,6 @@ import hu.qgears.parser.tokenizer.impl.TokenizerDef;
 /**
  * The grammar of a language.
  * The language can be used to instantiate parsers.
- * @author rizsi
- *
  */
 public interface ILanguage {
 	/**
@@ -41,4 +39,6 @@ public interface ILanguage {
 	 * @return
 	 */
 	ITermFilterDef getTermFilterDef();
+	
+	IAmbiguousSolver getAmbiguousSolver();
 }
