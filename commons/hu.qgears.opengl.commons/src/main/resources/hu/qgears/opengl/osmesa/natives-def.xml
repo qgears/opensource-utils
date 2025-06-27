@@ -12,9 +12,14 @@
 				<lib id="libqosmesa" path="libqosmesa-ubuntu-22.04-amd64.so"
 				installPath="/opt/qgears/libqosmesa64.so" />
 			</platform>
-			<platform distroId="debian">			
-				<preload fileName="libGL.so.1" resource="libGL-debian10-amd64.so.1"/>
-				<lib id="libqosmesa" path="libqosmesa-debian10-amd64.so"
+			<platform distroId="debian">
+				<!-- The natives built on debian 10 are tested with :
+					debian10:  osmesa version 18.x is preinstalled : glGetString symbol is not found in osmesa.so -> not working
+					debian11:  osmesa version 20.x is preinstalled : glGetString is found, working
+					debian12:  osmesa version 22.3.x is preinstalled : glGetString is found, working
+				 -->
+				<preload fileName="libGL.so.1" resource="libGL-debian-10-amd64.so.1"/>
+				<lib id="libqosmesa" path="libqosmesa-debian-10-amd64.so"
 				installPath="/opt/qgears/libqosmesa64.so" />
 			</platform>
 			<!-- The default -->
