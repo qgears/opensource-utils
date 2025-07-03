@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.ProcessBuilder.Redirect;
 import java.lang.management.ManagementFactory;
+import java.util.Arrays;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GLContext;
@@ -33,6 +34,7 @@ import lwjgl.standalone.BaseAccessor;
 public class OSMesaExample {
 	private static final int WIDTH = 1024;
 	private static final int HEIGHT = 768;
+	
 	public static void main(String[] args) throws Exception {
 		Log4Init.init();
 		try {
@@ -41,7 +43,6 @@ public class OSMesaExample {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-//		logLibs();
 	}
 	private void run() throws Exception {
 		OSMesaInstance.getInstance();
@@ -53,6 +54,7 @@ public class OSMesaExample {
 		osMesa.createContext(ENativeImageComponentOrder.ARGB);
 		NativeImage im=NativeImage.create(new SizeInt(WIDTH, HEIGHT), ENativeImageComponentOrder.RGBA, DefaultJavaNativeMemoryAllocator.getInstance());
 		osMesa.makeCurrent(im);
+		osMesa.checkOsMesaLoadable();
 		System.out.println("Pid: "+getPid());
 		GLContext.useContext(osMesa);
 		String[] GLExtensions = GL11.glGetString(GL11.GL_EXTENSIONS).split(" ");

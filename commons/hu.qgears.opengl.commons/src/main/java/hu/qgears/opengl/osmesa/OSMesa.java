@@ -44,4 +44,18 @@ public class OSMesa {
 	{
 		return n.getGlVersion();
 	}
+	
+	/**
+	 * Checks whether libOSMesa.so is loadable with dlopen. If not, then an
+	 * exception will be thrown with an error message read from dlerror().
+	 * <p>
+	 * This method is recommended to call during initialization. We can avoid the dodgy error
+	 * handling in osmesapreload.c, that terminates the whole process with exit(-1)
+	 * in case of load error.
+	 * 
+	 * @throws Exception
+	 */
+	public void checkOsMesaLoadable() throws Exception {
+		n.checkOsMesaLoadable();
+	}
 }

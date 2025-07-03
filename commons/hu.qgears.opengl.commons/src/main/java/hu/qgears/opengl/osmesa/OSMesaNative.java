@@ -7,4 +7,5 @@ public class OSMesaNative {
 	protected native void makeCurrentPrivate(ByteBuffer image, int width, int height);
 	protected native void disposeContext();
 	protected native String getGlVersion();
+	protected native void checkOsMesaLoadable() throws Exception;
 }

@@ -47,3 +47,20 @@ METHODPREFIX(CLASS, void, disposeContext)(ST_ARGS)
 {
 	OSMesaDestroyContext( osMesaCtx );
 }
+
+
+#define OSMESALIB "libOSMesa.so"
+
+METHODPREFIX(CLASS, void, checkOsMesaLoadable)(ST_ARGS)
+{
+	void* mesa_handle=dlopen(OSMESALIB, RTLD_LAZY | RTLD_GLOBAL);
+	if(mesa_handle==NULL)
+	{
+		char logBuf[100] = {0};
+		snprintf(logBuf,sizeof(logBuf),"dlopen cant load " OSMESALIB ": %s",dlerror());
+		logBuf[99] = '\0';
+		JNU_ThrowByName(env, EXCCLASS, logBuf);
+	} else {
+		dlclose(mesa_handle);
+	}
+}

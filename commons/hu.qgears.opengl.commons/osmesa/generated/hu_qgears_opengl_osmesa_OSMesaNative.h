@@ -17,14 +17,6 @@ JNIEXPORT void JNICALL Java_hu_qgears_opengl_osmesa_OSMesaNative_createContext
 
 /*
  * Class:     hu_qgears_opengl_osmesa_OSMesaNative
- * Method:    execPreload
- * Signature: ()V
- */
-JNIEXPORT void JNICALL Java_hu_qgears_opengl_osmesa_OSMesaNative_execPreload
-  (JNIEnv *, jclass);
-
-/*
- * Class:     hu_qgears_opengl_osmesa_OSMesaNative
  * Method:    makeCurrentPrivate
  * Signature: (Ljava/nio/ByteBuffer;II)V
  */
@@ -45,6 +37,14 @@ JNIEXPORT void JNICALL Java_hu_qgears_opengl_osmesa_OSMesaNative_disposeContext
  * Signature: ()Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL Java_hu_qgears_opengl_osmesa_OSMesaNative_getGlVersion
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     hu_qgears_opengl_osmesa_OSMesaNative
+ * Method:    checkOsMesaLoadable
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_hu_qgears_opengl_osmesa_OSMesaNative_checkOsMesaLoadable
   (JNIEnv *, jobject);
 
 #ifdef __cplusplus

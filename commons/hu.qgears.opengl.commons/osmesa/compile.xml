@@ -9,9 +9,20 @@
 	</target>
 	<target name="jnigen">
 		<mkdir dir="generated"/>
+		<mkdir dir="/tmp/jni-tmp"/>
+		<!-- 
+			for older java versions
 		<javah class="hu.qgears.opengl.osmesa.OSMesaNative"
 			classpath="../bin"
 			destdir="./generated"
-			/>
+			/> -->
+		<javac
+					includeantruntime="false"
+					destdir="/tmp/jni-tmp"
+					srcdir="../src/main/java/hu/qgears/opengl/osmesa/"
+					includes="OSMesaNative.java"
+					classpath="../target/classes:${env.QGEARSDEPS}"
+					nativeheaderdir="./generated"
+					/>
 	</target>
 </project>
