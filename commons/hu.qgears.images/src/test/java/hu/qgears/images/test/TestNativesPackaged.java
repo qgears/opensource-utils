@@ -14,7 +14,7 @@ public class TestNativesPackaged {
 	@Test
 	public void testLibpng()  {
 		try {
-			XMLNativeLoaderValidator.check( NativeLibPngAccessor.class);
+			XMLNativeLoaderValidator.check(new NativeLibPngAccessor());
 		} catch (Exception e) {
 			fail(e.getMessage());
 		}
@@ -22,7 +22,7 @@ public class TestNativesPackaged {
 	@Test
 	public void testTiff()  {
 		try {
-			XMLNativeLoaderValidator.check(NativeTiffLoaderAccessor.class);
+			XMLNativeLoaderValidator.check(new NativeTiffLoaderAccessor());
 		} catch (Exception e) {
 			fail(e.getMessage());
 		}

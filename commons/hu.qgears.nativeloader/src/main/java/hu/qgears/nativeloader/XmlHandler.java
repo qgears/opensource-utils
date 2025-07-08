@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.Stack;
 
+import org.apache.log4j.Logger;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -17,6 +18,8 @@ import org.xml.sax.helpers.DefaultHandler;
 	 * @author KRiS
 	 */
 public class XmlHandler extends DefaultHandler {
+	
+		private static final Logger LOG = Logger.getLogger(XmlHandler.class);
 
 		public static final String NAMESPACE = "";
 		public static final String EL_NATIVESDEF = "natives-def";
@@ -53,6 +56,10 @@ public class XmlHandler extends DefaultHandler {
 		public static final String AT_LIBGROUP_ENABLED = "enabled";
 		public static final String AT_LIBGROUP_ENABLED_TRUE = "true";
 		public static final String AT_LIBGROUP_ENABLED_FALSE = "false";
+		/**
+		 * Only attempt to load lib if path exists - useful for binaries that only exist in devenv
+		 */
+		public static final String AT_LIB_OPTIONAL = "optional";
 		
 		
 		/**
@@ -67,8 +74,12 @@ public class XmlHandler extends DefaultHandler {
 		protected final List<SourceFile> sources = new ArrayList<SourceFile>();
 		protected final List<NativePreload> preloads = new ArrayList<NativePreload>();
 		protected final Stack<Boolean> listening = new Stack<Boolean>();
-
 		
+		private XmlNativeLoader theLoader;
+		
+		public XmlHandler(XmlNativeLoader theLoader) {
+			this.theLoader = theLoader;
+		}
 
 		@Override
 		public void startDocument() throws SAXException {
@@ -111,7 +122,8 @@ public class XmlHandler extends DefaultHandler {
 								AT_LIBRARY_ID);
 						final String libId = libIdCandidate == null 
 								? libPath : libIdCandidate;
-						
+						final boolean optional = Boolean.parseBoolean(attributes.getValue(NAMESPACE,
+								"optional"));
 						if (libPath == null) {
 							throw new SAXException("argument 'path' not "
 									+ "supplied for element <library>");
@@ -120,21 +132,37 @@ public class XmlHandler extends DefaultHandler {
 								AT_INSTALLPATH);
 						
 						if (!nativesEnumd.contains(libId)) {
-							natives.add(new NativeBinary(libId, libPath, installPath));
-							nativesEnumd.add(libId);
+							NativeBinary nb = new NativeBinary(libId, libPath, installPath);
+							if (!optional || nb.exists(theLoader)) {
+								natives.add(nb);
+								nativesEnumd.add(libId);
+							} else {
+								if (LOG.isInfoEnabled()) {
+									LOG.info("Skip matching, but non-existing optional so : "+libPath);
+								}
+							}
 						}
 					}
 				} else if ("preload".equals(localName)) {
 					if(listening.peek())
 					{
+						final boolean optional = Boolean.parseBoolean(attributes.getValue(NAMESPACE,
+								"optional"));
 						final String fileName = attributes.getValue(NAMESPACE,
 								"fileName");
 						final String resource = attributes.getValue(NAMESPACE, 
 								"resource");
 						if(!nativesEnumd.contains(fileName))
 						{
-							nativesEnumd.add(fileName);
-							preloads.add(new NativePreload(fileName, resource));
+							NativePreload pre = new NativePreload(fileName, resource);
+							if (!optional || pre.exists(theLoader)) {
+								nativesEnumd.add(fileName);
+								preloads.add(pre);
+							} else {
+								if (LOG.isInfoEnabled()) {
+									LOG.info("Skip matching, but non-existing optional so : "+resource);
+								}
+							}
 						}
 					}
 				} else if (EL_SOURCE_ZIP.equals(localName)) { // <path>

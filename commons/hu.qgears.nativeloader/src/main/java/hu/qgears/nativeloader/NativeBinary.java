@@ -63,4 +63,9 @@ public class NativeBinary {
 		}
 		return ret;
 	}
+	
+	public boolean exists(INativeLoader nativeLoader) {
+		URL res=getUrl(nativeLoader.getClass());
+		return res != null;
+	}
 }

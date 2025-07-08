@@ -11,7 +11,7 @@ public class TestShmNativesPackaged {
 	@Test
 	public void testShm()  {
 		try {
-			XMLNativeLoaderValidator.check( Accessor.class);
+			XMLNativeLoaderValidator.check( new Accessor());
 		} catch (Exception e) {
 			fail(e.getMessage());
 		}

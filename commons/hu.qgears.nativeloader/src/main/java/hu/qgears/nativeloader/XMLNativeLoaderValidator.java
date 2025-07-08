@@ -21,15 +21,15 @@ public class XMLNativeLoaderValidator {
 	/**
 	 * Checks whether the native binaries, belonging to the specified native 
 	 * loader, exist. 
-	 * @param loader the loader, the existence of the native libraries of which
+	 * @param loaderInstance the loader, the existence of the native libraries of which
 	 * 		are to be checked
 	 * @throws Exception either if the checking fails for any reason or there
 	 * 		are at least one binary in the XML that does not exist
 	 */
-	public static void check(Class<? extends XmlNativeLoader> loader) throws Exception {
+	public static void check(XmlNativeLoader loaderInstance) throws Exception {
 		
-		final XmlHandler handler = new XmlHandler();
-		
+		final XmlHandler handler = new XmlHandler(loaderInstance);
+		Class<? extends XmlNativeLoader> loader = loaderInstance.getClass();
 		try (final InputStream istream = loader.getResourceAsStream(
 				XmlNativeLoader.NATIVES_DEF)) {
 			UtilNativeLoader.createSAXParser().parse(istream, handler);
@@ -39,8 +39,14 @@ public class XMLNativeLoaderValidator {
 		List<String> missing = new ArrayList<String>(); 
 		for (NativeBinary b : handler.getNatives()) {
 			String f = b.getFileName();
-			if (!exists(b,loader)) {
+			if (!b.exists(loaderInstance)) {
 				missing.add(f);
+			}
+		}
+		for (NativePreload b : handler.getPreloads()) {
+			String packagedPreloadResouce = b.getResource();
+			if (!b.exists(loaderInstance)) {
+				missing.add(packagedPreloadResouce);
 			}
 		}
 		if (!missing.isEmpty()) {
@@ -49,7 +55,4 @@ public class XMLNativeLoaderValidator {
 		}
 	}
 
-	private static boolean exists(NativeBinary b, Class<? extends XmlNativeLoader> loader) {
-		return b.getUrl(loader) != null;
-	}
 }

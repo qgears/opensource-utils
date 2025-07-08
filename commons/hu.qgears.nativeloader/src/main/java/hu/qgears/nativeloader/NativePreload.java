@@ -1,5 +1,7 @@
 package hu.qgears.nativeloader;
 
+import java.net.URL;
+
 /**
  * Represents a native library that must be present on a preload path.
  */
@@ -23,5 +25,10 @@ public class NativePreload {
 	
 	public String getFileName() {
 		return fileName;
+	}
+	
+	public boolean exists(INativeLoader nativeLoader) {
+		URL res=nativeLoader.getClass().getResource(resource);
+		return res != null;
 	}
 }

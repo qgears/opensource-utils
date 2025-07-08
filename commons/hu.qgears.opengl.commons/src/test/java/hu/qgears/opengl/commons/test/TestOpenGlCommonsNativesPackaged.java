@@ -11,7 +11,7 @@ public class TestOpenGlCommonsNativesPackaged {
 	@Test
 	public void testGlut()  {
 		try {
-			XMLNativeLoaderValidator.check( GlutAccessor.class);
+			XMLNativeLoaderValidator.check(new GlutAccessor());
 		} catch (Exception e) {
 			fail(e.getMessage());
 		}

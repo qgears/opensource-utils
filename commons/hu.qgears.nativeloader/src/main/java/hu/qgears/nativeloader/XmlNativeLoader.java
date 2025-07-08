@@ -199,6 +199,7 @@ public abstract class XmlNativeLoader implements INativeLoader {
 		 *            the os name
 		 */
 		public OsAndArchAwareXmlHandler(String arch, String os) throws NativeLoadException {
+			super(XmlNativeLoader.this);
 			this.arch = arch;
 			this.os = os;
 		}
