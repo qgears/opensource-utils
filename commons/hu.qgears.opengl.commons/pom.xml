@@ -108,7 +108,7 @@
 		</dependency>
 		<dependency>
 			<groupId>hu.qgears</groupId>
-			<artifactId>lwjgl.fork</artifactId>
+			<artifactId>lwjgl3.int</artifactId>
 			<version>${internal-dep-version}</version>
 		</dependency>
 		<dependency>

@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.ProcessBuilder.Redirect;
 import java.lang.management.ManagementFactory;
-import java.util.Arrays;
-
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GLContext;
 
@@ -20,6 +18,7 @@ import hu.qgears.opengl.osmesa.Log4Init;
 import hu.qgears.opengl.osmesa.OSMesa;
 import hu.qgears.opengl.osmesa.OSMesaInstance;
 import lwjgl.standalone.BaseAccessor;
+import lwjgl.standalone.BaseAccessor.ELwjglOpenGlImpl;
 
 /**
  * Render using osmesa - off-screen software renderer.
@@ -48,7 +47,7 @@ public class OSMesaExample {
 		OSMesaInstance.getInstance();
 		logLibs();
 		
-		BaseAccessor.initLwjglNatives();
+		BaseAccessor.initLwjglNatives(ELwjglOpenGlImpl.OSMESA);
 		logLibs();
 		OSMesa osMesa=new OSMesa();
 		osMesa.createContext(ENativeImageComponentOrder.ARGB);
