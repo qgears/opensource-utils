@@ -1,50 +1,102 @@
 package hu.qgears.opengl.lwjgl;
 
+import org.lwjgl.glfw.GLFW;
+import org.lwjgl.glfw.GLFWKeyCallbackI;
+
 import hu.qgears.opengl.commons.input.IKeyboard;
 
-import org.lwjgl.input.Keyboard;
+public class KeyboardImplLwjgl implements IKeyboard, GLFWKeyCallbackI {
 
-public class KeyboardImplLwjgl implements IKeyboard {
+	private class Event {
+		int key;
+		int scancode;
+		int action;
+		int mods;
+	}
+	
 
+	private Event[] events;
+	private int readPtr;
+	private int writePtr;
+
+	public KeyboardImplLwjgl() {
+		events=new Event[256];
+		for (int i = 0; i < events.length;i++) {
+			events[i]= new Event();
+		}
+	}
+	
 	@Override
 	public boolean next() {
-		return Keyboard.next();
+		if(readPtr!=writePtr)
+		{
+			readPtr++;
+			readPtr%=events.length;
+			return true;
+		}
+		return false;
+	}
+
+	private Event getEvent()
+	{
+		int p=(readPtr+events.length-1)%events.length;
+		return events[p];
 	}
 
 	@Override
 	public int getEventKey() {
-		return Keyboard.getEventKey();
+		return getEvent().key;
 	}
 
 	@Override
 	public boolean isKeyDown() {
-		return Keyboard.isKeyDown(getEventKey());
-	}
-
-	@Override
-	public char getEventCharacter() {
-		return Keyboard.getEventCharacter();
+		Event e = getEvent();
+		return e.action == GLFW.GLFW_PRESS;
 	}
 
 	@Override
 	public boolean isSpecialKey() {
-		int key=Keyboard.getEventKey();
-		return key>=Keyboard.KEY_F1&&key<=Keyboard.KEY_F15;
+		int k = getEventKey();
+		return k >= GLFW.GLFW_KEY_F1;
+	}
+
+	@Override
+	public char getEventCharacter() {
+		int k = getEventKey();
+		if (k >= GLFW.GLFW_KEY_F1) {
+			return 0;
+		}
+		/*
+		 * TODO Very lame impl
+		 * GLFWCharCallbackI should be used for Unicode character support if necessary
+		 */
+		return (char)k;
 	}
 
 	@Override
 	public boolean isCtrl() {
-		return false;
+		return (getEvent().mods & GLFW.GLFW_MOD_CONTROL) != 0;
 	}
 
 	@Override
 	public boolean isShift() {
-		return false;
+		return (getEvent().mods & GLFW.GLFW_MOD_SHIFT) != 0;
 	}
 
 	@Override
 	public boolean isAlt() {
-		return false;
+		return (getEvent().mods & GLFW.GLFW_MOD_ALT) != 0;
+	}
+
+	@Override
+	public void invoke(long window, int key, int scancode, int action, int mods) {
+		//callback from GLFW
+		events[writePtr].key = key;
+		events[writePtr].scancode = scancode;
+		events[writePtr].action = action;
+		events[writePtr].mods = mods;
+		writePtr++;
+		writePtr%=events.length;
 	}
 
 }

@@ -7,6 +7,8 @@ import org.apache.log4j.Logger;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLCapabilities;
 
+import hu.qgears.opengl.osmesa.Log4Init;
+
 
 public class QueryCaps extends AbstractOpenglApplication2 {
 	
@@ -14,6 +16,7 @@ public class QueryCaps extends AbstractOpenglApplication2 {
 	
 	public static void main(String[] args) {
 		try {
+			Log4Init.init();
 			new QueryCaps().execute();
 		} catch (Exception e) {
 			LOG.error("Error executing QueryCaps",e);

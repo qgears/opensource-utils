@@ -1,10 +1,6 @@
 package hu.qgears.opengl.commons;
 
 
-import hu.qgears.images.SizeInt;
-import hu.qgears.opengl.commons.context.EBlendFunc;
-import hu.qgears.opengl.commons.context.RGlContext;
-
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -13,7 +9,6 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 
 import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
 import org.lwjgl.util.Rectangle;
@@ -22,6 +17,10 @@ import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
+
+import hu.qgears.images.SizeInt;
+import hu.qgears.opengl.commons.context.EBlendFunc;
+import hu.qgears.opengl.commons.context.RGlContext;
 
 
 /**
@@ -88,14 +87,6 @@ public class UtilGl {
 		ByteBuffer bb = ByteBuffer.allocateDirect(length).order(
 				ByteOrder.nativeOrder());
 		return bb;
-	}
-	/**
-	 * Format display mode to user readable format.
-	 * @param mode
-	 * @return
-	 */
-	public static String formatMode(DisplayMode mode) {
-		return ""+mode.getWidth()+"X"+mode.getHeight()+" "+mode.getFrequency()+"Hz"+" "+mode.getBitsPerPixel()+"bpp";
 	}
 	public static void drawRectangle( //NOSONAR method has 9 parameters but is still comprehensible
 			RGlContext rgl,
