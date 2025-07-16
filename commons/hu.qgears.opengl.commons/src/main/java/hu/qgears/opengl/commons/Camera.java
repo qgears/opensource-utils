@@ -127,31 +127,31 @@ public class Camera {
 			float timeMultiplier=(float)(time-lastProcessKeyboard)/1000;
 			speed*=timeMultiplier;
 			if (lastProcessKeyboard > 0) {
-				// Csak akkor mozgatjuk egérrel a kamerát ha mienk az egér
-				if (Keyboard.isKeyDown(Keyboard.KEY_D)) {
-					moveRight(speed);
-				}
-				if (Keyboard.isKeyDown(Keyboard.KEY_A)) {
-					moveRight(-speed);
-				}
-				if (Keyboard.isKeyDown(Keyboard.KEY_W)) {
-					moveForward(speed);
-				}
-				if (Keyboard.isKeyDown(Keyboard.KEY_S)) {
-					moveForward(-speed);
-				}
-				if (Keyboard.isKeyDown(Keyboard.KEY_R)) {
-					moveUp(speed);
-				}
-				if (Keyboard.isKeyDown(Keyboard.KEY_F)) {
-					moveUp(-speed);
-				}
-				if (Keyboard.isKeyDown(Keyboard.KEY_Q)) {
-					turnAroundForward(-speed);
-				}
-				if (Keyboard.isKeyDown(Keyboard.KEY_E)) {
-					turnAroundForward(speed);
-				}
+//				// Csak akkor mozgatjuk egérrel a kamerát ha mienk az egér
+//				if (Keyboard.isKeyDown(Keyboard.KEY_D)) {
+//					moveRight(speed);
+//				}
+//				if (Keyboard.isKeyDown(Keyboard.KEY_A)) {
+//					moveRight(-speed);
+//				}
+//				if (Keyboard.isKeyDown(Keyboard.KEY_W)) {
+//					moveForward(speed);
+//				}
+//				if (Keyboard.isKeyDown(Keyboard.KEY_S)) {
+//					moveForward(-speed);
+//				}
+//				if (Keyboard.isKeyDown(Keyboard.KEY_R)) {
+//					moveUp(speed);
+//				}
+//				if (Keyboard.isKeyDown(Keyboard.KEY_F)) {
+//					moveUp(-speed);
+//				}
+//				if (Keyboard.isKeyDown(Keyboard.KEY_Q)) {
+//					turnAroundForward(-speed);
+//				}
+//				if (Keyboard.isKeyDown(Keyboard.KEY_E)) {
+//					turnAroundForward(speed);
+//				}
 			}
 			lastProcessKeyboard = time;
 	}

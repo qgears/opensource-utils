@@ -1,5 +1,11 @@
 package hu.qgears.opengl.commons.example;
 
+import org.apache.log4j.Logger;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.util.vector.Vector2f;
+import org.lwjgl.util.vector.Vector3f;
+import org.lwjgl.util.vector.Vector4f;
+
 import hu.qgears.images.SizeInt;
 import hu.qgears.opengl.commons.AbstractOpenglApplication2;
 import hu.qgears.opengl.commons.Camera;
@@ -11,13 +17,6 @@ import hu.qgears.opengl.commons.Texture;
 import hu.qgears.opengl.commons.UtilGl;
 import hu.qgears.opengl.commons.context.RGlContext;
 import hu.qgears.opengl.commons.input.IKeyboard;
-
-import org.apache.log4j.Logger;
-import org.lwjgl.input.Mouse;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.util.vector.Vector2f;
-import org.lwjgl.util.vector.Vector3f;
-import org.lwjgl.util.vector.Vector4f;
 
 /**
  * Egyetlen háromszöget megjelenítő alkalmazás.
@@ -101,9 +100,10 @@ public class ExampleRectangle extends AbstractOpenglApplication2 {
 		switch (ch) {
 		case 'm':
 			// Az egeret eltüntetjük
-			Mouse.setGrabbed(!Mouse.isGrabbed());
+//			Mouse.setGrabbed(!Mouse.isGrabbed());
 			break;
 		default:
+			super.keyDown(eventKey, ch, shift, ctrl, alt, special);
 			break;
 		}
 	}
