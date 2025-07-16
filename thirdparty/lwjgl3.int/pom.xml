@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>hu.qgears</groupId>
+		<artifactId>opensource-utils-parent</artifactId>
+		<version>12.1.1-SNAPSHOT</version>
+		<relativePath>../../build/opensource-utils-parent/</relativePath>
+	</parent>
+
+	<artifactId>lwjgl3.int</artifactId>
+
+	<packaging>jar</packaging>
+
+	<properties>
+		<lwjgl.version>3.3.6</lwjgl.version>
+	</properties>
+
+
+	<profiles>
+		<profile>
+			<id>lwjgl-natives-linux-amd64</id>
+			<activation>
+				<os>
+					<family>unix</family>
+					<name>linux</name>
+					<arch>amd64</arch>
+				</os>
+			</activation>
+			<properties>
+				<lwjgl.natives>natives-linux</lwjgl.natives>
+			</properties>
+		</profile>
+		<profile>
+			<id>lwjgl-natives-macos-x86_64</id>
+			<activation>
+				<os>
+					<family>mac</family>
+					<arch>x86_64</arch>
+				</os>
+			</activation>
+			<properties>
+				<lwjgl.natives>natives-macos</lwjgl.natives>
+			</properties>
+		</profile>
+		<profile>
+			<id>lwjgl-natives-macos-aarch64</id>
+			<activation>
+				<os>
+					<family>mac</family>
+					<arch>aarch64</arch>
+				</os>
+			</activation>
+			<properties>
+				<lwjgl.natives>natives-macos-arm64</lwjgl.natives>
+			</properties>
+		</profile>
+		<profile>
+			<id>lwjgl-natives-windows-amd64</id>
+			<activation>
+				<os>
+					<family>windows</family>
+					<arch>amd64</arch>
+				</os>
+			</activation>
+			<properties>
+				<lwjgl.natives>natives-windows</lwjgl.natives>
+			</properties>
+		</profile>
+
+	</profiles>
+	<dependencies>
+		<dependency>
+			<groupId>hu.qgears</groupId>
+			<artifactId>hu.qgears.nativeloader</artifactId>
+			<version>${internal-dep-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${junit-version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.lwjgl</groupId>
+			<artifactId>lwjgl</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.lwjgl</groupId>
+			<artifactId>lwjgl-assimp</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.lwjgl</groupId>
+			<artifactId>lwjgl-glfw</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.lwjgl</groupId>
+			<artifactId>lwjgl-openal</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.lwjgl</groupId>
+			<artifactId>lwjgl-opengl</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.lwjgl</groupId>
+			<artifactId>lwjgl-stb</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.lwjgl</groupId>
+			<artifactId>lwjgl</artifactId>
+			<classifier>${lwjgl.natives}</classifier>
+		</dependency>
+		<dependency>
+			<groupId>org.lwjgl</groupId>
+			<artifactId>lwjgl-assimp</artifactId>
+			<classifier>${lwjgl.natives}</classifier>
+		</dependency>
+		<dependency>
+			<groupId>org.lwjgl</groupId>
+			<artifactId>lwjgl-glfw</artifactId>
+			<classifier>${lwjgl.natives}</classifier>
+		</dependency>
+		<dependency>
+			<groupId>org.lwjgl</groupId>
+			<artifactId>lwjgl-openal</artifactId>
+			<classifier>${lwjgl.natives}</classifier>
+		</dependency>
+		<dependency>
+			<groupId>org.lwjgl</groupId>
+			<artifactId>lwjgl-opengl</artifactId>
+			<classifier>${lwjgl.natives}</classifier>
+		</dependency>
+		<dependency>
+			<groupId>org.lwjgl</groupId>
+			<artifactId>lwjgl-stb</artifactId>
+			<classifier>${lwjgl.natives}</classifier>
+		</dependency>
+		
+		<!-- <dependency>
+		    <groupId>org.lwjgl.lwjgl</groupId>
+		    <artifactId>lwjgl_util</artifactId>
+		    <version>2.9.3</version>
+		    
+		</dependency> -->
+	</dependencies>
+
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.lwjgl</groupId>
+				<artifactId>lwjgl-bom</artifactId>
+				<version>${lwjgl.version}</version>
+				<scope>import</scope>
+				<type>pom</type>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+</project>
