@@ -8,6 +8,8 @@ import org.lwjgl.LWJGLException;
  */
 public class GLContext {
 
+	private static boolean created = false;
+	
 	/**
 	 * Create and bind GL implementation to LWJGL. XXX might be not fully compatible
 	 * with 2.x version on GLContext
@@ -16,10 +18,16 @@ public class GLContext {
 	 */
 	public static void useContext(Object ctx) throws LWJGLException {
 		if (ctx != null) {
-			GL.create();
+			if (!created) {
+				created = true;
+				GL.create();
+			}
 			GL.createCapabilities();
 		} else {
-			GL.destroy();
+			if (created) {
+				GL.destroy();
+				created = false;
+			}
 		}
 	}
 
