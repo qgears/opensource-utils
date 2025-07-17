@@ -103,14 +103,10 @@ public class ExampleRectangle extends AbstractOpenglApplication2 {
 //			Mouse.setGrabbed(!Mouse.isGrabbed());
 			break;
 		default:
+			camera.keyDown(eventKey, ch, shift, ctrl, alt, special);
 			super.keyDown(eventKey, ch, shift, ctrl, alt, special);
 			break;
 		}
-	}
-	@Override
-	protected void processKeyboard(IKeyboard keyboard) throws Exception {
-		super.processKeyboard(keyboard);
-		camera.processKeyboard(keyboard, false, System.currentTimeMillis());
 	}
 	/**
 	 * Test entry point
