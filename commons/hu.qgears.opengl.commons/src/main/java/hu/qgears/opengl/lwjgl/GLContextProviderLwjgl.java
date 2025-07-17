@@ -3,8 +3,6 @@ package hu.qgears.opengl.lwjgl;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 import java.nio.IntBuffer;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.lwjgl.LWJGLException;
@@ -24,7 +22,6 @@ import lwjgl.standalone.BaseAccessor;
 public class GLContextProviderLwjgl implements IGlContextProvider{
 	private static final Logger LOG = Logger
 			.getLogger(GLContextProviderLwjgl.class);
-
 
 	private boolean fullscreen;
 	/*package*/ long window;
@@ -158,6 +155,12 @@ public class GLContextProviderLwjgl implements IGlContextProvider{
 		}
 
 		GLFW.glfwSetKeyCallback(window, getKeyboard());
+		MouseImplLwjgl m = getMouse();
+		GLFW.glfwSetMouseButtonCallback(window, m::mouseButtonEvent);
+		GLFW.glfwSetScrollCallback(window, m::scrollEvent);
+		GLFW.glfwSetCursorPosCallback(window, m::cursorEvent);
+		
+		
 		SizeInt fullscreenSize = getFullscreenSize();
 		// Center the window
 		GLFW.glfwSetWindowPos(
