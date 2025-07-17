@@ -16,7 +16,10 @@ import hu.qgears.opengl.commons.TargetRectangle;
 import hu.qgears.opengl.commons.Texture;
 import hu.qgears.opengl.commons.UtilGl;
 import hu.qgears.opengl.commons.context.RGlContext;
+import hu.qgears.opengl.commons.input.GlMouseEvent;
 import hu.qgears.opengl.commons.input.IKeyboard;
+import hu.qgears.opengl.commons.input.IMouse;
+import hu.qgears.opengl.osmesa.Log4Init;
 
 /**
  * Egyetlen háromszöget megjelenítő alkalmazás.
@@ -32,6 +35,13 @@ public class ExampleRectangle extends AbstractOpenglApplication2 {
 	}
 	@Override
 	protected void logic() {
+		IMouse m = getMouseObject();
+		for (GlMouseEvent e = m.getNextEvent(); e != null; e = m.getNextEvent()) {
+			handleMouseEvent(e);
+		}
+	}
+	private void handleMouseEvent(GlMouseEvent e) {
+		LOG.info("Mouse event "+e);
 	}
 	@Override
 	protected void render() {
@@ -97,22 +107,15 @@ public class ExampleRectangle extends AbstractOpenglApplication2 {
 	@Override
 	protected void keyDown(int eventKey, char ch, boolean shift, boolean ctrl,
 			boolean alt, boolean special) throws Exception {
-		switch (ch) {
-		case 'm':
-			// Az egeret eltüntetjük
-//			Mouse.setGrabbed(!Mouse.isGrabbed());
-			break;
-		default:
-			camera.keyDown(eventKey, ch, shift, ctrl, alt, special);
-			super.keyDown(eventKey, ch, shift, ctrl, alt, special);
-			break;
-		}
+		camera.keyDown(eventKey, ch, shift, ctrl, alt, special);
+		super.keyDown(eventKey, ch, shift, ctrl, alt, special);
 	}
 	/**
 	 * Test entry point
 	 */
 	public static void main(String[] args) {
 		try {
+			Log4Init.init();
 			ExampleRectangle fswTest = new ExampleRectangle();
 			fswTest.execute();
 			System.exit(0); //NOSONAR intentional exit point

@@ -1,132 +1,167 @@
 package hu.qgears.opengl.lwjgl;
 
-
 import org.apache.log4j.Logger;
-import org.lwjgl.LWJGLException;
+import org.lwjgl.glfw.GLFW;
+import org.lwjgl.glfw.GLFWCursorPosCallbackI;
+import org.lwjgl.glfw.GLFWMouseButtonCallbackI;
+import org.lwjgl.glfw.GLFWScrollCallbackI;
 
 import hu.qgears.opengl.commons.input.EMouseButton;
 import hu.qgears.opengl.commons.input.GlMouseEvent;
 import hu.qgears.opengl.commons.input.IMouse;
 
-public class MouseImplLwjgl implements IMouse
-{
+public class MouseImplLwjgl implements IMouse {
 	private static final Logger LOG = Logger.getLogger(MouseImplLwjgl.class);
 	private GLContextProviderLwjgl provider;
-	private GlMouseEvent event=new GlMouseEvent();
-	private GlMouseEvent wheelReleaseEvent=null;
+
+	private GlMouseEvent[] events;
+	private int readPtr;
+	private int writePtr;
+	private int x;
+	private int y;
+
 	public MouseImplLwjgl(GLContextProviderLwjgl provider) {
-		this.provider=provider;
+		this.provider = provider;
+		events = new GlMouseEvent[256];
+		for (int i = 0; i < events.length; i++) {
+			events[i] = new GlMouseEvent();
+		}
+	}
+
+	private boolean next() {
+		if (readPtr != writePtr) {
+			readPtr++;
+			readPtr %= events.length;
+			return true;
+		}
+		return false;
+	}
+
+	private GlMouseEvent getCurrent() {
+		int p = (readPtr + events.length - 1) % events.length;
+		return events[p];
 	}
 
 	@Override
 	public void poll() {
-//		Mouse.poll();
 	}
 
 	@Override
 	public boolean isButtonDown(EMouseButton b) {
-//		return Mouse.isButtonDown(invertDecodeMouse(b));
-		return false;
+		int button = -1;
+		switch (b) {
+		case LEFT:
+			button = GLFW.GLFW_MOUSE_BUTTON_LEFT;
+			break;
+		case MIDDLE:
+			button = GLFW.GLFW_MOUSE_BUTTON_MIDDLE;
+			break;
+		case RIGHT:
+			button = GLFW.GLFW_MOUSE_BUTTON_RIGHT;
+			break;
+		case WHEEL_DOWN:
+		case WHEEL_UP:
+		default:
+			break;
+		}
+		if (button == -1) {
+			return false;
+		} else {
+			int state = GLFW.glfwGetMouseButton(provider.window, button);
+			return state == GLFW.GLFW_PRESS;
+		}
 	}
 
 	@Override
 	public int getX() {
-//		return Mouse.getX();
-		return 0;
+		return x;
 	}
 
 	@Override
 	public int getY() {
-//		return Mouse.getY();
-		return 0;
+		return y;
 	}
 
 	@Override
 	public GlMouseEvent getNextEvent() {
-//		if(wheelReleaseEvent!=null)
-//		{
-//			GlMouseEvent ret=wheelReleaseEvent;
-//			wheelReleaseEvent=null;
-//			if(OGlGlobalParameters.logMouseMessages && LOG.isDebugEnabled())
-//			{
-//				LOG.debug("LWJGL event wheel release: "+ret);
-//			}
-//			return ret;
-//		}
-//		if(Mouse.next())
-//		{
-//			event.x=Mouse.getEventX();
-//			event.y=provider.getClientAreaSize().getHeight()-Mouse.getEventY();
-//			event.button=decodeMouse(Mouse.getEventButton());
-//			event.nanoseconds=Mouse.getEventNanoseconds();
-//			event.buttonState=Mouse.getEventButtonState();
-//			int dwheel=Mouse.getDWheel();
-//			if(event.button==null && dwheel!=0)
-//			{
-//				wheelReleaseEvent=new GlMouseEvent();
-//				wheelReleaseEvent.x=event.x;
-//				wheelReleaseEvent.y=event.y;
-//				wheelReleaseEvent.buttonState=false;
-//				wheelReleaseEvent.nanoseconds=event.nanoseconds;
-//				event.buttonState=true;
-//				if(dwheel>0)
-//				{
-//					event.button=EMouseButton.WHEEL_UP;
-//				}else if(dwheel<0)
-//				{
-//					event.button=EMouseButton.WHEEL_DOWN;
-//				}
-//				wheelReleaseEvent.button=event.button;
-//			}
-//			if(OGlGlobalParameters.logMouseMessages && LOG.isDebugEnabled())
-//			{
-//				LOG.debug("LWJGL event: "+event+" button: "+Mouse.getEventButton()+" dwheel: "+Mouse.getEventDWheel());
-//			}
-//			return event;
-//		}
-		return null;
-	}
-
-	private EMouseButton decodeMouse(int eventButton) {
-		switch (eventButton) {
-		case 0:
-			return EMouseButton.LEFT; 
-		case 1:
-			return EMouseButton.RIGHT; 
-		case 2:
-			return EMouseButton.MIDDLE; 
-		default:
-			break;
+		if (next()) {
+			GlMouseEvent currentEvent = getCurrent();
+			return currentEvent;
 		}
 		return null;
 	}
 
-	private int invertDecodeMouse(EMouseButton b) {
-		switch(b)
-		{
-		case LEFT:
-			return 0;
-		case RIGHT:
-			return 1;
-		case MIDDLE:
-			return 2;
-		default:
-			return -1;
-		}
+	/*
+	 * Not supported in this impl 
+	 */
+	@Override
+	public void addEvent(final int type, final int x, final int y, final EMouseButton button, final int state) {
+	}
+
+	private void addEvent(int x, int y, EMouseButton button, boolean state) {
+		// XXX This is not thread safe but we should call it from single thread
+		int p = writePtr++;
+		writePtr %= events.length;
+
+		events[p].x = x;
+		events[p].y = y;
+		events[p].button = button;
+		events[p].buttonState = state;
+		events[p].nanoseconds = System.nanoTime();
 	}
 
 	/**
-	 * Does nothing in this implementation.
-	 * @param type ignored
-	 * @param x ignored
-	 * @param y ignored
-	 * @param button ignored
-	 * @param state ignored
-	 * @see IMouse#addEvent(int, int, int, EMouseButton, int)
+	 * 
+	 * Implements {@link GLFWScrollCallbackI}.
+	 * 
+	 * @param window
+	 * @param xoffset
+	 * @param yoffset
 	 */
-	@Override
-	public void addEvent(final int type, final int x, final int y, 
-			final EMouseButton button, final int state) {
-		// Does nothing
+	public void scrollEvent(long window, double xoffset, double yoffset) {
+		// callback from GLFW
+		addEvent(x, y, yoffset < 0? EMouseButton.WHEEL_DOWN : EMouseButton.WHEEL_UP, false);
+	}
+
+	/**
+	 * Implements {@link GLFWCursorPosCallbackI}
+	 * 
+	 * @param window
+	 * @param xPos
+	 * @param yPos
+	 */
+	public void cursorEvent(long window, double xPos, double yPos) {
+		// callback from GLFW
+		this.x = (int) xPos;
+		this.y = (int) xPos;
+	}
+
+	/**
+	 * Implements {@link GLFWMouseButtonCallbackI}
+	 * 
+	 * @param window
+	 * @param button
+	 * @param action
+	 * @param mods
+	 */
+	public void mouseButtonEvent(long window, int button, int action, int mods) {
+		// callback from GLFW
+		EMouseButton b = null;
+		switch (button) {
+		case GLFW.GLFW_MOUSE_BUTTON_LEFT:
+			b = EMouseButton.LEFT;
+			break;
+		case GLFW.GLFW_MOUSE_BUTTON_RIGHT:
+			b = EMouseButton.RIGHT;
+			break;
+		case GLFW.GLFW_MOUSE_BUTTON_MIDDLE:
+			b = EMouseButton.MIDDLE;
+			break;
+		default:
+			break;
+		}
+		if (b != null) {
+			addEvent(x, y, b, action == GLFW.GLFW_PRESS);
+		}
 	}
 }
