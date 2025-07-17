@@ -111,6 +111,18 @@ public class Texture implements IDisposeable {
 	public static Texture create(NativeImage rdtc, EMipMapType mtype) {
 		return create(rdtc, mtype, ETextureWrapType.mirroredRepeat);
 	}
+	/**
+	 * @deprecated please remove removedFlag
+	 * @param rdtc
+	 * @param mtype
+	 * @param wrapType
+	 * @param removedFlag
+	 * @return
+	 */
+	@Deprecated
+	public static Texture create(NativeImage rdtc, EMipMapType mtype, ETextureWrapType wrapType,boolean removedFlag) {
+		return create(rdtc, mtype, wrapType);
+	}
 	public static Texture create(NativeImage rdtc, EMipMapType mtype, ETextureWrapType wrapType) {
 		int maxSize = UtilGl.getMaxTextureSize();
 		int w = rdtc.getWidth();

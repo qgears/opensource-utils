@@ -46,8 +46,7 @@ public class OSMesaExample {
 	private void run() throws Exception {
 		OSMesaInstance.getInstance();
 		logLibs();
-		
-		BaseAccessor.initLwjglNatives(ELwjglOpenGlImpl.OSMESA);
+		OSMesaInstance.getInstance().bindLwjglNatives();
 		logLibs();
 		OSMesa osMesa=new OSMesa();
 		osMesa.createContext(ENativeImageComponentOrder.ARGB);
