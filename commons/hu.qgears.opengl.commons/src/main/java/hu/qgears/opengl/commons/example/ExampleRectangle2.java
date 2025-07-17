@@ -130,10 +130,12 @@ public class ExampleRectangle2 extends AbstractOpenglApplication2 {
 		return true;
 	}
 	@Override
-	protected void processKeyboard(IKeyboard keyboard) throws Exception {
-		super.processKeyboard(keyboard);
-		camera.processKeyboard(keyboard, false, System.currentTimeMillis());
+	protected void keyDown(int eventKey, char ch, boolean shift, boolean ctrl, boolean alt, boolean special)
+			throws Exception {
+		camera.keyDown(eventKey, ch, shift, ctrl, alt, special);
+		super.keyDown(eventKey, ch, shift, ctrl, alt, special);
 	}
+	
 	@Override
 	protected void logError(String message, Exception e) {
 		LOG.error(message, e);
