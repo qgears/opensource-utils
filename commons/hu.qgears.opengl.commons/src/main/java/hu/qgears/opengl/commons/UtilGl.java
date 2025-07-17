@@ -777,4 +777,12 @@ public class UtilGl {
 			int sfactorAlpha, int dfactorAlpha) {
 		GL14.glBlendFuncSeparate(sfactorRGB, dfactorRGB, sfactorAlpha, dfactorAlpha);
 	}
+
+	public static void glVertexPointer(int size, int stride, FloatBuffer m) {
+		GL11.glVertexPointer(size, stride,m);
+	}
+
+	public static void glLoadMatrix(FloatBuffer m) {
+		GL11.glLoadMatrix(m);
+	}
 }
