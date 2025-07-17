@@ -769,11 +769,16 @@ public class UtilGl {
 		GL14.glBlendFuncSeparate(sfactorRGB, dfactorRGB, sfactorAlpha, dfactorAlpha);
 	}
 
+
 	public static void glVertexPointer(int size, int stride, FloatBuffer m) {
 		GL11.glVertexPointer(size, stride,m);
+		//LWJGL3
+		GL11.glVertexPointer(size, GL11.GL_FLOAT, stride, myBuffer);
 	}
 
 	public static void glLoadMatrix(FloatBuffer m) {
 		GL11.glLoadMatrix(m);
+		//LWJGL3
+		GL11.glLoadMatrixf(m);
 	}
 }
