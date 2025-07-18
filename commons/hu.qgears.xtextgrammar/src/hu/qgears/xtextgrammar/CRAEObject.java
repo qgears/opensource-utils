@@ -112,6 +112,11 @@ public class CRAEObject implements Adapter {
 			nameObject.close();
 			nameObject=null;
 		}
+		if(doc==null)
+		{
+			// In case of ModelFixer created objects doc is null and that is valid.
+			return;
+		}
 		CrossRefManager crm=doc.getHost();
 		Obj newNameObject=crm.createObj(doc, name, RuntimeMappings.getEMFClassName(host.eClass()));
 		newNameObject.setUserObject(null, this);
