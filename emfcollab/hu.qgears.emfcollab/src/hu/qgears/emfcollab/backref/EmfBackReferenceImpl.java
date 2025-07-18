@@ -230,7 +230,7 @@ public class EmfBackReferenceImpl implements EmfBackReference {
 			}
 		});
 	}
-	private void addElementRecursive(Notification notification) {
+	protected void addElementRecursive(Notification notification) {
 		List<EObject> target = getEObjects(notification.getNewValue());
 		for (EObject t : target) {
 			UtilVisitor.visitModel(t, new UtilVisitor.Visitor() {
@@ -332,7 +332,7 @@ public class EmfBackReferenceImpl implements EmfBackReference {
 	 * 
 	 * @param element
 	 */
-	private void addElement(EObject element) {
+	protected void addElement(EObject element) {
 		if (element.eResource() != null) {
 			EList<EReference> refs = element.eClass().getEAllReferences();
 			for (EReference ref : refs) {
