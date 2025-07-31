@@ -46,6 +46,26 @@ public class GenerationRules {
 			generateNonTerm(eb, sub, tokens, at, absoluteIndex);
 		}
 	}
+	/** Generate elements onto the same group by finding all finished elements
+	 * and looking up their creator elements and adding the followants of the creator elements.
+	 * @param indexWithinGroup The index of the element within the group to try to generate its descendants
+	 * @param at We are at this group index currently
+	 * @param eb elements are generated into this buffer
+	 * @param collectNontermOutput 
+	 * @param nextToken
+	 */
+	public static final void generateOnSameGroupForAccelerator(int absoluteIndex, int at, ElemBuffer eb, Set<TermToken> collectNontermOutput) {
+		int typeId=eb.getTermTypeId(absoluteIndex);
+		Term term = eb.resolve(typeId);
+		boolean isPassed = isPassed(eb, absoluteIndex, term);
+		if (isPassed) {
+			generatePassed(absoluteIndex, at, eb, term);
+		}
+		Term sub = getSub(eb, absoluteIndex, isPassed);
+		if (sub != null) {
+			generateNonTermForAccelerator(eb, sub, at, absoluteIndex, collectNontermOutput);
+		}
+	}
 	/**
 	 * Get the term that can be added to the same group in this state.
 	 * 
@@ -256,6 +276,28 @@ public class GenerationRules {
 			if (matches(tt, tokens, from)) {
 				eb.addElement(0, term.getId(), 0, from, generatedBy);
 			}
+			break;
+		}
+		default: {
+			eb.addElement(0, term.getId(), 0, from, generatedBy);
+			break;
+		}
+		}
+	}
+	public static final void generateNonTermForAccelerator(ElemBuffer eb, Term term, int from, int generatedBy, Set<TermToken> collectNontermOutput) {
+		switch (term.getType()) {
+		case or: {
+			TermOr termO = (TermOr) term;
+			for (int ctr = 0; ctr < termO.getSubs().size(); ++ctr) {
+				eb.addElement(0, term.getId(), ctr, from, generatedBy);
+			}
+			break;
+		}
+		case token: {
+			TermToken tt = (TermToken) term;
+			collectNontermOutput.add(tt);
+//			// TODO mark nonterm filter rule!
+//			eb.addElement(0, term.getId(), 0, from, generatedBy);
 			break;
 		}
 		default: {

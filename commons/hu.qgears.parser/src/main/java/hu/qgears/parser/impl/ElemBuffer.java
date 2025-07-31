@@ -81,9 +81,11 @@ final public class ElemBuffer {
 		nanosDoGenerates=0;
 		elems.clear();
 		groupStarts.clear();
+		genBys.clear();
 		currentGroup=-1;
 		currentGroupStart=0;
 		nGenBy=0;
+		pos=0;
 		for(int i=0;i<hashTable.length;++i)
 		{
 			hashTable[i]=-1;

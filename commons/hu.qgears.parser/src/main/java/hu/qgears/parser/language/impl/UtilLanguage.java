@@ -1,12 +1,19 @@
 package hu.qgears.parser.language.impl;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeMap;
 
+import hu.qgears.commons.MultiMapTreeImpl;
+import hu.qgears.parser.impl.ElemBuffer;
+import hu.qgears.parser.impl.GenerationRules;
 import hu.qgears.parser.language.EType;
 import hu.qgears.parser.language.ILanguage;
+import hu.qgears.parser.tokenizer.TokenArray;
 import hu.qgears.parser.tokenizer.impl.LanguageParseException;
+import hu.qgears.parser.tokenizer.impl.TextSource;
 
 
 public class UtilLanguage {
@@ -121,6 +128,66 @@ public class UtilLanguage {
 			{
 				ret.add(ts.getName());
 			}
+		}
+	}
+
+	/**
+	 * TODO term accelerator feature is not ready.
+	 * @param lang
+	 */
+	public static void setupTermAccelerator(ILanguage lang) {
+		ElemBuffer b=new ElemBuffer();
+		TextSource ts=new TextSource("");
+		TokenArray arr=new TokenArray(ts, lang);
+		for(Term t: lang.getTerms())
+		{
+			int processedUntil=0;
+			if("doc".equals(t.getName()))
+			{
+				System.out.println("my conditional breakpoint");
+			}
+			Set<TermToken> collectNontermOutput=new HashSet<>();
+			b.reInit(lang.getTerms(), arr, lang);
+			System.out.println("Term: "+t.getType()+" "+ t.getName());
+			GenerationRules.generateNonTermForAccelerator(b, t, 0, 0, collectNontermOutput);
+//			System.out.println("Buffer0: "+b.print());
+			while(b.getCurrentGroupEnd()>processedUntil)
+			{
+				GenerationRules.generateOnSameGroupForAccelerator(processedUntil, 0, b, collectNontermOutput);
+				processedUntil++;
+			}
+			MultiMapTreeImpl<Integer, TermToken> byId=new MultiMapTreeImpl<>();
+			for(TermToken tt: collectNontermOutput)
+			{
+				byId.putSingle(tt.getTokenType().getId(), tt);
+			}
+			for(Integer i: byId.keySet())
+			{
+				TermToken nullFilterToken=null;
+				for(TermToken tt: byId.get(i))
+				{
+					if(tt.getMatchingValue()==null)
+					{
+						nullFilterToken=tt;
+					}
+				}
+				if(nullFilterToken!=null)
+				{
+					List<TermToken> tts=byId.get(i);
+					tts.clear();
+					tts.add(nullFilterToken);
+				}
+			}
+//			System.out.println("Buffer1: "+b.print());
+			System.out.println("Possible terms: "+byId);
+			System.out.println();
+//			processedUntil = 0;
+//			while(b.getCurrentGroupEnd()>processedUntil)
+//			{
+//				GenerationRules.generateOnNextGroup(b, processedUntil, 1, null);
+//				processedUntil++;
+//			}
+//			System.out.println(b.print());
 		}
 	}
 }
