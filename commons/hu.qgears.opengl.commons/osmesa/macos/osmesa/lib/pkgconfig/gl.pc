@@ -1,0 +1,13 @@
+prefix=/Users/Martin/Dev/jzy3d/external/osmesa
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+glx_tls=yes
+
+Name: gl
+Description: Mesa OpenGL Library
+Version: 22.0.0-rc2
+Requires.private: x11, xext, xcb
+Libs: -L${libdir} -lGL
+Libs.private: -lpthread -pthread -lm
+Cflags: -I${includedir}

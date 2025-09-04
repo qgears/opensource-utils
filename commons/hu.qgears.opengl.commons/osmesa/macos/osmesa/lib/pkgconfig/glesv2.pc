@@ -1,0 +1,10 @@
+prefix=/Users/Martin/Dev/jzy3d/external/osmesa
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: glesv2
+Description: Mesa OpenGL ES 2.0 library
+Version: 22.0.0-rc2
+Libs: -L${libdir} -lGLESv2
+Libs.private: -lpthread -pthread -lm
+Cflags: -I${includedir}
