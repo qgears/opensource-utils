@@ -46,6 +46,7 @@ public class OSMesaExample {
 	private void run() throws Exception {
 		OSMesaInstance.getInstance();
 		logLibs();
+		// TODO bind qgears native loader paths to lwjgl
 		OSMesaInstance.getInstance().bindLwjglNatives();
 		logLibs();
 		OSMesa osMesa=new OSMesa();
@@ -63,6 +64,7 @@ public class OSMesaExample {
 		GL11.glFinish();
 		osMesa.disposeContext();
 		new NativeLibPng().saveImage(im, new File("/tmp/gl.png"));
+		System.in.read();
 	}
 	static private int getPid() throws IOException {
 		int pid=Integer.parseInt(ManagementFactory.getRuntimeMXBean().getName().split("@")[0]);
