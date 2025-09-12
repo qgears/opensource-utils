@@ -12,9 +12,6 @@
 	<packaging>jar</packaging>
 	<description>OpenGL helper methods and object oriented abstraction layer over OpenGL API.</description>
 	
-	<build>
-	</build>
-			
 	<profiles>
 		<profile>
 			<!-- Build profile for enable building C libs on current platform

@@ -27,9 +27,10 @@
 		<qgears-opensource-maven-public-url>qgears-opensource-maven-public-url</qgears-opensource-maven-public-url>
 		<qgears-opensource-maven-nightly-url>qgears-opensource-maven-nightly-url</qgears-opensource-maven-nightly-url>
 		<repositoryRoot>${project.basedir}/${project.parent.relativePath}/../../</repositoryRoot>
-		<site-plugin-version>3.5</site-plugin-version>
+		<site-plugin-version>3.21.0</site-plugin-version>
 		<stagingDirectory>${user.home}/os-report</stagingDirectory>
 		<project_url>file://${stagingDirectory}</project_url>
+		<cve.database.folder>${user.home}/.m2/repository/cvedb/</cve.database.folder>
 	</properties>
 
 	<build>
@@ -272,12 +273,14 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.2.0</version>
+				<version>3.11.3</version>
 				<configuration>
 				    <quiet>false</quiet>
-				<detectJavaApiLink>false</detectJavaApiLink>
-				<source>8</source>
-                    <excludePackageNames>org.lwjgl:org.lwjgl.*:lwjgl.standalone</excludePackageNames>
+				    <doclint>none</doclint>
+					<detectJavaApiLink>false</detectJavaApiLink>
+					<source>${java-src-version}</source>
+					<charset>UTF-8</charset>
+<!--                     <excludePackageNames>org.lwjgl:org.lwjgl.*:lwjgl.standalone</excludePackageNames> -->
 				</configuration>
 				<reportSets>
 					<reportSet>
@@ -288,13 +291,13 @@
 				</reportSets>
 			</plugin>
 			<plugin>
-				<groupId>org.codehaus.sonar-plugins</groupId>
-				<artifactId>maven-report</artifactId>
+				<groupId>nl.demon.shadowland.maven.plugins</groupId>
+				<artifactId>sonarqube-maven-report</artifactId>
+				<version>0.2.2</version>
 				<configuration>
 					<sonarHostURL>${gl_sonar_url}</sonarHostURL>
 					<branch>${gl_sonar_branch_opensource}</branch>
 				</configuration>
-				<version>0.1</version>
 			</plugin>
 			<plugin>
 				<groupId>org.jcoffee</groupId>
@@ -315,17 +318,23 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>org.owasp</groupId>
-				<artifactId>dependency-check-maven</artifactId>
- 				<version>6.0.3</version>
-				<reportSets>
-					<reportSet>
-						<reports>
-							<report>aggregate</report>
-						</reports>
-					</reportSet>
-				</reportSets>
-			</plugin>
+                <groupId>org.owasp</groupId>
+                <artifactId>dependency-check-maven</artifactId>
+                <version>12.0.1</version>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <report>aggregate</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+                <configuration>
+                	<dataDirectory>${cve.database.folder}</dataDirectory>
+                	<nvdValidForHours>168</nvdValidForHours>
+					<!--.NET analizer is not necessary here-->
+                	<assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
+                </configuration>
+            </plugin>
 		</plugins>
 	</reporting>
 </project>
