@@ -2,11 +2,13 @@ package hu.qgears.crossref;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.function.Supplier;
 
 import hu.qgears.commons.MultiMapHashToHashSetImpl;
 import hu.qgears.commons.MultiMapTreeImpl;
@@ -135,6 +137,7 @@ public class CrossRefManager {
 		// References are processed.
 		while(toResolve.size()>0)
 		{
+			System.out.println("To resolve: "+toResolve.size());
 			Set<Ref> rs=toResolve;
 			toResolve=new HashSet<>();
 			for(Ref r: rs)
@@ -437,7 +440,35 @@ public class CrossRefManager {
 	/**
 	 * Free to all cache.
 	 */
-	public MultiMapHashToHashSetImpl<String, Object> caches=new MultiMapHashToHashSetImpl<>();
+	private HashMap<Object, Object> userObjects=new HashMap<>();
+	
+	/** Get a user attached object by a key. Multi thread safe.
+	 * @param key
+	 * @return
+	 */
+	public Object getUserObject(Object key)
+	{
+		synchronized (userObjects) {
+			return userObjects.get(key);
+		}
+	}
+	/** Get a user attached object with lazy creation. Multi thread safe. Creation is called from a synchronized block! Do not do more synchronization within the supplier to avoid deadlock
+	 * @param key
+	 * @param creatorOfUserObject
+	 * @return
+	 */
+	public Object getUserObjectAndSetIfNotExists(Object key, Supplier<Object> creatorOfUserObject)
+	{
+		synchronized (userObjects) {
+			Object ret=userObjects.get(key);
+			if(ret==null)
+			{
+				ret=creatorOfUserObject.get();
+				userObjects.put(key, ret);
+			}
+			return ret;
+		}
+	}
 	/**
 	 * Called when a document has change notifications.
 	 * @param doc
