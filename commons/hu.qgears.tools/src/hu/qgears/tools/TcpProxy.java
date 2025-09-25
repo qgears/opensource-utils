@@ -29,6 +29,8 @@ public class TcpProxy extends AbstractTool
 		public String connectHost;
 		@JOHelp("Port to connect to.")
 		public int connectPort;
+		@JOHelp("Automatically flush datastream after each transferred block.")
+		public boolean autoFlush;
 		@Override
 		public void validate() {
 			if(serverHost==null||serverPort==0)
@@ -84,9 +86,13 @@ public class TcpProxy extends AbstractTool
 				Closer c=new Closer(new Socket[]{connectSocket, s});
 				File folder=new File(a.log, ""+System.currentTimeMillis()+"_"+(counter++));
 				folder.mkdirs();
-				new StreamTeeConnector().start(is, new OutputStream[]{connectSocket.getOutputStream(),
+				new StreamTeeConnector()
+					.setAutoFlush(a.autoFlush)
+					.start(is, new OutputStream[]{connectSocket.getOutputStream(),
 						new FileOutputStream(new File(folder, "request"))}).addOnReadyHandler(c);
-				new StreamTeeConnector().start(connectSocket.getInputStream(), new OutputStream[]{os,
+				new StreamTeeConnector()
+					.setAutoFlush(a.autoFlush)
+					.start(connectSocket.getInputStream(), new OutputStream[]{os,
 						new FileOutputStream(new File(folder, "response"))}).addOnReadyHandler(c);;
 			} catch (IOException e) {
 				e.printStackTrace();

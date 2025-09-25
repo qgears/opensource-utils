@@ -9,6 +9,7 @@ import hu.qgears.commons.UtilFile;
 import hu.qgears.commons.signal.SignalFutureWrapper;
 
 public class StreamTeeConnector {
+	private boolean autoFlush=false;
 	public SignalFutureWrapper<Object> start(final InputStream is, final OutputStream[] oss)
 	{
 		final SignalFutureWrapper<Object> ret=new SignalFutureWrapper<>();
@@ -41,6 +42,10 @@ public class StreamTeeConnector {
 					for(OutputStream os: oss)
 					{
 						os.write(buffer, 0, n);
+						if(autoFlush)
+						{
+							os.flush();
+						}
 					}
 				}
 			}
@@ -60,5 +65,9 @@ public class StreamTeeConnector {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	public StreamTeeConnector setAutoFlush(boolean autoFlush) {
+		this.autoFlush = autoFlush;
+		return this;
 	}
 }

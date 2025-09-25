@@ -98,7 +98,7 @@ public class GitToZip extends AbstractTool
 				    	try
 				    	{
 				            ObjectId objectId = treeWalk.getObjectId(0);
-				            if(repository.hasObject(objectId))
+				            if(repository.getObjectDatabase().has(objectId))
 				            {
 								ObjectLoader loader = repository.open(objectId);
 								loader.copyTo(zos);
