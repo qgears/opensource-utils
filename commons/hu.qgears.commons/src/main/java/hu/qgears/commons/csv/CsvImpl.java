@@ -39,10 +39,14 @@ public class CsvImpl implements CsvEditor, CsvContent{
 		if (maxColLengs.containsKey(colCnt)) {
 			mx = maxColLengs.get(colCnt);
 		}
-		if (getLineCount() >1) {
+		if (3 <= getLineCount()) {
 			maxColLengs.put(colCnt,Math.max(mx, length));
 		} else {
-			//skip first line, typically headers
+			//the first line is typically headers
+			//let's be in a consistent state, even if there is only headers and no data
+			//let's be in a consistent state, even if the no. of columns in headers and data do not match
+			//let's allow the first data line to disregard the headers' widths
+			maxColLengs.put(colCnt, length);
 		}
 	}
 
