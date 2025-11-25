@@ -48,6 +48,6 @@
 	</platform>
 	<platform name="Mac OS X">
 		<lib id="libqpng" path="libqpng-macos-aarch64.dylib" 
-				installPath="/opt/qgears/libqpng.dylib" />
+				installPath="/opt/qgears/libqpng-macos-aarch64.dylib" />
 	</platform>
 </natives-def>

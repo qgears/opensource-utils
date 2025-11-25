@@ -91,6 +91,36 @@
 				<version-postfix/>
 			</properties>
 		</profile>
+		<profile>
+			<id>lwjgl3mode</id>
+			<activation>
+				<property>
+					<name>!forceLwjgl2</name>
+				</property>
+			</activation>
+			<dependencies>
+				<dependency>
+					<groupId>hu.qgears</groupId>
+					<artifactId>lwjgl3.int</artifactId>
+					<version>${internal-dep-version}</version>
+				</dependency>
+			</dependencies>
+		</profile>
+		<profile>
+		<id>lwjgl2mode</id>
+			<activation>
+				<property>
+					<name>forceLwjgl2</name>
+				</property>
+			</activation>
+			<dependencies>
+				<dependency>
+					<groupId>hu.qgears</groupId>
+					<artifactId>lwjgl.fork</artifactId>
+					<version>${internal-dep-version}</version>
+				</dependency>
+			</dependencies>
+		</profile>
 	</profiles>
 	<dependencies>
 		<dependency>
@@ -104,11 +134,6 @@
 			<version>${internal-dep-version}</version>
 		</dependency>
 		<dependency>
-			<groupId>hu.qgears</groupId>
-			<artifactId>lwjgl3.int</artifactId>
-			<version>${internal-dep-version}</version>
-		</dependency>
-		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>${junit-version}</version>
@@ -117,7 +142,7 @@
 		<dependency>
 			<groupId>hu.qgears</groupId>
 			<artifactId>hu.qgears.commons</artifactId>
-			<version>12.1.1-SNAPSHOT</version>
+			<version>${internal-dep-version}</version>
 		</dependency>
 	</dependencies>
 	

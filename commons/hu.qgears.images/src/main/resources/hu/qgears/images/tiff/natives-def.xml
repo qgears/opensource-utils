@@ -34,4 +34,8 @@
 			<lib path="qtiffloader64.dll" />
 		</platform>
 	</platform>
+	<platform name="Mac OS X">
+		<lib id="qtiffloader" path="qtiffloader-macos-aarch64.dylib" 
+				installPath="/opt/qgears/qtiffloader-macos-aarch64.dylib" />
+	</platform>
 </natives-def>

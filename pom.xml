@@ -14,7 +14,6 @@
 		<module>commons/hu.qgears.shm</module>
 		<module>commons/hu.qgears.images</module>
 		<module>commons/hu.qgears.opengl.commons</module>
-		<module>thirdparty/lwjgl.fork</module>
 		<module>commons/hu.qgears.parser</module>
 		<module>commons/hu.qgears.crossref</module>
 		<module>coolrmi/hu.qgears.coolrmi</module>
@@ -41,4 +40,29 @@ TODO mavenify these
                     </plugin>
             </plugins>
     </build>
+<profiles>
+	<profile>
+		<id>lwjgl3mode</id>
+			<activation>
+				<property>
+					<name>!forceLwjgl2</name>
+				</property>
+			</activation>
+			<modules>
+				<module>thirdparty/lwjgl3.int</module>
+			</modules>
+		</profile>
+		<profile>
+		<id>lwjgl2mode</id>
+			<activation>
+				<property>
+					<name>forceLwjgl2</name>
+					<value>true</value>
+				</property>
+			</activation>
+			<modules>
+				<module>thirdparty/lwjgl.fork</module>
+			</modules>
+		</profile>
+	</profiles>
 </project>

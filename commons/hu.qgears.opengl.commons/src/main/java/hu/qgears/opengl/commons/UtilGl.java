@@ -21,6 +21,7 @@ import org.lwjgl.util.vector.Vector4f;
 import hu.qgears.images.SizeInt;
 import hu.qgears.opengl.commons.context.EBlendFunc;
 import hu.qgears.opengl.commons.context.RGlContext;
+import lwjgl.standalone.LwjglCompat;
 
 
 /**
@@ -771,14 +772,10 @@ public class UtilGl {
 
 
 	public static void glVertexPointer(int size, int stride, FloatBuffer m) {
-		GL11.glVertexPointer(size, stride,m);
-		//LWJGL3
-		GL11.glVertexPointer(size, GL11.GL_FLOAT, stride, myBuffer);
+		LwjglCompat.glVertexPointer(size, stride,m);
 	}
 
 	public static void glLoadMatrix(FloatBuffer m) {
-		GL11.glLoadMatrix(m);
-		//LWJGL3
-		GL11.glLoadMatrixf(m);
+		LwjglCompat.glLoadMatrix(m);
 	}
 }
