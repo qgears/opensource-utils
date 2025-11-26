@@ -138,19 +138,19 @@ METHODPREFIX(CLASS, void, nativeTest)(ST_ARGS)
 	
 	glutEnterGameMode(); //set glut to fullscreen using the settings in the line above
 
-	mlog("glewInit");
-	GLenum err = glewInit();
-	if (GLEW_OK != err)
-	{
-		/* Problem: glewInit failed, something is seriously wrong. */
-		char msg[STACK_BUF_SIZE];
-		snprintf(msg, STACK_BUF_SIZE, "GLEW initialization error: %s\n", glewGetErrorString(err));
-		fprintf(stderr, "%s", msg);
-		fflush(stderr);
-		glutDestroyWindow(glutGetWindow());
-		JNU_ThrowByName(env, EXCCLASS, "");
-		return;
-	}
+	// mlog("glewInit");
+	// GLenum err = glewInit();
+	// if (GLEW_OK != err)
+	// {
+	// 	/* Problem: glewInit failed, something is seriously wrong. */
+	// 	char msg[STACK_BUF_SIZE];
+	// 	snprintf(msg, STACK_BUF_SIZE, "GLEW initialization error: %s\n", glewGetErrorString(err));
+	// 	fprintf(stderr, "%s", msg);
+	// 	fflush(stderr);
+	// 	glutDestroyWindow(glutGetWindow());
+	// 	JNU_ThrowByName(env, EXCCLASS, "");
+	// 	return;
+	// }
 	mlog("setupVSync");
 	setupVSync(1);
 	mlog("Do loop");
@@ -186,22 +186,27 @@ METHODPREFIX(CLASS, void, nativeInit0)(ST_ARGS)
 
 	glutEnterGameMode(); //set glut to fullscreen using the settings in the line above
 
-	mlog("glewInit");
-	GLenum err = glewInit();
-	if (GLEW_OK != err)
-	{
-		/* Problem: glewInit failed, something is seriously wrong. */
-		char msg[STACK_BUF_SIZE];
-		snprintf(msg, STACK_BUF_SIZE,"GLEW initialization error: %s\n", glewGetErrorString(err));
-		fprintf(stderr, "%s", msg);
-		fflush(stderr);
-		glutDestroyWindow(glutGetWindow());
-		JNU_ThrowByName(env, EXCCLASS, "");
-		return;
-	}
+	// mlog("glewInit");
+	// GLenum err = glewInit();
+	// if (GLEW_OK != err)
+	// {
+	// 	/* Problem: glewInit failed, something is seriously wrong. */
+	// 	char msg[STACK_BUF_SIZE];
+	// 	snprintf(msg, STACK_BUF_SIZE,"GLEW initialization error: %s\n", glewGetErrorString(err));
+	// 	fprintf(stderr, "%s", msg);
+	// 	fflush(stderr);
+	// 	glutDestroyWindow(glutGetWindow());
+	// 	JNU_ThrowByName(env, EXCCLASS, "");
+	// 	return;
+	// }
 	mlog("setupVSync");
 	setupVSync(1);
 }
+
+void render(void){
+
+}
+
 METHODPREFIX(CLASS, void, init)(ST_ARGS)
 {
 	mlog("Hello");
@@ -355,20 +360,22 @@ METHODPREFIX(CLASS, void, nativeInit)(ST_ARGS, jboolean fullscreen, jint width, 
 	glutMotionFunc(motionFunc);
 	glutPassiveMotionFunc(motionFunc);
 	glutMouseFunc(mouseFunc);
+	
+	glutDisplayFunc(render);
 
-	mlog("glewInit");
-	GLenum err = glewInit();
-	if (GLEW_OK != err)
-	{
-		/* Problem: glewInit failed, something is seriously wrong. */
-		char msg[STACK_BUF_SIZE];
-		snprintf(msg, STACK_BUF_SIZE, "GLEW initialization error: %s\n", glewGetErrorString(err));
-		fprintf(stderr, "%s", msg);
-		fflush(stderr);
-		glutDestroyWindow(glutGetWindow());
-		JNU_ThrowByName(env, EXCCLASS, "");
-		return;
-	}
+	// mlog("glewInit");
+	// GLenum err = glewInit();
+	// if (GLEW_OK != err)
+	// {
+	// 	/* Problem: glewInit failed, something is seriously wrong. */
+	// 	char msg[STACK_BUF_SIZE];
+	// 	snprintf(msg, STACK_BUF_SIZE, "GLEW initialization error: %s\n", glewGetErrorString(err));
+	// 	fprintf(stderr, "%s", msg);
+	// 	fflush(stderr);
+	// 	glutDestroyWindow(glutGetWindow());
+	// 	JNU_ThrowByName(env, EXCCLASS, "");
+	// 	return;
+	// }
 //	mlog("setupVSync");
 //	setupVSync();
 }
@@ -435,3 +442,10 @@ void mlogImpl(const char * str)
 	printf("%s\n", str);
 	fflush(stdout);
 }
+
+
+METHODPREFIX(CLASS,jlong,getFunctionAddressNative)(ST_ARGS,jobject functionName) {
+	void * functionNameBytes=env->GetDirectBufferAddress(functionName);
+	return (jlong)glutGetProcAddress((char*)functionNameBytes);
+}
+

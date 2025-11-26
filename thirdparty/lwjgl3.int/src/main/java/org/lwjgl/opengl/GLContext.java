@@ -1,6 +1,7 @@
 package org.lwjgl.opengl;
 
 import org.lwjgl.LWJGLException;
+import org.lwjgl.system.FunctionProvider;
 
 /**
  * Try to implement the functionality of {@link GLContext} API from LWJGL 2.x
@@ -20,7 +21,11 @@ public class GLContext {
 		if (ctx != null) {
 			if (!created) {
 				created = true;
-				GL.create();
+				if (ctx instanceof FunctionProvider) {
+					GL.create((FunctionProvider) ctx);
+				} else {
+					GL.create();
+				}
 			}
 			GL.createCapabilities();
 		} else {

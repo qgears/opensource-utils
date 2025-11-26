@@ -15,29 +15,15 @@ ifndef OUTPUTDIR
     OUTPUTDIR = ../../src/main/resources/hu/qgears/opengl/glut
 endif
 
-# #Add -DQGLUT_LOG to enable logging in generated binaries
-# gnu_c: 
-# 	g++ -o $(OUTPUTDIR)/$(SO_NAME) \
-# 		-fPIC -D_REENTRANT -shared \
-# 		${JNI_INCLUDE} \
-# 		-DQGLUT_LOG=1 \
-# 		../QGlut.cpp ../QGlutMac.cpp ../jniutil.cpp \
-# 		-framework OpenGL -framework GLUT 
-	
 gnu_c: 
 	g++ -o $(OUTPUTDIR)/$(SO_NAME) \
 		-fPIC -D_REENTRANT -shared \
 		${JNI_INCLUDE} -I $(HOMEBREW)/include \
 		-DQGLUT_LOG=1 \
 		../QGlut.cpp ../QGlutMac.cpp ../jniutil.cpp \
-		-framework OpenGL \
 		-L $(HOMEBREW)/lib \
-		-lglut -lGLU -lGLEW -lGL
+		-lglut -lGLU -lGL
 	
-#		$(FREEGLUT_BINDIR)/*.o -L$(FREEGLUT_BINDIR) $(FREEGLUT_BINDIR)/libglut.a 
-
-	
-test : ../test.c
-	gcc -g -o ../test ../test.c  \
-	-I /System/Library/Frameworks/OpenGL.framework/Headers \
-	-framework OpenGL -framework GLUT 
+# 	-framework OpenGL -framework GLUT 
+# Use to compile agains the build in Macos frameworks : in theory we could also use these libraries instead of freeglut, but it would require a completely different port
+# glutMainLoopEvent() from freeglut can be polled. But in framework GLUT versions glutMainLoopEvent is not available, only glutMainLoop() which does not support polling (callbacks)
