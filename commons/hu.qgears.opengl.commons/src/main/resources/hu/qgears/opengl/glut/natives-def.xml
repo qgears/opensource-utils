@@ -41,4 +41,8 @@
 			<lib path="w32/libqglut32.dll" installPath="C:\opt\qgears\w32\libqglut32.dll"/>
 		</platform>
 	</platform>
+	<platform name="Mac OS X">
+		<lib id="libqglut" path="libqglut-macos-aarch64.dylib" 
+				installPath="/opt/qgears/libqglut-macos-aarch64.dylib" />
+	</platform>
 </natives-def>

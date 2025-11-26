@@ -5,6 +5,9 @@
 
 #include "QGlut.h"
 
+//definition of exit
+#include <stdlib.h>
+
 // EVENT_TYPES
 // Normal keyboard down event
 #define EVENT_KEYBOARD_DOWN 0
@@ -21,6 +24,7 @@
 
 
 #define MAX_EVENT 2048
+#define STACK_BUF_SIZE (255u)
 userEvent eventRR[MAX_EVENT];
 
 int eventReadPtr=0;
@@ -139,8 +143,8 @@ METHODPREFIX(CLASS, void, nativeTest)(ST_ARGS)
 	if (GLEW_OK != err)
 	{
 		/* Problem: glewInit failed, something is seriously wrong. */
-		char msg[255];
-		sprintf(msg, "GLEW initialization error: %s\n", glewGetErrorString(err));
+		char msg[STACK_BUF_SIZE];
+		snprintf(msg, STACK_BUF_SIZE, "GLEW initialization error: %s\n", glewGetErrorString(err));
 		fprintf(stderr, "%s", msg);
 		fflush(stderr);
 		glutDestroyWindow(glutGetWindow());
@@ -170,8 +174,8 @@ METHODPREFIX(CLASS, void, nativeInit0)(ST_ARGS)
 	int margc=0;
 	mlog("glutInit");
 	glutInit(&margc, NULL);
-  // specify the display mode to be RGB and single buffering 
-  // we use single buffering since this will be non animated
+	// specify the display mode to be RGB and single buffering 
+	// we use single buffering since this will be non animated
   	mlog("glutInitDisplayMode");
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
 
@@ -179,7 +183,7 @@ METHODPREFIX(CLASS, void, nativeInit0)(ST_ARGS)
 
 	glutGameModeString( "1024x768" ); //the settings for fullscreen mode
 	mlog("glutEnterGameMode");
-	
+
 	glutEnterGameMode(); //set glut to fullscreen using the settings in the line above
 
 	mlog("glewInit");
@@ -187,8 +191,8 @@ METHODPREFIX(CLASS, void, nativeInit0)(ST_ARGS)
 	if (GLEW_OK != err)
 	{
 		/* Problem: glewInit failed, something is seriously wrong. */
-		char msg[255];
-		sprintf(msg, "GLEW initialization error: %s\n", glewGetErrorString(err));
+		char msg[STACK_BUF_SIZE];
+		snprintf(msg, STACK_BUF_SIZE,"GLEW initialization error: %s\n", glewGetErrorString(err));
 		fprintf(stderr, "%s", msg);
 		fflush(stderr);
 		glutDestroyWindow(glutGetWindow());
@@ -329,8 +333,8 @@ METHODPREFIX(CLASS, void, nativeInit)(ST_ARGS, jboolean fullscreen, jint width, 
     if(fullscreen)
 	{
 		mlog("glutGameModeString");
-		char modestring[255];
-		sprintf(modestring, "%dx%d", width, height);
+		char modestring[STACK_BUF_SIZE];
+		snprintf(modestring, STACK_BUF_SIZE, "%dx%d", width, height);
 		glutGameModeString( modestring ); //the settings for fullscreen mode
 		mlog("glutEnterGameMode");
 	
@@ -339,7 +343,7 @@ METHODPREFIX(CLASS, void, nativeInit)(ST_ARGS, jboolean fullscreen, jint width, 
 	{
 		glutInitWindowSize (width, height);
 //		glutInitDisplayMode ( GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
-		glutCreateWindow ("");
+		glutCreateWindow ("s");
 	}
 	
 	/// Listeners must be registered _after_ window is created!
@@ -357,8 +361,8 @@ METHODPREFIX(CLASS, void, nativeInit)(ST_ARGS, jboolean fullscreen, jint width, 
 	if (GLEW_OK != err)
 	{
 		/* Problem: glewInit failed, something is seriously wrong. */
-		char msg[255];
-		sprintf(msg, "GLEW initialization error: %s\n", glewGetErrorString(err));
+		char msg[STACK_BUF_SIZE];
+		snprintf(msg, STACK_BUF_SIZE, "GLEW initialization error: %s\n", glewGetErrorString(err));
 		fprintf(stderr, "%s", msg);
 		fflush(stderr);
 		glutDestroyWindow(glutGetWindow());
