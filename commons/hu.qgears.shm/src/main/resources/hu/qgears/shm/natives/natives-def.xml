@@ -43,4 +43,8 @@
 			<lib path="shm.dll" />
 		</platform>
 	</platform>
+	<platform name="Mac OS X">
+		<lib id="libshm" path="libshm-macos-aarch64.dylib" 
+				installPath="/opt/qgears/libshm-macos-aarch64.dylib" />
+	</platform>
 </natives-def>
