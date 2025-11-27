@@ -24,7 +24,6 @@
 
 
 #define MAX_EVENT 2048
-#define STACK_BUF_SIZE (255u)
 userEvent eventRR[MAX_EVENT];
 
 int eventReadPtr=0;
@@ -138,19 +137,9 @@ METHODPREFIX(CLASS, void, nativeTest)(ST_ARGS)
 	
 	glutEnterGameMode(); //set glut to fullscreen using the settings in the line above
 
-	// mlog("glewInit");
-	// GLenum err = glewInit();
-	// if (GLEW_OK != err)
-	// {
-	// 	/* Problem: glewInit failed, something is seriously wrong. */
-	// 	char msg[STACK_BUF_SIZE];
-	// 	snprintf(msg, STACK_BUF_SIZE, "GLEW initialization error: %s\n", glewGetErrorString(err));
-	// 	fprintf(stderr, "%s", msg);
-	// 	fflush(stderr);
-	// 	glutDestroyWindow(glutGetWindow());
-	// 	JNU_ThrowByName(env, EXCCLASS, "");
-	// 	return;
-	// }
+	if (initializeGlew() == false ){
+		JNU_ThrowByName(env, EXCCLASS, "Glew init failed. see stderr.");
+	}
 	mlog("setupVSync");
 	setupVSync(1);
 	mlog("Do loop");
@@ -186,25 +175,12 @@ METHODPREFIX(CLASS, void, nativeInit0)(ST_ARGS)
 
 	glutEnterGameMode(); //set glut to fullscreen using the settings in the line above
 
-	// mlog("glewInit");
-	// GLenum err = glewInit();
-	// if (GLEW_OK != err)
-	// {
-	// 	/* Problem: glewInit failed, something is seriously wrong. */
-	// 	char msg[STACK_BUF_SIZE];
-	// 	snprintf(msg, STACK_BUF_SIZE,"GLEW initialization error: %s\n", glewGetErrorString(err));
-	// 	fprintf(stderr, "%s", msg);
-	// 	fflush(stderr);
-	// 	glutDestroyWindow(glutGetWindow());
-	// 	JNU_ThrowByName(env, EXCCLASS, "");
-	// 	return;
-	// }
+	if (initializeGlew() == false ){
+		JNU_ThrowByName(env, EXCCLASS, "Glew init failed. see stderr.");
+	}
+
 	mlog("setupVSync");
 	setupVSync(1);
-}
-
-void render(void){
-
 }
 
 METHODPREFIX(CLASS, void, init)(ST_ARGS)
@@ -361,21 +337,10 @@ METHODPREFIX(CLASS, void, nativeInit)(ST_ARGS, jboolean fullscreen, jint width, 
 	glutPassiveMotionFunc(motionFunc);
 	glutMouseFunc(mouseFunc);
 	
-	glutDisplayFunc(render);
-
-	// mlog("glewInit");
-	// GLenum err = glewInit();
-	// if (GLEW_OK != err)
-	// {
-	// 	/* Problem: glewInit failed, something is seriously wrong. */
-	// 	char msg[STACK_BUF_SIZE];
-	// 	snprintf(msg, STACK_BUF_SIZE, "GLEW initialization error: %s\n", glewGetErrorString(err));
-	// 	fprintf(stderr, "%s", msg);
-	// 	fflush(stderr);
-	// 	glutDestroyWindow(glutGetWindow());
-	// 	JNU_ThrowByName(env, EXCCLASS, "");
-	// 	return;
-	// }
+	
+	if (initializeGlew() == false ){
+		JNU_ThrowByName(env, EXCCLASS, "Glew init failed. see stderr.");
+	}
 //	mlog("setupVSync");
 //	setupVSync();
 }

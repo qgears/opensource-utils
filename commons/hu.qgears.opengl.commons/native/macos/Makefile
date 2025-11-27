@@ -15,7 +15,7 @@ ifndef OUTPUTDIR
     OUTPUTDIR = ../../src/main/resources/hu/qgears/opengl/glut
 endif
 
-gnu_c: 
+all: 
 	g++ -o $(OUTPUTDIR)/$(SO_NAME) \
 		-fPIC -D_REENTRANT -shared \
 		${JNI_INCLUDE} -I $(HOMEBREW)/include \

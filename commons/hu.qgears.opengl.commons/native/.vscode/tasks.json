@@ -1,0 +1,28 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "shell",
+      "label": "Make libqglut",
+      "command": "make",
+
+      "linux": {
+        "args": [
+          "-C",
+          "linux"
+        ],
+      },
+      "osx": {
+        "args": [
+          "-C",
+          "macos"
+        ],
+      },
+           
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+    }
+  ]
+}
