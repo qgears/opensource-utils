@@ -34,6 +34,9 @@
 			</platform>
 			<lib id="libshm" path="libshm-i686.so" installPath="/opt/qgears/libshm-i686.so"/>
 		</platform>
+		<platform arch="(arm|aarch)64">
+			<lib id="libshm" path="libshm-debian-13-aarch64.so" installPath="/opt/qgears/libshm-debian-13-aarch64.so" />
+		</platform>
 	</platform>
 	<platform name="Windows .+">
 		<platform arch="x86|i[3-6]86">
