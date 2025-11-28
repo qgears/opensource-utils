@@ -68,6 +68,9 @@
 					<failIfNoTests>false</failIfNoTests>
 					<!-- Killing to long tests-->
 					<forkedProcessTimeoutInSeconds>${test-timeout-sec}</forkedProcessTimeoutInSeconds>
+					<systemPropertyVariables>
+						<log4j.configuration>file://${project.basedir}/${project.parent.relativePath}/log4j.conf</log4j.configuration>
+					</systemPropertyVariables>
 				</configuration>
 	       </plugin>
 			<plugin>
