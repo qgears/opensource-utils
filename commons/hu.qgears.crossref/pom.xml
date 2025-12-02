@@ -17,13 +17,10 @@
 		<dependency>
 			<groupId>hu.qgears</groupId>
 			<artifactId>hu.qgears.commons</artifactId>
-			<version>${internal-dep-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>${junit-version}</version>
-			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>

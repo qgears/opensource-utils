@@ -6,7 +6,7 @@
 		<version>12.2.0-SNAPSHOT</version>
 		<relativePath>../../build/opensource-utils-parent/</relativePath>
 	</parent>
-	
+
 	<artifactId>hu.qgears.opengl.commons</artifactId>
 	
 	<packaging>jar</packaging>
@@ -34,7 +34,6 @@
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>exec-maven-plugin</artifactId>
-						<version>${exec-plugin-version}</version>
 						<!-- Inheritance must be disabled, because the exec plugin run in all submodules by default-->
 						<inherited>false</inherited>
 						<executions>
@@ -102,7 +101,6 @@
 				<dependency>
 					<groupId>hu.qgears</groupId>
 					<artifactId>lwjgl3.int</artifactId>
-					<version>${internal-dep-version}</version>
 				</dependency>
 			</dependencies>
 		</profile>
@@ -117,7 +115,6 @@
 				<dependency>
 					<groupId>hu.qgears</groupId>
 					<artifactId>lwjgl.fork</artifactId>
-					<version>${internal-dep-version}</version>
 				</dependency>
 			</dependencies>
 		</profile>
@@ -126,23 +123,18 @@
 		<dependency>
 			<groupId>hu.qgears</groupId>
 			<artifactId>hu.qgears.images</artifactId>
-			<version>${internal-dep-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>hu.qgears</groupId>
 			<artifactId>hu.qgears.nativeloader</artifactId>
-			<version>${internal-dep-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>${junit-version}</version>
-			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>hu.qgears</groupId>
 			<artifactId>hu.qgears.commons</artifactId>
-			<version>${internal-dep-version}</version>
 		</dependency>
 	</dependencies>
 	

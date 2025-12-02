@@ -17,7 +17,6 @@
 		<dependency>
 			<groupId>hu.qgears</groupId>
 			<artifactId>hu.qgears.commons</artifactId>
-			<version>${internal-dep-version}</version>
 		</dependency>
 	</dependencies>
 </project>
