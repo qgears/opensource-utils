@@ -4,10 +4,9 @@ import java.io.StringWriter;
 import java.lang.reflect.Field;
 
 import org.apache.log4j.Logger;
-import org.lwjgl.opengl.GL;
-import org.lwjgl.opengl.GLCapabilities;
 
 import hu.qgears.opengl.osmesa.Log4Init;
+import lwjgl.standalone.LwjglCompat;
 
 
 public class QueryCaps extends AbstractOpenglApplication2 {
@@ -24,8 +23,8 @@ public class QueryCaps extends AbstractOpenglApplication2 {
 	}
 	@Override
 	protected void logic() {
-		GLCapabilities cc = GL.getCapabilities();
-		Field[] fs=GLCapabilities.class.getFields();
+		Object cc = LwjglCompat.getCapabilities();
+		Field[] fs=cc.getClass().getFields();
 		StringWriter sw=new StringWriter();
 		for(Field f:fs)
 		{

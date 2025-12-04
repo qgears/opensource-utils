@@ -12,6 +12,39 @@
 	<packaging>jar</packaging>
 	<description>OpenGL helper methods and object oriented abstraction layer over OpenGL API.</description>
 	
+	<properties>
+		<lwjglMode>lwjgl3</lwjglMode>
+	</properties>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>3.0.0</version>
+				<executions>
+					<execution>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>src/main/${lwjglMode}</source>
+							</sources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<classifier>${lwjglMode}</classifier>
+				</configuration>
+			</plugin>
+        
+		</plugins>
+	</build>
 	<profiles>
 		<profile>
 			<!-- Build profile for enable building C libs on current platform
@@ -91,24 +124,10 @@
 			</properties>
 		</profile>
 		<profile>
-			<id>lwjgl3mode</id>
+			<id>lwjgl2mode</id>
 			<activation>
 				<property>
-					<name>!forceLwjgl2</name>
-				</property>
-			</activation>
-			<dependencies>
-				<dependency>
-					<groupId>hu.qgears</groupId>
-					<artifactId>lwjgl3.int</artifactId>
-				</dependency>
-			</dependencies>
-		</profile>
-		<profile>
-		<id>lwjgl2mode</id>
-			<activation>
-				<property>
-					<name>forceLwjgl2</name>
+					<name>lwjgl2mode</name>
 				</property>
 			</activation>
 			<dependencies>
@@ -117,6 +136,27 @@
 					<artifactId>lwjgl.fork</artifactId>
 				</dependency>
 			</dependencies>
+			<properties>
+				<lwjglMode>lwjgl2</lwjglMode>
+				<lwjgl2mode>true</lwjgl2mode>
+			</properties>
+		</profile>
+		<profile>
+			<id>lwjgl3mode</id>
+			<activation>
+				<property>
+					<name>!lwjgl2mode</name>
+				</property>
+			</activation>
+			<dependencies>
+				<dependency>
+					<groupId>hu.qgears</groupId>
+					<artifactId>lwjgl3.int</artifactId>
+				</dependency>
+			</dependencies>
+			<properties>
+				<lwjglMode>lwjgl3</lwjglMode>
+			</properties>
 		</profile>
 	</profiles>
 	<dependencies>
@@ -137,5 +177,4 @@
 			<artifactId>hu.qgears.commons</artifactId>
 		</dependency>
 	</dependencies>
-	
 </project>

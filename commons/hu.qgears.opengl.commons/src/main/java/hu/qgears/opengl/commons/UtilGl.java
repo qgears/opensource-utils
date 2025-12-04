@@ -203,7 +203,7 @@ public class UtilGl {
 		fb.clear();
 		m.store(fb);
 		fb.flip();
-		GL11.glMultMatrixf(fb);
+		LwjglCompat.glMultMatrix(fb);
 	}
 	/**
 	 * 
@@ -239,7 +239,7 @@ public class UtilGl {
 		if(maxTextureSize<0)
 		{
 			tempIntBuffer.clear();
-			GL11.glGetIntegerv(GL11.GL_MAX_TEXTURE_SIZE, tempIntBuffer);
+			LwjglCompat.glGetInteger(GL11.GL_MAX_TEXTURE_SIZE, tempIntBuffer);
 			maxTextureSize=tempIntBuffer.get(0);
 		}
 		return maxTextureSize;
@@ -331,7 +331,7 @@ public class UtilGl {
 		
 		fb.flip();
 		GL11.glMatrixMode(matrixMode);
-		GL11.glMultMatrixf(fb);
+		LwjglCompat.glMultMatrix(fb);
 	}
 	/**
 	 * Transformation that moves an object an other coordinate system.
@@ -369,7 +369,7 @@ public class UtilGl {
 		
 		fb.flip();
 		GL11.glMatrixMode(matrixMode);
-		GL11.glMultMatrixf(fb);
+		LwjglCompat.glMultMatrix(fb);
 	}
 	/**
 	 * Use RGlContext.setColor instead
@@ -449,9 +449,9 @@ public class UtilGl {
 	 */
 	public static void setMaterial(Vector3f color) {
 		
-		GL11.glMaterialfv(GL11.GL_FRONT_AND_BACK, GL11.GL_SPECULAR, wrapTemp(new float[]{color.x, color.y, color.z,1f}));
-		GL11.glMaterialfv(GL11.GL_FRONT_AND_BACK, GL11.GL_EMISSION, wrapTemp(new float[]{0, 0, 0,1f}));
-		GL11.glMaterialfv(GL11.GL_FRONT_AND_BACK, GL11.GL_AMBIENT, wrapTemp(new float[]{color.x, color.y, color.z,1f}));
+		LwjglCompat.glMaterial(GL11.GL_FRONT_AND_BACK, GL11.GL_SPECULAR, wrapTemp(new float[]{color.x, color.y, color.z,1f}));
+		LwjglCompat.glMaterial(GL11.GL_FRONT_AND_BACK, GL11.GL_EMISSION, wrapTemp(new float[]{0, 0, 0,1f}));
+		LwjglCompat.glMaterial(GL11.GL_FRONT_AND_BACK, GL11.GL_AMBIENT, wrapTemp(new float[]{color.x, color.y, color.z,1f}));
 		UtilGl.setColor(color);
 		GL11.glMaterialf(GL11.GL_FRONT_AND_BACK, GL11.GL_SHININESS, 50f);
 	}

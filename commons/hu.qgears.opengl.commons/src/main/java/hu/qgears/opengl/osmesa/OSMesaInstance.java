@@ -18,11 +18,7 @@ public class OSMesaInstance {
 	
 
 	public void bindLwjglNatives() {
-		BaseAccessor.initLwjglNatives();
 		BaseAccessor.initLwjglNatives(ELwjglOpenGlImpl.OSMESA);
 	}
 
-	public void initLwjgl() {
-		//TODO should be deleted?
-	}
 }

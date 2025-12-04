@@ -1,15 +1,5 @@
 package hu.qgears.opengl.commons;
 
-import hu.qgears.commons.IDisposeable;
-import hu.qgears.commons.mem.DefaultJavaNativeMemory;
-import hu.qgears.images.ENativeImageAlphaStorageFormat;
-import hu.qgears.images.ENativeImageComponentOrder;
-import hu.qgears.images.NativeImage;
-import hu.qgears.images.SizeInt;
-import hu.qgears.images.text.RGBAColor;
-import hu.qgears.opengl.commons.context.EBlendFunc;
-import hu.qgears.opengl.commons.context.RGlContext;
-
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
@@ -19,10 +9,20 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GL30;
-import org.lwjgl.opengl.GLCapabilities;
 import org.lwjgl.opengl.GLContext;
 import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
+
+import hu.qgears.commons.IDisposeable;
+import hu.qgears.commons.mem.DefaultJavaNativeMemory;
+import hu.qgears.images.ENativeImageAlphaStorageFormat;
+import hu.qgears.images.ENativeImageComponentOrder;
+import hu.qgears.images.NativeImage;
+import hu.qgears.images.SizeInt;
+import hu.qgears.images.text.RGBAColor;
+import hu.qgears.opengl.commons.context.EBlendFunc;
+import hu.qgears.opengl.commons.context.RGlContext;
+import lwjgl.standalone.LwjglCompat;
 
 
 /**
@@ -695,7 +695,7 @@ public class Texture implements IDisposeable {
 		this.sourceTextureWrapType=wrapType;
 		if(EMipMapType.standard.equals(mtype))
 		{
-			GLCapabilities cc = GLContext.getCapabilities();
+			var cc = LwjglCompat.getCapabilities();
 			if(!cc.OpenGL30&&!cc.GL_EXT_framebuffer_object)
 			{
 				mtype=EMipMapType.none;
@@ -848,7 +848,7 @@ public class Texture implements IDisposeable {
 	 */
 	public void generateMipMap()
 	{
-		GLCapabilities cc = GLContext.getCapabilities();
+		var cc = LwjglCompat.getCapabilities();
 		if(cc.OpenGL30)
 		{
 			selectTecture();
