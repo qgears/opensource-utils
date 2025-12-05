@@ -19,7 +19,7 @@ import hu.qgears.images.SizeInt;
 import hu.qgears.opengl.commons.IGlContextProvider;
 import lwjgl.standalone.BaseAccessor;
 
-public class GLContextProviderLwjgl implements IGlContextProvider{
+public class GLContextProviderLwjgl implements IGlContextProvider,ILwjgl3Marker {
 	private static final Logger LOG = Logger
 			.getLogger(GLContextProviderLwjgl.class);
 

@@ -14,6 +14,7 @@
 		<module>commons/hu.qgears.shm</module>
 		<module>commons/hu.qgears.images</module>
 		<module>commons/hu.qgears.opengl.commons</module>
+		<module>commons/hu.qgears.opengl.commons/lwjgl2</module>
 		<module>commons/hu.qgears.parser</module>
 		<module>commons/hu.qgears.crossref</module>
 		<module>coolrmi/hu.qgears.coolrmi</module>

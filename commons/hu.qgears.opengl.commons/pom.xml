@@ -2,128 +2,25 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>hu.qgears</groupId>
-		<artifactId>opensource-utils-parent</artifactId>
+		<artifactId>hu.qgears.opengl.commons.base</artifactId>
 		<version>12.2.0-SNAPSHOT</version>
-		<relativePath>../../build/opensource-utils-parent/</relativePath>
+		<relativePath>pom-base</relativePath>
 	</parent>
 
 	<artifactId>hu.qgears.opengl.commons</artifactId>
-	
 	<packaging>jar</packaging>
 	<description>OpenGL helper methods and object oriented abstraction layer over OpenGL API.</description>
-	
-	<properties>
-		<lwjglMode>lwjgl3</lwjglMode>
-	</properties>
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>build-helper-maven-plugin</artifactId>
-				<version>3.0.0</version>
-				<executions>
-					<execution>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>add-source</goal>
-						</goals>
-						<configuration>
-							<sources>
-								<source>src/main/${lwjglMode}</source>
-							</sources>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 
-			<plugin>
-				<artifactId>maven-jar-plugin</artifactId>
-				<configuration>
-					<classifier>${lwjglMode}</classifier>
-				</configuration>
-			</plugin>
-        
-		</plugins>
-	</build>
+	<properties>
+		<lwjglSrcDir>src/main/${lwjglMode}</lwjglSrcDir>
+	</properties>
+
 	<profiles>
 		<profile>
-			<!-- Build profile for enable building C libs on current platform
-				This is intended to be used on developer workspaces, where cross compiled libs 
-				for other platforms are unnecessary.
-			-->
-			<id>host-only</id>
-			<activation>
-				<property>
-					<name>cbuild</name>
-					<value>host</value>
-				</property>
-			</activation>
-			<properties>
-				<!-- Use "-nat" postfix -->
-				<version-postfix>-nat</version-postfix>
-			</properties>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>exec-maven-plugin</artifactId>
-						<!-- Inheritance must be disabled, because the exec plugin run in all submodules by default-->
-						<inherited>false</inherited>
-						<executions>
-							<execution>
-								<id>opengl-commons-natives</id>
-								<phase>generate-resources</phase>
-								<goals>
-									<goal>exec</goal>
-								</goals>
-								<configuration>
-									<executable>make</executable>
-									<workingDirectory>./native/linux</workingDirectory>
-								</configuration>
-							</execution>
-								<!-- Building OpenGL context factories for e. g.
-									* Xorgless OpenGL, 
-									* software framebuffer
-									* etc
-									
-									TODO is this necessary?
-								 -->
-<!--
-							<execution>
-								<id>opengl-context-factories</id>
-								<phase>generate-resources</phase>
-								<goals>
-									<goal>exec</goal>
-								</goals>
-								<configuration>
-									<executable>make</executable>
-									<workingDirectory>./makeall</workingDirectory>
-								</configuration>
-							</execution>
-							-->
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<!-- Build profile to package native connectors for every platform.
-			This profile intended to be used on build server, where precompiled libs are already created. -->
-			<id>cross-compile</id>
-			<activation>
-				<property>
-					<name>cbuild</name>
-					<value>cross</value>
-				</property>
-			</activation>
-			<properties>
-				<!-- Do not postfix build when cross compile is enabled 
-				There are unit tests that check all libs are packaged
-				-->
-				<version-postfix/>
-			</properties>
-		</profile>
-		<profile>
+		<!-- This profile should be activated only for eclipse : make possible to develop lwjgl2 mode
+		 To activate : Eclipse project Properties -> Maven -> Activate Maven Profiles : "lwjgl2mode,!lwjgl3mode"
+		
+		-->
 			<id>lwjgl2mode</id>
 			<activation>
 				<property>
@@ -138,7 +35,6 @@
 			</dependencies>
 			<properties>
 				<lwjglMode>lwjgl2</lwjglMode>
-				<lwjgl2mode>true</lwjgl2mode>
 			</properties>
 		</profile>
 		<profile>
@@ -159,22 +55,4 @@
 			</properties>
 		</profile>
 	</profiles>
-	<dependencies>
-		<dependency>
-			<groupId>hu.qgears</groupId>
-			<artifactId>hu.qgears.images</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>hu.qgears</groupId>
-			<artifactId>hu.qgears.nativeloader</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>hu.qgears</groupId>
-			<artifactId>hu.qgears.commons</artifactId>
-		</dependency>
-	</dependencies>
 </project>

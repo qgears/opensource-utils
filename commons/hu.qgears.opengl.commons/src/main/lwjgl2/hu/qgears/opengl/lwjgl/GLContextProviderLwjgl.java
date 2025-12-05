@@ -11,7 +11,7 @@ import hu.qgears.opengl.commons.IGlContextProvider;
 import hu.qgears.opengl.commons.input.IKeyboard;
 import lwjgl.standalone.BaseAccessor;
 
-public class GLContextProviderLwjgl implements IGlContextProvider{
+public class GLContextProviderLwjgl implements IGlContextProvider,ILwjgl2Marker {
 	private static final Logger LOG = Logger
 			.getLogger(GLContextProviderLwjgl.class);
 	
