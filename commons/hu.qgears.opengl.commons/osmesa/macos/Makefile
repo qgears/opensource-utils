@@ -1,23 +1,27 @@
-#JNI_ARCHPOSTFIX:=`uname -m | sed -e 's/x86_64/amd64/' -e 's/x86/i386/' -e 's/i686/i386/'`
-#JNI_INCLUDE:=-I/usr/lib/jvm/java-1.7.0-openjdk-${JNI_ARCHPOSTFIX}/include \
-    -I/usr/lib/jvm/java-1.7.0-openjdk-${JNI_ARCHPOSTFIX}/include/linux \
-    -I/usr/lib/jvm/java-1.8.0-openjdk-${JNI_ARCHPOSTFIX}/include \
-    -I/usr/lib/jvm/java-1.8.0-openjdk-${JNI_ARCHPOSTFIX}/include/linux \
-    -I/usr/lib/jvm/java-11-openjdk-${JNI_ARCHPOSTFIX}/include \
-    -I/usr/lib/jvm/java-11-openjdk-${JNI_ARCHPOSTFIX}/include/linux
-#POSTFIX=$(shell ../../platform_prefix.sh)${JNI_ARCHPOSTFIX}
-JNI_INCLUDE:=-I/Users/istvanrath/Apps/jdk/jdk-24.0.2.jdk/Contents/Home/include \
-	-I /Users/istvanrath/Apps/jdk/jdk-24.0.2.jdk/Contents/Home/include/darwin \
-	-I /opt/homebrew/include \
-	-I osmesa/include
-JNI_ARCHPOSTFIX=aarch64
-POSTFIX=macos-${JNI_ARCHPOSTFIX}
+JAVA_HOME=$(shell java -XshowSettings:properties -version 2>&1 | grep java.home | cut -d '=' -f2 | xargs echo)
+HOMEBREW=$(shell brew --prefix)
 
-OUTPUTDIR=../../src/main/resources/hu/qgears/opengl/osmesa/
+JNI_INCLUDE:=-I$(JAVA_HOME)/include \
+	-I $(JAVA_HOME)/include/darwin \
+	-I osmesa/include \
+	-I $(HOMEBREW)/include
 
-gnu_c:
-	g++ -o ../../src/main/resources/hu/qgears/opengl/osmesa/libqosmesa-$(POSTFIX).dylib \
+
+SONAME:=libqosmesa-macos-aarch64.dylib
+
+OUTPUTDIR=../../src/main/resources/hu/qgears/opengl/osmesa
+
+all: libs
+	g++ -o $(OUTPUTDIR)/$(SONAME) \
+	-install_name $(SONAME) \
 	-fPIC -D_REENTRANT -shared \
 	${JNI_INCLUDE_PLATFORM} ${JNI_INCLUDE} \
-	../OSMesa.cpp ../jniutil.cpp -lOSMesa -L osmesa/lib
+	../OSMesa.cpp ../jniutil.cpp -lOSMesa.8 -L osmesa/lib
 
+libs: 
+	cp osmesa/lib/libOSMesa.8.dylib $(OUTPUTDIR)/
+	cp osmesa/lib/libglapi.0.dylib $(OUTPUTDIR)/
+	cp osmesa/lib/libGL.1.dylib $(OUTPUTDIR)/
+
+clean : 
+	rm -fv $(OUTPUTDIR)/*.dylib

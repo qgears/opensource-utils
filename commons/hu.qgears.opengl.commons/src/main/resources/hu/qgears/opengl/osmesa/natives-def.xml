@@ -32,8 +32,6 @@
 	</platform>
 	<platform name="Mac OS X">
 		<lib path="libglapi.0.dylib" installPath="/opt/qgears/libglapi.0.dylib"/> 
-<!-- 		<lib path="libGLESv1_CM.1.dylib" installPath="/opt/qgears/libGLESv1_CM.1.dylib"/>
-		<lib path="libGLESv2.2.dylib" installPath="/opt/qgears/libGLESv2.2.dylib"/>		 -->
 		<lib path="libGL.1.dylib" installPath="/opt/qgears/libGL.1.dylib"/>
 		<lib path="libOSMesa.8.dylib" installPath="/opt/qgears/libOSMesa.8.dylib"/>
 		<lib id="libqosmesa" path="libqosmesa-macos-aarch64.dylib" installPath="/opt/qgears/libqosmesa.dylib" />				
