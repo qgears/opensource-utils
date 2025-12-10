@@ -1,5 +1,10 @@
+ifeq ($(JAVA_HOME),)
 JAVA_HOME=$(shell java -XshowSettings:properties -version 2>&1 | grep java.home | cut -d '=' -f2 | xargs echo)
+endif
+
+ifeq ($(HOMEBREW),)
 HOMEBREW=$(shell brew --prefix)
+endif
 
 JNI_INCLUDE:=-I$(JAVA_HOME)/include \
 	-I $(JAVA_HOME)/include/darwin \
@@ -13,9 +18,10 @@ ifndef OUTPUTDIR
 endif
 
 gnu_c:
-	g++ -o $(OUTPUTDIR)/$(SO_NAME) \
+	$(GCC_PREFIX)g++ -o $(OUTPUTDIR)/$(SO_NAME) \
+	-install_name $(SONAME) \
 	-fPIC -D_REENTRANT -shared \
 	${JNI_INCLUDE} \
 	../nativeLibpng.cpp ../jniutil.cpp \
-	-lpng -L /opt/homebrew/lib
+	-lpng -L $(HOMEBREW)/lib
 	
