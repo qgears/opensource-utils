@@ -3,7 +3,7 @@ JAVA_HOME=$(shell java -XshowSettings:properties -version 2>&1 | grep java.home 
 endif
 
 ifeq ($(HOMEBREW),)
-HOMEBREW=$(shell brew --prefix)
+HOMEBREW=$(shell brew --prefix || echo "/opt/homebrew")
 endif
 
 JNI_INCLUDE:=-I$(JAVA_HOME)/include \
@@ -17,11 +17,13 @@ ifndef OUTPUTDIR
     OUTPUTDIR = ../../../src/main/resources/hu/qgears/images/libpng
 endif
 
-gnu_c:
-	$(GCC_PREFIX)g++ -o $(OUTPUTDIR)/$(SO_NAME) \
+all:
+	$(CXX) -o $(OUTPUTDIR)/$(SO_NAME) \
 	-install_name $(SONAME) \
 	-fPIC -D_REENTRANT -shared \
 	${JNI_INCLUDE} \
 	../nativeLibpng.cpp ../jniutil.cpp \
 	-lpng -L $(HOMEBREW)/lib
-	
+
+clean:
+	rm -fv $(OUTPUTDIR)/$(SO_NAME)

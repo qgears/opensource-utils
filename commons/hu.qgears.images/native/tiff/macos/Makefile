@@ -1,10 +1,9 @@
-
 ifeq ($(JAVA_HOME),)
 JAVA_HOME=$(shell java -XshowSettings:properties -version 2>&1 | grep java.home | cut -d '=' -f2 | xargs echo)
 endif
 
 ifeq ($(HOMEBREW),)
-HOMEBREW=$(shell brew --prefix)
+HOMEBREW=$(shell brew --prefix || echo "/opt/homebrew")
 endif
 
 JNI_INCLUDE:=-I$(JAVA_HOME)/include \
@@ -18,10 +17,13 @@ ifndef OUTPUTDIR
     OUTPUTDIR = ../../../src/main/resources/hu/qgears/images/tiff
 endif
 
-gnu_c:
-	$(GCC_PREFIX)g++ -o $(OUTPUTDIR)/$(SO_NAME) \
+all:
+	$(CXX) -o $(OUTPUTDIR)/$(SO_NAME) \
 		-install_name $(SONAME) \
 		-fPIC -D_REENTRANT -shared \
 		${JNI_INCLUDE} \
 		../tiffloader.c ../jni/tiffloader_connector.cpp \
 		../jni/image_data_connector.cpp ../jni/jniutil.cpp
+
+clean:
+	rm -fv $(OUTPUTDIR)/$(SO_NAME)
