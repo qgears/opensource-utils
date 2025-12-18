@@ -5,7 +5,7 @@
 		
 	<groupId>hu.qgears</groupId>
 	<artifactId>opensource-utils-parent</artifactId>
-	<version>12.1.2</version>
+	<version>12.1.3-SNAPSHOT</version>
 	<packaging>pom</packaging>
  	<url>${project_url}/modules/</url>
 	<description>The ${project.artifactId} bundle.</description>
