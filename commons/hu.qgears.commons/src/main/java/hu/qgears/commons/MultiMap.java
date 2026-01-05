@@ -33,7 +33,4 @@ public interface MultiMap<K,V> extends Map<K, Collection<V>> {
 	 * @return
 	 */
 	Collection<V> getPossibleNull(K key);
-	
-	default
-	Collection<V> getPossibleNull2(K key) {return null;}
 }

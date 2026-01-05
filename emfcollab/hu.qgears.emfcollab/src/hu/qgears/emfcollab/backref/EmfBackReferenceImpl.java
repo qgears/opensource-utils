@@ -388,7 +388,14 @@ public class EmfBackReferenceImpl implements EmfBackReference {
 	}
 	@Override
 	public Set<EObject> getInstances(EClass clazz) {
-		return new HashSet<EObject>(instances.get(clazz));
+		HashSet<EObject> ret=instances.getPossibleNull(clazz);
+		if(ret!=null)
+		{
+			return new HashSet<EObject>(instances.get(clazz));
+		}else
+		{
+			return new HashSet<EObject>();
+		}
 	}
 	@Override
 	public Set<EObject> getInstancesRecursive(EClass clazz) {
@@ -407,10 +414,13 @@ public class EmfBackReferenceImpl implements EmfBackReference {
 		HashSet<T> ret = new HashSet<>();
 		for (EClass c : instances.keySet()) {
 			if (clazz.isSuperTypeOf(c)) {
-				HashSet<EObject> l=instances.get(c);
-				for(EObject o: l)
+				HashSet<EObject> l=instances.getPossibleNull(c);
+				if(l!=null)
 				{
-					ret.add(castTo.cast(o));
+					for(EObject o: l)
+					{
+						ret.add(castTo.cast(o));
+					}
 				}
 			}
 		}
@@ -424,9 +434,13 @@ public class EmfBackReferenceImpl implements EmfBackReference {
 	public <T extends EObject> Set<T> getInstances(Class<T> type) {
 		EClass clazz = UtilEmf.getEClassForJavaClass(type);
 		Set<T> ret=new HashSet<>();
-		for(EObject eo: instances.get(clazz))
+		HashSet<EObject> contained = instances.getPossibleNull(clazz);
+		if(contained!=null)
 		{
-			ret.add(type.cast(eo));
+			for(EObject eo: contained)
+			{
+				ret.add(type.cast(eo));
+			}
 		}
 		return ret;
 	}
