@@ -30,7 +30,7 @@ import hu.qgears.crossref.Scope;
  */
 public class CRAEReference implements IRefListener {
 	public Set<String> unresolvedReferenceAcceptedTypes;
-	public String unresolvedReferenceRawRecerenceString;
+	public String unresolvedReferenceRawReferenceString;
 	public String unresolvedReferenceType;
 	public CRAEObject targetA;
 	public CRAEObject source;
@@ -129,7 +129,7 @@ public class CRAEReference implements IRefListener {
 		return resolvedToAdapter==null;
 	}
 	public CRAEReference setUnresolvedReference(String prefixproxyid, String unescaped) {
-		unresolvedReferenceRawRecerenceString=unescaped;
+		unresolvedReferenceRawReferenceString=unescaped;
 		unresolvedReferenceType=prefixproxyid;
 		return this;
 	}
@@ -150,7 +150,7 @@ public class CRAEReference implements IRefListener {
 		}
 		if(scope==null)
 		{
-			scope=new Scope(null, "NOT_SET:"+unresolvedReferenceRawRecerenceString, null, null);
+			scope=new Scope(null, "NOT_SET:"+unresolvedReferenceRawReferenceString, null, null);
 			scope.setAllowedTypes(Collections.EMPTY_SET);
 			Doc doc=unresolvedObjectAdapter.getDoc();
 			CrossRefManager crm=doc.getHost();
@@ -178,7 +178,7 @@ public class CRAEReference implements IRefListener {
 		{
 			if(ref==null)
 			{
-				return ""+r.getName()+" UNSET "+unresolvedReferenceRawRecerenceString;
+				return ""+r.getName()+" UNSET "+unresolvedReferenceRawReferenceString;
 			}else
 			{
 				return ""+r.getName()+" "+ref.getScope();
@@ -214,39 +214,6 @@ public class CRAEReference implements IRefListener {
 		{
 			return unresolvedObjectAdapter;
 		}
-	}
-	@SuppressWarnings("unchecked")
-	public void duplicateThisReferenceTo(EObject newSourceObject, EReference eReference, int i) {
-		EObject tg=(EObject)unresolvedObjectAdapter.getTarget();
-		// EObject newTg=tg.eClass().getEPackage().getEFactoryInstance().create();
-		CRAEObject cra=source.createNewUnresolvedReferenceTargetPlaceHolder(tg.eClass());
-		EObject newTg=(EObject)cra.getTarget();
-		if(eReference.isMany())
-		{
-			((List<EObject>)newSourceObject.eGet(eReference)).add(newTg);
-		}else
-		{
-			newSourceObject.eSet(eReference, newTg);
-		}
-		CRAEReference cri=cra.getOrCreateUnresolvedCrossReferenceObject();
-		cri.setFeatureThatEndsInThis(eReference);
-		cri.setSourceParameters(newSourceObject, eReference, i);
-		cri.setSourceReference(sourceReference);
-		cri.unresolvedReferenceAcceptedTypes=unresolvedReferenceAcceptedTypes;
-		cri.unresolvedReferenceType=unresolvedReferenceType;
-		cri.unresolvedReferenceRawRecerenceString=unresolvedReferenceRawRecerenceString;
-		cri.source.getAddedToTreeProperty().addListenerWithInitialTrigger(new UtilEventListener<Boolean>() {
-			@Override
-			public void eventHappened(Boolean b) {
-				if(b)
-				{
-					cri.referenceInstalledIntoTree(newSourceObject, eReference, i);
-				}else
-				{
-					// cri.setReferenceSearchScope(null);
-				}
-			}
-		});
 	}
 	private Object debugDynamicResolve;
 	public boolean duplicateError;

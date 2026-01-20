@@ -81,7 +81,7 @@ public class QEdLabelProvider extends CellLabelProvider {
 			if(cra.getUnresolvedCrossReference()!=null)
 			{
 				CRAEReference cri=cra.getUnresolvedCrossReference();
-				sb.append("REF: "+cri.unresolvedReferenceRawRecerenceString);
+				sb.append("REF: "+cri.unresolvedReferenceRawReferenceString);
 				if(cri.ref!=null)
 				{
 					sb.append(" "+cri.ref.getScope());
