@@ -236,6 +236,7 @@ public class CRAEReference implements IRefListener {
 		newCri.setSourceParameters((EObject)host.getTarget(), eReference, i);
 		newCri.setSourceReference(sourceReference);
 		newCri.targetA=target;
+		newCri.unresolvedReferenceRawReferenceString=unresolvedReferenceRawReferenceString;
 		host.addManagedReference(eReference, i, newCri);
 		return newCri;
 	}
