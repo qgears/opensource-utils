@@ -1,5 +1,18 @@
 package hu.qgears.opengl.commons;
 
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
+
+import org.apache.log4j.Logger;
+import org.lwjgl.opengl.EXTFramebufferObject;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL12;
+import org.lwjgl.opengl.GL14;
+import org.lwjgl.opengl.GL30;
+import org.lwjgl.opengl.GLContext;
+import org.lwjgl.util.vector.Vector3f;
+import org.lwjgl.util.vector.Vector4f;
+
 import hu.qgears.commons.IDisposeable;
 import hu.qgears.commons.mem.DefaultJavaNativeMemory;
 import hu.qgears.images.ENativeImageAlphaStorageFormat;
@@ -9,21 +22,7 @@ import hu.qgears.images.SizeInt;
 import hu.qgears.images.text.RGBAColor;
 import hu.qgears.opengl.commons.context.EBlendFunc;
 import hu.qgears.opengl.commons.context.RGlContext;
-
-import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
-
-import org.apache.log4j.Logger;
-import org.lwjgl.opengl.APPLEClientStorage;
-import org.lwjgl.opengl.ContextCapabilities;
-import org.lwjgl.opengl.EXTFramebufferObject;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
-import org.lwjgl.opengl.GL14;
-import org.lwjgl.opengl.GL30;
-import org.lwjgl.opengl.GLContext;
-import org.lwjgl.util.vector.Vector3f;
-import org.lwjgl.util.vector.Vector4f;
+import lwjgl.standalone.LwjglCompat;
 
 
 /**
@@ -110,9 +109,21 @@ public class Texture implements IDisposeable {
 		return create(image, EMipMapType.none);
 	}
 	public static Texture create(NativeImage rdtc, EMipMapType mtype) {
-		return create(rdtc, mtype, ETextureWrapType.mirroredRepeat, false);
+		return create(rdtc, mtype, ETextureWrapType.mirroredRepeat);
 	}
-	public static Texture create(NativeImage rdtc, EMipMapType mtype, ETextureWrapType wrapType, boolean appleClientStorage) {
+	/**
+	 * @deprecated please remove removedFlag
+	 * @param rdtc
+	 * @param mtype
+	 * @param wrapType
+	 * @param removedFlag
+	 * @return
+	 */
+	@Deprecated
+	public static Texture create(NativeImage rdtc, EMipMapType mtype, ETextureWrapType wrapType,boolean removedFlag) {
+		return create(rdtc, mtype, wrapType);
+	}
+	public static Texture create(NativeImage rdtc, EMipMapType mtype, ETextureWrapType wrapType) {
 		int maxSize = UtilGl.getMaxTextureSize();
 		int w = rdtc.getWidth();
 		int h = rdtc.getHeight();
@@ -122,7 +133,7 @@ public class Texture implements IDisposeable {
 		int handle=allocateTexture();
 		if (handle > 0) {
 			Texture ret=new Texture(handle, w, h, GL11.GL_RGBA8, 0);
-			ret.replaceContent(rdtc, mtype, wrapType, appleClientStorage);
+			ret.replaceContent(rdtc, mtype, wrapType);
 			return ret;
 		}
 		return null;
@@ -675,16 +686,16 @@ public class Texture implements IDisposeable {
 	}
 
 	public void replaceContent(NativeImage newimage) {
-		replaceContent(newimage, EMipMapType.none, ETextureWrapType.mirroredRepeat, false);
+		replaceContent(newimage, EMipMapType.none, ETextureWrapType.mirroredRepeat);
 	}
 	
-	public void replaceContent(NativeImage newimage, EMipMapType mtype, ETextureWrapType wrapType, boolean appleClientStorage) {
+	public void replaceContent(NativeImage newimage, EMipMapType mtype, ETextureWrapType wrapType) {
 		this.sourceImage=newimage;
 		this.sourceMipmapType=mtype;
 		this.sourceTextureWrapType=wrapType;
 		if(EMipMapType.standard.equals(mtype))
 		{
-			ContextCapabilities cc=GLContext.getCapabilities();
+			var cc = LwjglCompat.getCapabilities();
 			if(!cc.OpenGL30&&!cc.GL_EXT_framebuffer_object)
 			{
 				mtype=EMipMapType.none;
@@ -749,16 +760,17 @@ public class Texture implements IDisposeable {
 		int dataformat;
 		pixel_format=componentOrderToOGL(newimage.getComponentOrder());
 		int internal_format=componentOrderTOIntarnalFormat(newimage.getComponentOrder());
-		boolean undoClientStorage=false;
-		if(appleClientStorage)
-		{
-			ContextCapabilities cc=GLContext.getCapabilities();
-			if(cc.GL_APPLE_client_storage)
-			{
-				GL11.glPixelStorei(APPLEClientStorage.GL_UNPACK_CLIENT_STORAGE_APPLE, GL11.GL_TRUE);
-				undoClientStorage=true;
-			}
-		}
+//		XXX it seems GL_APPLE_client_storage is not supported any more in OpenGl
+//		boolean undoClientStorage=false;
+//		if(appleClientStorage)
+//		{
+//			GLCapabilities cc=GLContext.getCapabilities();
+//			if(cc.GL_APPLE_client_storage)
+//			{
+//				GL11.glPixelStorei(APPLEClientStorage.GL_UNPACK_CLIENT_STORAGE_APPLE, GL11.GL_TRUE);
+//				undoClientStorage=true;
+//			}
+//		}
 		dataformat = GL11.GL_UNSIGNED_BYTE;
 		GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, internal_format, width, height,
 				0, pixel_format, dataformat, newimage.getBuffer().getJavaAccessor());
@@ -781,10 +793,10 @@ public class Texture implements IDisposeable {
 		}
 		// Reset the default behaviour
 		GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 1);
-		if(undoClientStorage)
-		{
-			GL11.glPixelStorei(APPLEClientStorage.GL_UNPACK_CLIENT_STORAGE_APPLE, GL11.GL_FALSE);
-		}
+//		if(undoClientStorage)
+//		{
+//			GL11.glPixelStorei(APPLEClientStorage.GL_UNPACK_CLIENT_STORAGE_APPLE, GL11.GL_FALSE);
+//		}
 	}
 	public static int componentOrderToOGL(ENativeImageComponentOrder co)
 	{
@@ -836,7 +848,7 @@ public class Texture implements IDisposeable {
 	 */
 	public void generateMipMap()
 	{
-		ContextCapabilities cc=GLContext.getCapabilities();
+		var cc = LwjglCompat.getCapabilities();
 		if(cc.OpenGL30)
 		{
 			selectTecture();

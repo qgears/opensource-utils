@@ -10,6 +10,24 @@ import hu.qgears.nativeloader.XmlNativeLoader;
 
 public class BaseAccessor extends XmlNativeLoader {
 	
+	/**
+	 * Part of compatibility layer between LWJGL2 and 3. This constants does not
+	 * change anything in case of LWJGL 2, but used in LWJGL 3.
+	 */
+	public static enum ELwjglOpenGlImpl {
+		DEFAULT(null),
+		NATIVE("native"),
+		OSMESA("OSMesa"),
+		EGL("EGL")
+		;
+		private String optionName;
+
+		private ELwjglOpenGlImpl(String optionName) {
+			this.optionName = optionName;
+		}
+		
+	}
+	
 	private static final Logger LOG = Logger.getLogger(BaseAccessor.class);
 	
 	private static boolean inited = false;
@@ -32,7 +50,15 @@ public class BaseAccessor extends XmlNativeLoader {
 		return "natives-base-def.xml";
 	}
 
-	public static synchronized void initLwjglNatives()
+	public static synchronized void initLwjglNatives() {
+		initLwjglNatives(ELwjglOpenGlImpl.DEFAULT);
+	}
+	
+	/**
+	 * @param glContext Irrelevant in case of LWJGL 2, only exist to keep API-s compatible. 
+	 * @throws NativeLoadException
+	 */
+	public static synchronized void initLwjglNatives(ELwjglOpenGlImpl glContext)
 			throws NativeLoadException {
 
 		if (!inited) {

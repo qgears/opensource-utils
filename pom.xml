@@ -5,7 +5,7 @@
 
 	<groupId>hu.qgears</groupId>
 	<artifactId>opensource-utils</artifactId>
-	<version>12.1.3-SNAPSHOT</version>
+	<version>12.2.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<modules>
@@ -14,10 +14,12 @@
 		<module>commons/hu.qgears.shm</module>
 		<module>commons/hu.qgears.images</module>
 		<module>commons/hu.qgears.opengl.commons</module>
-		<module>thirdparty/lwjgl.fork</module>
+		<module>commons/hu.qgears.opengl.commons/lwjgl2</module>
 		<module>commons/hu.qgears.parser</module>
 		<module>commons/hu.qgears.crossref</module>
 		<module>coolrmi/hu.qgears.coolrmi</module>
+		<module>thirdparty/lwjgl.fork</module>
+		<module>thirdparty/lwjgl3.int</module>
 <!--	
 TODO mavenify these
 		<module>commons/hu.qgears.remote</module>
@@ -41,4 +43,28 @@ TODO mavenify these
                     </plugin>
             </plugins>
     </build>
+<profiles>
+	<profile>
+		<id>lwjgl3mode</id>
+			<activation>
+				<property>
+					<name>!lwjgl2mode</name>
+				</property>
+			</activation>
+			<modules>
+				<module>thirdparty/lwjgl3.int</module>
+			</modules>
+		</profile>
+		<profile>
+		<id>lwjgl2mode</id>
+			<activation>
+				<property>
+					<name>lwjgl2mode</name>
+				</property>
+			</activation>
+			<modules>
+				<module>thirdparty/lwjgl.fork</module>
+			</modules>
+		</profile>
+	</profiles>
 </project>

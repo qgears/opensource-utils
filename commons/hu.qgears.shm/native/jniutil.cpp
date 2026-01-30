@@ -49,7 +49,7 @@ void JNU_ThrowByName(JNIEnv *env, const char *name, const char *msg)
 void JNU_ThrowByNameErrno(JNIEnv *env, const char *name, const char *msg, int err)
 {
 	char tmpmsg[1024];
-	tmpmsg[1024]=0;
+	tmpmsg[1023]=0;
 	tmpmsg[512]=0;
 	strncpy(tmpmsg, msg, 512);
 	char * ptr=tmpmsg+strlen(tmpmsg);

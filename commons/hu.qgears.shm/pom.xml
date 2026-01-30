@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>hu.qgears</groupId>
 		<artifactId>opensource-utils-parent</artifactId>
-		<version>12.1.3-SNAPSHOT</version>
+		<version>12.2.0-SNAPSHOT</version>
 		<relativePath>../../build/opensource-utils-parent/</relativePath>
 	</parent>
 	
@@ -12,21 +12,6 @@
 	
 	
 	<description>Custom effective shared memory implementation.</description>
-
-	<build>	
-	<!--	<plugins>
-			<plugin>
-    			<groupId>org.eclipse.tycho</groupId>
-		        <artifactId>tycho-packaging-plugin</artifactId>
-				<version>${tycho-version}</version>
-				<configuration>
-					 using version postfix if xcompile is disabled. See parent pom. 
-					<forceContextQualifier>${forceContextQualifier}${version-postfix}</forceContextQualifier>
-				</configuration>
-	        </plugin>
-		</plugins>
-		-->
-	</build>
 
 	<profiles>
 		<profile>
@@ -95,14 +80,10 @@
 		<dependency>
 			<groupId>hu.qgears</groupId>
 			<artifactId>hu.qgears.nativeloader</artifactId>
-			<version>${internal-dep-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>${junit-version}</version>
-			<scope>test</scope>
 		</dependency>
-		
 	</dependencies>
 </project>

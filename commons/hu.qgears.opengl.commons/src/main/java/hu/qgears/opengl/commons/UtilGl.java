@@ -1,10 +1,6 @@
 package hu.qgears.opengl.commons;
 
 
-import hu.qgears.images.SizeInt;
-import hu.qgears.opengl.commons.context.EBlendFunc;
-import hu.qgears.opengl.commons.context.RGlContext;
-
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -13,7 +9,6 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 
 import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
 import org.lwjgl.util.Rectangle;
@@ -22,6 +17,11 @@ import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
+
+import hu.qgears.images.SizeInt;
+import hu.qgears.opengl.commons.context.EBlendFunc;
+import hu.qgears.opengl.commons.context.RGlContext;
+import lwjgl.standalone.LwjglCompat;
 
 
 /**
@@ -88,14 +88,6 @@ public class UtilGl {
 		ByteBuffer bb = ByteBuffer.allocateDirect(length).order(
 				ByteOrder.nativeOrder());
 		return bb;
-	}
-	/**
-	 * Format display mode to user readable format.
-	 * @param mode
-	 * @return
-	 */
-	public static String formatMode(DisplayMode mode) {
-		return ""+mode.getWidth()+"X"+mode.getHeight()+" "+mode.getFrequency()+"Hz"+" "+mode.getBitsPerPixel()+"bpp";
 	}
 	public static void drawRectangle( //NOSONAR method has 9 parameters but is still comprehensible
 			RGlContext rgl,
@@ -211,7 +203,7 @@ public class UtilGl {
 		fb.clear();
 		m.store(fb);
 		fb.flip();
-		GL11.glMultMatrix(fb);
+		LwjglCompat.glMultMatrix(fb);
 	}
 	/**
 	 * 
@@ -247,7 +239,7 @@ public class UtilGl {
 		if(maxTextureSize<0)
 		{
 			tempIntBuffer.clear();
-			GL11.glGetInteger(GL11.GL_MAX_TEXTURE_SIZE, tempIntBuffer);
+			LwjglCompat.glGetInteger(GL11.GL_MAX_TEXTURE_SIZE, tempIntBuffer);
 			maxTextureSize=tempIntBuffer.get(0);
 		}
 		return maxTextureSize;
@@ -339,7 +331,7 @@ public class UtilGl {
 		
 		fb.flip();
 		GL11.glMatrixMode(matrixMode);
-		GL11.glMultMatrix(fb);
+		LwjglCompat.glMultMatrix(fb);
 	}
 	/**
 	 * Transformation that moves an object an other coordinate system.
@@ -377,7 +369,7 @@ public class UtilGl {
 		
 		fb.flip();
 		GL11.glMatrixMode(matrixMode);
-		GL11.glMultMatrix(fb);
+		LwjglCompat.glMultMatrix(fb);
 	}
 	/**
 	 * Use RGlContext.setColor instead
@@ -457,9 +449,9 @@ public class UtilGl {
 	 */
 	public static void setMaterial(Vector3f color) {
 		
-		GL11.glMaterial(GL11.GL_FRONT_AND_BACK, GL11.GL_SPECULAR, wrapTemp(new float[]{color.x, color.y, color.z,1f}));
-		GL11.glMaterial(GL11.GL_FRONT_AND_BACK, GL11.GL_EMISSION, wrapTemp(new float[]{0, 0, 0,1f}));
-		GL11.glMaterial(GL11.GL_FRONT_AND_BACK, GL11.GL_AMBIENT, wrapTemp(new float[]{color.x, color.y, color.z,1f}));
+		LwjglCompat.glMaterial(GL11.GL_FRONT_AND_BACK, GL11.GL_SPECULAR, wrapTemp(new float[]{color.x, color.y, color.z,1f}));
+		LwjglCompat.glMaterial(GL11.GL_FRONT_AND_BACK, GL11.GL_EMISSION, wrapTemp(new float[]{0, 0, 0,1f}));
+		LwjglCompat.glMaterial(GL11.GL_FRONT_AND_BACK, GL11.GL_AMBIENT, wrapTemp(new float[]{color.x, color.y, color.z,1f}));
 		UtilGl.setColor(color);
 		GL11.glMaterialf(GL11.GL_FRONT_AND_BACK, GL11.GL_SHININESS, 50f);
 	}
@@ -778,11 +770,12 @@ public class UtilGl {
 		GL14.glBlendFuncSeparate(sfactorRGB, dfactorRGB, sfactorAlpha, dfactorAlpha);
 	}
 
+
 	public static void glVertexPointer(int size, int stride, FloatBuffer m) {
-		GL11.glVertexPointer(size, stride,m);
+		LwjglCompat.glVertexPointer(size, stride,m);
 	}
 
 	public static void glLoadMatrix(FloatBuffer m) {
-		GL11.glLoadMatrix(m);
+		LwjglCompat.glLoadMatrix(m);
 	}
 }

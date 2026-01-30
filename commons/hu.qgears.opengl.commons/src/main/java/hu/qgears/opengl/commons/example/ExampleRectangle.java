@@ -1,5 +1,11 @@
 package hu.qgears.opengl.commons.example;
 
+import org.apache.log4j.Logger;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.util.vector.Vector2f;
+import org.lwjgl.util.vector.Vector3f;
+import org.lwjgl.util.vector.Vector4f;
+
 import hu.qgears.images.SizeInt;
 import hu.qgears.opengl.commons.AbstractOpenglApplication2;
 import hu.qgears.opengl.commons.Camera;
@@ -10,14 +16,10 @@ import hu.qgears.opengl.commons.TargetRectangle;
 import hu.qgears.opengl.commons.Texture;
 import hu.qgears.opengl.commons.UtilGl;
 import hu.qgears.opengl.commons.context.RGlContext;
+import hu.qgears.opengl.commons.input.GlMouseEvent;
 import hu.qgears.opengl.commons.input.IKeyboard;
-
-import org.apache.log4j.Logger;
-import org.lwjgl.input.Mouse;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.util.vector.Vector2f;
-import org.lwjgl.util.vector.Vector3f;
-import org.lwjgl.util.vector.Vector4f;
+import hu.qgears.opengl.commons.input.IMouse;
+import hu.qgears.opengl.osmesa.Log4Init;
 
 /**
  * Egyetlen háromszöget megjelenítő alkalmazás.
@@ -33,6 +35,13 @@ public class ExampleRectangle extends AbstractOpenglApplication2 {
 	}
 	@Override
 	protected void logic() {
+		IMouse m = getMouseObject();
+		for (GlMouseEvent e = m.getNextEvent(); e != null; e = m.getNextEvent()) {
+			handleMouseEvent(e);
+		}
+	}
+	private void handleMouseEvent(GlMouseEvent e) {
+		LOG.info("Mouse event "+e);
 	}
 	@Override
 	protected void render() {
@@ -98,25 +107,15 @@ public class ExampleRectangle extends AbstractOpenglApplication2 {
 	@Override
 	protected void keyDown(int eventKey, char ch, boolean shift, boolean ctrl,
 			boolean alt, boolean special) throws Exception {
-		switch (ch) {
-		case 'm':
-			// Az egeret eltüntetjük
-			Mouse.setGrabbed(!Mouse.isGrabbed());
-			break;
-		default:
-			break;
-		}
-	}
-	@Override
-	protected void processKeyboard(IKeyboard keyboard) throws Exception {
-		super.processKeyboard(keyboard);
-		camera.processKeyboard(keyboard, false, System.currentTimeMillis());
+		camera.keyDown(eventKey, ch, shift, ctrl, alt, special);
+		super.keyDown(eventKey, ch, shift, ctrl, alt, special);
 	}
 	/**
 	 * Test entry point
 	 */
 	public static void main(String[] args) {
 		try {
+			Log4Init.init();
 			ExampleRectangle fswTest = new ExampleRectangle();
 			fswTest.execute();
 			System.exit(0); //NOSONAR intentional exit point

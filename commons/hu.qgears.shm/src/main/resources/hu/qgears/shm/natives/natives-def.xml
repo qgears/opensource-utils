@@ -14,6 +14,9 @@
 			<platform distroId="debian" distroVersion="10">
 				<lib id="libshm" path="libshm-debian-10-x86_64.so" installPath="/opt/qgears/libshm-debian-10-x86_64.so"/>
 			</platform>
+			<platform distroId="debian" distroVersion="13">
+				<lib id="libshm" path="libshm-debian-13-x86_64.so" installPath="/opt/qgears/libshm-debian-13-x86_64.so"/>
+			</platform>
 			<lib id="libshm" path="libshm-x86_64.so" installPath="/opt/qgears/libshm-x86_64.so"/>
 		</platform>
 		<platform arch="x86|i[3-6]86">
@@ -23,10 +26,16 @@
 			<platform distroId="debian" distroVersion="10">
 				<lib id="libshm" path="libshm-debian-10-i686.so" installPath="/opt/qgears/libshm-debian-10-i686.so"/>
 			</platform>
+			<platform distroId="debian" distroVersion="13">
+				<lib id="libshm" path="libshm-debian-13-i686.so" installPath="/opt/qgears/libshm-debian-13-i686.so"/>
+			</platform>
 			<platform distroId="ubuntu" distroVersion="14.04">
 				<lib id="libshm" path="libshm-ubuntu-14.04-i686.so" installPath="/opt/qgears/libshm-ubuntu-14.04-i686.so"/>
 			</platform>
 			<lib id="libshm" path="libshm-i686.so" installPath="/opt/qgears/libshm-i686.so"/>
+		</platform>
+		<platform arch="(arm|aarch)64">
+			<lib id="libshm" path="libshm-debian-13-aarch64.so" installPath="/opt/qgears/libshm-debian-13-aarch64.so" />
 		</platform>
 	</platform>
 	<platform name="Windows .+">
@@ -36,5 +45,9 @@
 		<platform arch="(amd|x86_)64">
 			<lib path="shm.dll" />
 		</platform>
+	</platform>
+	<platform name="Mac OS X">
+		<lib id="libshm" path="libshm-macos-aarch64.dylib" 
+				installPath="/opt/qgears/libshm-macos-aarch64.dylib" />
 	</platform>
 </natives-def>

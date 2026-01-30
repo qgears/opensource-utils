@@ -119,41 +119,42 @@ public class Camera {
 				(Vector3f)dir.scale(speed));
 	}
 
-	public void processKeyboard(IKeyboard keyboard,
-			boolean invertmouse, long time)
+	public void keyDown(int eventKey, char ch, boolean shift, boolean ctrl, boolean alt, boolean special)
 	{
-			float speed = 60;
-			
-			float timeMultiplier=(float)(time-lastProcessKeyboard)/1000;
-			speed*=timeMultiplier;
-			if (lastProcessKeyboard > 0) {
-				// Csak akkor mozgatjuk egérrel a kamerát ha mienk az egér
-				if (Keyboard.isKeyDown(Keyboard.KEY_D)) {
+		float speed = 60;
+		long time = System.currentTimeMillis();
+		float timeMultiplier=(float)(time-lastProcessKeyboard)/1000;
+		speed*=timeMultiplier;
+		if (lastProcessKeyboard > 0) {
+			// Csak akkor mozgatjuk egérrel a kamerát ha mienk az egér
+			switch (eventKey) {
+				case Keyboard.KEY_D:
 					moveRight(speed);
-				}
-				if (Keyboard.isKeyDown(Keyboard.KEY_A)) {
+					break;
+				case Keyboard.KEY_A:
 					moveRight(-speed);
-				}
-				if (Keyboard.isKeyDown(Keyboard.KEY_W)) {
+					break;
+				case Keyboard.KEY_W:
 					moveForward(speed);
-				}
-				if (Keyboard.isKeyDown(Keyboard.KEY_S)) {
+					break;
+				case Keyboard.KEY_S:
 					moveForward(-speed);
-				}
-				if (Keyboard.isKeyDown(Keyboard.KEY_R)) {
+					break;
+				case Keyboard.KEY_R:
 					moveUp(speed);
-				}
-				if (Keyboard.isKeyDown(Keyboard.KEY_F)) {
+					break;
+				case Keyboard.KEY_F:
 					moveUp(-speed);
-				}
-				if (Keyboard.isKeyDown(Keyboard.KEY_Q)) {
+					break;
+				case Keyboard.KEY_Q:
 					turnAroundForward(-speed);
-				}
-				if (Keyboard.isKeyDown(Keyboard.KEY_E)) {
+					break;
+				case Keyboard.KEY_E:
 					turnAroundForward(speed);
-				}
+					break;
 			}
-			lastProcessKeyboard = time;
+		}
+		lastProcessKeyboard = time;
 	}
 	public void drawCrossbar()
 	{

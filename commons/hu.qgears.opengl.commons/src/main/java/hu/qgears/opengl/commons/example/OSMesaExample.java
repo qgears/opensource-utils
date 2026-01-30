@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.ProcessBuilder.Redirect;
 import java.lang.management.ManagementFactory;
-import java.util.Arrays;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GLContext;
@@ -19,7 +18,6 @@ import hu.qgears.opengl.commons.UtilGl;
 import hu.qgears.opengl.osmesa.Log4Init;
 import hu.qgears.opengl.osmesa.OSMesa;
 import hu.qgears.opengl.osmesa.OSMesaInstance;
-import lwjgl.standalone.BaseAccessor;
 
 /**
  * Render using osmesa - off-screen software renderer.
@@ -47,8 +45,7 @@ public class OSMesaExample {
 	private void run() throws Exception {
 		OSMesaInstance.getInstance();
 		logLibs();
-		
-		BaseAccessor.initLwjglNatives();
+		OSMesaInstance.getInstance().bindLwjglNatives();
 		logLibs();
 		OSMesa osMesa=new OSMesa();
 		osMesa.createContext(ENativeImageComponentOrder.ARGB);
@@ -65,6 +62,7 @@ public class OSMesaExample {
 		GL11.glFinish();
 		osMesa.disposeContext();
 		new NativeLibPng().saveImage(im, new File("/tmp/gl.png"));
+//		System.in.read();
 	}
 	static private int getPid() throws IOException {
 		int pid=Integer.parseInt(ManagementFactory.getRuntimeMXBean().getName().split("@")[0]);

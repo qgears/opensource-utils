@@ -23,6 +23,7 @@ hs_err_pid*
 #shared objects
 *.so
 *.dll
+*.dylib
 
 build/repository-builder
 #repo builder ref

@@ -34,7 +34,7 @@
 		<javac
 			includeantruntime="false"
 			destdir="/tmp/jni-tmp"
-			srcdir="../src/hu/qgears/opengl/glut"
+			srcdir="../src/main/java/hu/qgears/opengl/glut"
 			includes="Glut.java"
 			classpath="../bin"
 			nativeheaderdir="./generated"

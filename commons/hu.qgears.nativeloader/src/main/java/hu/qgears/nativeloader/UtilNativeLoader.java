@@ -94,8 +94,14 @@ public class UtilNativeLoader {
 
 			String archKey = "os.arch";
 			String oskey = "os.name";
-			String arch = dataModelSysProp == null ? System.getProperty(archKey)
-					: dataModelSysProp.replace("32", "i386").replace("64", "amd64");
+			String arch = System.getProperty(archKey);
+			//hacky workarund to get proper arch info for arm64 platforms
+			if (!arch.equals("aarch64")) {
+				//TODO - i do not get the point of using dataModelSysProp here.
+				// This should be removed, and make sure backward compatibility for existing natives-dex.xmls
+				arch = dataModelSysProp == null ? System.getProperty(archKey)
+						: dataModelSysProp.replace("32", "i386").replace("64", "amd64");
+			}
 			String os = System.getProperty(oskey);
 			info("Searching for natives for class: "
 					+ clazz.getName() + " arch: " + arch + " os: " + os);

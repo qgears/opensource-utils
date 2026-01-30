@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>hu.qgears</groupId>
+		<artifactId>hu.qgears.opengl.commons.base</artifactId>
+		<version>12.2.0-SNAPSHOT</version>
+		<relativePath>../pom-base</relativePath>
+	</parent>
+
+	<artifactId>hu.qgears.opengl.commons.lwjgl2</artifactId>
+	<packaging>jar</packaging>
+	<description>OpenGL helper methods and object oriented abstraction layer over OpenGL API.</description>
+	<properties>
+		<lwjglSrcDir>../src/main/lwjgl2</lwjglSrcDir>
+	</properties>
+	
+	<dependencies>
+		<dependency>
+			<groupId>hu.qgears</groupId>
+			<artifactId>lwjgl.fork</artifactId>
+		</dependency>
+	</dependencies>
+	
+	<build>
+		<sourceDirectory>../src/main/java</sourceDirectory>
+	</build>
+</project>
