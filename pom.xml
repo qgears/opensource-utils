@@ -5,7 +5,7 @@
 
 	<groupId>hu.qgears</groupId>
 	<artifactId>opensource-utils</artifactId>
-	<version>12.2.1</version>
+	<version>12.2.2-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<modules>
@@ -43,27 +43,16 @@ TODO mavenify these
                     </plugin>
             </plugins>
     </build>
-<profiles>
-	<profile>
-		<id>lwjgl3mode</id>
-			<activation>
-				<property>
-					<name>!lwjgl2mode</name>
-				</property>
-			</activation>
-			<modules>
-				<module>thirdparty/lwjgl3.int</module>
-			</modules>
-		</profile>
+	<profiles>
 		<profile>
-		<id>lwjgl2mode</id>
+			<id>versionbump</id>
 			<activation>
 				<property>
-					<name>lwjgl2mode</name>
+					<name>versionbump</name>
 				</property>
 			</activation>
 			<modules>
-				<module>thirdparty/lwjgl.fork</module>
+				<module>commons/hu.qgears.opengl.commons/pom-base</module>
 			</modules>
 		</profile>
 	</profiles>
