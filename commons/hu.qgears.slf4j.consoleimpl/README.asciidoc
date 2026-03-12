@@ -1,0 +1,4 @@
+Initialize both Log4j and SLF4j to log onto the standard error.
+
+This is useful when running program as a systemd service and all logs are viewable using the
+journalctl command.

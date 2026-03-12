@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Consoleimpl
+Bundle-SymbolicName: hu.qgears.slf4j.consoleimpl
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Q-Gears Kft.
+Automatic-Module-Name: hu.qgears.slf4j.consoleimpl
+Export-Package: hu.qgears.slf4j.consoleimpl,
+ org.slf4j,
+ org.slf4j.impl
+Require-Bundle: org.apache.log4j;bundle-version="1.2.15",
+ org.slf4j.api;bundle-version="1.7.30"
