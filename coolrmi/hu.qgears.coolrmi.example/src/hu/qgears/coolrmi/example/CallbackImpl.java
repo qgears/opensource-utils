@@ -27,12 +27,8 @@ public class CallbackImpl implements ICallback
 	public void callback(String s) {
 		System.out.println("Callback returned: "+s);
 		System.out.println("We close the CoolRMI service and then the application exits.");
-		try {
-			((ICoolRMIProxy) service).disposeProxy();
-			c.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		((ICoolRMIProxy) service).disposeProxy();
+		c.close();
 	}
 
 }

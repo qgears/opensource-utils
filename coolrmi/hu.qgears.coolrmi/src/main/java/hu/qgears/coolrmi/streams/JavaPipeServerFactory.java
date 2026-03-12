@@ -14,5 +14,4 @@ public class JavaPipeServerFactory implements IConnectionServerFactory {
 	public IConnectionServer bindServer() throws IOException {
 		return server;
 	}
-
 }

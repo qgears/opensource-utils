@@ -5,7 +5,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CancellationException;
 
+import hu.qgears.commons.NoExceptionAutoClosable;
+import hu.qgears.commons.signal.SignalFutureWrapper;
 import hu.qgears.coolrmi.CoolRMIClose;
 import hu.qgears.coolrmi.CoolRMIException;
 import hu.qgears.coolrmi.CoolRMIService;
@@ -23,9 +26,11 @@ import hu.qgears.coolrmi.messages.CoolRMIDisconnect;
 import hu.qgears.coolrmi.messages.CoolRMIDisposeProxy;
 import hu.qgears.coolrmi.messages.CoolRMIFutureReply;
 import hu.qgears.coolrmi.messages.CoolRMIProxyPlaceHolder;
+import hu.qgears.coolrmi.messages.CoolRMIReply;
 import hu.qgears.coolrmi.messages.CoolRMIRequestServiceQuery;
 import hu.qgears.coolrmi.messages.CoolRMIRequestServiceReply;
 import hu.qgears.coolrmi.multiplexer.ISocketMultiplexer;
+import hu.qgears.coolrmi.streams.IConnection;
 
 /**
  * Communication object that receives and sends messages.
@@ -34,7 +39,7 @@ import hu.qgears.coolrmi.multiplexer.ISocketMultiplexer;
  * Different implementations can be used for different threading models and different communication implementations
  * (eg. RCOM project multiplexes CoolRMI based control messages into a NIO stream of data containing also audio and video streams).
  */
-abstract public class GenericCoolRMIRemoter {
+abstract public class GenericCoolRMIRemoter implements NoExceptionAutoClosable {
 	private ICoolRMILogger log=new ICoolRMILogger() {
 		@Override
 		public void logError(Throwable e) {
@@ -47,6 +52,7 @@ abstract public class GenericCoolRMIRemoter {
 	protected boolean connected = false;
 	private boolean closed = false;
 	protected boolean guaranteeOrdering;
+	protected boolean checkAlive;
 	private Map<Long, CoolRMIFutureReply> replies = new HashMap<Long, CoolRMIFutureReply>();
 	/**
 	 * The client side proxy objects.
@@ -58,6 +64,7 @@ abstract public class GenericCoolRMIRemoter {
 	private Map<Long, CoolRMIServerSideObject> services = new HashMap<Long, CoolRMIServerSideObject>();
 	private long callCounter = 0;
 	private long proxyCounter = 0;
+	public final SignalFutureWrapper<Object> closedEvent=new SignalFutureWrapper<>();
 	public GenericCoolRMIRemoter(ClassLoader classLoader, boolean guaranteeOrdering) {
 		this.classLoader = classLoader;
 		this.guaranteeOrdering=guaranteeOrdering;
@@ -96,6 +103,9 @@ abstract public class GenericCoolRMIRemoter {
 
 	public void send(AbstractCoolRMIMessage message) throws IOException {
 		byte[] bs = UtilSerializator.serialize(servicesReg, message);
+		message.replyCancelled.addListener(m->{
+			handleReply(new CoolRMIReply(m.getQueryId(), null, new CancellationException("Connection closed while processing message")));
+		});
 		multiplexer.addMessageToSend(bs, message);
 	}
 	/**
@@ -288,14 +298,9 @@ abstract public class GenericCoolRMIRemoter {
 		if(!isClosed())
 		{
 			// If socket is not closed by query then the exception is logged.
-			e.printStackTrace();
+			log.logError(e);
 		}
-		try {
-			close();
-		} catch (IOException e1) {
-			// There is nothing to do when the connection can not be properly closed.
-			e1.printStackTrace();
-		}
+		close();
 	}
 
 	public boolean isConnected() {
@@ -308,7 +313,8 @@ abstract public class GenericCoolRMIRemoter {
 		}
 	}
 
-	public void close() throws IOException {
+	@Override
+	public void close() {
 		List<CoolRMIFutureReply> cancelled=new ArrayList<CoolRMIFutureReply>();
 		List<CoolRMIServerSideObject> toDispose=new ArrayList<>();
 		synchronized (this) {
@@ -336,10 +342,28 @@ abstract public class GenericCoolRMIRemoter {
 				log.logError(e);
 			}
 		}
+		List<CoolRMIProxy> openProxies;
+		synchronized (this) {
+			openProxies=new ArrayList<CoolRMIProxy>(proxies.values());
+		}
+		for(CoolRMIProxy p: openProxies)
+		{
+			p.dispose();
+		}
+		List<CoolRMIFutureReply> openReplies;
+		synchronized (this) {
+			openReplies=new ArrayList<CoolRMIFutureReply>(replies.values());
+			replies.clear();
+		}
+		for(CoolRMIFutureReply r: openReplies)
+		{
+			r.cancelled();
+		}
+		closedEvent.ready(this, null);
 		//CoolRMIServerSideObject dispose uses the executor, so connection must be closed only in the end
 		closeConnection();
 	}
-	abstract protected void closeConnection() throws IOException;
+	abstract protected void closeConnection();
 
 	/**
 	 * Create future reply object.
@@ -443,4 +467,16 @@ abstract public class GenericCoolRMIRemoter {
 	 * @param runnable
 	 */
 	abstract public void execute(Runnable runnable);
+
+	public ICoolRMILogger getLog()
+	{
+		return this.log;
+	}
+
+	abstract public IConnection getConnection();
+	
+	public void configureAliveMessaging(boolean b)
+	{
+		checkAlive=b;
+	}
 }

@@ -12,6 +12,7 @@ import java.io.PipedOutputStream;
 public class JavaPipeConnection implements IConnection{
 	private PipedInputStream is;
 	private PipedOutputStream os;
+	protected ConnectionConfiguration configuration=new ConnectionConfiguration();
 	public JavaPipeConnection() throws IOException {
 		is=new PipedInputStream();
 		os=new PipedOutputStream();
@@ -34,8 +35,20 @@ public class JavaPipeConnection implements IConnection{
 	}
 
 	@Override
-	public void close() throws IOException {
-		is.close();
-		os.close();
+	public void close() {
+		try {
+			is.close();
+		} catch (IOException e) {
+			configuration.getLog().logError(e);
+		}
+		try {
+			os.close();
+		} catch (IOException e) {
+			configuration.getLog().logError(e);
+		}
+	}
+	@Override
+	public ConnectionConfiguration getConfiguration() {
+		return configuration;
 	}
 }

@@ -124,6 +124,7 @@ public class CoolRMIServer {
 						new CoolRMIServe(this, sock, guaranteeOrdering);
 					serve.setTimeoutMillis(timeoutMillis);
 					serve.setServiceRegistry(getServiceRegistry());
+					serve.setLog(sock.getConfiguration().getLog());
 					serve.connect();
 				}
 			} finally {

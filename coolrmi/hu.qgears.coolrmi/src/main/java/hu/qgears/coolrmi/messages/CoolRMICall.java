@@ -28,12 +28,11 @@ import hu.qgears.coolrmi.CoolRMIException;
 import hu.qgears.coolrmi.CoolRMIReplyHandler;
 import hu.qgears.coolrmi.remoter.CoolRMIServerSideObject;
 import hu.qgears.coolrmi.remoter.GenericCoolRMIRemoter;
+import hu.qgears.coolrmi.streams.IConnection;
 
 
 /**
  * The message sent over network for a method call request.
- * @author rizsi
- *
  */
 public class CoolRMICall
 	extends AbstractCoolRMICall
@@ -80,7 +79,7 @@ public class CoolRMICall
 					}
 				} catch (Exception e) {
 					// We can not do anything clever here.
-					e.printStackTrace();
+					coolRMIRemoter.getLog().logError(e);
 				}
 			}
 		});
@@ -197,5 +196,8 @@ public class CoolRMICall
 		CoolRMIReplyHandler ret=nextCallAsync;
 		nextCallAsync=null;
 		return ret;
+	}
+	public IConnection getConnection() {
+		return remoter.getConnection();
 	}
 }

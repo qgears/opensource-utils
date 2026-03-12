@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
 import hu.qgears.commons.UtilEvent;
+import hu.qgears.commons.signal.SignalFutureWrapper;
 import hu.qgears.coolrmi.CoolRMIException;
 import hu.qgears.coolrmi.CoolRMIReplyHandler;
 import hu.qgears.coolrmi.ICoolRMIProxy;
@@ -19,8 +20,6 @@ import hu.qgears.coolrmi.messages.CoolRMIFutureReply;
  * Representation of a proxy endpoint on the CoolRMI
  * remoter.
  * Uses Java proxy mechanism to pass calls to implementation class through network.
- * @author rizsi
- *
  */
 public class CoolRMIProxy implements InvocationHandler {
 	private long id;
@@ -29,6 +28,7 @@ public class CoolRMIProxy implements InvocationHandler {
 	private ICoolRMIProxy proxyObject;
 	private CallAggregatorClientSide callAggregator=new CallAggregatorClientSide(this);
 	public final UtilEvent<CoolRMIProxy> disposedEvent=new UtilEvent<>();
+	public final SignalFutureWrapper<CoolRMIProxy> disposedEvent2=new SignalFutureWrapper<CoolRMIProxy>();
 	public ICoolRMIProxy getProxyObject() {
 		return proxyObject;
 	}
@@ -50,6 +50,7 @@ public class CoolRMIProxy implements InvocationHandler {
 		remoter.remove(this);
 		disposed=true;
 		disposedEvent.eventHappened(this);
+		disposedEvent2.ready(this, null);
 	}
 	public long getId() {
 		return id;

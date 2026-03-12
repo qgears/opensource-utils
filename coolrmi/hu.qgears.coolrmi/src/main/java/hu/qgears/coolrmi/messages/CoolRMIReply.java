@@ -16,6 +16,8 @@
  */
 package hu.qgears.coolrmi.messages;
 
+import java.io.ObjectStreamException;
+
 import hu.qgears.coolrmi.remoter.CoolRMIProxy;
 import hu.qgears.coolrmi.remoter.GenericCoolRMIRemoter;
 
@@ -26,7 +28,7 @@ import hu.qgears.coolrmi.remoter.GenericCoolRMIRemoter;
  * @author rizsi
  *
  */
-public class CoolRMIReply extends AbstractCoolRMIMethodCallReply
+public class CoolRMIReply extends AbstractCoolRMIMethodCallReply implements ISerializationErrorTransforms
 {
 	private static final long serialVersionUID = 1L;
 	private Throwable exception;
@@ -80,5 +82,10 @@ public class CoolRMIReply extends AbstractCoolRMIMethodCallReply
 	public boolean isAsync()
 	{
 		return false;
+	}
+	@Override
+	public void serializationError(ObjectStreamException e) {
+		exception = e;
+		ret=null;
 	}
 }

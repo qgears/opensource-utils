@@ -23,11 +23,8 @@ import hu.qgears.coolrmi.streams.IConnection;
 
 
 
-/**
- * Class for internal use.
+/** Class for internal use.
  * This class executes a processing thread for each client connected to the server. 
- * @author rizsi
- *
  */
 public class CoolRMIServe
 	extends CoolRMIRemoter{

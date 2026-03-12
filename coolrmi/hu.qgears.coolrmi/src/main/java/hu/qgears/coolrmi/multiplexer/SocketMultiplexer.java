@@ -22,9 +22,6 @@ import hu.qgears.coolrmi.messages.AbstractCoolRMIMessage;
  * connection to both direction.
  * 
  * Both write and read has an own thread.
- * 
- * @author rizsi
- *
  */
 public class SocketMultiplexer implements ISocketMultiplexer{
 	private boolean guaranteeOrdering;
@@ -77,7 +74,7 @@ public class SocketMultiplexer implements ISocketMultiplexer{
 							throw new IOException("Connection version string does not match! "+new String(recv, StandardCharsets.UTF_8)+" expected: "+requiredHelloString);
 						}
 					} catch (IOException e1) {
-						e1.printStackTrace();
+						messageListener.pipeBroken(e1);
 						exit=true;
 					}
 					while(!exit)
@@ -95,6 +92,7 @@ public class SocketMultiplexer implements ISocketMultiplexer{
 				}finally
 				{
 					is.close();
+					SocketMultiplexer.this.stop();
 				}
 			} catch (Exception e) {
 				messageListener.pipeBroken(e);
@@ -118,14 +116,16 @@ public class SocketMultiplexer implements ISocketMultiplexer{
 	{
 		public WriteThread() {
 			super("Cool RMI write thread");
+			setDaemon(true);
 		}
 		int lastSent=-1;
 		@Override
 		public void run() {
 			try {
 				os.write(sendHelloString.getBytes(StandardCharsets.UTF_8));
+				os.flush();
 			} catch (IOException e1) {
-				e1.printStackTrace();
+				messageListener.pipeBroken(e1);
 				exit=true;
 			}
 			while(!exit)
@@ -202,6 +202,7 @@ public class SocketMultiplexer implements ISocketMultiplexer{
 		if(b)
 		{
 			message.sent();
+			message.replyCancelled.eventHappened(message);
 		}
 	}
 	public void stop()
@@ -209,6 +210,7 @@ public class SocketMultiplexer implements ISocketMultiplexer{
 		exit=true;
 		List<SocketMultiplexerSource> toCancel=null;
 		synchronized (messagesToSend) {
+			disconnected=true;
 			messagesToSend.notifyAll();
 			toCancel=new ArrayList<SocketMultiplexerSource>(messagesToSend);
 		}
@@ -217,6 +219,8 @@ public class SocketMultiplexer implements ISocketMultiplexer{
 			for(SocketMultiplexerSource s: toCancel)
 			{
 				s.sent();
+				s.cancelled();
+				s.getId();
 			}
 		}
 	}

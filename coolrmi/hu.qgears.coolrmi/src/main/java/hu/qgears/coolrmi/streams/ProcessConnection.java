@@ -3,32 +3,40 @@ package hu.qgears.coolrmi.streams;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.Socket;
 
-public class TCPConnection implements IConnection
+public class ProcessConnection implements IConnection
 {
-	private Socket sock;
+	private Process process;
 	private ConnectionConfiguration configuration=new ConnectionConfiguration();
-	public TCPConnection(Socket sock) {
+	public ProcessConnection(Process process) {
 		super();
-		this.sock = sock;
+		this.process = process;
+//		process.onExit().thenAccept(p->{
+//			try {
+//				System.out.println("Process exited!");
+//				p.getOutputStream().close();
+//				p.getInputStream().close();
+//				System.out.println("All closed!");
+//			} catch (IOException e) {
+//			}
+//		});
 	}
 
 	@Override
 	public InputStream getInputStream() throws IOException {
-		return sock.getInputStream();
+		return process.getInputStream();
 	}
 
 	@Override
 	public OutputStream getOutputStream() throws IOException {
-		return sock.getOutputStream();
+		return process.getOutputStream();
 	}
 
 	@Override
 	public void close() {
 		try {
-			sock.close();
-		} catch (IOException e) {
+			process.destroy();
+		} catch (Exception e) {
 			configuration.getLog().logError(e);
 		}
 	}

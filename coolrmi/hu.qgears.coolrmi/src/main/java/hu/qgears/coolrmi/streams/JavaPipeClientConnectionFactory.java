@@ -12,5 +12,4 @@ public class JavaPipeClientConnectionFactory implements IClientConnectionFactory
 	public IConnection connect() throws IOException {
 		return jps.clientConnect();
 	}
-
 }

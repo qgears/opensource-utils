@@ -6,6 +6,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import hu.qgears.commons.NamedThreadFactory;
+import hu.qgears.coolrmi.ICoolRMILogger;
 import hu.qgears.coolrmi.multiplexer.ISocketMultiplexerListener;
 import hu.qgears.coolrmi.multiplexer.SocketMultiplexer;
 import hu.qgears.coolrmi.streams.IConnection;
@@ -53,10 +54,34 @@ abstract public class CoolRMIRemoter extends GenericCoolRMIRemoter
 				.getOutputStream(), new SocketMultiplexerListener(), guaranteeOrdering, isClient());
 		connected = true;
 		((SocketMultiplexer)multiplexer).start();
+		if(checkAlive)
+		{
+			Thread t=new Thread("Checkalive") {
+				@Override
+				public void run() {
+					while(connected)
+					{
+						try {
+							getService(ICoolRMILogger.class, "logger");
+						} catch (IOException e) {
+							close();
+							// Ignore - only used to trigger disposal
+							// e.printStackTrace();
+						}
+						try {
+							Thread.sleep(getTimeoutMillis());
+						} catch (InterruptedException e) {
+						}
+					}
+				}
+			};
+			t.setDaemon(true);
+			t.start();
+		}
 	}
 	abstract protected boolean isClient();
 	@Override
-	protected void closeConnection() throws IOException {
+	protected void closeConnection() {
 		sock.close();
 		if(serverSideExecutor instanceof ExecutorService)
 		{

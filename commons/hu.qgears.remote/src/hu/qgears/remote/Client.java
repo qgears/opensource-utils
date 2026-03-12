@@ -20,11 +20,6 @@ public class Client implements NoExceptionAutoClosable {
 	}
 	@Override
 	public void close() {
-		try {
-			c.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		c.close();
 	}
 }

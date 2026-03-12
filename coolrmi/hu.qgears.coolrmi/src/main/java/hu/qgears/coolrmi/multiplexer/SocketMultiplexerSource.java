@@ -4,10 +4,7 @@ import java.io.ByteArrayInputStream;
 
 import hu.qgears.coolrmi.messages.AbstractCoolRMIMessage;
 
-/**
- * A datagram source that must be sent.
- * @author rizsi
- *
+/** A datagram source that must be sent.
  */
 public class SocketMultiplexerSource {
 	private long id;
@@ -34,5 +31,9 @@ public class SocketMultiplexerSource {
 	 */
 	public void sent() {
 		message.sent();
+	}
+	public void cancelled()
+	{
+		message.replyCancelled.eventHappened(message);
 	}
 }

@@ -27,13 +27,10 @@ import hu.qgears.coolrmi.streams.TCPClientConnectionFactory;
 
 
 
-/**
- * Cool RMI client.
+/** Cool RMI client.
  * Can be used to create a client object that implements
  * the user defined communication interface and connects to the
  * specified server on method call.
- * @author rizsi
- *
  */
 public class CoolRMIClient extends CoolRMIRemoter {
 	private IClientConnectionFactory connectionFactory;
@@ -67,14 +64,36 @@ public class CoolRMIClient extends CoolRMIRemoter {
 		this.connectionFactory=connectionFactory;
 		connect();
 	}
-	private void connect() throws IOException
+	/**
+	 * Create a client object that is parametered with a client connection factory.
+	 * After creation the client is already connected on TCP.
+	 * @param classLoader {@link ClassLoader} to use for serializing communication messages. Must see all of CoolRMI and the communication interfaces.
+	 * @param connectionFactory Connection factory that can connect to the RMI server.
+	 * @param guaranteeOrdering guarantee that the ordering of method calls is same on the client side as on the server side.
+	 * @throws IOException 
+	 */
+	public CoolRMIClient(ClassLoader classLoader,
+			IClientConnectionFactory connectionFactory,
+			boolean guaranteeOrdering, boolean connect) throws IOException {
+		super(classLoader, guaranteeOrdering);
+		this.connectionFactory=connectionFactory;
+		if(connect)
+		{
+			connect();
+		}
+	}
+	public void connect() throws IOException
 	{
+		if(this.getConnection()!=null)
+		{
+			throw new IOException("Already connected");
+		}
 		IConnection socket=connectionFactory.connect();
 		super.connect(socket);
 	}
 	private boolean disconnectSent=false;
 	@Override
-	public void close() throws IOException {
+	public void close() {
 		boolean sendDisconnect;
 		synchronized (this) {
 			sendDisconnect=!disconnectSent;
@@ -83,8 +102,12 @@ public class CoolRMIClient extends CoolRMIRemoter {
 		if(sendDisconnect)
 		{
 			CoolRMIDisconnect disconnect=new CoolRMIDisconnect();
-			send(disconnect);
-			disconnect.waitSent(getTimeoutMillis());
+			try {
+				send(disconnect);
+				disconnect.waitSent(getTimeoutMillis());
+			} catch (IOException e) {
+				getConnection().getConfiguration().getLog().logError(e);
+			}
 			super.close();
 		}
 	}

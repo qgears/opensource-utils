@@ -8,6 +8,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class JavaPipeServer implements IConnectionServer {
 	
 	private LinkedBlockingQueue<JavaPipeConnection> servers=new LinkedBlockingQueue<JavaPipeConnection>();
+
 	@Override
 	public void close() throws IOException {
 	}
@@ -30,8 +31,8 @@ public class JavaPipeServer implements IConnectionServer {
 		sos.connect(cis);
 		JavaPipeConnection c=new JavaPipeConnection(cis, cos);
 		JavaPipeConnection s=new JavaPipeConnection(sis, sos);
+		s.configuration=c.configuration;
 		servers.add(s);
 		return c;
 	}
-
 }
