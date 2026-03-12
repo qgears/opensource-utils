@@ -11,6 +11,9 @@
 			<platform distroId="debian" distroVersion="10">
 				<lib id="libqpng" path="libqpng-debian-10-x86_64.so" installPath="/opt/qgears/libqpng-debian-10-x86_64.so" />
 			</platform>
+			<platform distroId="debian" distroVersion="13">
+				<lib id="libqpng" path="libqpng-debian-13-x86_64.so" installPath="/opt/qgears/libqpng-debian-13-x86_64.so" />
+			</platform>
 			<lib id="libqpng" path="libqpng-x86_64.so" installPath="/opt/qgears/libqpng-x86_64.so" />
 		</platform>
 		<platform arch="x86|i[3-6]86">
@@ -23,8 +26,15 @@
 			<platform distroId="debian" distroVersion="10">
 				<lib id="libqpng" path="libqpng-debian-10-i686.so" installPath="/opt/qgears/libqpng-debian-10-i686.so" />
 			</platform>
+			<platform distroId="debian" distroVersion="13">
+				<lib id="libqpng" path="libqpng-debian-13-i686.so" installPath="/opt/qgears/libqpng-debian-13-i686.so" />
+			</platform>
 			<lib id="libqpng" path="libqpng-i686.so" installPath="/opt/qgears/libqpng-i686.so" />
 		</platform>
+		<platform arch="(arm|aarch)64">
+			<lib id="libqpng" path="libqpng-debian-13-aarch64.so" installPath="/opt/qgears/libqpng-debian-13-aarch64.so" />
+		</platform>
+		
 	</platform>
 	<platform name=".*(W|w)in.*">
 		<platform arch="(i386|i486|i586|i686|x86|x86_32)">
@@ -39,5 +49,9 @@
 			<lib path="w64/libpng16-16.dll" installPath="C:\opt\qgears\w64\libpng16-16.dll" />
 			<lib path="libqpng64.dll" installPath="C:\opt\qgears\libqpng64.dll" />
 		</platform>
+	</platform>
+	<platform name="Mac OS X">
+		<lib id="libqpng" path="libqpng-macos-aarch64.dylib" 
+				installPath="/opt/qgears/libqpng-macos-aarch64.dylib" />
 	</platform>
 </natives-def>

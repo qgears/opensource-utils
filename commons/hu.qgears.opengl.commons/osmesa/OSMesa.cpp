@@ -49,10 +49,12 @@ METHODPREFIX(CLASS, void, disposeContext)(ST_ARGS)
 }
 
 
-#define OSMESALIB "libOSMesa.so"
+#define OSMESALIB_OLD "libOSMesa.so" ## <-- TODO problematic on macos
+#define OSMESALIB "libOSMesa.dylib"
 
 METHODPREFIX(CLASS, void, checkOsMesaLoadable)(ST_ARGS)
 {
+	/*
 	void* mesa_handle=dlopen(OSMESALIB, RTLD_LAZY | RTLD_GLOBAL);
 	if(mesa_handle==NULL)
 	{
@@ -63,4 +65,5 @@ METHODPREFIX(CLASS, void, checkOsMesaLoadable)(ST_ARGS)
 	} else {
 		dlclose(mesa_handle);
 	}
+	*/
 }

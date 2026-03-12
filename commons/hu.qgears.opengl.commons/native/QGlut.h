@@ -3,9 +3,10 @@
 
 #include <jni.h>
 #include <unistd.h>
-#include <GL/glew.h>
 #include <GL/freeglut.h>
 #include <GL/gl.h>
+
+#define STACK_BUF_SIZE (255u)
 
 typedef struct
 {
@@ -34,6 +35,17 @@ typedef struct
 extern void transcodeeventCharacter(userEvent * ev);
 
 extern void setupVSync(int swap);
+
+/**
+ * Glew is necessary for freeglut 2.x, but latest freeglut on MAc works without glew (eventually chrashed with glew!)
+ * This method is introduced to allow win and linux ports to use glew, and macos to do nothing.
+ * 
+ * Note that beside the issue with GLEW there are other mandatory initialization steps in freeglut 3.x. On macos port these steps 
+ * should go here as well.
+ * 
+ * Impl must return true if init is successful, false if something fails.
+ */
+extern bool initializeGlew(void);
 
 extern void mlogImpl(const char* str);
 

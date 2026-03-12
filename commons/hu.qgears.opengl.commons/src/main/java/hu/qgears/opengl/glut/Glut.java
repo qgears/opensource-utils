@@ -2,12 +2,14 @@ package hu.qgears.opengl.glut;
 
 import java.nio.ByteBuffer;
 
+import org.lwjgl.system.FunctionProvider;
+
 /**
  * Glut bindings accessors for Java
  * @author rizsi
  *
  */
-public class Glut {
+public class Glut implements FunctionProvider {
 	/**
 	 * Size of the userEvent structure in bytes. See QGlut.cpp
 	 * 6*sizeof(jint)=6*4
@@ -90,4 +92,23 @@ public class Glut {
 	 * @return
 	 */
 	native public int getMessagesWriteIndex();
+	
+	/**
+	 * Can be used to bind LWJGL to the GL implementations used by freeglut. This is
+	 * basically a JNI wrapper over "glutGetProcAddress", so the address of GL
+	 * functions required for LWJGL are resolved via to the very same methods seen
+	 * by freeglut.
+	 * <p>
+	 * This is necessary on MacOs port (however it should work on linux / windows as
+	 * well).
+	 */
+	private native long getFunctionAddressNative(ByteBuffer functionName);
+	
+	@Override
+	/**
+	 * Can be used to bind LWJGL to the GL implementations used by freeglut. 
+	 */
+	public long getFunctionAddress(ByteBuffer functionName) {
+		return getFunctionAddressNative(functionName);
+	}
 }

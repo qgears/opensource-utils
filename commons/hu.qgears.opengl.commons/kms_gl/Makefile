@@ -4,7 +4,9 @@ JNI_INCLUDE:=-I/usr/lib/jvm/java-1.7.0-openjdk-${JNI_ARCHPOSTFIX}/include \
     -I/usr/lib/jvm/java-1.8.0-openjdk-${JNI_ARCHPOSTFIX}/include \
     -I/usr/lib/jvm/java-1.8.0-openjdk-${JNI_ARCHPOSTFIX}/include/linux \
     -I/usr/lib/jvm/java-11-openjdk-${JNI_ARCHPOSTFIX}/include \
-    -I/usr/lib/jvm/java-11-openjdk-${JNI_ARCHPOSTFIX}/include/linux
+    -I/usr/lib/jvm/java-11-openjdk-${JNI_ARCHPOSTFIX}/include/linux \
+    -I/usr/lib/jvm/default-java/include \
+    -I/usr/lib/jvm/default-java/include/linux
     
 POSTFIX:=$(shell ../platform_prefix.sh)${JNI_ARCHPOSTFIX}
     

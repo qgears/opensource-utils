@@ -16,7 +16,6 @@ public class CoolRMIFutureReply {
 	private SignalFutureWrapper<AbstractCoolRMIReply> fut=new SignalFutureWrapper<AbstractCoolRMIReply>();
 	private GenericCoolRMIRemoter remoter;
 	private long callId;
-	private CoolRMIReplyHandler handler;
 	public CoolRMIFutureReply(GenericCoolRMIRemoter remoter, long callId)
 	{
 		this.remoter=remoter;

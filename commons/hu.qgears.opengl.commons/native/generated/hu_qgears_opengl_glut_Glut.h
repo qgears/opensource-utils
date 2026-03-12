@@ -137,6 +137,14 @@ JNIEXPORT jint JNICALL Java_hu_qgears_opengl_glut_Glut_getAndResetMessagesReadIn
 JNIEXPORT jint JNICALL Java_hu_qgears_opengl_glut_Glut_getMessagesWriteIndex
   (JNIEnv *, jobject);
 
+/*
+ * Class:     hu_qgears_opengl_glut_Glut
+ * Method:    getFunctionAddressNative
+ * Signature: (Ljava/nio/ByteBuffer;)J
+ */
+JNIEXPORT jlong JNICALL Java_hu_qgears_opengl_glut_Glut_getFunctionAddressNative
+  (JNIEnv *, jobject, jobject);
+
 #ifdef __cplusplus
 }
 #endif
