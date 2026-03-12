@@ -4,19 +4,34 @@ import java.util.TimerTask;
 
 import org.apache.log4j.Logger;
 
-public abstract class SafeTimerTask extends TimerTask {
-
-	private static final Logger LOG = Logger.getLogger(SafeTimerTask.class);
-	
+/**
+ * Timer task with exception wrapping.
+ * Using the Timer/TimerTask API if a timer
+ * throws an exception then the timer dies. This is a problem when
+ * multiple functions share a single timer.
+ */
+abstract public class SafeTimerTask extends TimerTask {
+	private static Logger safeTimerTastLog=Logger.getLogger(SafeTimerTask.class);
+	private volatile boolean cancelled=false;
 	@Override
-	public void run() {
+	final public void run() {
 		try {
-			doRun();
+			if(!cancelled)
+			{
+				doRun();
+			}
 		} catch (Exception e) {
-			LOG.error("Timer task failed",e);
+			safeTimerTastLog.error("Uncaught exception in timer", e);
 		}
 	}
-
-	protected abstract void doRun();
-
+	abstract protected void doRun();
+	@Override
+	public boolean cancel() {
+		cancelled=true;
+		return super.cancel();
+	}
+	public boolean isCancelled()
+	{
+		return cancelled;
+	}
 }

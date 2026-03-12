@@ -10,6 +10,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import hu.qgears.commons.INamed;
+import hu.qgears.commons.NoExceptionAutoClosable;
+import hu.qgears.commons.SafeTimerTask;
 import hu.qgears.commons.UtilTimer;
 
 /**
@@ -32,7 +34,8 @@ public class SignalFutureWrapper<T> implements SignalFuture<T>, Callable<T>, INa
 	private List<Slot<SignalFuture<T>>> listeners=null;
 	private T ret;
 	private String name="";
-	private TimerTask timeout; 
+	private TimerTask timeout;
+	private NoExceptionAutoClosable cancellationToken;
 
 	/**
 	 * Call this method when you want to finish
@@ -115,7 +118,12 @@ public class SignalFutureWrapper<T> implements SignalFuture<T>, Callable<T>, INa
 
 	@Override
 	public boolean cancel(boolean mayInterruptIfRunning) {
-		return ready(null, new CancellationException(), true);
+		boolean ret=ready(null, new CancellationException(), true);
+		if(mayInterruptIfRunning && cancellationToken!=null)
+		{
+			cancellationToken.close();
+		}
+		return ret;
 	}
 	@Override
 	public T get() throws InterruptedException, ExecutionException {
@@ -258,11 +266,14 @@ public class SignalFutureWrapper<T> implements SignalFuture<T>, Callable<T>, INa
 	/**
 	 * Set up a timeout to fail this future with {@link TimeoutException}.
 	 * If there is already a timeout set up then that is cancelled.
-	 * If task is done than this is noop.
+	 * If task is done then this is noop.
 	 * @param timeoutMillis
 	 * @return this future self
 	 */
 	public SignalFutureWrapper<T> setTimeout(final long timeoutMillis) {
+		return setTimeout(timeoutMillis, false);
+	}
+	public SignalFutureWrapper<T> setTimeout(final long timeoutMillis, boolean cancelWithInterrupt) {
 		TimerTask toCancel=null;
 		TimerTask toStart=null;
 		synchronized (this) {
@@ -273,10 +284,14 @@ public class SignalFutureWrapper<T> implements SignalFuture<T>, Callable<T>, INa
 					toCancel=timeout;
 					timeout=null;
 				}
-				toStart=new TimerTask() {
+				toStart=new SafeTimerTask() {
 					@Override
-					public void run() {
+					public void doRun() {
 						ready(null, new TimeoutException("Timeout millis: "+timeoutMillis));
+						if(cancelWithInterrupt)
+						{
+							SignalFutureWrapper.this.cancel(true);
+						}
 					}
 				};
 				timeout=toStart;
@@ -290,6 +305,15 @@ public class SignalFutureWrapper<T> implements SignalFuture<T>, Callable<T>, INa
 		{
 			UtilTimer.javaTimer.schedule(toStart, timeoutMillis);
 		}
+		return this;
+	}
+	/** Set the task to do when cancellation of the task was called.
+	 * The given cancellationToken will be disposed when cancel(true) was called.
+	 * @param cancellationToken
+	 * @return
+	 */
+	public SignalFutureWrapper<T> setCancellationToken(NoExceptionAutoClosable cancellationToken) {
+		this.cancellationToken = cancellationToken;
 		return this;
 	}
 }

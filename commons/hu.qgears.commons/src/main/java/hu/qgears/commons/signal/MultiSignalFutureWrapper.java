@@ -57,6 +57,10 @@ public class MultiSignalFutureWrapper<T> extends SignalFutureWrapper<List<T>> {
 				}
 			});
 		}
+		if(ws.size()==0)
+		{
+			MultiSignalFutureWrapper.this.ready(ret, null);
+		}
 		return this;
 	}
 	public void addFuture(SignalFutureWrapper<T> fut) {
