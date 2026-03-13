@@ -32,7 +32,7 @@ public class CallbackImpl implements ICallback
 		try {
 			((ICoolRMIProxy) service).disposeProxy();
 			c.close();
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		returns.ready(s, null);
