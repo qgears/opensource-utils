@@ -59,19 +59,20 @@ abstract public class CoolRMIRemoter extends GenericCoolRMIRemoter
 			Thread t=new Thread("Checkalive") {
 				@Override
 				public void run() {
-					while(connected)
-					{
-						try {
+					try {
+						while(connected)
+						{
 							getService(ICoolRMILogger.class, "logger");
-						} catch (IOException e) {
-							close();
-							// Ignore - only used to trigger disposal
-							// e.printStackTrace();
+							try {
+								Thread.sleep(getTimeoutMillis());
+							} catch (InterruptedException e) {
+							}
 						}
-						try {
-							Thread.sleep(getTimeoutMillis());
-						} catch (InterruptedException e) {
-						}
+					} catch (Exception e) {
+						getLog().logError(e);
+					} finally
+					{
+						close();
 					}
 				}
 			};
