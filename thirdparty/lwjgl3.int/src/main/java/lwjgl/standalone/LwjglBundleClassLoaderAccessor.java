@@ -1,12 +1,9 @@
 package lwjgl.standalone;
 
-import hu.qgears.nativeloader.NativeLoadException;
-import hu.qgears.nativeloader.UtilNativeLoader;
-import hu.qgears.nativeloader.XmlNativeLoader;
-
 import java.io.File;
 
-import org.lwjgl.openal.AL;
+import hu.qgears.nativeloader.NativeLoadException;
+import hu.qgears.nativeloader.XmlNativeLoader;
 
 public class LwjglBundleClassLoaderAccessor extends XmlNativeLoader
 {
@@ -24,11 +21,9 @@ public class LwjglBundleClassLoaderAccessor extends XmlNativeLoader
 	}
 	public static synchronized void initLwjglNatives() throws NativeLoadException
 	{
-		BaseAccessor.initLwjglNatives();
-		InputAccessor.initLwjglNatives();
 		if(!inited)
 		{
-			UtilNativeLoader.loadNatives(new LwjglBundleClassLoaderAccessor());
+			BaseAccessor.initLwjglNatives();
 			inited=true;
 		}
 	}
