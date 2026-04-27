@@ -128,4 +128,48 @@ public class LineIndex {
 	public LineInfo getLastLine(){
 		return getLine(contentSize-1);
 	}
+
+	/**
+	 * Quasi-inclusive: In and empty file, the start of line 1 is character 1, although there is no character 1.
+	 * Combined with the line end: [1,1) makes sense, and we can recognize it as an empty range.
+	 * Naturally the same goes for an empty line at the end of the file.
+	 *
+	 * @param line1 1-based
+	 * @return quasi-inclusive
+	 */
+	public int getLineStartOffset(int line1) {
+		if (line1 < 1) {
+			throw new IndexOutOfBoundsException(line1);
+		} else if (line1 == 1) {
+			return 0;
+		} else {
+			int iPrevLineEnd = line1 - 2;
+			if (0 <= iPrevLineEnd && iPrevLineEnd < lineBreakPositionsSize) {
+				return lineBreakPositions[iPrevLineEnd] + 1;
+			} else /*iPrevLineEnd out of range*/ {
+				throw new IndexOutOfBoundsException(line1);
+			}
+		}
+	}
+
+	/**
+	 * The (carriage-return and the) line-feed is considered part of the line.
+	 *
+	 * @param line1 1-based
+	 * @return exclusive
+	 */
+	public int getLineEndOffset(int line1) {
+		int nLines = lineBreakPositionsSize + 1;
+		if (line1 < 1) {
+			throw new IndexOutOfBoundsException(line1);
+		} else if (line1 < nLines) { //not the last line
+			int iLineEnd = line1 - 1;
+			int offsetLineEndInclusive = lineBreakPositions[iLineEnd];
+			return offsetLineEndInclusive + 1;
+		} else if (line1 == nLines) { //last line
+			return contentSize;
+		} else /*nLines < line1*/ {
+			throw new IndexOutOfBoundsException(line1);
+		}
+	}
 }
