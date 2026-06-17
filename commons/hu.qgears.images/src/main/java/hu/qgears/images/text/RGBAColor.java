@@ -1,5 +1,6 @@
 package hu.qgears.images.text;
 
+import java.io.Serializable;
 import java.util.Locale;
 
 import hu.qgears.commons.UtilString;
@@ -17,7 +18,10 @@ import hu.qgears.images.NativeImage;
  * @author agostoni
  * @since 3.0
  */
-public class RGBAColor {
+public class RGBAColor implements Serializable {
+	
+	private static final long serialVersionUID = -3653212905497027365L;
+
 	private static final String hahstagColorFormat = "#%02x%02x%02x";
 
 	/**

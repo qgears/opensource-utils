@@ -1,5 +1,6 @@
 package hu.qgears.images.text;
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
 
 import org.apache.log4j.Logger;
@@ -16,7 +17,10 @@ import org.apache.log4j.Logger;
  * if adding getters and setters.
  */
 @SuppressWarnings("squid:ClassVariableVisibilityCheck")
-public class TextParameters {
+public class TextParameters implements Serializable {
+	
+	private static final long serialVersionUID = 4382924961030658221L;
+	
 	private static final String SYSPROP_NAME_WBF_DEFAULT_FONT = "wbf.defaultFont";
 	/**
 	 * The default system-wide fontface

@@ -1,11 +1,16 @@
 package hu.qgears.images;
 
+import java.io.Serializable;
+
 /**
  * Wrapper of width and height pairs.
  * @author rizsi
  *
  */
-public class SizeInt {
+public class SizeInt implements Serializable {
+	
+	private static final long serialVersionUID = -2662659240861849860L;
+	
 	private int width, height;
 
 	/**
