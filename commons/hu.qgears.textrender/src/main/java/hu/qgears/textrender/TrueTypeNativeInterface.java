@@ -20,6 +20,7 @@ public interface TrueTypeNativeInterface {
 	 *             Returns the surface id (handle) that identifies this instance.
 	 */
 	public int createSurfaceWithData(ByteBuffer data, int w, int h);
+	
 	/**
 	 * 
 	 * @param surfaceHandle the surface handle returned by {@link #createSurfaceWithData(ByteBuffer, int, int)}. Might be zero, if parameter render = false.

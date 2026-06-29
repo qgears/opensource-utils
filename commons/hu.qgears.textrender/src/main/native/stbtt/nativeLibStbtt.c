@@ -1,6 +1,10 @@
 #include "nativeLibStbtt.h"
 #include <stddef.h>
 
+static uint8_t* theSingletonSurface = NULL;
+
+static uint8_t* qstb_get_surfacedata(int32_t id);
+
 /*
  * Method:    createSurfaceWithDataPrivate
  * Signature: (Ljava/nio/ByteBuffer;II)I
@@ -8,6 +12,7 @@
 int32_t qstb_createSurfaceWithDataPrivate(uint8_t* data, int32_t w, int32_t h)
 {
     // Stub implementation - to be filled later
+    theSingletonSurface = data;
     return 0;
 }
 
@@ -19,7 +24,18 @@ T_SizeInt qstb_renderTextPrivate(int32_t surfaceHandle, const char* fontFamily, 
                             uint32_t hAlign, uint32_t vAlign, int32_t x, int32_t y, int32_t width, int32_t height,
                             float r, float g, float b, float a, bool clip, uint32_t wrapMode)
 {
-    // Stub implementation - to be filled later
+    // Dummy implementation - draw some "random" lines
+    uint32_t* surfaceData = (uint32_t*)qstb_get_surfacedata(surfaceHandle);
+    if (surfaceData) 
+    {
+    	uint32_t i = 0;
+    	uint32_t j = 0;
+    	for (j = x; j < width; j++ ) {
+    		surfaceData[i*width + j] = 0xFF0000FF;
+    		i = ((i+1) % height);
+    	}
+    }
+    
     T_SizeInt result = {100, 50}; // dummy values
     return result;
 }
@@ -34,4 +50,14 @@ T_SizeInt qstb_layoutTextPrivate(const char* fontFamily, const char* text,
     // Stub implementation - to be filled later
     T_SizeInt result = {100, 50}; // dummy values
     return result;
+}
+
+
+static uint8_t* qstb_get_surfacedata(int32_t id) {
+	/*
+	 Note : this is a simplified implementation, we should support creating multiple surfaces, and
+	 and identify them by id.
+	 
+	*/
+	return theSingletonSurface;
 }
