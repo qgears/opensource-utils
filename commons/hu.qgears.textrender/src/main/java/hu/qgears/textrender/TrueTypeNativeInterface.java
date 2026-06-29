@@ -19,8 +19,9 @@ public interface TrueTypeNativeInterface {
 	 * 
 	 *             Returns the surface id (handle) that identifies this instance.
 	 */
-	public int createSurfaceWithData(ByteBuffer data, int w, int h);
+	long createSurfaceWithData(ByteBuffer data, int w, int h);
 	
+	void disposeSurface(long surfaceHandle);
 	/**
 	 * 
 	 * @param surfaceHandle the surface handle returned by {@link #createSurfaceWithData(ByteBuffer, int, int)}. Might be zero, if parameter render = false.
@@ -40,8 +41,8 @@ public interface TrueTypeNativeInterface {
 	 * @param wrapMode How to wrap long texts amongst white spaces
 	 * @return The bounding box calculated during laying out the text 
 	 */
-	public SizeInt renderText(
-			int surfaceHandle,
+	SizeInt renderText(
+			long surfaceHandle,
 			String fontFamily, 
 			String text, 
 			EHorizontalAlign hAlign, 
@@ -60,7 +61,7 @@ public interface TrueTypeNativeInterface {
 	 * @param wrapMode How to wrap long texts amongst white spaces
 	 * @return The bounding box calculated during laying out the text 
 	 */
-	public SizeInt layoutText(
+	SizeInt layoutText(
 			String fontFamily, 
 			String text, 
 			EHorizontalAlign hAlign, 

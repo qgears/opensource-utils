@@ -10,18 +10,18 @@ extern "C" {
 /*
  * Class:     hu_qgears_textrender_stbtt_StbTrueTypeNative
  * Method:    createSurfaceWithDataPrivate
- * Signature: (Ljava/nio/ByteBuffer;II)I
+ * Signature: (Ljava/nio/ByteBuffer;II)J
  */
-JNIEXPORT jint JNICALL Java_hu_qgears_textrender_stbtt_StbTrueTypeNative_createSurfaceWithDataPrivate
+JNIEXPORT jlong JNICALL Java_hu_qgears_textrender_stbtt_StbTrueTypeNative_createSurfaceWithDataPrivate
   (JNIEnv *, jobject, jobject, jint, jint);
 
 /*
  * Class:     hu_qgears_textrender_stbtt_StbTrueTypeNative
  * Method:    renderTextPrivate
- * Signature: (ILjava/lang/String;Ljava/lang/String;Lhu/qgears/images/text/EHorizontalAlign;Lhu/qgears/images/text/EVerticalAlign;IIIIFFFFZLhu/qgears/images/text/EWrapMode;)Lhu/qgears/images/SizeInt;
+ * Signature: (JLjava/lang/String;Ljava/lang/String;Lhu/qgears/images/text/EHorizontalAlign;Lhu/qgears/images/text/EVerticalAlign;IIIIFFFFZLhu/qgears/images/text/EWrapMode;)Lhu/qgears/images/SizeInt;
  */
 JNIEXPORT jobject JNICALL Java_hu_qgears_textrender_stbtt_StbTrueTypeNative_renderTextPrivate
-  (JNIEnv *, jobject, jint, jstring, jstring, jobject, jobject, jint, jint, jint, jint, jfloat, jfloat, jfloat, jfloat, jboolean, jobject);
+  (JNIEnv *, jobject, jlong, jstring, jstring, jobject, jobject, jint, jint, jint, jint, jfloat, jfloat, jfloat, jfloat, jboolean, jobject);
 
 /*
  * Class:     hu_qgears_textrender_stbtt_StbTrueTypeNative
@@ -30,6 +30,14 @@ JNIEXPORT jobject JNICALL Java_hu_qgears_textrender_stbtt_StbTrueTypeNative_rend
  */
 JNIEXPORT jobject JNICALL Java_hu_qgears_textrender_stbtt_StbTrueTypeNative_layoutTextPrivate
   (JNIEnv *, jobject, jstring, jstring, jobject, jobject, jint, jint, jobject);
+
+/*
+ * Class:     hu_qgears_textrender_stbtt_StbTrueTypeNative
+ * Method:    disposeSurfacePrivate
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL Java_hu_qgears_textrender_stbtt_StbTrueTypeNative_disposeSurfacePrivate
+  (JNIEnv *, jobject, jlong);
 
 #ifdef __cplusplus
 }
