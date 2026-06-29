@@ -10,7 +10,7 @@ import hu.qgears.textrender.TrueTypeNativeInterface;
 /*package*/ class StbTrueTypeNative implements TrueTypeNativeInterface {
 
 	@Override
-	public int createSurfaceWithData(ByteBuffer data, int w, int h) {
+	public long createSurfaceWithData(ByteBuffer data, int w, int h) {
 		if (data == null) {
 			throw new NullPointerException("data");
 		}
@@ -21,10 +21,10 @@ import hu.qgears.textrender.TrueTypeNativeInterface;
 		return createSurfaceWithDataPrivate(data, w, h);
 	}
 
-	private native int createSurfaceWithDataPrivate(ByteBuffer data, int w, int h);
+	private native long createSurfaceWithDataPrivate(ByteBuffer data, int w, int h);
 
 	@Override
-	public SizeInt renderText(int surfaceHandle, String fontFamily, String str, EHorizontalAlign hAlign,
+	public SizeInt renderText(long surfaceHandle, String fontFamily, String str, EHorizontalAlign hAlign,
 			EVerticalAlign vAlign, int x, int y, int width, int height, float r, float g, float b, float a,
 			boolean clip, EWrapMode wrapMode) {
 
@@ -34,7 +34,7 @@ import hu.qgears.textrender.TrueTypeNativeInterface;
 				wrapMode);
 	}
 
-	private native SizeInt renderTextPrivate(int surfaceHandle, String fontFamily, String str, EHorizontalAlign hAlign,
+	private native SizeInt renderTextPrivate(long surfaceHandle, String fontFamily, String str, EHorizontalAlign hAlign,
 			EVerticalAlign vAlign, int x, int y, int width, int height, float r, float g, float b, float a,
 			boolean clip, EWrapMode wrapMode);
 
@@ -47,6 +47,12 @@ import hu.qgears.textrender.TrueTypeNativeInterface;
 
 	private native SizeInt layoutTextPrivate(String fontFamily, String text, EHorizontalAlign hAlign,
 			EVerticalAlign vAlign, int width, int height, EWrapMode wrapMode);
+
+	@Override
+	public void disposeSurface(long surfaceHandle) {
+		disposeSurfacePrivate(surfaceHandle);
+	}
+	private native void disposeSurfacePrivate(long surfaceHandle);
 
 	
 }

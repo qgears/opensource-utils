@@ -4,9 +4,9 @@
 
 /*
  * Method:    createSurfaceWithDataPrivate
- * Signature: (Ljava/nio/ByteBuffer;II)I
+ * Signature: (Ljava/nio/ByteBuffer;II)J
  */
-JNIEXPORT jint JNICALL Java_hu_qgears_textrender_stbtt_StbTrueTypeNative_createSurfaceWithDataPrivate
+JNIEXPORT jlong JNICALL Java_hu_qgears_textrender_stbtt_StbTrueTypeNative_createSurfaceWithDataPrivate
   (JNIEnv *env, jobject obj, jobject buffer, jint width, jint height)
 {
     // Get the direct buffer address
@@ -18,10 +18,10 @@ JNIEXPORT jint JNICALL Java_hu_qgears_textrender_stbtt_StbTrueTypeNative_createS
 
 /*
  * Method:    renderTextPrivate
- * Signature: (ILjava/lang/String;Ljava/lang/String;Lhu/qgears/images/text/EHorizontalAlign;Lhu/qgears/images/text/EVerticalAlign;IIIIFFFFZLhu/qgears/images/text/EWrapMode;)Lhu/qgears/images/SizeInt;
+ * Signature: (JLjava/lang/String;Ljava/lang/String;Lhu/qgears/images/text/EHorizontalAlign;Lhu/qgears/images/text/EVerticalAlign;IIIIFFFFZLhu/qgears/images/text/EWrapMode;)Lhu/qgears/images/SizeInt;
  */
 JNIEXPORT jobject JNICALL Java_hu_qgears_textrender_stbtt_StbTrueTypeNative_renderTextPrivate
-  (JNIEnv *env, jobject obj, jint surfaceId, jstring text, jstring fontPath, jobject hAlign, jobject vAlign, 
+  (JNIEnv *env, jobject obj, jlong surfaceId, jstring text, jstring fontPath, jobject hAlign, jobject vAlign, 
    jint x, jint y, jint width, jint height, jfloat fontSize, jfloat letterSpacing, jfloat lineSpacing, 
    jfloat wordSpacing, jboolean useKerning, jobject wrapMode)
 {
@@ -95,4 +95,15 @@ JNIEXPORT jobject JNICALL Java_hu_qgears_textrender_stbtt_StbTrueTypeNative_layo
     
     // Return SizeInt object with width and height from the C struct
     return (*env)->NewObject(env, sizeIntClass, constructor, result.width, result.height);
+}
+
+/*
+ * Method:    disposeSurfacePrivate
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL Java_hu_qgears_textrender_stbtt_StbTrueTypeNative_disposeSurfacePrivate
+  (JNIEnv *env, jobject obj, jlong surfaceId)
+{
+    // Forward to native implementation
+    qstb_disposeSurfacePrivate(surfaceId);
 }
