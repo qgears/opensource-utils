@@ -20,7 +20,13 @@ public interface TrueTypeNativeInterface {
 	 *             Returns the surface id (handle) that identifies this instance.
 	 */
 	long createSurfaceWithData(ByteBuffer data, int w, int h);
-	
+
+	/**
+	 * Disposes the surface instance allocated earlier with
+	 * {@link #createSurfaceWithData(ByteBuffer, int, int)}.
+	 * 
+	 * @param surfaceHandle The surface to dispose
+	 */
 	void disposeSurface(long surfaceHandle);
 	/**
 	 * 
