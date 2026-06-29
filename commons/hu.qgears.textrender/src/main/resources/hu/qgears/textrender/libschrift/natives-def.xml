@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<natives-def>
+	<platform name="Linux">
+		<platform arch="(amd|x86_)64">
+			<platform distroId="ubuntu" distroVersion="22">
+				<lib id="libqlibschrift" path="libqlibschrift-ubuntu-22-x86_64.so" installPath="/opt/qgears/libqlibschrift-ubuntu-14.04-x86_64.so" />
+			</platform>
+			<platform distroId="debian" distroVersion="13">			
+				<lib id="libqlibschrift" path="libqlibschrift-debian-13-x86_64.so" installPath="/opt/qgears/libqlibschrift-debian-9-x86_64.so" />
+			</platform>
+			<lib id="libqlibschrift" path="libqlibschrift-x86_64.so" installPath="/opt/qgears/libqlibschrift-x86_64.so" />
+		</platform>
+		<platform arch="x86|i[3-6]86">
+			<platform distroId="debian" distroVersion="9">			
+				<lib id="libqlibschrift" path="libqlibschrift-debian-9-i686.so" installPath="/opt/qgears/libqlibschrift-debian-9-i686.so" />
+			</platform>
+			<platform distroId="debian" distroVersion="13">			
+				<lib id="libqlibschrift" path="libqlibschrift-debian-13-i686.so" installPath="/opt/qgears/libqlibschrift-debian-13-i686.so" />
+			</platform>
+		</platform>
+		<platform arch="(arm|aarch)64">
+			<lib id="libqlibschrift" path="libqlibschrift-debian-13-aarch64.so" installPath="/opt/qgears/libqlibschrift-debian-13-aarch64.so" />
+		</platform>
+	</platform>
+	<platform name=".*(W|w)indows.*">
+		<platform arch="(amd|x86_)64">
+			<lib path="libqlibschrift64.dll" />
+		</platform>
+	</platform>
+	<platform name="Mac OS X">
+		<lib id="libqlibschrift" path="libqlibschrift-macos-aarch64.dylib" 
+				installPath="/opt/qgears/libqlibschrift-macos-aarch64.dylib" />
+	</platform>
+</natives-def>
