@@ -7,20 +7,23 @@ import hu.qgears.images.NativeImageEditor;
 import hu.qgears.images.SizeInt;
 import hu.qgears.images.text.RGBAColor;
 import hu.qgears.images.text.TextParameters;
+import hu.qgears.textrender.libschrift.LibschriftAccessor;
 import hu.qgears.textrender.stbtt.StbNativeAccessor;
 
 public class TrueTypeRenderer {
 	
 	private TrueTypeNativeInterface rendererNative;
 	private static final RGBAColor TRANSPARENT = new RGBAColor(0,0,0,0);
+
+	public TrueTypeRenderer(TrueTypeNativeInterface rendererNative) {
+		this.rendererNative = rendererNative;
+	}
 	public TrueTypeRenderer(boolean stbMode) {
-	
 		if (stbMode) {
 			rendererNative = StbNativeAccessor.getInstance();
 		} else {
-			throw new RuntimeException("Other lib not impelmented yet");
+			rendererNative = LibschriftAccessor.getInstance();
 		}
-		
 	}
 	
 	public NativeImage createNativeImageColor(int w, int h) {
