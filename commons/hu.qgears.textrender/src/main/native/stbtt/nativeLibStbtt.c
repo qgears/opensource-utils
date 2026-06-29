@@ -11,10 +11,6 @@ typedef struct {
 
 static T_SurfaceData* qstb_get_surfacedata(uint64_t id);
 
-/*
- * Method:    createSurfaceWithDataPrivate
- * Signature: (Ljava/nio/ByteBuffer;II)J
- */
 uint64_t qstb_createSurfaceWithDataPrivate(uint8_t* data, int32_t w, int32_t h)
 {
     // Allocate memory for surface data structure
@@ -32,10 +28,6 @@ uint64_t qstb_createSurfaceWithDataPrivate(uint8_t* data, int32_t w, int32_t h)
     return (uint64_t)surfaceData;
 }
 
-/*
- * Method:    renderTextPrivate
- * Signature: (JLjava/lang/String;Ljava/lang/String;Lhu/qgears/images/text/EHorizontalAlign;Lhu/qgears/images/text/EVerticalAlign;IIIIFFFFZLhu/qgears/images/text/EWrapMode;)Lhu/qgears/images/SizeInt;
- */
 T_SizeInt qstb_renderTextPrivate(uint64_t surfaceHandle, const char* fontFamily, const char* text, 
                             uint32_t hAlign, uint32_t vAlign, int32_t x, int32_t y, int32_t width, int32_t height,
                             float r, float g, float b, float a, bool clip, uint32_t wrapMode)
@@ -49,7 +41,7 @@ T_SizeInt qstb_renderTextPrivate(uint64_t surfaceHandle, const char* fontFamily,
             uint32_t i = 0;
             uint32_t j = 0;
             for (j = x; j < width; j++ ) {
-                surfaceData[i*width + j] = 0xFF0000FF;
+                surfaceData[i*width + j] = 0xFF0000FF;//RED
                 i = ((i+1) % height);
             }
         }
@@ -59,10 +51,6 @@ T_SizeInt qstb_renderTextPrivate(uint64_t surfaceHandle, const char* fontFamily,
     }
 }
 
-/*
- * Method:    layoutTextPrivate
- * Signature: (Ljava/lang/String;Ljava/lang/String;Lhu/qgears/images/text/EHorizontalAlign;Lhu/qgears/images/text/EVerticalAlign;IILhu/qgears/images/text/EWrapMode;)Lhu/qgears/images/SizeInt;
- */
 T_SizeInt qstb_layoutTextPrivate(const char* fontFamily, const char* text, 
                             uint32_t hAlign, uint32_t vAlign, int32_t width, int32_t height, uint32_t wrapMode)
 {
@@ -71,10 +59,6 @@ T_SizeInt qstb_layoutTextPrivate(const char* fontFamily, const char* text,
     return result;
 }
 
-/*
- * Method:    disposeSurfacePrivate
- * Signature: (J)V
- */
 void qstb_disposeSurfacePrivate(uint64_t surfaceHandle)
 {
     // Check if handle is valid
