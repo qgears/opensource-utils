@@ -8,6 +8,20 @@
 extern "C" {
 #endif
 
+
+/**
+ * C representation of Java TrueTypeFont object
+ */
+typedef struct {
+    const char* fontFamily;
+    float fontSize;
+    double letterSpacing;
+    bool bold;
+    bool italic;
+    bool underline;
+} T_TrueTypeFont;
+
+
 /**
  * C representation of Java SizeInt object
  */
@@ -41,7 +55,7 @@ void qls_disposeSurfacePrivate(uint64_t surfaceHandle);
  * Renders text onto a surface
  * 
  * @param surfaceHandle The surface handle returned by {@link #createSurfaceWithData(ByteBuffer, int, int)}.
- * @param fontFamily Name of the font family to use
+ * @param font The font parameters
  * @param text Text to render as UTF-16 character array (as JNI->GetStringChars returns)
  * @param textLen The number of UTF-16 chars in text
  * @param hAlign Horizontal alignment
@@ -59,14 +73,14 @@ void qls_disposeSurfacePrivate(uint64_t surfaceHandle);
  * 
  * @return The bounding box calculated during laying out the text
  */
-T_SizeInt qls_renderTextPrivate(uint64_t surfaceHandle, const char* fontFamily, const uint16_t* text, uint32_t textLen,  
+T_SizeInt qls_renderTextPrivate(uint64_t surfaceHandle, T_TrueTypeFont* font, const uint16_t* text, uint32_t textLen,  
                             uint32_t hAlign, uint32_t vAlign, int32_t x, int32_t y, int32_t width, int32_t height,
                             float r, float g, float b, float a, bool clip, uint32_t wrapMode);
 
 /**
  * Calculates the layout of text without rendering it
  * 
- * @param fontFamily Name of the font family to use
+ * @param font The font parameters
  * @param text Text to calculate layout for, specified as UTF-16 character array (as JNI->GetStringChars returns)
  * @param hAlign Horizontal alignment
  * @param vAlign Vertical alignment
@@ -76,7 +90,7 @@ T_SizeInt qls_renderTextPrivate(uint64_t surfaceHandle, const char* fontFamily, 
  * 
  * @return The bounding box calculated during laying out the text
  */
-T_SizeInt qls_layoutTextPrivate(const char* fontFamily, const uint16_t* text, 
+T_SizeInt qls_layoutTextPrivate(T_TrueTypeFont* font, const uint16_t* text, 
                             uint32_t hAlign, uint32_t vAlign, int32_t width, int32_t height, uint32_t wrapMode);
 
 #ifdef __cplusplus

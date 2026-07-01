@@ -7,6 +7,7 @@ import hu.qgears.images.SizeInt;
 import hu.qgears.images.text.EHorizontalAlign;
 import hu.qgears.images.text.EVerticalAlign;
 import hu.qgears.images.text.EWrapMode;
+import hu.qgears.textrender.TrueTypeFont;
 import hu.qgears.textrender.TrueTypeNativeInterface;
 
 /*package*/ class LibschriftNative implements TrueTypeNativeInterface {
@@ -26,7 +27,7 @@ import hu.qgears.textrender.TrueTypeNativeInterface;
 	private native long createSurfaceWithDataPrivate(ByteBuffer data, int w, int h);
 
 	@Override
-	public SizeInt renderText(long surfaceHandle, String fontFamily, String str, EHorizontalAlign hAlign,
+	public SizeInt renderText(long surfaceHandle, TrueTypeFont fontFamily, String str, EHorizontalAlign hAlign,
 			EVerticalAlign vAlign, int x, int y, int width, int height, float r, float g, float b, float a,
 			boolean clip, EWrapMode wrapMode) {
 
@@ -36,18 +37,18 @@ import hu.qgears.textrender.TrueTypeNativeInterface;
 				wrapMode);
 	}
 
-	private native SizeInt renderTextPrivate(long surfaceHandle, String fontFamily, String str, EHorizontalAlign hAlign,
+	private native SizeInt renderTextPrivate(long surfaceHandle, TrueTypeFont fontFamily, String str, EHorizontalAlign hAlign,
 			EVerticalAlign vAlign, int x, int y, int width, int height, float r, float g, float b, float a,
 			boolean clip, EWrapMode wrapMode);
 
 	@Override
-	public SizeInt layoutText(String fontFamily, String text, EHorizontalAlign hAlign, EVerticalAlign vAlign, int width,
+	public SizeInt layoutText(TrueTypeFont fontFamily, String text, EHorizontalAlign hAlign, EVerticalAlign vAlign, int width,
 			int height, EWrapMode wrapMode) {
 		// TODO parameter verification
 		return layoutTextPrivate(fontFamily, text, hAlign, vAlign, width, height, wrapMode);
 	}
 
-	private native SizeInt layoutTextPrivate(String fontFamily, String text, EHorizontalAlign hAlign,
+	private native SizeInt layoutTextPrivate(TrueTypeFont fontFamily, String text, EHorizontalAlign hAlign,
 			EVerticalAlign vAlign, int width, int height, EWrapMode wrapMode);
 
 	@Override
