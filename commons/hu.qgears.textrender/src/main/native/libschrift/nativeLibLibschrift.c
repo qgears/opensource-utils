@@ -28,6 +28,8 @@ typedef struct {
 
 static T_SurfaceData* qls_get_surfacedata(uint64_t id);
 static inline void qls_render_gliph(SFT* sft, uint32_t codePoint,T_SurfaceData* surface,T_LayoutData* l_data);
+static void qls_load_font(SFT* sft, T_TrueTypeFont* font);
+
 
 uint64_t qls_createSurfaceWithDataPrivate(uint8_t* data, int32_t w, int32_t h)
 {
@@ -46,12 +48,11 @@ uint64_t qls_createSurfaceWithDataPrivate(uint8_t* data, int32_t w, int32_t h)
     return (uint64_t)(uintptr_t)surfaceData;
 }
 
-T_SizeInt qls_renderTextPrivate(uint64_t surfaceHandle, const const char* fontFamily, const uint16_t* text, uint32_t textLen,
+T_SizeInt qls_renderTextPrivate(uint64_t surfaceHandle, T_TrueTypeFont* font, const uint16_t* text, uint32_t textLen,
                             uint32_t hAlign, uint32_t vAlign, int32_t x, int32_t y, int32_t width, int32_t height,
                             float r, float g, float b, float a, bool clip, uint32_t wrapMode)
 {
     (void)surfaceHandle;
-    (void)fontFamily;
     (void)hAlign;
     (void)vAlign;
     (void)x;
@@ -71,21 +72,15 @@ T_SizeInt qls_renderTextPrivate(uint64_t surfaceHandle, const const char* fontFa
     T_SurfaceData* surface = qls_get_surfacedata(surfaceHandle);
     if (surface) {
         uint32_t* surfaceData = (uint32_t*)surface->data;
-        //TODO Font settings and parameters 
-        float fontSize = (float)surface->height -2.0f; 
         if (surfaceData) 
         {
+            
             SFT sft = {
-			.xScale = fontSize,
-			.yScale = fontSize,
-			.flags  = SFT_DOWNWARD_Y,
+		    	.flags  = SFT_DOWNWARD_Y,
             };
-            sft.font = sft_loadfile(fontFamily);
-            if (sft.font == NULL)
-            {
-                error("TTF load failed");
-            }
-
+            
+            qls_load_font(&sft,font);
+           
             for (int i = 0; i < textLen; i++) {
                 //The unicode codepoint
                 uint32_t cp = text[i];
@@ -108,10 +103,9 @@ T_SizeInt qls_renderTextPrivate(uint64_t surfaceHandle, const const char* fontFa
     return result;
 }
 
-T_SizeInt qls_layoutTextPrivate(const char* fontFamily, const uint16_t* text, 
+T_SizeInt qls_layoutTextPrivate(T_TrueTypeFont* font, const uint16_t* text, 
                             uint32_t hAlign, uint32_t vAlign, int32_t width, int32_t height, uint32_t wrapMode)
 {
-    (void)fontFamily;
     (void)text;
     (void)hAlign;
     (void)vAlign;
@@ -249,3 +243,14 @@ static inline void qls_render_gliph(SFT* sft, uint32_t cp,T_SurfaceData* surface
     l_data->x += mtx.advanceWidth;
 }
 
+ static void qls_load_font(SFT* sft, T_TrueTypeFont* font) {
+    //TODO font cache, load font by name etc...
+    sft->xScale = font->fontSize;
+    sft->yScale = font->fontSize;
+    sft->font = sft_loadfile("/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf");
+            if (sft->font == NULL)
+            {
+                error("TTF load failed");
+            }
+
+ }

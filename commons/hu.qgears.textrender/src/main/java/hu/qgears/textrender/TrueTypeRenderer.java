@@ -5,6 +5,9 @@ import hu.qgears.images.ENativeImageComponentOrder;
 import hu.qgears.images.NativeImage;
 import hu.qgears.images.NativeImageEditor;
 import hu.qgears.images.SizeInt;
+import hu.qgears.images.text.EFontStyle;
+import hu.qgears.images.text.EFontWeight;
+import hu.qgears.images.text.ETextDecoration;
 import hu.qgears.images.text.RGBAColor;
 import hu.qgears.images.text.TextParameters;
 import hu.qgears.textrender.libschrift.LibschriftAccessor;
@@ -34,12 +37,20 @@ public class TrueTypeRenderer {
 	
 	public SizeInt layoutText(TextParameters params, SizeInt desiredBox) {
 		return rendererNative.layoutText(
-				params.fontFamily,
+				createFont(params),
 				params.text,
 				params.hAlign,
 				params.vAlign,
 				desiredBox.getWidth() ,desiredBox.getHeight()
 				,params.wrapMode);
+	}
+	private TrueTypeFont createFont(TextParameters params) {
+		TrueTypeFont f = new TrueTypeFont(params.fontFamily, params.fontSize);
+		f.bold = EFontWeight.bold.equals(params.fontWeight);
+		f.italic = EFontStyle.italic.equals(params.fontStyle);
+		f.underline = ETextDecoration.underline.equals(params.textDecoration);
+		f.letterSpacing = params.letterSpacing;
+		return f;
 	}
 
 	public SizeInt renderText(NativeImage image, TextParameters params, boolean clear) {
@@ -54,7 +65,7 @@ public class TrueTypeRenderer {
 			
 			return rendererNative.renderText(
 					s, 
-					params.fontFamily,
+					createFont(params),
 					params.text,
 					params.hAlign,
 					params.vAlign,

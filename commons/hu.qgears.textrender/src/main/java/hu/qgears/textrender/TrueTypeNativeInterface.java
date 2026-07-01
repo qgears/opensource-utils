@@ -31,7 +31,7 @@ public interface TrueTypeNativeInterface {
 	/**
 	 * 
 	 * @param surfaceHandle the surface handle returned by {@link #createSurfaceWithData(ByteBuffer, int, int)}. Might be zero, if parameter render = false.
-	 * @param fontFamily
+	 * @param font
 	 * @param text
 	 * @param hAlign
 	 * @param vAlign
@@ -49,7 +49,7 @@ public interface TrueTypeNativeInterface {
 	 */
 	SizeInt renderText(
 			long surfaceHandle,
-			String fontFamily, 
+			TrueTypeFont font, 
 			String text, 
 			EHorizontalAlign hAlign, 
 			EVerticalAlign vAlign, 
@@ -68,7 +68,7 @@ public interface TrueTypeNativeInterface {
 	 * @return The bounding box calculated during laying out the text 
 	 */
 	SizeInt layoutText(
-			String fontFamily, 
+			TrueTypeFont font, 
 			String text, 
 			EHorizontalAlign hAlign, 
 			EVerticalAlign vAlign, 
