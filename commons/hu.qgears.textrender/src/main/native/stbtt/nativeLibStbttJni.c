@@ -34,8 +34,8 @@ JNIEXPORT jlong JNICALL Java_hu_qgears_textrender_stbtt_StbTrueTypeNative_create
  */
 JNIEXPORT jobject JNICALL Java_hu_qgears_textrender_stbtt_StbTrueTypeNative_renderTextPrivate
   (JNIEnv *env, jobject obj, jlong surfaceId, jobject font, jstring text, jobject hAlign, jobject vAlign, 
-   jint x, jint y, jint width, jint height, jfloat fontSize, jfloat letterSpacing, jfloat lineSpacing, 
-   jfloat wordSpacing, jboolean useKerning, jobject wrapMode)
+   jint x, jint y, jint width, jint height, jfloat r, jfloat g, jfloat b, 
+   jfloat a, jboolean clip, jobject wrapMode)
 {
     // Convert Java strings to C strings
     const char* c_text = (*env)->GetStringUTFChars(env, text, 0);
@@ -48,8 +48,8 @@ JNIEXPORT jobject JNICALL Java_hu_qgears_textrender_stbtt_StbTrueTypeNative_rend
     
     // Forward to native implementation
     T_SizeInt result = qstb_renderTextPrivate(surfaceId, &c_font, c_text , 
-                                         hAlignValue, vAlignValue, x, y, width, height, fontSize, letterSpacing, 
-                                         lineSpacing, wordSpacing, useKerning, wrapModeValue);
+                                         hAlignValue, vAlignValue, x, y, width, height, r, g, 
+                                         b, a, clip, wrapModeValue);
     
     // Release the Java strings
     (*env)->ReleaseStringUTFChars(env, text, c_text);
