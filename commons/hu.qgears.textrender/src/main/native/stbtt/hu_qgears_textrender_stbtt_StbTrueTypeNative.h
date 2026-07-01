@@ -18,18 +18,18 @@ JNIEXPORT jlong JNICALL Java_hu_qgears_textrender_stbtt_StbTrueTypeNative_create
 /*
  * Class:     hu_qgears_textrender_stbtt_StbTrueTypeNative
  * Method:    renderTextPrivate
- * Signature: (JLjava/lang/String;Ljava/lang/String;Lhu/qgears/images/text/EHorizontalAlign;Lhu/qgears/images/text/EVerticalAlign;IIIIFFFFZLhu/qgears/images/text/EWrapMode;)Lhu/qgears/images/SizeInt;
+ * Signature: (JLhu/qgears/textrender/TrueTypeFont;Ljava/lang/String;Lhu/qgears/images/text/EHorizontalAlign;Lhu/qgears/images/text/EVerticalAlign;IIIIFFFFZLhu/qgears/images/text/EWrapMode;)Lhu/qgears/images/SizeInt;
  */
 JNIEXPORT jobject JNICALL Java_hu_qgears_textrender_stbtt_StbTrueTypeNative_renderTextPrivate
-  (JNIEnv *, jobject, jlong, jstring, jstring, jobject, jobject, jint, jint, jint, jint, jfloat, jfloat, jfloat, jfloat, jboolean, jobject);
+  (JNIEnv *, jobject, jlong, jobject, jstring, jobject, jobject, jint, jint, jint, jint, jfloat, jfloat, jfloat, jfloat, jboolean, jobject);
 
 /*
  * Class:     hu_qgears_textrender_stbtt_StbTrueTypeNative
  * Method:    layoutTextPrivate
- * Signature: (Ljava/lang/String;Ljava/lang/String;Lhu/qgears/images/text/EHorizontalAlign;Lhu/qgears/images/text/EVerticalAlign;IILhu/qgears/images/text/EWrapMode;)Lhu/qgears/images/SizeInt;
+ * Signature: (Lhu/qgears/textrender/TrueTypeFont;Ljava/lang/String;Lhu/qgears/images/text/EHorizontalAlign;Lhu/qgears/images/text/EVerticalAlign;IILhu/qgears/images/text/EWrapMode;)Lhu/qgears/images/SizeInt;
  */
 JNIEXPORT jobject JNICALL Java_hu_qgears_textrender_stbtt_StbTrueTypeNative_layoutTextPrivate
-  (JNIEnv *, jobject, jstring, jstring, jobject, jobject, jint, jint, jobject);
+  (JNIEnv *, jobject, jobject, jstring, jobject, jobject, jint, jint, jobject);
 
 /*
  * Class:     hu_qgears_textrender_stbtt_StbTrueTypeNative

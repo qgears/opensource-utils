@@ -28,7 +28,7 @@ uint64_t qstb_createSurfaceWithDataPrivate(uint8_t* data, int32_t w, int32_t h)
     return (uint64_t)surfaceData;
 }
 
-T_SizeInt qstb_renderTextPrivate(uint64_t surfaceHandle, const char* fontFamily, const char* text, 
+T_SizeInt qstb_renderTextPrivate(uint64_t surfaceHandle, T_TrueTypeFont* font, const char* text, 
                             uint32_t hAlign, uint32_t vAlign, int32_t x, int32_t y, int32_t width, int32_t height,
                             float r, float g, float b, float a, bool clip, uint32_t wrapMode)
 {
@@ -51,7 +51,7 @@ T_SizeInt qstb_renderTextPrivate(uint64_t surfaceHandle, const char* fontFamily,
     }
 }
 
-T_SizeInt qstb_layoutTextPrivate(const char* fontFamily, const char* text, 
+T_SizeInt qstb_layoutTextPrivate(T_TrueTypeFont* font, const char* text, 
                             uint32_t hAlign, uint32_t vAlign, int32_t width, int32_t height, uint32_t wrapMode)
 {
     // Stub implementation - to be filled later

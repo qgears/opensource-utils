@@ -9,6 +9,18 @@ extern "C" {
 #endif
 
 /**
+ * C representation of Java TrueTypeFont object
+ */
+typedef struct {
+    const char* fontFamily;
+    float fontSize;
+    double letterSpacing;
+    bool bold;
+    bool italic;
+    bool underline;
+} T_TrueTypeFont;
+
+/**
  * C representation of Java SizeInt object
  */
 typedef struct {
@@ -41,7 +53,7 @@ void qstb_disposeSurfacePrivate(uint64_t surfaceHandle);
  * Renders text onto a surface
  * 
  * @param surfaceHandle The surface handle returned by {@link #createSurfaceWithData(ByteBuffer, int, int)}.
- * @param fontFamily Name of the font family to use
+ * @param font The font parameters
  * @param text Text to render
  * @param hAlign Horizontal alignment
  * @param vAlign Vertical alignment  
@@ -58,14 +70,14 @@ void qstb_disposeSurfacePrivate(uint64_t surfaceHandle);
  * 
  * @return The bounding box calculated during laying out the text
  */
-T_SizeInt qstb_renderTextPrivate(uint64_t surfaceHandle, const char* fontFamily, const char* text, 
+T_SizeInt qstb_renderTextPrivate(uint64_t surfaceHandle, T_TrueTypeFont* font, const char* text, 
                             uint32_t hAlign, uint32_t vAlign, int32_t x, int32_t y, int32_t width, int32_t height,
                             float r, float g, float b, float a, bool clip, uint32_t wrapMode);
 
 /**
  * Calculates the layout of text without rendering it
  * 
- * @param fontFamily Name of the font family to use
+ * @param font The font parameters
  * @param text Text to calculate layout for
  * @param hAlign Horizontal alignment
  * @param vAlign Vertical alignment
@@ -75,7 +87,7 @@ T_SizeInt qstb_renderTextPrivate(uint64_t surfaceHandle, const char* fontFamily,
  * 
  * @return The bounding box calculated during laying out the text
  */
-T_SizeInt qstb_layoutTextPrivate(const char* fontFamily, const char* text, 
+T_SizeInt qstb_layoutTextPrivate(T_TrueTypeFont* font, const char* text, 
                             uint32_t hAlign, uint32_t vAlign, int32_t width, int32_t height, uint32_t wrapMode);
 
 #ifdef __cplusplus
