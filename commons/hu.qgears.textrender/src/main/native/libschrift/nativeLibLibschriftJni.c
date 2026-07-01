@@ -36,8 +36,8 @@ JNIEXPORT jlong JNICALL Java_hu_qgears_textrender_libschrift_LibschriftNative_cr
  */
 JNIEXPORT jobject JNICALL Java_hu_qgears_textrender_libschrift_LibschriftNative_renderTextPrivate
   (JNIEnv *env, jobject obj, jlong surfaceId, jobject font, jstring text, jobject hAlign, jobject vAlign, 
-   jint x, jint y, jint width, jint height, jfloat fontSize, jfloat letterSpacing, jfloat lineSpacing, 
-   jfloat wordSpacing, jboolean useKerning, jobject wrapMode)
+   jint x, jint y, jint width, jint height, jfloat r, jfloat g, jfloat b, 
+   jfloat a, jboolean clip, jobject wrapMode)
 {
     (void)obj;
     
@@ -54,8 +54,8 @@ JNIEXPORT jobject JNICALL Java_hu_qgears_textrender_libschrift_LibschriftNative_
     
     // Forward to native implementation
     T_SizeInt result = qls_renderTextPrivate((uint64_t)surfaceId, &c_font, c_text,(uint32_t) length,
-                                     (uint32_t)hAlignValue, (uint32_t)vAlignValue, x, y, width, height, fontSize, letterSpacing, 
-                                     lineSpacing, wordSpacing, useKerning, (uint32_t)wrapModeValue);
+                                     (uint32_t)hAlignValue, (uint32_t)vAlignValue, x, y, width, height, r, g, 
+                                     b, a, clip, (uint32_t)wrapModeValue);
     
     // Release the Java strings
     (*env)->ReleaseStringChars(env, text, c_text);
