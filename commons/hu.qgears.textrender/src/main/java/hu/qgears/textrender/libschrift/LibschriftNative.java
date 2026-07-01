@@ -1,7 +1,5 @@
 package hu.qgears.textrender.libschrift;
 import java.nio.ByteBuffer;
-import java.nio.charset.CharsetDecoder;
-import java.nio.charset.StandardCharsets;
 
 import hu.qgears.images.SizeInt;
 import hu.qgears.images.text.EHorizontalAlign;
