@@ -1,7 +1,8 @@
 #include <jni.h>
 #include "nativeLibLibschrift.h"
 #include "hu_qgears_textrender_libschrift_LibschriftNative.h"
-
+#include <stdio.h>
+#include <string.h>
 
 /**
  * Converts a Java TrueTypeFont object to a native C struct
@@ -11,6 +12,8 @@
  * @return T_TrueTypeFont struct with converted values
  */
 static T_TrueTypeFont convertJavaTrueTypeFont(JNIEnv *env, jobject fontObject);
+
+static void throwException(JNIEnv *env, T_ErrorHandler* eh);
 
 static void disposeTrueTypeFont(JNIEnv *env, jobject fontObject, T_TrueTypeFont* font);
 
@@ -52,29 +55,36 @@ JNIEXPORT jobject JNICALL Java_hu_qgears_textrender_libschrift_LibschriftNative_
     int vAlignValue = (*env)->CallIntMethod(env, vAlign, (*env)->GetMethodID(env, (*env)->GetObjectClass(env, vAlign), "ordinal", "()I"));
     int wrapModeValue = (*env)->CallIntMethod(env, wrapMode, (*env)->GetMethodID(env, (*env)->GetObjectClass(env, wrapMode), "ordinal", "()I"));
     
+    T_ErrorHandler eh = {0};
     // Forward to native implementation
-    T_SizeInt result = qls_renderTextPrivate((uint64_t)surfaceId, &c_font, c_text,(uint32_t) length,
+    T_SizeInt result = qls_renderTextPrivate(&eh,(uint64_t)surfaceId, &c_font, c_text,(uint32_t) length,
                                      (uint32_t)hAlignValue, (uint32_t)vAlignValue, x, y, width, height, r, g, 
                                      b, a, clip, (uint32_t)wrapModeValue);
     
     // Release the Java strings
     (*env)->ReleaseStringChars(env, text, c_text);
     disposeTrueTypeFont(env,font,&c_font);
+    
+    if (eh.code == QLS_ERROR_OK) {
+        // Create and return SizeInt object from T_SizeInt result
+        jclass sizeIntClass = (*env)->FindClass(env, "hu/qgears/images/SizeInt");
+        if (sizeIntClass == NULL) {
+            return NULL;
+        }
+        jmethodID constructor = (*env)->GetMethodID(env, sizeIntClass, "<init>", "(II)V");
+        if (constructor == NULL) {
+            return NULL;
+        }
+        // Return SizeInt object with width and height from the C struct
+        return (*env)->NewObject(env, sizeIntClass, constructor, result.width, result.height);
+    } else {
 
-    // Create and return SizeInt object from T_SizeInt result
-    jclass sizeIntClass = (*env)->FindClass(env, "hu/qgears/images/SizeInt");
-    if (sizeIntClass == NULL) {
+        throwException(env,&eh);
         return NULL;
     }
-    
-    jmethodID constructor = (*env)->GetMethodID(env, sizeIntClass, "<init>", "(II)V");
-    if (constructor == NULL) {
-        return NULL;
-    }
-    
-    // Return SizeInt object with width and height from the C struct
-    return (*env)->NewObject(env, sizeIntClass, constructor, result.width, result.height);
 }
+
+
 
 /*
  * Method:    layoutTextPrivate
@@ -85,7 +95,7 @@ JNIEXPORT jobject JNICALL Java_hu_qgears_textrender_libschrift_LibschriftNative_
    jint width, jint height, jobject wrapMode)
 {
     (void)obj;
-    
+    T_ErrorHandler eh = {0};
     // Convert Java strings to C strings
     const jchar* c_text = (*env)->GetStringChars(env, text, 0);
     T_TrueTypeFont c_font = convertJavaTrueTypeFont(env,font);
@@ -96,7 +106,7 @@ JNIEXPORT jobject JNICALL Java_hu_qgears_textrender_libschrift_LibschriftNative_
     int wrapModeValue = (*env)->CallIntMethod(env, wrapMode, (*env)->GetMethodID(env, (*env)->GetObjectClass(env, wrapMode), "ordinal", "()I"));
     
     // Forward to native implementation
-    T_SizeInt result = qls_layoutTextPrivate(&c_font,c_text, (uint32_t)hAlignValue, (uint32_t)vAlignValue, width, height, (uint32_t)wrapModeValue);
+    T_SizeInt result = qls_layoutTextPrivate(&eh,&c_font,c_text, (uint32_t)hAlignValue, (uint32_t)vAlignValue, width, height, (uint32_t)wrapModeValue);
     
     // Release the Java strings
     (*env)->ReleaseStringChars(env, text, c_text);
@@ -207,5 +217,46 @@ static void disposeTrueTypeFont(JNIEnv *env, jobject fontObject, T_TrueTypeFont*
              (*env)->ReleaseStringUTFChars(env, fontFamilyString, font->fontFamily);
              font->fontFamily = NULL;
         }
+    }
+}
+
+const char *filename(const char *str)
+{
+    if (str == NULL) {
+        return NULL;
+    }
+
+    const char *last = str;
+
+    for (const char *p = str; *p != '\0'; p++) {
+        if (*p == '/') {
+            last = p+1;
+        }
+    }
+
+    return last;  // if not found → original str
+}
+
+static void throwException(JNIEnv *env, T_ErrorHandler* eh) {
+    jclass exc = (*env)->FindClass(env, "java/lang/RuntimeException");
+    eh->errorMsg[QLS_MAX_ERROR_MSG_SIZE-1] = '\0';
+    uint32_t len = (uint32_t)strlen(eh->errorMsg);
+    if (len < QLS_MAX_ERROR_MSG_SIZE){
+        char* msgPtr = &(eh->errorMsg[len]);
+        if (eh->file){
+            snprintf(msgPtr,QLS_MAX_ERROR_MSG_SIZE - len,
+                " at %s#%d. Error code %d", 
+                filename(eh->file),
+                eh->line,
+                eh->code);
+        } else {
+            snprintf(msgPtr,QLS_MAX_ERROR_MSG_SIZE - len,
+                " Error code %d", 
+                eh->code);
+        }
+    }
+
+    if (exc != NULL) {
+        (*env)->ThrowNew(env, exc, eh->errorMsg);
     }
 }

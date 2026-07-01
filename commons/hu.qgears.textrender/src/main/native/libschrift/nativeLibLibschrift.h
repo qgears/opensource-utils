@@ -9,6 +9,30 @@ extern "C" {
 #endif
 
 
+typedef enum {
+    QLS_ERROR_OK,
+    QLS_ERROR_INVALID_SURFACE,
+    QLS_ERROR_SURFACE_DATA_NULL,
+    QLS_ERROR_MISSING_FONT,
+    QLS_ERROR_LONG_FONT_PATH,
+    QLS_ERROR_FONT_LOAD,
+    QLS_ERROR_GLIPH_MISSING,
+    QLS_ERROR_GLIPH_METRICS_BAD,
+    QLS_ERROR_GLIPH_RENDER,
+} QLS_ERROR_CODE;
+
+#define QLS_MAX_ERROR_MSG_SIZE (256u)
+
+typedef struct {
+    QLS_ERROR_CODE code;
+    const char* file;
+    uint32_t line;
+    char errorMsg[QLS_MAX_ERROR_MSG_SIZE];
+} T_ErrorHandler;
+
+#define ERROR(eh,ec,...) do { eh->code = ec;eh->file = __FILE__; eh->line = __LINE__; snprintf(eh->errorMsg,QLS_MAX_ERROR_MSG_SIZE, __VA_ARGS__); } while (0)
+
+
 /**
  * C representation of Java TrueTypeFont object
  */
@@ -20,7 +44,6 @@ typedef struct {
     bool italic;
     bool underline;
 } T_TrueTypeFont;
-
 
 /**
  * C representation of Java SizeInt object
@@ -73,7 +96,7 @@ void qls_disposeSurfacePrivate(uint64_t surfaceHandle);
  * 
  * @return The bounding box calculated during laying out the text
  */
-T_SizeInt qls_renderTextPrivate(uint64_t surfaceHandle, T_TrueTypeFont* font, const uint16_t* text, uint32_t textLen,  
+T_SizeInt qls_renderTextPrivate(T_ErrorHandler* errorHandler, uint64_t surfaceHandle, T_TrueTypeFont* font, const uint16_t* text, uint32_t textLen,  
                             uint32_t hAlign, uint32_t vAlign, int32_t x, int32_t y, int32_t width, int32_t height,
                             float r, float g, float b, float a, bool clip, uint32_t wrapMode);
 
@@ -90,7 +113,7 @@ T_SizeInt qls_renderTextPrivate(uint64_t surfaceHandle, T_TrueTypeFont* font, co
  * 
  * @return The bounding box calculated during laying out the text
  */
-T_SizeInt qls_layoutTextPrivate(T_TrueTypeFont* font, const uint16_t* text, 
+T_SizeInt qls_layoutTextPrivate(T_ErrorHandler* errorHandler, T_TrueTypeFont* font, const uint16_t* text, 
                             uint32_t hAlign, uint32_t vAlign, int32_t width, int32_t height, uint32_t wrapMode);
 
 #ifdef __cplusplus

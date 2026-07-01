@@ -6,14 +6,8 @@
 #include <string.h>
 #include <fontconfig/fontconfig.h>
 
-#define ERROR(...) printf("ERROR: ");printf(__VA_ARGS__);printf("\n");fflush(stdout)
-#define LOG(...) ;printf(__VA_ARGS__);printf("\n");fflush(stdout)
 
-static void error(char* m) {
-    //TODO Java exception
-    printf("ERROR %s\n",m);
-    fflush(stdout);
-}
+#define LOG(...) ;printf(__VA_ARGS__);printf("\n");fflush(stdout)
 
 
 // Structure to represent surface data
@@ -33,9 +27,9 @@ typedef struct {
 } T_LayoutData;
 
 static T_SurfaceData* qls_get_surfacedata(uint64_t id);
-static inline void qls_render_gliph(SFT* sft, uint32_t codePoint,T_SurfaceData* surface,T_LayoutData* l_data);
-static void qls_load_font(SFT* sft, T_TrueTypeFont* font);
-static uint8_t get_font_file(T_TrueTypeFont* font, char* filePath, uint32_t filePathLength);
+static inline void qls_render_gliph(T_ErrorHandler* eh,SFT* sft, uint32_t codePoint,T_SurfaceData* surface,T_LayoutData* l_data);
+static void qls_load_font(T_ErrorHandler* eh,SFT* sft, T_TrueTypeFont* font);
+static void get_font_file(T_ErrorHandler* eh, T_TrueTypeFont* font, char* filePath, uint32_t filePathLength);
 
 uint64_t qls_createSurfaceWithDataPrivate(uint8_t* data, int32_t w, int32_t h)
 {
@@ -54,7 +48,7 @@ uint64_t qls_createSurfaceWithDataPrivate(uint8_t* data, int32_t w, int32_t h)
     return (uint64_t)(uintptr_t)surfaceData;
 }
 
-T_SizeInt qls_renderTextPrivate(uint64_t surfaceHandle, T_TrueTypeFont* font, const uint16_t* text, uint32_t textLen,
+T_SizeInt qls_renderTextPrivate(T_ErrorHandler* errorHandler, uint64_t surfaceHandle, T_TrueTypeFont* font, const uint16_t* text, uint32_t textLen,
                             uint32_t hAlign, uint32_t vAlign, int32_t x, int32_t y, int32_t width, int32_t height,
                             float r, float g, float b, float a, bool clip, uint32_t wrapMode)
 {
@@ -80,14 +74,11 @@ T_SizeInt qls_renderTextPrivate(uint64_t surfaceHandle, T_TrueTypeFont* font, co
         uint32_t* surfaceData = (uint32_t*)surface->data;
         if (surfaceData) 
         {
-            
             SFT sft = {
 		    	.flags  = SFT_DOWNWARD_Y,
             };
-            
-            qls_load_font(&sft,font);
-           
-            for (int i = 0; i < textLen; i++) {
+            qls_load_font(errorHandler, &sft,font);
+            for (int i = 0; i < textLen && (errorHandler->code == QLS_ERROR_OK); i++) {
                 //The unicode codepoint
                 uint32_t cp = text[i];
                 if (cp >= 0xD800 && cp <= 0xDBFF && i + 1 < textLen) {
@@ -97,19 +88,29 @@ T_SizeInt qls_renderTextPrivate(uint64_t surfaceHandle, T_TrueTypeFont* font, co
                         ++i;
                     }
                 }
-                qls_render_gliph(&sft, cp,surface,&l_data);
+                qls_render_gliph(errorHandler,&sft, cp,surface,&l_data);
             }
-            
+            if (sft.font != NULL){
+                sft_freefont(sft.font);
+            }
+
             T_SizeInt result = {100, 50}; // dummy values
             return result;
+        } 
+        else
+        {
+            ERROR(errorHandler,QLS_ERROR_SURFACE_DATA_NULL,"Surface data null");
         }
+    } else
+    {
+        ERROR(errorHandler,QLS_ERROR_INVALID_SURFACE,"Invalid surface id");
     }
     
     T_SizeInt result = {0, 0};
     return result;
 }
 
-T_SizeInt qls_layoutTextPrivate(T_TrueTypeFont* font, const uint16_t* text, 
+T_SizeInt qls_layoutTextPrivate(T_ErrorHandler* errorHandler, T_TrueTypeFont* font, const uint16_t* text, 
                             uint32_t hAlign, uint32_t vAlign, int32_t width, int32_t height, uint32_t wrapMode)
 {
     (void)text;
@@ -212,23 +213,22 @@ static inline void copy_rect(int32_t startx, int32_t starty, T_SurfaceData* surf
 //     return (uint8_t)((src * alpha + dst * (255 - alpha) + 127) / 255);
 // }
 
-static inline void qls_render_gliph(SFT* sft, uint32_t cp,T_SurfaceData* surface,T_LayoutData* l_data)
+static inline void qls_render_gliph(T_ErrorHandler* eh, SFT* sft, uint32_t cp,T_SurfaceData* surface,T_LayoutData* l_data)
 {
-//TODO use java exceptions instead of ABORT
-#define ABORT(cp, m) do { printf("codepoint 0x%04X %s\n", cp, m); return; } while (0)
 
 	SFT_Glyph gid;  //  unsigned long gid;
 	if (sft_lookup(sft, cp, &gid) < 0)
     {
-		ABORT(cp, "missing");
+		ERROR(eh,QLS_ERROR_GLIPH_MISSING, "codepoint 0x%04X missing",cp);
+        return;
     }
-
+    
 	SFT_GMetrics mtx;
 	if (sft_gmetrics(sft, gid, &mtx) < 0)
     {
-		ABORT(cp, "bad glyph metrics");
+        ERROR(eh,QLS_ERROR_GLIPH_MISSING, "codepoint 0x%04X bad glyph metrics",cp);
+        return;
     }
-
     
     bool render = true;
     int32_t yBaseLine = l_data->y+surface->height;
@@ -241,32 +241,32 @@ static inline void qls_render_gliph(SFT* sft, uint32_t cp,T_SurfaceData* surface
         img.pixels = pixels;
         if (sft_render(sft, gid, img) < 0)
         {
-            ABORT(cp, "not rendered");
+            ERROR(eh,QLS_ERROR_GLIPH_RENDER, "codepoint 0x%04X not rendered",cp);
+            return;
         }
-        
         copy_rect((int32_t)l_data->x ,yBaseLine+mtx.yOffset, surface,&img,0xFFFF0000);
     }
     l_data->x += mtx.advanceWidth;
 }
 
- static void qls_load_font(SFT* sft, T_TrueTypeFont* font) {
+static void qls_load_font(T_ErrorHandler* eh, SFT* sft, T_TrueTypeFont* font) {
     //TODO font cache, load font by name etc...
     sft->xScale = font->fontSize;
     sft->yScale = font->fontSize;
     static char font_path[256];
-    if (0 == get_font_file(font,font_path,sizeof(font_path))) {
-        sft->font = sft_loadfile(font_path);
-    }
-    if (sft->font == NULL)
-    {
-        error("TTF load failed");
-    }
+    get_font_file(eh,font,font_path,sizeof(font_path));
 
+    if (eh->code == QLS_ERROR_OK){
+        sft->font = sft_loadfile(font_path);
+        if (sft->font == NULL)
+        {
+            ERROR(eh,QLS_ERROR_FONT_LOAD, "TTF load failed %s" , font->fontFamily);
+        }
+    }
 }
 
 
-static uint8_t get_font_file(T_TrueTypeFont* font, char* filePath, uint32_t filePathLength){
-    uint8_t ok = 1;
+static void get_font_file(T_ErrorHandler* eh,T_TrueTypeFont* font, char* filePath, uint32_t filePathLength){
     FcInit();
 
     FcPattern *pat = FcPatternCreate();
@@ -291,14 +291,12 @@ static uint8_t get_font_file(T_TrueTypeFont* font, char* filePath, uint32_t file
                 memcpy(filePath,file,fLen);
                 filePath[fLen] = '\0';
                 LOG("Font file: %s\n", filePath);
-                ok = 0;
             } else {
-                ERROR("File path for font %s too long ", font->fontFamily);
+                ERROR(eh,QLS_ERROR_LONG_FONT_PATH,"File path for font %s too long : %d", font->fontFamily,fLen);
             }
         }
         FcPatternDestroy(fc_font);
     } else {
-        ERROR("No matching font found %s.",font->fontFamily);
+        ERROR(eh,QLS_ERROR_MISSING_FONT ,"No matching font found %s.",font->fontFamily);
     }
-    return ok;
  }
