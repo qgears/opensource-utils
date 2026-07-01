@@ -3,10 +3,16 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "schrift.h"
+#include <string.h>
+#include <fontconfig/fontconfig.h>
+
+#define ERROR(...) printf("ERROR: ");printf(__VA_ARGS__);printf("\n");fflush(stdout)
+#define LOG(...) ;printf(__VA_ARGS__);printf("\n");fflush(stdout)
 
 static void error(char* m) {
     //TODO Java exception
     printf("ERROR %s\n",m);
+    fflush(stdout);
 }
 
 
@@ -29,7 +35,7 @@ typedef struct {
 static T_SurfaceData* qls_get_surfacedata(uint64_t id);
 static inline void qls_render_gliph(SFT* sft, uint32_t codePoint,T_SurfaceData* surface,T_LayoutData* l_data);
 static void qls_load_font(SFT* sft, T_TrueTypeFont* font);
-
+static uint8_t get_font_file(T_TrueTypeFont* font, char* filePath, uint32_t filePathLength);
 
 uint64_t qls_createSurfaceWithDataPrivate(uint8_t* data, int32_t w, int32_t h)
 {
@@ -247,10 +253,52 @@ static inline void qls_render_gliph(SFT* sft, uint32_t cp,T_SurfaceData* surface
     //TODO font cache, load font by name etc...
     sft->xScale = font->fontSize;
     sft->yScale = font->fontSize;
-    sft->font = sft_loadfile("/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf");
-            if (sft->font == NULL)
-            {
-                error("TTF load failed");
-            }
+    static char font_path[256];
+    if (0 == get_font_file(font,font_path,sizeof(font_path))) {
+        sft->font = sft_loadfile(font_path);
+    }
+    if (sft->font == NULL)
+    {
+        error("TTF load failed");
+    }
 
+}
+
+
+static uint8_t get_font_file(T_TrueTypeFont* font, char* filePath, uint32_t filePathLength){
+    uint8_t ok = 1;
+    FcInit();
+
+    FcPattern *pat = FcPatternCreate();
+
+    FcPatternAddString(pat, FC_FAMILY, (FcChar8 *)font->fontFamily);
+    FcPatternAddInteger(pat, FC_WEIGHT, font->bold ? FC_WEIGHT_BOLD : FC_WEIGHT_NORMAL);
+    FcPatternAddInteger(pat, FC_SLANT, font->italic ? FC_SLANT_ITALIC : FC_SLANT_ROMAN);
+
+    FcConfigSubstitute(NULL, pat, FcMatchPattern);
+    FcDefaultSubstitute(pat);
+
+    FcResult result;
+    FcPattern *fc_font = FcFontMatch(NULL, pat, &result);
+
+    if (fc_font) {
+        char *file;
+        int index;
+
+        if (FcPatternGetString(fc_font, FC_FILE, 0, (FcChar8**)&file) == FcResultMatch) {
+            uint32_t fLen =(uint32_t) strlen(file);
+            if (fLen < filePathLength-1){
+                memcpy(filePath,file,fLen);
+                filePath[fLen] = '\0';
+                LOG("Font file: %s\n", filePath);
+                ok = 0;
+            } else {
+                ERROR("File path for font %s too long ", font->fontFamily);
+            }
+        }
+        FcPatternDestroy(fc_font);
+    } else {
+        ERROR("No matching font found %s.",font->fontFamily);
+    }
+    return ok;
  }
