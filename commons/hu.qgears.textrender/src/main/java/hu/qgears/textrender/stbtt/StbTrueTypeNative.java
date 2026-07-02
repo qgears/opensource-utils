@@ -5,6 +5,7 @@ import hu.qgears.images.SizeInt;
 import hu.qgears.images.text.EHorizontalAlign;
 import hu.qgears.images.text.EVerticalAlign;
 import hu.qgears.images.text.EWrapMode;
+import hu.qgears.images.text.RGBAColor;
 import hu.qgears.textrender.TrueTypeFont;
 import hu.qgears.textrender.TrueTypeNativeInterface;
 
@@ -31,6 +32,7 @@ import hu.qgears.textrender.TrueTypeNativeInterface;
 
 		// TODO parameter verficifation : handle null args here instead of the native
 		// impl
+		RGBAColor.fromFloats(r, g, b, a).toIntPixel();
 		return renderTextPrivate(surfaceHandle, fontFamily, str, hAlign, vAlign, x, y, width, height, r, g, b, a, clip,
 				wrapMode);
 	}
