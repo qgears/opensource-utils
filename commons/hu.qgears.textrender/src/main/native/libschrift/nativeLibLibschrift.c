@@ -18,16 +18,22 @@ typedef struct {
 } T_SurfaceData;
 
 typedef struct {
-    double x;
-    int32_t y;
-    int32_t startX;
-    int32_t startY;
-    int32_t endX;
-    int32_t endY;
-} T_LayoutData;
+    SFT sft;
+    double penX;
+    double penY;
+    int32_t minPenX;
+    int32_t minPenY;
+    int32_t maxPenX;
+    int32_t maxPenY;
+    uint32_t color;
+    /**
+     * Store prev gliph to support kerning
+     */
+    SFT_Glyph prev_gliph;
+} T_RenderData;
 
 static T_SurfaceData* qls_get_surfacedata(uint64_t id);
-static inline void qls_render_gliph(T_ErrorHandler* eh,SFT* sft, uint32_t codePoint,T_SurfaceData* surface,T_LayoutData* l_data);
+static inline void qls_render_gliph(T_ErrorHandler* eh, T_RenderData * rData, uint32_t cp,T_SurfaceData* surface);
 static void qls_load_font(T_ErrorHandler* eh,SFT* sft, T_TrueTypeFont* font);
 static void get_font_file(T_ErrorHandler* eh, T_TrueTypeFont* font, char* filePath, uint32_t filePathLength);
 
@@ -48,6 +54,9 @@ uint64_t qls_createSurfaceWithDataPrivate(uint8_t* data, int32_t w, int32_t h)
     return (uint64_t)(uintptr_t)surfaceData;
 }
 
+#define LIMIT(x,min,max) ((x) < (min) ? (min) : ((x) > (max) ? (max) : (x)))
+#define PIX(r)  (uint32_t)(((uint8_t)(r * 0xFFu)))
+
 T_SizeInt qls_renderTextPrivate(T_ErrorHandler* errorHandler, uint64_t surfaceHandle, T_TrueTypeFont* font, const uint16_t* text, uint32_t textLen,
                             uint32_t hAlign, uint32_t vAlign, int32_t x, int32_t y, int32_t width, int32_t height,
                             float r, float g, float b, float a, bool clip, uint32_t wrapMode)
@@ -66,36 +75,59 @@ T_SizeInt qls_renderTextPrivate(T_ErrorHandler* errorHandler, uint64_t surfaceHa
     (void)clip;
     (void)wrapMode;
     
-    T_LayoutData l_data = {0};
-    l_data.x = x;
-    l_data.y = y;
     T_SurfaceData* surface = qls_get_surfacedata(surfaceHandle);
     if (surface) {
         uint32_t* surfaceData = (uint32_t*)surface->data;
         if (surfaceData) 
         {
-            SFT sft = {
-		    	.flags  = SFT_DOWNWARD_Y,
-            };
-            qls_load_font(errorHandler, &sft,font);
-            for (int i = 0; i < textLen && (errorHandler->code == QLS_ERROR_OK); i++) {
-                //The unicode codepoint
-                uint32_t cp = text[i];
-                if (cp >= 0xD800 && cp <= 0xDBFF && i + 1 < textLen) {
-                    uint32_t lo = text[i + 1];
-                    if (lo >= 0xDC00 && lo <= 0xDFFF) {
-                        cp = 0x10000 + (((cp - 0xD800) << 10) | (lo - 0xDC00));
-                        ++i;
+            T_RenderData rData = {0};
+            rData.minPenX = LIMIT(x,0,surface->width);
+            rData.minPenY = LIMIT(y,0,surface->height);
+            if (clip)
+            {
+                rData.maxPenX = x + width;
+                rData.maxPenY = y + height;
+                rData.maxPenX = LIMIT(rData.maxPenX,0,surface->width);
+                rData.maxPenY = LIMIT(rData.maxPenY,0,surface->height);
+            }
+            else 
+            {
+                rData.maxPenX = surface->width;
+                rData.maxPenY = surface->height;
+            }
+            //put pen to baseline
+            rData.penX = x;
+            rData.penY = font->fontSize + (double)y;
+            if (rData.maxPenY > rData.minPenY && rData.maxPenX > rData.minPenX){
+                rData.color = PIX(r) | (PIX(g) << 8) | (PIX(b) << 16) | (PIX(a) << 24);
+        
+                
+                // rData.sft.flags = 0;
+                rData.sft.flags = SFT_DOWNWARD_Y;
+                qls_load_font(errorHandler, &(rData.sft),font);
+                for (int i = 0; i < textLen && (errorHandler->code == QLS_ERROR_OK); i++) {
+                    //The unicode codepoint
+                    uint32_t cp = text[i];
+                    if (cp >= 0xD800 && cp <= 0xDBFF && i + 1 < textLen) {
+                        uint32_t lo = text[i + 1];
+                        if (lo >= 0xDC00 && lo <= 0xDFFF) {
+                            cp = 0x10000 + (((cp - 0xD800) << 10) | (lo - 0xDC00));
+                            ++i;
+                        }
                     }
+                    qls_render_gliph(errorHandler, &rData, cp,surface);
                 }
-                qls_render_gliph(errorHandler,&sft, cp,surface,&l_data);
-            }
-            if (sft.font != NULL){
-                sft_freefont(sft.font);
-            }
+                if (rData.sft.font != NULL){
+                    sft_freefont(rData.sft.font);
+                }
 
-            T_SizeInt result = {100, 50}; // dummy values
-            return result;
+                T_SizeInt result = {100, 50}; // dummy values
+                return result;
+            }
+            else
+            {
+                //specified target rectangle is invalid or empty
+            }
         } 
         else
         {
@@ -213,10 +245,22 @@ static inline void copy_rect(int32_t startx, int32_t starty, T_SurfaceData* surf
 //     return (uint8_t)((src * alpha + dst * (255 - alpha) + 127) / 255);
 // }
 
-static inline void qls_render_gliph(T_ErrorHandler* eh, SFT* sft, uint32_t cp,T_SurfaceData* surface,T_LayoutData* l_data)
+
+static int32_t dToI (double d)
+{
+    //convert with rounding following the usual math rules
+    if (d < 0){
+        return (int32_t)(d - 0.5);
+    } else {
+        return (int32_t)(d + 0.5);
+    }
+}
+
+static inline void qls_render_gliph(T_ErrorHandler* eh, T_RenderData * rData, uint32_t cp,T_SurfaceData* surface)
 {
 
 	SFT_Glyph gid;  //  unsigned long gid;
+    SFT* sft = &(rData->sft);
 	if (sft_lookup(sft, cp, &gid) < 0)
     {
 		ERROR(eh,QLS_ERROR_GLIPH_MISSING, "codepoint 0x%04X missing",cp);
@@ -231,7 +275,6 @@ static inline void qls_render_gliph(T_ErrorHandler* eh, SFT* sft, uint32_t cp,T_
     }
     
     bool render = true;
-    int32_t yBaseLine = l_data->y+surface->height;
     if (render){
         SFT_Image img = {
             .width  = (mtx.minWidth + 3) & ~3,
@@ -244,9 +287,12 @@ static inline void qls_render_gliph(T_ErrorHandler* eh, SFT* sft, uint32_t cp,T_
             ERROR(eh,QLS_ERROR_GLIPH_RENDER, "codepoint 0x%04X not rendered",cp);
             return;
         }
-        copy_rect((int32_t)l_data->x ,yBaseLine+mtx.yOffset, surface,&img,0xFFFF0000);
+        double dX = mtx.leftSideBearing;
+        double dY = mtx.yOffset;
+        copy_rect(dToI(rData->penX + dX) ,dToI(rData->penY + dY), surface,&img,rData->color);
     }
-    l_data->x += mtx.advanceWidth;
+    rData->penX += mtx.advanceWidth;
+    rData->prev_gliph = gid;
 }
 
 static void qls_load_font(T_ErrorHandler* eh, SFT* sft, T_TrueTypeFont* font) {
