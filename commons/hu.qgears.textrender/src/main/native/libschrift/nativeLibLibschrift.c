@@ -248,12 +248,13 @@ static inline void copy_rect(int32_t startx, int32_t starty, T_SurfaceData* surf
 
 static int32_t dToI (double d)
 {
-    //convert with rounding following the usual math rules
-    if (d < 0){
-        return (int32_t)(d - 0.5);
-    } else {
-        return (int32_t)(d + 0.5);
-    }
+    return (int32_t)(d );
+    // //convert with rounding following the usual math rules
+    // if (d < 0){
+    //     return (int32_t)(d - 0.5);
+    // } else {
+    //     return (int32_t)(d + 0.5);
+    // }
 }
 
 static inline void qls_render_gliph(T_ErrorHandler* eh, T_RenderData * rData, uint32_t cp,T_SurfaceData* surface)
@@ -273,7 +274,12 @@ static inline void qls_render_gliph(T_ErrorHandler* eh, T_RenderData * rData, ui
         ERROR(eh,QLS_ERROR_GLIPH_MISSING, "codepoint 0x%04X bad glyph metrics",cp);
         return;
     }
-    
+    SFT_Kerning kerning;
+    if (sft_kerning(sft,rData->prev_gliph,gid,&kerning) < 0){
+        ERROR(eh,QLS_ERROR_GLIPH_KERNING, "Invalid kerning between gliphs 0x%016lX 0x%016lX ",rData->prev_gliph,gid);
+        return;
+
+    }
     bool render = true;
     if (render){
         SFT_Image img = {
@@ -287,11 +293,11 @@ static inline void qls_render_gliph(T_ErrorHandler* eh, T_RenderData * rData, ui
             ERROR(eh,QLS_ERROR_GLIPH_RENDER, "codepoint 0x%04X not rendered",cp);
             return;
         }
-        double dX = mtx.leftSideBearing;
-        double dY = mtx.yOffset;
+        double dX = mtx.leftSideBearing +kerning.xShift;
+        double dY = mtx.yOffset + kerning.yShift;
         copy_rect(dToI(rData->penX + dX) ,dToI(rData->penY + dY), surface,&img,rData->color);
     }
-    rData->penX += mtx.advanceWidth;
+    rData->penX += mtx.advanceWidth + kerning.xShift;
     rData->prev_gliph = gid;
 }
 
