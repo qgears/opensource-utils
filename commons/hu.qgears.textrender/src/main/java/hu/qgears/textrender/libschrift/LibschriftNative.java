@@ -40,10 +40,10 @@ import hu.qgears.textrender.TrueTypeNativeInterface;
 			boolean clip, EWrapMode wrapMode);
 
 	@Override
-	public SizeInt layoutText(TrueTypeFont fontFamily, String text, EHorizontalAlign hAlign, EVerticalAlign vAlign, int width,
+	public SizeInt layoutText(TrueTypeFont font, String text, EHorizontalAlign hAlign, EVerticalAlign vAlign, int width,
 			int height, EWrapMode wrapMode) {
 		// TODO parameter verification
-		return layoutTextPrivate(fontFamily, text, hAlign, vAlign, width, height, wrapMode);
+		return layoutTextPrivate(font, text, hAlign, vAlign, width, height, wrapMode);
 	}
 
 	private native SizeInt layoutTextPrivate(TrueTypeFont fontFamily, String text, EHorizontalAlign hAlign,

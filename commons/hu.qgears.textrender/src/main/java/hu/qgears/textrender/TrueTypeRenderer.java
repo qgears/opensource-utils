@@ -54,6 +54,10 @@ public class TrueTypeRenderer {
 	}
 
 	public SizeInt renderText(NativeImage image, TextParameters params, boolean clear) {
+		return renderText(0,0,image.getWidth(),image.getHeight(), image, params, clear);
+	}
+	
+	public SizeInt renderText(int x, int y, int w, int h, NativeImage image, TextParameters params, boolean clear) {
 		
 		long s = rendererNative.createSurfaceWithData(image.getBuffer().getJavaAccessor(), image.getWidth(), image.getHeight());
 		if (clear) {
@@ -69,7 +73,7 @@ public class TrueTypeRenderer {
 					params.text,
 					params.hAlign,
 					params.vAlign,
-					0,0,image.getWidth(),image.getHeight(),
+					x,y,w,h,
 					c[0],c[1],c[2],c[3],
 					true
 					,params.wrapMode);

@@ -5,7 +5,7 @@
 #include "schrift.h"
 #include <string.h>
 #include <fontconfig/fontconfig.h>
-
+#include <math.h>
 
 #define LOG(...) ;printf(__VA_ARGS__);printf("\n");fflush(stdout)
 
@@ -18,13 +18,22 @@ typedef struct {
 } T_SurfaceData;
 
 typedef struct {
+    int32_t x;
+    int32_t y;
+} T_IPoint;
+typedef struct {
+    double x;
+    double y;
+} T_DPoint;
+
+typedef struct {
     SFT sft;
-    double penX;
-    double penY;
-    int32_t minPenX;
-    int32_t minPenY;
-    int32_t maxPenX;
-    int32_t maxPenY;
+    SFT_LMetrics lineMetrics;
+    T_DPoint pen;
+    T_IPoint minPen;
+    T_IPoint maxPen;
+    T_IPoint lExtentMin;
+    T_IPoint lExtentMax;
     uint32_t color;
     /**
      * Store prev gliph to support kerning
@@ -32,10 +41,19 @@ typedef struct {
     SFT_Glyph prev_gliph;
 } T_RenderData;
 
+#define MIN(a,b) ((a) < (b) ? (a) : (b))
+#define MAX(a,b) ((a) > (b) ? (a) : (b))
+#define LIMIT(x,min,max) ((x) < (min) ? (min) : ((x) > (max) ? (max) : (x)))
+#define PIX(r)  (uint32_t)(((uint8_t)(r * 0xFFu)))
+
 static T_SurfaceData* qls_get_surfacedata(uint64_t id);
 static inline void qls_render_gliph(T_ErrorHandler* eh, T_RenderData * rData, uint32_t cp,T_SurfaceData* surface);
-static void qls_load_font(T_ErrorHandler* eh,SFT* sft, T_TrueTypeFont* font);
+static void qls_load_font(T_ErrorHandler* eh,T_RenderData* r, T_TrueTypeFont* font);
 static void get_font_file(T_ErrorHandler* eh, T_TrueTypeFont* font, char* filePath, uint32_t filePathLength);
+static void qls_layoutAndRender(T_ErrorHandler* errorHandler, T_RenderData* rData,T_SurfaceData* surface, const uint16_t* text, uint32_t textLen);
+static inline int32_t dToI (double d);
+
+static void qls_align(T_ErrorHandler* errorHandler, T_RenderData* rData, uint32_t hAlign, uint32_t vAlign,const uint16_t* text, uint32_t textLen);
 
 uint64_t qls_createSurfaceWithDataPrivate(uint8_t* data, int32_t w, int32_t h)
 {
@@ -54,79 +72,63 @@ uint64_t qls_createSurfaceWithDataPrivate(uint8_t* data, int32_t w, int32_t h)
     return (uint64_t)(uintptr_t)surfaceData;
 }
 
-#define LIMIT(x,min,max) ((x) < (min) ? (min) : ((x) > (max) ? (max) : (x)))
-#define PIX(r)  (uint32_t)(((uint8_t)(r * 0xFFu)))
+
+static void qls_layoutAndRender(T_ErrorHandler* errorHandler, T_RenderData* rData,T_SurfaceData* surface, const uint16_t* text, uint32_t textLen) {
+    if (rData->maxPen.y > rData->minPen.y && rData->maxPen.x > rData->minPen.x) {
+        rData->lExtentMin.y = dToI(rData->pen.y);
+        rData->lExtentMax.y = dToI(rData->pen.y) + dToI(ceil(-rData->lineMetrics.descender)) +dToI(ceil(rData->lineMetrics.ascender));
+        for (int i = 0; i < textLen && (errorHandler->code == QLS_ERROR_OK); i++) {
+            //The unicode codepoint
+            uint32_t cp = text[i];
+            if (cp >= 0xD800 && cp <= 0xDBFF && i + 1 < textLen) {
+                uint32_t lo = text[i + 1];
+                if (lo >= 0xDC00 && lo <= 0xDFFF) {
+                    cp = 0x10000 + (((cp - 0xD800) << 10) | (lo - 0xDC00));
+                    ++i;
+                }
+            }
+            qls_render_gliph(errorHandler, rData, cp,surface);
+        }
+    }
+    else
+    {
+        //specified target rectangle is invalid or empty
+    }
+}
 
 T_SizeInt qls_renderTextPrivate(T_ErrorHandler* errorHandler, uint64_t surfaceHandle, T_TrueTypeFont* font, const uint16_t* text, uint32_t textLen,
                             uint32_t hAlign, uint32_t vAlign, int32_t x, int32_t y, int32_t width, int32_t height,
                             float r, float g, float b, float a, bool clip, uint32_t wrapMode)
 {
-    (void)surfaceHandle;
-    (void)hAlign;
-    (void)vAlign;
-    (void)x;
-    (void)y;
-    (void)width;
-    (void)height;
-    (void)r;
-    (void)g;
-    (void)b;
-    (void)a;
-    (void)clip;
     (void)wrapMode;
-    
+    T_SizeInt result = {0, 0};
     T_SurfaceData* surface = qls_get_surfacedata(surfaceHandle);
     if (surface) {
         uint32_t* surfaceData = (uint32_t*)surface->data;
         if (surfaceData) 
         {
             T_RenderData rData = {0};
-            rData.minPenX = LIMIT(x,0,surface->width);
-            rData.minPenY = LIMIT(y,0,surface->height);
-            if (clip)
+            rData.minPen.x = x;
+            rData.minPen.y = y;
+            rData.maxPen.x = x + width;
+            rData.maxPen.y = y + height;
+           
+            if (rData.maxPen.y > rData.minPen.y && rData.maxPen.x > rData.minPen.x)
             {
-                rData.maxPenX = x + width;
-                rData.maxPenY = y + height;
-                rData.maxPenX = LIMIT(rData.maxPenX,0,surface->width);
-                rData.maxPenY = LIMIT(rData.maxPenY,0,surface->height);
-            }
-            else 
-            {
-                rData.maxPenX = surface->width;
-                rData.maxPenY = surface->height;
-            }
-            //put pen to baseline
-            rData.penX = x;
-            rData.penY = font->fontSize + (double)y;
-            if (rData.maxPenY > rData.minPenY && rData.maxPenX > rData.minPenX){
+                qls_load_font(errorHandler, &rData,font);
+                qls_align(errorHandler,&rData,hAlign,vAlign,text,textLen);
                 rData.color = PIX(r) | (PIX(g) << 8) | (PIX(b) << 16) | (PIX(a) << 24);
-        
-                
-                // rData.sft.flags = 0;
-                rData.sft.flags = SFT_DOWNWARD_Y;
-                qls_load_font(errorHandler, &(rData.sft),font);
-                for (int i = 0; i < textLen && (errorHandler->code == QLS_ERROR_OK); i++) {
-                    //The unicode codepoint
-                    uint32_t cp = text[i];
-                    if (cp >= 0xD800 && cp <= 0xDBFF && i + 1 < textLen) {
-                        uint32_t lo = text[i + 1];
-                        if (lo >= 0xDC00 && lo <= 0xDFFF) {
-                            cp = 0x10000 + (((cp - 0xD800) << 10) | (lo - 0xDC00));
-                            ++i;
-                        }
-                    }
-                    qls_render_gliph(errorHandler, &rData, cp,surface);
-                }
-                if (rData.sft.font != NULL){
-                    sft_freefont(rData.sft.font);
-                }
+                qls_layoutAndRender(errorHandler,&rData,surface,text,textLen);
 
-                T_SizeInt result = {100, 50}; // dummy values
-                return result;
+                result.width = dToI(rData.lExtentMax.x-rData.lExtentMin.x);
+                result.height = dToI(rData.lExtentMax.y+rData.lExtentMin.y);
             }
             else
             {
                 //specified target rectangle is invalid or empty
+            }
+            if (rData.sft.font != NULL){
+                sft_freefont(rData.sft.font);
             }
         } 
         else
@@ -138,22 +140,31 @@ T_SizeInt qls_renderTextPrivate(T_ErrorHandler* errorHandler, uint64_t surfaceHa
         ERROR(errorHandler,QLS_ERROR_INVALID_SURFACE,"Invalid surface id");
     }
     
-    T_SizeInt result = {0, 0};
     return result;
 }
 
 T_SizeInt qls_layoutTextPrivate(T_ErrorHandler* errorHandler, T_TrueTypeFont* font, const uint16_t* text, 
-                            uint32_t hAlign, uint32_t vAlign, int32_t width, int32_t height, uint32_t wrapMode)
+                            uint32_t textLen, int32_t width, uint32_t wrapMode)
 {
-    (void)text;
-    (void)hAlign;
-    (void)vAlign;
-    (void)width;
-    (void)height;
     (void)wrapMode;
-    
-    // Stub implementation - to be filled later
-    T_SizeInt result = {100, 50}; // dummy values
+    T_SizeInt result = {0,0};
+    T_RenderData r = {0};
+    r.maxPen.x = width;
+    r.maxPen.y = INT32_MAX;
+    r.sft.flags = SFT_DOWNWARD_Y;
+    qls_load_font(errorHandler,&r,font);
+    if (errorHandler->code == QLS_ERROR_OK)
+    {
+        qls_layoutAndRender(errorHandler,&r,NULL,text,textLen);
+        if (errorHandler->code == QLS_ERROR_OK)
+        {
+            result.width = dToI(r.lExtentMax.x-r.lExtentMin.x);
+            result.height = dToI(r.lExtentMax.y+r.lExtentMin.y);
+        }
+        if (r.sft.font != NULL){
+            sft_freefont(r.sft.font);
+        }
+    }
     return result;
 }
 
@@ -174,8 +185,6 @@ static T_SurfaceData* qls_get_surfacedata(uint64_t id) {
     return (T_SurfaceData*)id;
 }
 
-
-#define MAX(a,b) ((a) > (b) ? (a) : (b))
 static inline void copy_rect(int32_t startx, int32_t starty, T_SurfaceData* surface, SFT_Image* img, uint32_t color)
 {
     // Ensure the source image and destination surface are valid
@@ -227,8 +236,8 @@ static inline void copy_rect(int32_t startx, int32_t starty, T_SurfaceData* surf
     int32_t dstj = startx;
     uint32_t* surfaceData = (uint32_t*)surface->data;
     uint8_t* imageData = ((uint8_t*)img->pixels);
-    for (j = min_src_x,dstj = startx; j < max_src_x; j++, dstj++ ) {
-        for (i = min_src_y, dsti = starty; i < max_src_y; i++, dsti++ ) {
+    for (j = min_src_x,dstj = startx+min_src_x; j < max_src_x; j++, dstj++ ) {
+        for (i = min_src_y, dsti = starty+min_src_y; i < max_src_y; i++, dsti++ ) {
             int32_t dst_pix = (dsti*surface->width) + dstj;
             int32_t src_pix = (i*img->width) + j;
             uint8_t src_alpha = imageData[src_pix];
@@ -246,7 +255,7 @@ static inline void copy_rect(int32_t startx, int32_t starty, T_SurfaceData* surf
 // }
 
 
-static int32_t dToI (double d)
+static inline int32_t dToI (double d)
 {
     return (int32_t)(d );
     // //convert with rounding following the usual math rules
@@ -280,8 +289,17 @@ static inline void qls_render_gliph(T_ErrorHandler* eh, T_RenderData * rData, ui
         return;
 
     }
-    bool render = true;
-    if (render){
+    bool render = (surface != NULL);
+
+    double dX = mtx.leftSideBearing +kerning.xShift;
+    double dY = mtx.yOffset + kerning.yShift + rData->lineMetrics.ascender;
+    int32_t y = dToI(rData->pen.y + dY);
+    int32_t x = dToI(rData->pen.x + dX);
+
+    rData->lExtentMin.x = MIN(x,rData->lExtentMin.x);
+    
+    if (render)
+    {
         SFT_Image img = {
             .width  = (mtx.minWidth + 3) & ~3,
             .height = mtx.minHeight,
@@ -293,30 +311,39 @@ static inline void qls_render_gliph(T_ErrorHandler* eh, T_RenderData * rData, ui
             ERROR(eh,QLS_ERROR_GLIPH_RENDER, "codepoint 0x%04X not rendered",cp);
             return;
         }
-        double dX = mtx.leftSideBearing +kerning.xShift;
-        double dY = mtx.yOffset + kerning.yShift;
-        copy_rect(dToI(rData->penX + dX) ,dToI(rData->penY + dY), surface,&img,rData->color);
+        
+        copy_rect(dToI(x) ,dToI(y), surface,&img,rData->color);
     }
-    rData->penX += mtx.advanceWidth + kerning.xShift;
+    rData->lExtentMax.x = MAX(dToI( rData->pen.x+mtx.advanceWidth),rData->lExtentMax.x);
+    rData->pen.x += mtx.advanceWidth + kerning.xShift;
     rData->prev_gliph = gid;
 }
 
-static void qls_load_font(T_ErrorHandler* eh, SFT* sft, T_TrueTypeFont* font) {
+static void qls_load_font(T_ErrorHandler* eh, T_RenderData* r, T_TrueTypeFont* font) {
+    SFT* sft = &(r->sft);
     //TODO font cache, load font by name etc...
     sft->xScale = font->fontSize;
     sft->yScale = font->fontSize;
+    sft->flags = SFT_DOWNWARD_Y;
     static char font_path[256];
     get_font_file(eh,font,font_path,sizeof(font_path));
 
-    if (eh->code == QLS_ERROR_OK){
+    if (eh->code == QLS_ERROR_OK)
+    {
         sft->font = sft_loadfile(font_path);
         if (sft->font == NULL)
         {
             ERROR(eh,QLS_ERROR_FONT_LOAD, "TTF load failed %s" , font->fontFamily);
         }
     }
-}
+    
+    if (sft_lmetrics(sft,&(r->lineMetrics)) < 0) {
+        ERROR(eh,QLS_ERROR_LINE_METRICS, "Failed to init line metrics of font %s" , font->fontFamily);
+    } else {
+        LOG("LineMetrics asc %f, desc %f, gap %f",r->lineMetrics.ascender, r->lineMetrics.descender, r->lineMetrics.lineGap);
+    }
 
+}
 
 static void get_font_file(T_ErrorHandler* eh,T_TrueTypeFont* font, char* filePath, uint32_t filePathLength){
     FcInit();
@@ -352,3 +379,43 @@ static void get_font_file(T_ErrorHandler* eh,T_TrueTypeFont* font, char* filePat
         ERROR(eh,QLS_ERROR_MISSING_FONT ,"No matching font found %s.",font->fontFamily);
     }
  }
+
+ static void qls_align(T_ErrorHandler* errorHandler, T_RenderData* rData, uint32_t hAlign, uint32_t vAlign,const uint16_t* text, uint32_t textLen) 
+ {
+    int32_t width = rData->maxPen.x - rData->minPen.x;
+    int32_t height = rData->maxPen.y - rData->minPen.y;
+    qls_layoutAndRender(errorHandler,rData,NULL,text,textLen);
+    int32_t lExtW = rData->lExtentMax.x - rData->lExtentMin.x;
+    int32_t lExtH = rData->lExtentMax.y - rData->lExtentMin.y;
+    //put pen to baseline
+    switch (hAlign){
+        case 1://ALIGN CENTER
+            rData->pen.x = rData->minPen.x + ((width - lExtW) / 2); 
+        break;  
+        case 2://ALIGN RIGHT
+            rData->pen.x = rData->minPen.x + (width - lExtW); 
+            break;  
+        case 3://JUSTIFY
+            //TODO only letterspacing is changed, star pos remains x
+            rData->pen.x = rData->minPen.x; 
+            break;
+        case 0://ALIGN LEFT
+        default :
+            rData->pen.x = rData->minPen.x; 
+            break;
+
+    }
+    switch (vAlign){
+        case 1://ALIGN MIDDLE
+            rData->pen.y = rData->minPen.y + ((height - lExtH) / 2); 
+        break;  
+        case 2://ALIGN BOTTOM
+            rData->pen.y = rData->minPen.y + (height - lExtH); 
+            break;  
+        case 0://ALIGN TOP
+        default :
+            rData->pen.y = rData->minPen.y; 
+            break;
+
+    }
+}
