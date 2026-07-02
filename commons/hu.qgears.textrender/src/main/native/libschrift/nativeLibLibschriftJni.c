@@ -91,22 +91,20 @@ JNIEXPORT jobject JNICALL Java_hu_qgears_textrender_libschrift_LibschriftNative_
  * Signature: (Ljava/lang/String;Ljava/lang/String;Lhu/qgears/images/text/EHorizontalAlign;Lhu/qgears/images/text/EVerticalAlign;IILhu/qgears/images/text/EWrapMode;)Lhu/qgears/images/SizeInt;
  */
 JNIEXPORT jobject JNICALL Java_hu_qgears_textrender_libschrift_LibschriftNative_layoutTextPrivate
-  (JNIEnv *env, jobject obj, jstring text, jstring font, jobject hAlign, jobject vAlign, 
+  (JNIEnv *env, jobject obj, jobject font, jstring text, jobject hAlign, jobject vAlign, 
    jint width, jint height, jobject wrapMode)
 {
     (void)obj;
     T_ErrorHandler eh = {0};
     // Convert Java strings to C strings
     const jchar* c_text = (*env)->GetStringChars(env, text, 0);
+    uint32_t textLen = (uint32_t)( (*env)->GetStringLength(env,text) );
     T_TrueTypeFont c_font = convertJavaTrueTypeFont(env,font);
-
     // Extract enum values from Java objects
-    int hAlignValue = (*env)->CallIntMethod(env, hAlign, (*env)->GetMethodID(env, (*env)->GetObjectClass(env, hAlign), "ordinal", "()I"));
-    int vAlignValue = (*env)->CallIntMethod(env, vAlign, (*env)->GetMethodID(env, (*env)->GetObjectClass(env, vAlign), "ordinal", "()I"));
     int wrapModeValue = (*env)->CallIntMethod(env, wrapMode, (*env)->GetMethodID(env, (*env)->GetObjectClass(env, wrapMode), "ordinal", "()I"));
     
     // Forward to native implementation
-    T_SizeInt result = qls_layoutTextPrivate(&eh,&c_font,c_text, (uint32_t)hAlignValue, (uint32_t)vAlignValue, width, height, (uint32_t)wrapModeValue);
+    T_SizeInt result = qls_layoutTextPrivate(&eh,&c_font,c_text, textLen, width, (uint32_t)wrapModeValue);
     
     // Release the Java strings
     (*env)->ReleaseStringChars(env, text, c_text);

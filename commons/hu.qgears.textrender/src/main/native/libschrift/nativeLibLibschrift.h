@@ -20,6 +20,7 @@ typedef enum {
     QLS_ERROR_GLIPH_METRICS_BAD,
     QLS_ERROR_GLIPH_RENDER,
     QLS_ERROR_GLIPH_KERNING,
+    QLS_ERROR_LINE_METRICS
 } QLS_ERROR_CODE;
 
 #define QLS_MAX_ERROR_MSG_SIZE (256u)
@@ -104,18 +105,16 @@ T_SizeInt qls_renderTextPrivate(T_ErrorHandler* errorHandler, uint64_t surfaceHa
 /**
  * Calculates the layout of text without rendering it
  * 
+ * @param errorHandler The error handler
  * @param font The font parameters
  * @param text Text to calculate layout for, specified as UTF-16 character array (as JNI->GetStringChars returns)
- * @param hAlign Horizontal alignment
- * @param vAlign Vertical alignment
  * @param width The maximal width of the bounding box within surface
- * @param height The maximal height of the bounding box within surface
  * @param wrapMode How to wrap long texts amongst white spaces
  * 
  * @return The bounding box calculated during laying out the text
  */
-T_SizeInt qls_layoutTextPrivate(T_ErrorHandler* errorHandler, T_TrueTypeFont* font, const uint16_t* text, 
-                            uint32_t hAlign, uint32_t vAlign, int32_t width, int32_t height, uint32_t wrapMode);
+T_SizeInt qls_layoutTextPrivate(T_ErrorHandler* errorHandler, T_TrueTypeFont* font, const uint16_t* text, uint32_t textLen,
+                            int32_t width, uint32_t wrapMode);
 
 #ifdef __cplusplus
 }
