@@ -59,6 +59,7 @@ static uint32_t qls_layoutAndRenderTextPart(T_ErrorHandler* errorHandler, T_Rend
 static uint32_t qls_layoutAndRender(T_ErrorHandler* errorHandler, T_RenderData* rData,T_SurfaceData* surface, const uint16_t* text, uint32_t textLen);
 static inline void qls_render_gliph(T_ErrorHandler* eh, T_RenderData * rData, uint32_t cp,T_SurfaceData* surface, bool allowCharWrap);
 static void qls_align(T_ErrorHandler* errorHandler, T_RenderData* rData, uint32_t hAlign, uint32_t vAlign,const uint16_t* text, uint32_t textLen);
+static inline uint32_t blend_rgba(uint32_t dst, uint32_t pcolor, uint8_t mask);
 static inline void copy_rect(int32_t startx, int32_t starty, T_SurfaceData* surface, SFT_Image* img, uint32_t color);
 static void qls_load_font(T_ErrorHandler* eh,T_RenderData* r, T_TrueTypeFont* font);
 static void get_font_file(T_ErrorHandler* eh, T_TrueTypeFont* font, char* filePath, uint32_t filePathLength);
@@ -409,6 +410,25 @@ static void qls_align(T_ErrorHandler* errorHandler, T_RenderData* rData, uint32_
     }
 }
 
+static inline uint32_t blend_rgba(uint32_t dst, uint32_t pcolor, uint8_t mask)
+{
+    uint32_t pa = ((pcolor >> 24) & 0xFF) * mask / 255;
+    uint32_t ia = 255 - pa;
+
+    uint32_t dr =  dst        & 0xFF;
+    uint32_t dg = (dst >>  8) & 0xFF;
+    uint32_t db = (dst >> 16) & 0xFF;
+    uint32_t da = (dst >> 24) & 0xFF;
+
+    uint32_t pr =  pcolor        & 0xFF;
+    uint32_t pg = (pcolor >>  8) & 0xFF;
+    uint32_t pb = (pcolor >> 16) & 0xFF;
+
+    return ((pa + da * ia / 255) << 24) |
+           (((pb * pa + db * ia) / 255) << 16) |
+           (((pg * pa + dg * ia) / 255) <<  8) |
+            ((pr * pa + dr * ia) / 255);
+}
 static inline void copy_rect(int32_t startx, int32_t starty, T_SurfaceData* surface, SFT_Image* img, uint32_t color)
 {
     // Ensure the source image and destination surface are valid
@@ -466,8 +486,7 @@ static inline void copy_rect(int32_t startx, int32_t starty, T_SurfaceData* surf
             int32_t src_pix = (i*img->width) + j;
             uint8_t src_alpha = imageData[src_pix];
             if (src_alpha > 0) {  // Only copy non-transparent pixels
-                //TODO proper blending
-                surfaceData[dst_pix] = ((color & 0x00FFFFFF) | (src_alpha << 24));
+                surfaceData[dst_pix] = blend_rgba(surfaceData[dst_pix], color,src_alpha);
             }
         }
     }
@@ -533,11 +552,6 @@ static void get_font_file(T_ErrorHandler* eh,T_TrueTypeFont* font, char* filePat
         ERROR(eh,QLS_ERROR_MISSING_FONT ,"No matching font found %s.",font->fontFamily);
     }
  }
-
- // static inline uint8_t blend8(uint8_t src, uint8_t dst, uint8_t alpha)
-// {
-//     return (uint8_t)((src * alpha + dst * (255 - alpha) + 127) / 255);
-// }
 
 static T_SurfaceData* qls_get_surfacedata(uint64_t id) {
     // Cast the handle back to T_SurfaceData pointer
