@@ -47,7 +47,7 @@ typedef struct {
 #define LOG(...) ;printf(__VA_ARGS__);printf("\n");fflush(stdout)
 
 static uint32_t qls_layoutAndRender(T_ErrorHandler* errorHandler, T_RenderData* rData,T_SurfaceData* surface, const uint16_t* text, uint32_t textLen);
-static inline void qls_render_gliph(T_ErrorHandler* eh, T_RenderData * rData, uint32_t cp,T_SurfaceData* surface);
+static inline void qls_render_gliph(T_ErrorHandler* eh, T_RenderData * rData, uint32_t cp,T_SurfaceData* surface, bool allowCharWrap);
 static void qls_align(T_ErrorHandler* errorHandler, T_RenderData* rData, uint32_t hAlign, uint32_t vAlign,const uint16_t* text, uint32_t textLen);
 static inline void copy_rect(int32_t startx, int32_t starty, T_SurfaceData* surface, SFT_Image* img, uint32_t color);
 static void qls_load_font(T_ErrorHandler* eh,T_RenderData* r, T_TrueTypeFont* font);
@@ -169,12 +169,18 @@ T_SizeInt qls_layoutTextPrivate(T_ErrorHandler* errorHandler, T_TrueTypeFont* fo
 /***   Static function implementations     ***/
 /*********************************************/
 
+static int32_t lineHeightLogical(T_RenderData* rData)
+{
+    //TODO strange algorithm, tried to reverse engineer cairo's behaviour, but I'm not sure...
+    return dToI(ceil(rData->lineMetrics.ascender - rData->lineMetrics.descender +rData->lineMetrics.lineGap));
+}
+
 static uint32_t qls_layoutAndRender(T_ErrorHandler* errorHandler, T_RenderData* rData,T_SurfaceData* surface, const uint16_t* text, uint32_t textLen) {
     uint32_t numCodepoints = 0;
     if (rData->maxPen.y > rData->minPen.y && rData->maxPen.x > rData->minPen.x)
     {
         rData->lExtentMin.y = dToI(rData->pen.y);
-        rData->lExtentMax.y = dToI(rData->pen.y) + dToI(ceil(-rData->lineMetrics.descender)) +dToI(ceil(rData->lineMetrics.ascender));
+        rData->lExtentMax.y = dToI(rData->pen.y) + lineHeightLogical(rData);
         for (int i = 0; i < textLen && (errorHandler->code == QLS_ERROR_OK); i++)
         {
             //The unicode codepoint
@@ -188,7 +194,7 @@ static uint32_t qls_layoutAndRender(T_ErrorHandler* errorHandler, T_RenderData* 
                     ++i;
                 }
             }
-            qls_render_gliph(errorHandler, rData, cp,surface);
+            qls_render_gliph(errorHandler, rData, cp,surface,true);
             numCodepoints++;
         }
     }
@@ -199,7 +205,7 @@ static uint32_t qls_layoutAndRender(T_ErrorHandler* errorHandler, T_RenderData* 
     return numCodepoints;
 }
 
-static inline void qls_render_gliph(T_ErrorHandler* eh, T_RenderData * rData, uint32_t cp,T_SurfaceData* surface)
+static inline void qls_render_gliph(T_ErrorHandler* eh, T_RenderData * rData, uint32_t cp,T_SurfaceData* surface,bool allowCharWrap)
 {
 
 	SFT_Glyph gid;  //  unsigned long gid;
@@ -223,11 +229,23 @@ static inline void qls_render_gliph(T_ErrorHandler* eh, T_RenderData * rData, ui
 
     }
     bool render = (surface != NULL);
-
     double dX = mtx.leftSideBearing +kerning.xShift;
     double dY = mtx.yOffset + kerning.yShift + rData->lineMetrics.ascender;
-    int32_t y = dToI(rData->pen.y + dY);
     int32_t x = dToI(rData->pen.x + dX);
+    int32_t y = dToI(rData->pen.y + dY);
+    
+    if (allowCharWrap) {
+        bool charFitsInLine = (x+mtx.minWidth) < rData->maxPen.x;
+        if (!charFitsInLine) {
+            rData->pen.x = rData->minPen.x;
+            rData->pen.y += lineHeightLogical(rData);
+            x = dToI(rData->pen.x + mtx.leftSideBearing);
+            y = dToI(rData->pen.y + mtx.yOffset +rData->lineMetrics.ascender);
+            kerning.xShift = 0;
+            kerning.yShift = 0;
+            rData->lExtentMax.y += lineHeightLogical(rData);
+        }
+    }
 
     rData->lExtentMin.x = MIN(x,rData->lExtentMin.x);
     
