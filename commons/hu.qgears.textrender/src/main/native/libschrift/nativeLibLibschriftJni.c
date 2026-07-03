@@ -101,10 +101,11 @@ JNIEXPORT jobject JNICALL Java_hu_qgears_textrender_libschrift_LibschriftNative_
     uint32_t textLen = (uint32_t)( (*env)->GetStringLength(env,text) );
     T_TrueTypeFont c_font = convertJavaTrueTypeFont(env,font);
     // Extract enum values from Java objects
-    int wrapModeValue = (*env)->CallIntMethod(env, wrapMode, (*env)->GetMethodID(env, (*env)->GetObjectClass(env, wrapMode), "ordinal", "()I"));
+    uint32_t wrapModeValue = (uint32_t)(*env)->CallIntMethod(env, wrapMode, (*env)->GetMethodID(env, (*env)->GetObjectClass(env, wrapMode), "ordinal", "()I"));
+    uint32_t hAlignValue = (uint32_t)(*env)->CallIntMethod(env, hAlign, (*env)->GetMethodID(env, (*env)->GetObjectClass(env, hAlign), "ordinal", "()I"));
     
     // Forward to native implementation
-    T_SizeInt result = qls_layoutTextPrivate(&eh,&c_font,c_text, textLen, width, (uint32_t)wrapModeValue);
+    T_SizeInt result = qls_layoutTextPrivate(&eh,&c_font,c_text, textLen, hAlignValue, width, wrapModeValue);
     
     // Release the Java strings
     (*env)->ReleaseStringChars(env, text, c_text);
