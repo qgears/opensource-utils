@@ -35,6 +35,7 @@ typedef struct {
     T_IPoint lExtentMin;
     T_IPoint lExtentMax;
     uint32_t color;
+    double letterSpacing;
     /**
      * Store prev gliph to support kerning
      */
@@ -50,7 +51,7 @@ static T_SurfaceData* qls_get_surfacedata(uint64_t id);
 static inline void qls_render_gliph(T_ErrorHandler* eh, T_RenderData * rData, uint32_t cp,T_SurfaceData* surface);
 static void qls_load_font(T_ErrorHandler* eh,T_RenderData* r, T_TrueTypeFont* font);
 static void get_font_file(T_ErrorHandler* eh, T_TrueTypeFont* font, char* filePath, uint32_t filePathLength);
-static void qls_layoutAndRender(T_ErrorHandler* errorHandler, T_RenderData* rData,T_SurfaceData* surface, const uint16_t* text, uint32_t textLen);
+static uint32_t qls_layoutAndRender(T_ErrorHandler* errorHandler, T_RenderData* rData,T_SurfaceData* surface, const uint16_t* text, uint32_t textLen);
 static inline int32_t dToI (double d);
 
 static void qls_align(T_ErrorHandler* errorHandler, T_RenderData* rData, uint32_t hAlign, uint32_t vAlign,const uint16_t* text, uint32_t textLen);
@@ -73,7 +74,8 @@ uint64_t qls_createSurfaceWithDataPrivate(uint8_t* data, int32_t w, int32_t h)
 }
 
 
-static void qls_layoutAndRender(T_ErrorHandler* errorHandler, T_RenderData* rData,T_SurfaceData* surface, const uint16_t* text, uint32_t textLen) {
+static uint32_t qls_layoutAndRender(T_ErrorHandler* errorHandler, T_RenderData* rData,T_SurfaceData* surface, const uint16_t* text, uint32_t textLen) {
+    uint32_t numCodepoints = 0;
     if (rData->maxPen.y > rData->minPen.y && rData->maxPen.x > rData->minPen.x) {
         rData->lExtentMin.y = dToI(rData->pen.y);
         rData->lExtentMax.y = dToI(rData->pen.y) + dToI(ceil(-rData->lineMetrics.descender)) +dToI(ceil(rData->lineMetrics.ascender));
@@ -88,12 +90,14 @@ static void qls_layoutAndRender(T_ErrorHandler* errorHandler, T_RenderData* rDat
                 }
             }
             qls_render_gliph(errorHandler, rData, cp,surface);
+            numCodepoints++;
         }
     }
     else
     {
         //specified target rectangle is invalid or empty
     }
+    return numCodepoints;
 }
 
 T_SizeInt qls_renderTextPrivate(T_ErrorHandler* errorHandler, uint64_t surfaceHandle, T_TrueTypeFont* font, const uint16_t* text, uint32_t textLen,
@@ -112,7 +116,7 @@ T_SizeInt qls_renderTextPrivate(T_ErrorHandler* errorHandler, uint64_t surfaceHa
             rData.minPen.y = y;
             rData.maxPen.x = x + width;
             rData.maxPen.y = y + height;
-           
+            rData.letterSpacing = font->letterSpacing;
             if (rData.maxPen.y > rData.minPen.y && rData.maxPen.x > rData.minPen.x)
             {
                 qls_load_font(errorHandler, &rData,font);
@@ -144,7 +148,7 @@ T_SizeInt qls_renderTextPrivate(T_ErrorHandler* errorHandler, uint64_t surfaceHa
 }
 
 T_SizeInt qls_layoutTextPrivate(T_ErrorHandler* errorHandler, T_TrueTypeFont* font, const uint16_t* text, 
-                            uint32_t textLen, int32_t width, uint32_t wrapMode)
+                            uint32_t textLen, uint32_t hAlign, int32_t width, uint32_t wrapMode)
 {
     (void)wrapMode;
     T_SizeInt result = {0,0};
@@ -152,13 +156,18 @@ T_SizeInt qls_layoutTextPrivate(T_ErrorHandler* errorHandler, T_TrueTypeFont* fo
     r.maxPen.x = width;
     r.maxPen.y = INT32_MAX;
     r.sft.flags = SFT_DOWNWARD_Y;
+    r.letterSpacing = font->letterSpacing;
     qls_load_font(errorHandler,&r,font);
     if (errorHandler->code == QLS_ERROR_OK)
     {
-        qls_layoutAndRender(errorHandler,&r,NULL,text,textLen);
+        uint32_t numCodePoints = qls_layoutAndRender(errorHandler,&r,NULL,text,textLen);
         if (errorHandler->code == QLS_ERROR_OK)
         {
-            result.width = dToI(r.lExtentMax.x-r.lExtentMin.x);
+            if (hAlign == 3 && numCodePoints > 1) { //JUSTIFY, and at least two chars
+                result.width = width;
+            } else {
+                result.width = dToI(r.lExtentMax.x-r.lExtentMin.x);
+            }
             result.height = dToI(r.lExtentMax.y+r.lExtentMin.y);
         }
         if (r.sft.font != NULL){
@@ -315,7 +324,7 @@ static inline void qls_render_gliph(T_ErrorHandler* eh, T_RenderData * rData, ui
         copy_rect(dToI(x) ,dToI(y), surface,&img,rData->color);
     }
     rData->lExtentMax.x = MAX(dToI( rData->pen.x+mtx.advanceWidth),rData->lExtentMax.x);
-    rData->pen.x += mtx.advanceWidth + kerning.xShift;
+    rData->pen.x += mtx.advanceWidth + kerning.xShift + rData->letterSpacing;
     rData->prev_gliph = gid;
 }
 
@@ -384,7 +393,7 @@ static void get_font_file(T_ErrorHandler* eh,T_TrueTypeFont* font, char* filePat
  {
     int32_t width = rData->maxPen.x - rData->minPen.x;
     int32_t height = rData->maxPen.y - rData->minPen.y;
-    qls_layoutAndRender(errorHandler,rData,NULL,text,textLen);
+    uint32_t numCodepoints = qls_layoutAndRender(errorHandler,rData,NULL,text,textLen);
     int32_t lExtW = rData->lExtentMax.x - rData->lExtentMin.x;
     int32_t lExtH = rData->lExtentMax.y - rData->lExtentMin.y;
     //put pen to baseline
@@ -396,7 +405,10 @@ static void get_font_file(T_ErrorHandler* eh,T_TrueTypeFont* font, char* filePat
             rData->pen.x = rData->minPen.x + (width - lExtW); 
             break;  
         case 3://JUSTIFY
-            //TODO only letterspacing is changed, star pos remains x
+            if (numCodepoints > 1)
+            {
+                rData->letterSpacing += ((double)(width - lExtW)) /(numCodepoints-1);
+            }
             rData->pen.x = rData->minPen.x; 
             break;
         case 0://ALIGN LEFT

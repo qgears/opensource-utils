@@ -108,13 +108,15 @@ T_SizeInt qls_renderTextPrivate(T_ErrorHandler* errorHandler, uint64_t surfaceHa
  * @param errorHandler The error handler
  * @param font The font parameters
  * @param text Text to calculate layout for, specified as UTF-16 character array (as JNI->GetStringChars returns)
+ * @param textLen The number of UTF-16 chars in text
+ * @param hAlign The desired horizontal alignment (allow considering JUSTIFY properly)
  * @param width The maximal width of the bounding box within surface
  * @param wrapMode How to wrap long texts amongst white spaces
  * 
  * @return The bounding box calculated during laying out the text
  */
 T_SizeInt qls_layoutTextPrivate(T_ErrorHandler* errorHandler, T_TrueTypeFont* font, const uint16_t* text, uint32_t textLen,
-                            int32_t width, uint32_t wrapMode);
+                         uint32_t hAlign, int32_t width, uint32_t wrapMode);
 
 #ifdef __cplusplus
 }
