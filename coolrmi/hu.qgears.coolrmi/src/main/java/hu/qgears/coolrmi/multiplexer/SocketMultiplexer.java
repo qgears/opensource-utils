@@ -1,5 +1,7 @@
 package hu.qgears.coolrmi.multiplexer;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -42,9 +44,9 @@ public class SocketMultiplexer implements ISocketMultiplexer{
 			ISocketMultiplexerListener messageListener,
 			boolean guaranteeOrdering, boolean isClient) throws IOException {
 		super();
-		this.is = is;
+		this.is = new BufferedInputStream(is);
 		this.messageListener=messageListener;
-		this.os=os;
+		this.os= new BufferedOutputStream(os);
 		requiredHelloString="CoolRMI 2.0.0"+(isClient?" server":" client");
 		sendHelloString="CoolRMI 2.0.0"+(!isClient?" server":" client");
 	}
