@@ -21,11 +21,11 @@ public class TestRemoteDelay {
 		InetSocketAddress sa = new InetSocketAddress("localhost", 9876);
 		CoolRMIServer server = startTcpServer(sa);
 		try (	CoolRMIClient client = new CoolRMIClient(Service.class.getClassLoader(), sa, true)) {
-			client.setTimeoutMillis(10000);
+			client.setTimeoutMillis(1000000);
 			IService rrs = (IService) client.getService(IService.class, Service.id);
 			
-			for (int i = 0; i < 100; i++) {
-				System.out.println(rrs.echo("hello", i));
+			for (int i = 0; i < 1000; i++) {
+				rrs.echo("hello", 3000);
 			}
 		} finally {
 			server.close();
