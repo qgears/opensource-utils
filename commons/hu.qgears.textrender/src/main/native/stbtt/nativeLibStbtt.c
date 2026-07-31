@@ -3,11 +3,14 @@
 #include <stdlib.h>
 #include <uchar.h>
 
-#include "nativeLibStbtt.h"
-
 #define STB_TRUETYPE_IMPLEMENTATION
 #define STBTT_STATIC
 #include "stb_truetype.h"
+
+#include "nativeLibStbtt.h"
+
+#include "qstb_utf8.h"
+#include "qstb_line.h"
 
 // Structure to represent surface data
 typedef struct {
@@ -59,19 +62,17 @@ static T_SurfaceData* qstb_get_surfacedata(uint64_t id) {
     return (T_SurfaceData*)id;
 }
 
-//--
+//--------------------------------------------------
 
-static struct T_TrueTypeFont2 {
-    stbtt_fontinfo font; //font.data is dynamically allocated
-    const T_TrueTypeFont* pSource;
-    int32_t ascent, descent, lineGap;
-    int32_t x0, y0, x1, y1;
-    float scale;
-};
+static void qstb_InitFont(T_TrueTypeFont* font) {
+    //TODO cache
 
-static void qstb_InitFont(const T_TrueTypeFont* const source, struct T_TrueTypeFont2* const result) {
-    assert(result != NULL);
-    result->pSource = source;
+    assert(!font->stb.inited);
+    if (font->stb.inited) {
+        return;
+    }
+    assert(font->stb.font.data == NULL);
+
     { //stbtt_InitFont
         FILE* fFont = fopen("/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf", "rb"); //TODO find the font file
         assert(fFont != NULL); // no error
@@ -86,59 +87,56 @@ static void qstb_InitFont(const T_TrueTypeFont* const source, struct T_TrueTypeF
         assert(ret2 == 1); // no error
         ret = fclose(fFont);
         assert(ret == 0);
-        ret = stbtt_InitFont(&result->font, bufFont, 0);
+        ret = stbtt_InitFont(&font->stb.font, bufFont, 0);
         assert(ret != 0); // no error
-        assert(result->font.data == bufFont); // can free later
+        assert(font->stb.font.data == bufFont); // can free later
     }
-    stbtt_GetFontVMetrics(&result->font, &result->ascent, &result->descent, &result->lineGap);
-    assert(0 <= result->ascent);
-    assert(result->descent <= 0);
-    stbtt_GetFontBoundingBox(&result->font, &result->x0, &result->y0, &result->x1, &result->y1);
-    assert(result->x0 <= result->x1);
-    assert(result->y0 <= result->y1);
+    stbtt_GetFontVMetrics(&font->stb.font, &font->stb.ascent, &font->stb.descent, &font->stb.lineGap);
+    assert(0 <= font->stb.ascent);
+    assert(font->stb.descent <= 0);
+    stbtt_GetFontBoundingBox(&font->stb.font, &font->stb.x0, &font->stb.y0, &font->stb.x1, &font->stb.y1);
+    assert(font->stb.x0 <= font->stb.x1);
+    assert(font->stb.y0 <= font->stb.y1);
     // assert(result->ascent <= -result->y0);
-    result->scale = stbtt_ScaleForPixelHeight(&result->font, source->fontSize);
-    assert(0.0f <= result->scale);
+    font->stb.scale = stbtt_ScaleForPixelHeight(&font->stb.font, font->fontSize);
+    assert(0.0f <= font->stb.scale);
+
+    font->stb.inited = true;
 }
 
 T_SizeInt qstb_layoutTextPrivate(T_TrueTypeFont* font, const char* text,
                             uint32_t hAlign, uint32_t vAlign, int32_t width, int32_t height, uint32_t wrapMode)
 {
-    const size_t len = strlen(text);
-    if (len == 0) {
-        /**
-         *  TODO semantics
-         *  Should the height be set anyway?
-         **/
-        return (T_SizeInt) {0, 0};
+
+    const bool wasInited = font->stb.inited;
+    qstb_InitFont(font);
+
+    int32_t nLines = 0;
+    double maxLineWidth = 0;
+    struct utf8 utf8 = utf8_init(text);
+    struct LineInfo line = line_peek((struct LineInfo){}, utf8, width
+        , font->stb.scale, font->letterSpacing, &font->stb.font, wrapMode);
+    do { //even the empty string is at least one line long
+        nLines += 1;
+        double lineWidth = line_width(line, font->stb.scale, font->letterSpacing);
+        if (maxLineWidth < lineWidth) {
+            maxLineWidth = lineWidth;
+        }
+        line = line_next(line, utf8, width
+            , font->stb.scale, font->letterSpacing, &font->stb.font, wrapMode);
+    } while (line.end < utf8.len);
+
+    //TODO special handling for 0 ink width lines?
+
+    if (!wasInited) {
+        font->stb.inited = false;
+        free(font->stb.font.data);
     }
 
-    assert(len != 0);
-    struct T_TrueTypeFont2 f;
-    qstb_InitFont(font, &f); //TODO cache
-
-    float cx = 0.0f;
-    struct {
-        int32_t x0, y0, x1, y1, advanceWidth;
-    } box = {};
-    for (int32_t i = 0; i < len; i++) {
-        const char32_t c = text[i]; //TODO mbrtoc32
-        memset(&box, 0x00, sizeof(box));
-        stbtt_GetCodepointHMetrics(&f.font, c, &box.advanceWidth, NULL);
-        stbtt_GetCodepointBitmapBoxSubpixel(&f.font, c, f.scale, f.scale, (cx - floorf(cx)), 0.0f
-            , &box.x0, &box.y0, &box.x1, &box.y1);
-        if (i == 0) {
-            cx += -box.x0;
-        }
-        if (i < len - 1) {
-            cx += f.scale * box.advanceWidth;
-            cx += f.scale * stbtt_GetCodepointKernAdvance(&f.font, c, text[i+1]);
-        }
-    }
-
-    //TODO linebreaks
-    //TODO should the result reflect exceptionally high/low characters? Should it be snug heightwise?
-    return (T_SizeInt) { floorf(cx) + box.x1, f.scale * (f.ascent - f.descent) };
+    return (T_SizeInt) {
+        .width = ceil(maxLineWidth),
+        .height = ceil(nLines * (font->stb.ascent - font->stb.descent + font->stb.lineGap) * font->stb.scale)
+    };
 }
 
 static int32_t max(const int32_t a, const int32_t b) {
@@ -201,60 +199,121 @@ T_SizeInt qstb_renderTextPrivate(uint64_t surfaceHandle, T_TrueTypeFont* font, c
                             uint32_t hAlign, uint32_t vAlign, int32_t x, int32_t y, int32_t width, int32_t height,
                             float r, float g, float b, float a, bool clip, uint32_t wrapMode)
 {
+    /*
+     * TODO count lines, implement valign bottom, valign middle
+     *      Should valign bottom/middle default to valign top if the text is too tall?
+     *      What about leading/trailing empty lines?
+     * TODO check each line's width. Implement halign right, middle, justify
+     * TODO qstb_MemBlend clips on surface.width and surface.height. Let params width and height be provided instead, and implement CLIP
+     */
+
     const T_SurfaceData* const surface = qstb_get_surfacedata(surfaceHandle);
-    if (surface == NULL) {
-        return (T_SizeInt) {0, 0}; //TODO what to do
-    }
-    {
-        uint32_t* const surfaceData = (uint32_t*)surface->data;
-        if (surfaceData == NULL) {
-            return (T_SizeInt) {0, 0}; //TODO what to do
-        }
+    if (surface == NULL || surface->data == NULL) {
+        return (T_SizeInt) {0, 0};
     }
 
-    const size_t len = strlen(text);
-    if (len == 0) {
-        return (T_SizeInt) {0, 0}; //TODO what to do
-    }
+    const bool wasInited = font->stb.inited;
+    qstb_InitFont(font);
 
-    struct T_TrueTypeFont2 f;
-    qstb_InitFont(font, &f);
-
-    float cx = 0;
-    {
-        assert(len != 0);
-        int32_t x0 = 0;
-        stbtt_GetCodepointBitmapBoxSubpixel(&f.font, text[0], f.scale, f.scale, 0.0f, 0.0f,
-            &x0, NULL, NULL, NULL);
-        // assert(x0 <= 0); //TODO else what to do
-        cx += -x0;
-    }
-    int32_t cy = f.scale * f.ascent; //TODO ceil? TODO linebreaks, centering
     struct {
-        int32_t x0, y0, x1, y1, advanceWidth;
-    } box = {};
-    for (int32_t iText = 0; iText < len; iText++) {
-        const char32_t c = text[iText]; //TODO mbrtoc32
-        memset(&box, 0x00, sizeof(box));
-        stbtt_GetCodepointBitmapBoxSubpixel(&f.font, c, f.scale, f.scale, (cx - floorf(cx)), 0.0f
-            , &box.x0, &box.y0, &box.x1, &box.y1);
-        stbtt_GetCodepointHMetrics(&f.font, c, &box.advanceWidth, NULL);
-        struct {
-            uint8_t* p;
-            int32_t w, h, xoff, yoff;
-        } bmp = {};
-        bmp.p = stbtt_GetCodepointBitmapSubpixel(&f.font, f.scale, f.scale, (cx - floorf(cx)), 0.0f, c
-            , &bmp.w, &bmp.h, &bmp.xoff, &bmp.yoff); //TODO MakeCodepointBitmapSubpixel, MakeGlyphBitmapSubpixel
-        if (bmp.p != NULL) {
-            qstb_MemBlend(surface, cx + box.x0, cy + box.y0, bmp.p, bmp.w, bmp.h, r, g, b, a);
-            free(bmp.p);
-        }
-        if (iText < len - 1) {
-            cx += f.scale * box.advanceWidth;
-            cx += f.scale * stbtt_GetCodepointKernAdvance(&f.font, c, text[iText + 1]);
-        }
+        uint8_t* p;
+        int32_t w, h;
+    } tmp = {};
+    {
+        int32_t unscaled_height = font->stb.y1 - font->stb.y0 + 1;
+        int32_t unscaled_width = font->stb.x1 - font->stb.x0 + 1;
+        tmp.w = ceil(unscaled_width * font->stb.scale) + 1;
+        tmp.h = ceil(unscaled_height * font->stb.scale) + 1;
+        tmp.p = calloc(tmp.w * tmp.h, 1);
     }
 
-    return (T_SizeInt) {floorf(cx) + box.x1, f.scale * (f.ascent - f.descent)};
-    // return (T_SizeInt) { 0, 0 };
+    struct utf8 s = utf8_init(text);
+    struct LineInfo line = line_peek((struct LineInfo){}, s, width
+        , font->stb.scale, font->letterSpacing, &font->stb.font, wrapMode);
+
+    struct {
+        //unscaled, counted from param x & y, y increases down
+        int32_t x, y;
+    } idraw = {
+        .y = font->stb.ascent
+    };
+
+    do { // there is always a first/last line (even in the empty string). Stop once the processed line has just been the last line.
+        s = utf8_seek(s, line.off);
+        while (is_ignore(s.codepoint) && s.end <= line.end) {
+            s = utf8_read(s);
+        }
+
+        idraw.x = 0;
+        if (s.end <= line.end && s.codepoint != '\0') {
+            int32_t leftSideBearing = 0;
+            stbtt_GetCodepointHMetrics(&font->stb.font, s.codepoint, NULL, &leftSideBearing);
+            idraw.x = leftSideBearing;
+        }
+
+        int32_t iPrintable = 0;
+        while (s.end <= line.end && s.codepoint != '\0') {
+            assert(is_print(s.codepoint));
+
+            int32_t advanceWidth = 0;
+            stbtt_GetCodepointHMetrics(&font->stb.font, s.codepoint, &advanceWidth, NULL);
+
+            if (is_graph(s.codepoint)) {
+#define SHIFT(x) ((x) - floor((x)))
+                float shift_x;
+                const float shift_y = SHIFT(idraw.y * font->stb.scale);
+
+                struct {
+                    int32_t lsb;
+                    int32_t y0;
+                } codepoint = {};
+                {
+                    assert(is_graph(s.codepoint));
+                    stbtt_GetCodepointHMetrics(&font->stb.font, s.codepoint, NULL, &codepoint.lsb);
+                    shift_x = SHIFT((idraw.x + codepoint.lsb) * font->stb.scale + iPrintable * font->letterSpacing);
+#undef SHIFT
+                    stbtt_GetCodepointBitmapBoxSubpixel(&font->stb.font, s.codepoint
+                        , font->stb.scale, font->stb.scale, shift_x, shift_y
+                        , NULL, &codepoint.y0, NULL, NULL);
+                }
+
+                struct {
+                    //scaled, counted from param x & y, y increases down
+                    int32_t x, y;
+                } icorner = {
+                    //shift_x is calculated without lsb...
+                    .x = (idraw.x + codepoint.lsb) * font->stb.scale + iPrintable * font->letterSpacing,
+                    .y = (idraw.y * font->stb.scale) + codepoint.y0
+                };
+
+                memset(tmp.p, 0x00, tmp.w * tmp.h);
+                stbtt_MakeCodepointBitmapSubpixel(&font->stb.font, tmp.p, tmp.w, tmp.h, tmp.w
+                    , font->stb.scale, font->stb.scale, shift_x, shift_y
+                    , s.codepoint);
+
+                qstb_MemBlend(surface, x + icorner.x, y + icorner.y
+                    , tmp.p, tmp.w, tmp.h
+                    , r, g, b, a);
+            }
+
+            //loop variables...
+            iPrintable += 1;
+            idraw.x += advanceWidth;
+            s = utf8_read(s);
+            while (is_ignore(s.codepoint) && s.end <= line.end) {
+                s = utf8_read(s);
+            }
+        }
+
+        line = line_next(line, s, width, font->stb.scale, font->letterSpacing, &font->stb.font, wrapMode);
+        idraw.y += font->stb.ascent - font->stb.descent + font->stb.lineGap;
+    } while (line.end < s.len);
+
+    T_SizeInt ret = qstb_layoutTextPrivate(font, text, hAlign, vAlign, width, height, wrapMode);
+    if (wasInited) {
+        font->stb.inited = false;
+        free(font->stb.font.data);
+    }
+    free(tmp.p);
+    return ret;
 }
