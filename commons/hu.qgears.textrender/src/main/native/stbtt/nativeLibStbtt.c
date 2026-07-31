@@ -1,13 +1,13 @@
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <uchar.h>
+
 #include "nativeLibStbtt.h"
 
 #define STB_TRUETYPE_IMPLEMENTATION
 #define STBTT_STATIC
 #include "stb_truetype.h"
-
-#include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <uchar.h>
 
 // Structure to represent surface data
 typedef struct {
@@ -155,6 +155,11 @@ static void qstb_MemBlend(
     , const int32_t pw, const int32_t ph
     , const float pr, const float pg, const float pb, const float pa)
 {
+    assert(0.0f <= pr && pr <= 1.0f);
+    assert(0.0f <= pg && pg <= 1.0f);
+    assert(0.0f <= pb && pb <= 1.0f);
+    assert(0.0f <= pa && pa <= 1.0f);
+
     const int32_t x0o = max(0, px0o);
     const int32_t y0o = max(0, py0o);
     const int32_t xendo = min(px0o + pw, surface->width);
@@ -166,10 +171,13 @@ static void qstb_MemBlend(
     for (int32_t yo = y0o, yi = y0i; yo < yendo; yo++, yi++) {
         for (int32_t xo = x0o, xi = x0i; xo < xendo; xo++, xi++) {
             const uint8_t* const inb = pp + yi * pw + xi;
+            if (*inb == 0x00u) {
+                continue;
+            }
             uint8_t* const outb = surface->data + (yo * surface->width + xo) * 4;
             const float inf[4] = { pr, pg, pb, (pa * ((float)*inb/0xffu)) };
             float outf[4] = { (float)outb[R]/0xffu, (float)outb[G]/0xffu, (float)outb[B]/0xffu, (float)outb[A]/0xffu };
-            float outa = inf[A] + outf[A] * (1.0f - inf[A]);
+            const float outa = inf[A] + outf[A] * (1.0f - inf[A]);
             if (outa > 0.0f) {
                 outf[R] = (inf[R] * inf[A] + outf[R] * outf[A] * (1.0f - inf[A])) / outa;
                 outf[G] = (inf[G] * inf[A] + outf[G] * outf[A] * (1.0f - inf[A])) / outa;
@@ -177,6 +185,10 @@ static void qstb_MemBlend(
             }
             outf[A] = outa;
 
+            assert(0.0f <= outf[R] && outf[R] <= 1.0f);
+            assert(0.0f <= outf[G] && outf[G] <= 1.0f);
+            assert(0.0f <= outf[B] && outf[B] <= 1.0f);
+            assert(0.0f <= outf[A] && outf[A] <= 1.0f);
             outb[R] = 0xffu * outf[R];
             outb[G] = 0xffu * outf[G];
             outb[B] = 0xffu * outf[B];
