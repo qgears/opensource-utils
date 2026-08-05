@@ -1,18 +1,37 @@
 Manifest-Version: 1.0
-Export-Package: hu.qgears.emfcollab,
- hu.qgears.emfcollab.backref,
- hu.qgears.emfcollab.exceptions,
- hu.qgears.emfcollab.impl,
- hu.qgears.emfcollab.srv,
- hu.qgears.emfcollab.util
-Bundle-SymbolicName: hu.qgears.emfcollab
-Bundle-Version: 11.1.0.qualifier
-Bundle-Name: Emfcollab Plug-in
-Require-Bundle: org.eclipse.emf;bundle-version="2.4.0";visibility:=reexport,
- org.eclipse.emf.ecore;bundle-version="2.4.0";visibility:=reexport,
- org.eclipse.emf.ecore.xmi;bundle-version="2.4.0";visibility:=reexport,
- hu.qgears.commons;bundle-version="2.0.0";visibility:=reexport
+Bnd-LastModified: 1786441495414
+Build-Jdk: 21.0.11
+Built-By: agostoni
+Bundle-Description: The hu.qgears.emfcollab bundle.
 Bundle-ManifestVersion: 2
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Bundle-Vendor: Q-Gears Kft.
-
+Bundle-Name: hu.qgears.emfcollab
+Bundle-SymbolicName: hu.qgears.emfcollab
+Bundle-Version: 12.5.1.SNAPSHOT
+Created-By: Apache Maven Bundle Plugin
+Export-Package: hu.qgears.emfcollab;version="12.5.0.SNAPSHOT";uses:="hu.
+ qgears.emfcollab.impl,hu.qgears.emfcollab.srv,org.eclipse.emf.common.no
+ tify,org.eclipse.emf.ecore,org.eclipse.emf.ecore.resource",hu.qgears.em
+ fcollab.backref;version="12.5.0.SNAPSHOT";uses:="hu.qgears.commons,org.
+ eclipse.emf.common.notify,org.eclipse.emf.ecore,org.eclipse.emf.ecore.r
+ esource,org.eclipse.emf.ecore.util",hu.qgears.emfcollab.exceptions;vers
+ ion="12.5.0.SNAPSHOT";uses:="hu.qgears.emfcollab.srv",hu.qgears.emfcoll
+ ab.impl;version="12.5.0.SNAPSHOT";uses:="hu.qgears.emfcollab,hu.qgears.
+ emfcollab.exceptions,hu.qgears.emfcollab.srv,org.eclipse.emf.ecore.reso
+ urce",hu.qgears.emfcollab.serial;version="12.5.0.SNAPSHOT";uses:="hu.qg
+ ears.emfcollab,hu.qgears.emfcollab.impl,hu.qgears.emfcollab.srv",hu.qge
+ ars.emfcollab.srv;version="12.5.0.SNAPSHOT";uses:="hu.qgears.emfcollab,
+ hu.qgears.emfcollab.exceptions",hu.qgears.emfcollab.util;version="12.5.
+ 0.SNAPSHOT";uses:="hu.qgears.emfcollab.impl,org.eclipse.emf.common.noti
+ fy,org.eclipse.emf.common.util,org.eclipse.emf.ecore,org.eclipse.emf.ec
+ ore.resource,org.eclipse.emf.ecore.resource.impl,org.eclipse.emf.ecore.
+ xmi,org.eclipse.emf.ecore.xmi.impl"
+Import-Package: hu.qgears.commons;version="[12.5,13)",hu.qgears.commons.
+ signal;version="[12.5,13)",org.eclipse.emf.common.notify;version="[2.45
+ ,3)",org.eclipse.emf.common.util;version="[2.45,3)",org.eclipse.emf.eco
+ re,org.eclipse.emf.ecore.resource;version="[2.42,3)",org.eclipse.emf.ec
+ ore.resource.impl;version="[2.42,3)",org.eclipse.emf.ecore.util;version
+ ="[2.42,3)",org.eclipse.emf.ecore.xmi;version="[2.40,3)",org.eclipse.em
+ f.ecore.xmi.impl;version="[2.40,3)"
+Originally-Created-By: Apache Maven Bundle Plugin
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=11))"
+Tool: Bnd-2.3.0.201405100607

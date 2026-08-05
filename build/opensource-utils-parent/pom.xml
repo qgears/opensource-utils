@@ -5,7 +5,7 @@
 		
 	<groupId>hu.qgears</groupId>
 	<artifactId>opensource-utils-parent</artifactId>
-	<version>12.5.0-SNAPSHOT</version>
+	<version>12.5.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
  	<url>${project_url}/modules/</url>
 	<description>The ${project.artifactId} bundle.</description>
@@ -22,8 +22,8 @@
 		<!-- The -source and -target arguments of Java compiler. -->
 		<java-trg-version>11</java-trg-version>
 		<java-src-version>11</java-src-version>
-		<maven-complier-plugin-version>3.1</maven-complier-plugin-version>
-		<maven-surifire-plugin-version>2.12.4</maven-surifire-plugin-version>
+		<maven-complier-plugin-version>3.14.1</maven-complier-plugin-version>
+		<maven-surefire-plugin-version>3.5.4</maven-surefire-plugin-version>
 		<qgears-opensource-maven-public-url>qgears-opensource-maven-public-url</qgears-opensource-maven-public-url>
 		<qgears-opensource-maven-nightly-url>qgears-opensource-maven-nightly-url</qgears-opensource-maven-nightly-url>
 		<repositoryRoot>${project.basedir}/${project.parent.relativePath}/../../</repositoryRoot>
@@ -114,7 +114,7 @@
 			<plugin>
 	         <groupId>org.apache.maven.plugins</groupId>
 	         <artifactId>maven-surefire-plugin</artifactId>
-	         <version>${maven-surifire-plugin-version}</version>
+	         <version>${maven-surefire-plugin-version}</version>
 				<configuration>
 					<!-- Do not fail the build on broken tests -->
 					<testFailureIgnore>true</testFailureIgnore>
@@ -161,6 +161,7 @@
 		</plugins>
 		
 	</build>
+
 	<profiles>
 		<!-- profile for enabling source bundle generation -->
 		<profile>

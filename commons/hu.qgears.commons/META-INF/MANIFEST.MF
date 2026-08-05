@@ -1,18 +1,19 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1748884284350
-Build-Jdk: 11.0.9.1
-Built-By: deveushu
+Bnd-LastModified: 1786441493470
+Build-Jdk: 21.0.11
+Built-By: agostoni
 Bundle-Description: Common helper classes and methods.
 Bundle-ManifestVersion: 2
 Bundle-Name: hu.qgears.commons
 Bundle-SymbolicName: hu.qgears.commons
-Bundle-Version: 12.0.1.SNAPSHOT
+Bundle-Version: 12.5.1.SNAPSHOT
 Created-By: Apache Maven Bundle Plugin
-Export-Package: hu.qgears.commons;uses:="hu.qgears.commons.mem,hu.qgears
- .commons.signal";version="12.0.1.SNAPSHOT",hu.qgears.commons.csv;versio
- n="12.0.1.SNAPSHOT",hu.qgears.commons.mem;uses:="hu.qgears.commons";ver
- sion="12.0.1.SNAPSHOT",hu.qgears.commons.signal;uses:="hu.qgears.common
- s";version="12.0.1.SNAPSHOT"
+Export-Package: hu.qgears.commons;version="12.5.0.SNAPSHOT";uses:="hu.qg
+ ears.commons.mem,hu.qgears.commons.signal",hu.qgears.commons.csv;versio
+ n="12.5.0.SNAPSHOT",hu.qgears.commons.mem;version="12.5.0.SNAPSHOT";use
+ s:="hu.qgears.commons",hu.qgears.commons.signal;version="12.5.0.SNAPSHO
+ T";uses:="hu.qgears.commons"
 Import-Package: org.apache.log4j;version="[1.2,2)"
+Originally-Created-By: Apache Maven Bundle Plugin
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=11))"
 Tool: Bnd-2.3.0.201405100607
