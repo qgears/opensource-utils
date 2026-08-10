@@ -61,7 +61,7 @@ static bool is_word_boundary(char32_t c1, char32_t c2) {
 double line_width(struct LineInfo line, float scale, double letterSpacing) {
     //TODO shared concerns with layout and render
     //TODO negative letter spacing -> a thin character might decrease the logical width, while leaving the ink width untouched
-    int32_t nLetterSpacing = (line.l <= 0) ? 0 : line.l - 1;
+    int32_t nLetterSpacing = (0 < line.l) ? line.l - 1 : 0;
     return line.w * scale + nLetterSpacing * letterSpacing;
 }
 
@@ -131,6 +131,7 @@ struct LineInfo line_peek(struct LineInfo line, struct utf8 utf8
     assert(is_line_too_long(line, width, scale, letterSpacing) || is_line_ending(utf8.codepoint));
 
     if (!is_line_too_long(line, width, scale, letterSpacing)) {
+        assert(is_line_ending(utf8.codepoint));
         //line = line;
     } else if (wrapword && 0 < candidates[FOR_WORD_BREAK].lSpace) {
         line = candidates[FOR_WORD_BREAK];
@@ -169,7 +170,7 @@ struct LineInfo line_peek(struct LineInfo line, struct utf8 utf8
  * Includes trailing is_ignore codepoints
  *
  * @param line
- * @param utf8
+ * @param utf8 inited
  * @param width
  * @param scale
  * @param letterSpacing
