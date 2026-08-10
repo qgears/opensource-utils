@@ -30,11 +30,14 @@ static struct result_utf8d_read utf8d_read(const uint8_t* s, const size_t off) {
      *      Here, these are read as a series of U+FFFD (Unicode replacement character)
      */
     char32_t raw = 0;
-    for (uint_fast8_t i = 0; i < 4; ++i) {
-        raw <<= 8;
-        raw |= s[i];
-        if (s[i] != '\0') {
-            i += 1;
+    {
+        size_t j = off;
+        for (uint_fast8_t i = 0; i < 4; ++i) {
+            raw <<= 8;
+            raw |= s[j];
+            if (s[j] != '\0') {
+                j += 1;
+            }
         }
     }
 
@@ -76,8 +79,8 @@ static struct result_utf8d_read utf8d_read(const uint8_t* s, const size_t off) {
         codepoint |= (raw & 0x3F0000u) >> 4u;
         codepoint |= (raw & 0x7F000000u) >> 6u;
         if (k != 3) {
-            assert(  0u < (3 - k) * 8u);
-            codepoint >>= (3 - k) * 8u;
+            assert(  0u < (3 - k) * 6u);
+            codepoint >>= (3 - k) * 6u;
         }
 
         enum {
@@ -123,7 +126,8 @@ struct utf8 utf8_init(const uint8_t* s) {
         .s = s,
         .s_unsanitized = s,
         .len = strlen(s),
-    };    result = utf8_peek(result);
+    };
+    result = utf8_peek(result);
     return result;
 }
 

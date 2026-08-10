@@ -10,40 +10,61 @@
 uint8_t bufFont[1024 * 1024];
 uint8_t message[1024];
 
+static void init_message16(void) {
+    const char* msg = "Hello, World! Hello, World! Hello, World! Hello, World! Hello, World!\n";
+    uint8_t* wSeek = message + 1;
+    const char* rSeek = msg;
+    while (*rSeek != '\0') {
+        *wSeek = *rSeek;
+        rSeek += 1;
+        wSeek += 2;
+    }
+    enum {
+        SURROGATE_MASK = 0xFC00
+        , HIGH_SURROGATE_PREFIX = 0xD800
+        , LOW_SURROGATE_PREFIX = 0xDC00
+        , VALUE_MASK = 0x03FF
+    };
+    enum {
+        CODEPOINT_OLD_ITALIC_LETTER_EM = 0x01030C
+        , CODEPOINT_GRINNING_FACE = 0x01F600
+    };
+    const int32_t additional_codepoint = CODEPOINT_OLD_ITALIC_LETTER_EM - 0x10000;
+    wSeek -= 1;
+    wSeek[0] |= HIGH_SURROGATE_PREFIX >> 8;
+    wSeek[0] |= (additional_codepoint >> 18) & 0x03;
+    wSeek[1] |= (additional_codepoint >> 10) & 0xFF;
+    wSeek[2] |= LOW_SURROGATE_PREFIX >> 8;
+    wSeek[2] |= (additional_codepoint >> 8) & 0x03;
+    wSeek[3] |= (additional_codepoint) & 0xFF;
+}
+
+static void init_message8(void) {
+    const char* msg = "Hello, World! Hello, World! Hello, World! Hello, World! Hello, World!\n";
+    uint8_t* wSeek = message;
+    const char* rSeek = msg;
+    while (*rSeek != '\0') {
+        *wSeek = *rSeek;
+        rSeek += 1;
+        wSeek += 1;
+    }
+    enum {
+        CODEPOINT_OLD_ITALIC_LETTER_EM = 0x01030C
+        , CODEPOINT_GRINNING_FACE = 0x01F600
+    };
+    wSeek[0] |= 0xF0u | ((CODEPOINT_OLD_ITALIC_LETTER_EM >> 18u));
+    wSeek[1] |= 0x80u | ((CODEPOINT_OLD_ITALIC_LETTER_EM >> 12u) & 0x3Fu);
+    wSeek[2] |= 0x80u | ((CODEPOINT_OLD_ITALIC_LETTER_EM >> 6u) & 0x3Fu);
+    wSeek[3] |= 0x80u | ((CODEPOINT_OLD_ITALIC_LETTER_EM) & 0x3Fu);
+}
+
 int main(void) {
     stbtt_fontinfo font;
     fread(bufFont, 1, 1000000, fopen("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", "rb"));
     stbtt_InitFont(&font, bufFont, 0);
 
     const float scale = stbtt_ScaleForPixelHeight(&font, 16);
-    {
-        const char* msg = "Hello, World! Hello, World! Hello, World! Hello, World! Hello, World!\n";
-        uint8_t* wSeek = message + 1;
-        const char* rSeek = msg;
-        while (*rSeek != '\0') {
-            *wSeek = *rSeek;
-            rSeek += 1;
-            wSeek += 2;
-        }
-        enum {
-            SURROGATE_MASK = 0xFC00
-            , HIGH_SURROGATE_PREFIX = 0xD800
-            , LOW_SURROGATE_PREFIX = 0xDC00
-            , VALUE_MASK = 0x03FF
-        };
-        enum {
-            CODEPOINT_OLD_ITALIC_LETTER_EM = 0x01030C
-            , CODEPOINT_GRINNING_FACE = 0x01F600
-        };
-        const int32_t additional_codepoint = CODEPOINT_OLD_ITALIC_LETTER_EM - 0x10000;
-        wSeek -= 1;
-        wSeek[0] |= HIGH_SURROGATE_PREFIX >> 8;
-        wSeek[0] |= (additional_codepoint >> 18) & 0x03;
-        wSeek[1] |= (additional_codepoint >> 10) & 0xFF;
-        wSeek[2] |= LOW_SURROGATE_PREFIX >> 8;
-        wSeek[2] |= (additional_codepoint >> 8) & 0x03;
-        wSeek[3] |= (additional_codepoint) & 0xFF;
-    }
+    init_message8();
 
     struct utf8 utf8;
     utf8 = utf8_init(message);

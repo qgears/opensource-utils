@@ -2,9 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <uchar.h>
+#include <assert.h>
+#include <math.h>
+#include <string.h>
 
-#define STB_TRUETYPE_IMPLEMENTATION
-#define STBTT_STATIC
 #include "stb_truetype.h"
 
 #include "nativeLibStbtt.h"
@@ -310,7 +311,7 @@ T_SizeInt qstb_renderTextPrivate(uint64_t surfaceHandle, T_TrueTypeFont* font, c
     } while (line.end < s.len);
 
     T_SizeInt ret = qstb_layoutTextPrivate(font, text, hAlign, vAlign, width, height, wrapMode);
-    if (wasInited) {
+    if (!wasInited) {
         font->stb.inited = false;
         free(font->stb.font.data);
     }

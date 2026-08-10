@@ -6,6 +6,8 @@
 
 #include "stb_truetype.h"
 
+#include "qstb_utf8.h"
+
 enum { WRAP_CHAR, WRAP_WORD, WRAP_WORDCHAR };
 
 struct LineInfo {
