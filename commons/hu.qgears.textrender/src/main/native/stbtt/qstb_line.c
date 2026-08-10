@@ -66,6 +66,9 @@ double line_width(struct LineInfo line, float scale, double letterSpacing) {
 }
 
 static bool is_line_too_long(struct LineInfo line, int32_t width, float scale, double letterSpacing) {
+    if (line.l == 0) {
+        return false;
+    }
     return width < line_width(line, scale, letterSpacing);
 }
 
