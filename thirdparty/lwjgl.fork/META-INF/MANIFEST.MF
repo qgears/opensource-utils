@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1786441494874
+Bnd-LastModified: 1786465399683
 Build-Jdk: 21.0.11
 Built-By: agostoni
 Bundle-Description: Java OpenGL bindings implementation library.
@@ -7,23 +7,23 @@ Bundle-License: http://legacy.lwjgl.org/license.php.html
 Bundle-ManifestVersion: 2
 Bundle-Name: lwjgl.fork
 Bundle-SymbolicName: lwjgl.fork
-Bundle-Version: 12.5.1.SNAPSHOT
+Bundle-Version: 12.6.0.SNAPSHOT
 Created-By: Apache Maven Bundle Plugin
 Export-Package: lwjgl.standalone;uses:="hu.qgears.nativeloader,org.lwjgl
- .opengl";version="12.5.1.SNAPSHOT",net.java.games.input;uses:="net.java
- .games.util.plugins";version="12.5.1.SNAPSHOT",net.java.games.util;vers
- ion="12.5.1.SNAPSHOT",net.java.games.util.plugins;version="12.5.1.SNAPS
- HOT",net.java.games.util.plugins.test;version="12.5.1.SNAPSHOT",org.lwj
- gl;version="12.5.1.SNAPSHOT",org.lwjgl.input;uses:="org.lwjgl";version=
- "12.5.1.SNAPSHOT",org.lwjgl.openal;uses:="org.lwjgl";version="12.5.1.SN
- APSHOT",org.lwjgl.opengl;uses:="org.lwjgl";version="12.5.1.SNAPSHOT",or
- g.lwjgl.system;version="12.5.1.SNAPSHOT",org.lwjgl.util;uses:="javax.so
- und.sampled,org.lwjgl,org.lwjgl.opengl";version="12.5.1.SNAPSHOT",org.l
- wjgl.util.glu;version="12.5.1.SNAPSHOT",org.lwjgl.util.glu.tessellation
- ;uses:="org.lwjgl.util.glu";version="12.5.1.SNAPSHOT",org.lwjgl.util.in
- put;uses:="org.lwjgl.input";version="12.5.1.SNAPSHOT",org.lwjgl.util.ji
+ .opengl";version="12.6.0.SNAPSHOT",net.java.games.input;uses:="net.java
+ .games.util.plugins";version="12.6.0.SNAPSHOT",net.java.games.util;vers
+ ion="12.6.0.SNAPSHOT",net.java.games.util.plugins;version="12.6.0.SNAPS
+ HOT",net.java.games.util.plugins.test;version="12.6.0.SNAPSHOT",org.lwj
+ gl;version="12.6.0.SNAPSHOT",org.lwjgl.input;uses:="org.lwjgl";version=
+ "12.6.0.SNAPSHOT",org.lwjgl.openal;uses:="org.lwjgl";version="12.6.0.SN
+ APSHOT",org.lwjgl.opengl;uses:="org.lwjgl";version="12.6.0.SNAPSHOT",or
+ g.lwjgl.system;version="12.6.0.SNAPSHOT",org.lwjgl.util;uses:="javax.so
+ und.sampled,org.lwjgl,org.lwjgl.opengl";version="12.6.0.SNAPSHOT",org.l
+ wjgl.util.glu;version="12.6.0.SNAPSHOT",org.lwjgl.util.glu.tessellation
+ ;uses:="org.lwjgl.util.glu";version="12.6.0.SNAPSHOT",org.lwjgl.util.in
+ put;uses:="org.lwjgl.input";version="12.6.0.SNAPSHOT",org.lwjgl.util.ji
  nput;uses:="net.java.games.input,net.java.games.util.plugins";version="
- 12.5.1.SNAPSHOT",org.lwjgl.util.vector;version="12.5.1.SNAPSHOT"
+ 12.6.0.SNAPSHOT",org.lwjgl.util.vector;version="12.6.0.SNAPSHOT"
 Import-Package: com.apple.eawt,com.apple.eio,hu.qgears.nativeloader,java
  x.sound.sampled,javax.swing,org.apache.log4j;version="[1.2,2)"
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=11))"

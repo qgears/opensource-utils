@@ -1,23 +1,23 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1786441493903
+Bnd-LastModified: 1786465398256
 Build-Jdk: 21.0.11
 Built-By: agostoni
 Bundle-Description: The lwjgl3.int bundle.
 Bundle-ManifestVersion: 2
 Bundle-Name: lwjgl3.int
 Bundle-SymbolicName: lwjgl3.int
-Bundle-Version: 12.5.1.SNAPSHOT
+Bundle-Version: 12.6.0.SNAPSHOT
 Created-By: Apache Maven Bundle Plugin
-Export-Package: linux.x86.org.lwjgl;version="12.5.1.SNAPSHOT",linux.x86.
- org.lwjgl.glfw;version="12.5.1.SNAPSHOT",linux.x86.org.lwjgl.opengl;ver
- sion="12.5.1.SNAPSHOT",linux.x86.org.lwjgl.opengles;version="12.5.1.SNA
- PSHOT",linux.x86.org.lwjgl.stb;version="12.5.1.SNAPSHOT",lwjgl.standalo
- ne;uses:="hu.qgears.nativeloader,org.lwjgl.opengl";version="12.5.1.SNAP
- SHOT",org.lwjgl;version="12.5.1.SNAPSHOT",org.lwjgl.input;version="12.5
- .1.SNAPSHOT",org.lwjgl.opengl;uses:="org.lwjgl";version="12.5.1.SNAPSHO
- T",org.lwjgl.util;version="12.5.1.SNAPSHOT",org.lwjgl.util.glu;version=
- "12.5.1.SNAPSHOT",org.lwjgl.util.glu.tessellation;uses:="org.lwjgl.util
- .glu";version="12.5.1.SNAPSHOT",org.lwjgl.util.vector;version="12.5.1.S
+Export-Package: linux.x86.org.lwjgl;version="12.6.0.SNAPSHOT",linux.x86.
+ org.lwjgl.glfw;version="12.6.0.SNAPSHOT",linux.x86.org.lwjgl.opengl;ver
+ sion="12.6.0.SNAPSHOT",linux.x86.org.lwjgl.opengles;version="12.6.0.SNA
+ PSHOT",linux.x86.org.lwjgl.stb;version="12.6.0.SNAPSHOT",lwjgl.standalo
+ ne;uses:="hu.qgears.nativeloader,org.lwjgl.opengl";version="12.6.0.SNAP
+ SHOT",org.lwjgl;version="12.6.0.SNAPSHOT",org.lwjgl.input;version="12.6
+ .0.SNAPSHOT",org.lwjgl.opengl;uses:="org.lwjgl";version="12.6.0.SNAPSHO
+ T",org.lwjgl.util;version="12.6.0.SNAPSHOT",org.lwjgl.util.glu;version=
+ "12.6.0.SNAPSHOT",org.lwjgl.util.glu.tessellation;uses:="org.lwjgl.util
+ .glu";version="12.6.0.SNAPSHOT",org.lwjgl.util.vector;version="12.6.0.S
  NAPSHOT"
 Import-Package: hu.qgears.nativeloader,org.apache.log4j;version="[1.2,2)
  ",org.lwjgl.glfw,org.lwjgl.system
