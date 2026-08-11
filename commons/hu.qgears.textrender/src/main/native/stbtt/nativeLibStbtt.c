@@ -68,7 +68,6 @@ static T_SurfaceData* qstb_get_surfacedata(uint64_t id) {
 static void qstb_InitFont(T_TrueTypeFont* font) {
     //TODO cache
 
-    assert(!font->stb.inited);
     if (font->stb.inited) {
         return;
     }
