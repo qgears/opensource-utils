@@ -16,5 +16,5 @@ org.eclipse.tycho:tycho-versions-plugin:5.0.3:set-version \
 -DnewVersion=$1 \
 -Dversionbump || error "Failed bumping pom versions"
 
-mvn process-classes -Dregenmanifest  || error "Failed update Manifests"
+mvn -f ${PARENT_DIR} process-classes -Dregenmanifest  || error "Failed update Manifests"
 
