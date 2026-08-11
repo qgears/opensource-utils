@@ -46,4 +46,6 @@ struct utf8 utf8_seek(struct utf8 s, size_t off);
  */
 struct utf8 utf8_include_ignore_chars(struct utf8 s);
 
+struct utf8 utf8_ignore(struct utf8 s);
+
 #endif

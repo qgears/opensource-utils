@@ -155,3 +155,12 @@ struct utf8 utf8_seek(struct utf8 s, size_t off) {
     s.off = clamp(0, off, s.len);
     return utf8_peek(s);
 }
+
+struct utf8 utf8_ignore(struct utf8 s) {
+    struct utf8 u2 = utf8_read(s);
+    while (is_ignore(u2.codepoint)) {
+        u2 = utf8_read(u2);
+    }
+    s.end = u2.off;
+    return s;
+}
