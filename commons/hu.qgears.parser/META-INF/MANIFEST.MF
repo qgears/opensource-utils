@@ -1,41 +1,41 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1791300369255
-Build-Jdk: 21.0.12
+Bnd-LastModified: 1786465400348
+Build-Jdk: 21.0.11
 Built-By: agostoni
 Bundle-Description: Parser util for building an AST.
 Bundle-ManifestVersion: 2
 Bundle-Name: hu.qgears.parser
 Bundle-SymbolicName: hu.qgears.parser
-Bundle-Version: 12.5.2.SNAPSHOT
+Bundle-Version: 12.6.0.SNAPSHOT
 Created-By: Apache Maven Bundle Plugin
 Export-Package: hu.qgears.parser;uses:="hu.qgears.parser.impl,hu.qgears.
  parser.language,hu.qgears.parser.language.impl,hu.qgears.parser.tokeniz
- er,hu.qgears.parser.tokenizer.impl";version="12.5.2.SNAPSHOT",hu.qgears
+ er,hu.qgears.parser.tokenizer.impl";version="12.6.0.SNAPSHOT",hu.qgears
  .parser.coloring;uses:="hu.qgears.parser,hu.qgears.parser.impl,hu.qgear
- s.parser.tokenizer";version="12.5.2.SNAPSHOT",hu.qgears.parser.contenta
+ s.parser.tokenizer";version="12.6.0.SNAPSHOT",hu.qgears.parser.contenta
  ssist;uses:="hu.qgears.parser,hu.qgears.parser.impl,hu.qgears.parser.la
- nguage.impl,hu.qgears.parser.tokenizer";version="12.5.2.SNAPSHOT",hu.qg
- ears.parser.expression;version="12.5.2.SNAPSHOT",hu.qgears.parser.impl;
+ nguage.impl,hu.qgears.parser.tokenizer";version="12.6.0.SNAPSHOT",hu.qg
+ ears.parser.expression;version="12.6.0.SNAPSHOT",hu.qgears.parser.impl;
  uses:="hu.qgears.parser,hu.qgears.parser.language,hu.qgears.parser.lang
  uage.impl,hu.qgears.parser.tokenizer,hu.qgears.parser.tokenizer.impl,hu
- .qgears.parser.util";version="12.5.2.SNAPSHOT",hu.qgears.parser.languag
+ .qgears.parser.util";version="12.6.0.SNAPSHOT",hu.qgears.parser.languag
  e;uses:="hu.qgears.parser.impl,hu.qgears.parser.language.impl,hu.qgears
- .parser.tokenizer,hu.qgears.parser.tokenizer.impl";version="12.5.2.SNAP
+ .parser.tokenizer,hu.qgears.parser.tokenizer.impl";version="12.6.0.SNAP
  SHOT",hu.qgears.parser.language.impl;uses:="hu.qgears.parser,hu.qgears.
  parser.language,hu.qgears.parser.tokenizer,hu.qgears.parser.tokenizer.i
- mpl,javax.xml.xpath,org.w3c.dom";version="12.5.2.SNAPSHOT",hu.qgears.pa
+ mpl,javax.xml.xpath,org.w3c.dom";version="12.6.0.SNAPSHOT",hu.qgears.pa
  rser.math;uses:="hu.qgears.parser,hu.qgears.parser.language";version="1
- 2.5.2.SNAPSHOT",hu.qgears.parser.tokenizer;uses:="hu.qgears.parser.impl
+ 2.6.0.SNAPSHOT",hu.qgears.parser.tokenizer;uses:="hu.qgears.parser.impl
  ,hu.qgears.parser.language,hu.qgears.parser.tokenizer.impl";version="12
- .5.2.SNAPSHOT",hu.qgears.parser.tokenizer.impl;uses:="hu.qgears.parser,
+ .6.0.SNAPSHOT",hu.qgears.parser.tokenizer.impl;uses:="hu.qgears.parser,
  hu.qgears.parser.language,hu.qgears.parser.tokenizer,javax.xml.xpath,or
- g.w3c.dom";version="12.5.2.SNAPSHOT",hu.qgears.parser.tokenizer.recogni
+ g.w3c.dom";version="12.6.0.SNAPSHOT",hu.qgears.parser.tokenizer.recogni
  zer;uses:="hu.qgears.parser.language,hu.qgears.parser.tokenizer,hu.qgea
- rs.parser.util";version="12.5.2.SNAPSHOT",hu.qgears.parser.tokenizer.re
+ rs.parser.util";version="12.6.0.SNAPSHOT",hu.qgears.parser.tokenizer.re
  cognizer.factories;uses:="hu.qgears.parser.language,hu.qgears.parser.to
- kenizer";version="12.5.2.SNAPSHOT",hu.qgears.parser.util;uses:="hu.qgea
+ kenizer";version="12.6.0.SNAPSHOT",hu.qgears.parser.util;uses:="hu.qgea
  rs.parser,javax.xml.parsers,javax.xml.xpath,org.w3c.dom,org.xml.sax";ve
- rsion="12.5.2.SNAPSHOT"
+ rsion="12.6.0.SNAPSHOT"
 Import-Package: hu.qgears.commons,javax.xml.namespace,javax.xml.parsers,
  javax.xml.xpath,org.w3c.dom,org.xml.sax
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=11))"
