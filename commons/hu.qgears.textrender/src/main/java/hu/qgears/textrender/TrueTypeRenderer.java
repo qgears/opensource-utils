@@ -15,6 +15,7 @@ import hu.qgears.textrender.stbtt.StbNativeAccessor;
 
 public class TrueTypeRenderer {
 	
+	public static final ENativeImageComponentOrder DEFAULT_CO = ENativeImageComponentOrder.RGBA;
 	private TrueTypeNativeInterface rendererNative;
 	private static final RGBAColor TRANSPARENT = new RGBAColor(0,0,0,0);
 
@@ -29,8 +30,8 @@ public class TrueTypeRenderer {
 		}
 	}
 	
-	public NativeImage createNativeImageColor(int w, int h) {
-		NativeImage ret = NativeImage.create(new SizeInt(w, h), ENativeImageComponentOrder.RGBA, 4,
+	public static NativeImage createNativeImageColor(int w, int h) {
+		NativeImage ret = NativeImage.create(new SizeInt(w, h), DEFAULT_CO, 4,
 				DefaultJavaNativeMemoryAllocator.getInstance());
 		return ret;
 	}
