@@ -103,6 +103,7 @@ public class NativeLibPng extends NativeLibPngConnector
 		case MONO:
 		case RGB:
 		case RGBA:
+		case ALPHA:
 			break;
 		case ARGB:
 			swapAlpha=true;

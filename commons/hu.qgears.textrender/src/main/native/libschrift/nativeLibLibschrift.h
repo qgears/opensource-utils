@@ -8,6 +8,17 @@
 extern "C" {
 #endif
 
+typedef enum  {
+	ENICO_RGB,
+	ENICO_BGR,
+	ENICO_BGRA,
+	ENICO_RGBA,
+	ENICO_ARGB,
+	ENICO_ABGR,
+	ENICO_MONO,
+	ENICO_ALPHA,
+	ENICO_BIM
+} ENativeImageComponentOrder;
 
 typedef enum {
     QLS_ERROR_OK,
@@ -20,7 +31,8 @@ typedef enum {
     QLS_ERROR_GLIPH_METRICS_BAD,
     QLS_ERROR_GLIPH_RENDER,
     QLS_ERROR_GLIPH_KERNING,
-    QLS_ERROR_LINE_METRICS
+    QLS_ERROR_LINE_METRICS,
+    QLS_ERROR_UNSUPPORTED_PIXEL_FORMAT
 } QLS_ERROR_CODE;
 
 #define QLS_MAX_ERROR_MSG_SIZE (256u)
@@ -59,14 +71,15 @@ typedef struct {
  * Creates a render surface. Assumptions :
  * 
  * * RGBA pixel representation. * Size of data equals w * h * 4
- * 
+ * @param T_ErrorHandler* eh the error handler object
  * @param data Pointer to the surface data buffer
  * @param w Width of the surface
  * @param h Height of the surface
+ * @param pixelformat The expected pixelformat, see ENativeImageComponentOrder
  * 
  * @return The surface id (handle) that identifies this instance.
  */
-uint64_t qls_createSurfaceWithDataPrivate(uint8_t* data, int32_t w, int32_t h);
+uint64_t qls_createSurfaceWithDataPrivate(T_ErrorHandler *eh, uint8_t* data, int32_t w, int32_t h, int32_t pixelFormat);
 
 /**
  * Disposes the surface instance allocated earlier with

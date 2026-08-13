@@ -1,6 +1,7 @@
 package hu.qgears.textrender;
 
 import hu.qgears.commons.mem.DefaultJavaNativeMemoryAllocator;
+import hu.qgears.images.ENativeImageAlphaStorageFormat;
 import hu.qgears.images.ENativeImageComponentOrder;
 import hu.qgears.images.NativeImage;
 import hu.qgears.images.NativeImageEditor;
@@ -15,7 +16,7 @@ import hu.qgears.textrender.stbtt.StbNativeAccessor;
 
 public class TrueTypeRenderer {
 	
-	public static final ENativeImageComponentOrder DEFAULT_CO = ENativeImageComponentOrder.RGBA;
+	public static final ENativeImageComponentOrder DEFAULT_CO = ENativeImageComponentOrder.BGRA;
 	private TrueTypeNativeInterface rendererNative;
 	private static final RGBAColor TRANSPARENT = new RGBAColor(0,0,0,0);
 
@@ -33,6 +34,7 @@ public class TrueTypeRenderer {
 	public static NativeImage createNativeImageColor(int w, int h) {
 		NativeImage ret = NativeImage.create(new SizeInt(w, h), DEFAULT_CO, 4,
 				DefaultJavaNativeMemoryAllocator.getInstance());
+		ret.setAlphaStorageFormat(ENativeImageAlphaStorageFormat.premultiplied);
 		return ret;
 	}
 	
@@ -60,7 +62,7 @@ public class TrueTypeRenderer {
 	
 	public SizeInt renderText(int x, int y, int w, int h, NativeImage image, TextParameters params, boolean clear) {
 		
-		long s = rendererNative.createSurfaceWithData(image.getBuffer().getJavaAccessor(), image.getWidth(), image.getHeight());
+		long s = rendererNative.createSurfaceWithData(image.getBuffer().getJavaAccessor(), image.getWidth(), image.getHeight(), image.getComponentOrder());
 		if (clear) {
 			//TODO should we do it in native code? (for performance reason, memset vs ByteBuffer manipulation from java)
 			new NativeImageEditor(image).fillWithColor(TRANSPARENT);

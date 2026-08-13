@@ -22,15 +22,19 @@ static void disposeTrueTypeFont(JNIEnv *env, jobject fontObject, T_TrueTypeFont*
  * Signature: (Ljava/nio/ByteBuffer;II)J
  */
 JNIEXPORT jlong JNICALL Java_hu_qgears_textrender_libschrift_LibschriftNative_createSurfaceWithDataPrivate
-  (JNIEnv *env, jobject obj, jobject buffer, jint width, jint height)
+  (JNIEnv *env, jobject obj, jobject buffer, jint width, jint height, jint pixelformat)
 {
     // Get the direct buffer address
     uint8_t* data = (uint8_t*)(*env)->GetDirectBufferAddress(env, buffer);
-    (void)obj;
-    
+    T_ErrorHandler eh = {0};
     // Forward to native implementation
-    uint64_t result = qls_createSurfaceWithDataPrivate(data, width, height);
-    return (jlong)(uintptr_t)result;
+    uint64_t result = qls_createSurfaceWithDataPrivate(&eh,data, width, height,pixelformat);
+    if (eh.code == QLS_ERROR_OK) {
+        return (jlong)(uintptr_t)result;
+    } else {
+        throwException(env,&eh);
+        return 0;
+    }
 }
 
 /*

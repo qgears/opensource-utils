@@ -10,10 +10,10 @@ extern "C" {
 /*
  * Class:     hu_qgears_textrender_libschrift_LibschriftNative
  * Method:    createSurfaceWithDataPrivate
- * Signature: (Ljava/nio/ByteBuffer;II)J
+ * Signature: (Ljava/nio/ByteBuffer;III)J
  */
 JNIEXPORT jlong JNICALL Java_hu_qgears_textrender_libschrift_LibschriftNative_createSurfaceWithDataPrivate
-  (JNIEnv *, jobject, jobject, jint, jint);
+  (JNIEnv *, jobject, jobject, jint, jint, jint);
 
 /*
  * Class:     hu_qgears_textrender_libschrift_LibschriftNative

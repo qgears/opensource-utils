@@ -12,6 +12,11 @@ typedef struct {
     uint8_t* data;
     int32_t width;
     int32_t height;
+    /**
+     * true : BGRA premultiplied.
+     * false : ALPHA
+     */
+    bool color;
 } T_SurfaceData;
 
 typedef struct {
@@ -59,7 +64,7 @@ static uint32_t qls_layoutAndRenderTextPart(T_ErrorHandler* errorHandler, T_Rend
 static uint32_t qls_layoutAndRender(T_ErrorHandler* errorHandler, T_RenderData* rData,T_SurfaceData* surface, const uint16_t* text, uint32_t textLen);
 static inline void qls_render_gliph(T_ErrorHandler* eh, T_RenderData * rData, uint32_t cp,T_SurfaceData* surface, bool allowCharWrap);
 static void qls_align(T_ErrorHandler* errorHandler, T_RenderData* rData, uint32_t hAlign, uint32_t vAlign,const uint16_t* text, uint32_t textLen);
-static inline uint32_t blend_rgba(uint32_t dst, uint32_t pcolor, uint8_t mask);
+static inline uint32_t blend_bgra_premultiplied(uint32_t dst, uint32_t pcolor, uint8_t mask);
 static inline void copy_rect(int32_t startx, int32_t starty, T_SurfaceData* surface, SFT_Image* img, uint32_t color);
 static void qls_load_font(T_ErrorHandler* eh,T_RenderData* r, T_TrueTypeFont* font);
 static void get_font_file(T_ErrorHandler* eh, T_TrueTypeFont* font, char* filePath, uint32_t filePathLength);
@@ -70,7 +75,7 @@ static inline int32_t dToI (double d);
 /*** External function implementations     ***/
 /*********************************************/
 
-uint64_t qls_createSurfaceWithDataPrivate(uint8_t* data, int32_t w, int32_t h)
+uint64_t qls_createSurfaceWithDataPrivate(T_ErrorHandler *eh, uint8_t* data, int32_t w, int32_t h, int32_t pixelFormat)
 {
     // Allocate memory for surface data structure
     T_SurfaceData* surfaceData = (T_SurfaceData*)malloc(sizeof(T_SurfaceData));
@@ -78,6 +83,19 @@ uint64_t qls_createSurfaceWithDataPrivate(uint8_t* data, int32_t w, int32_t h)
         return 0; // Return 0 on allocation failure
     }
     
+    switch (pixelFormat)
+    {
+    case ENICO_BGRA:
+        surfaceData->color = true;
+        break;
+    case ENICO_ALPHA:
+        surfaceData->color = false;
+        break;
+    default:
+        ERROR(eh,QLS_ERROR_UNSUPPORTED_PIXEL_FORMAT, "Unsupported pixel format %d",pixelFormat);
+        break;
+    }
+
     // Initialize the surface data
     surfaceData->data = data;
     surfaceData->width = w;
@@ -410,24 +428,31 @@ static void qls_align(T_ErrorHandler* errorHandler, T_RenderData* rData, uint32_
     }
 }
 
-static inline uint32_t blend_rgba(uint32_t dst, uint32_t pcolor, uint8_t mask)
+static inline uint32_t blend_bgra_premultiplied(uint32_t dst, uint32_t pcolor, uint8_t alpha)
 {
-    uint32_t pa = ((pcolor >> 24) & 0xFF) * mask / 255;
-    uint32_t ia = 255 - pa;
+    // pcolor is packed in RGBA byte order (byte0=R, byte1=G, byte2=B, byte3=A)
+    uint32_t pR =  pcolor        & 0xFF;
+    uint32_t pG = (pcolor >>  8) & 0xFF;
+    uint32_t pB = (pcolor >> 16) & 0xFF;
+    uint32_t pA = ((pcolor >> 24) & 0xFF);
 
-    uint32_t dr =  dst        & 0xFF;
+    // dst is stored in BGRA byte order (byte0=B, byte1=G, byte2=R, byte3=A)
+    uint32_t db = dst        & 0xFF;
     uint32_t dg = (dst >>  8) & 0xFF;
-    uint32_t db = (dst >> 16) & 0xFF;
+    uint32_t dr = (dst >> 16) & 0xFF;
     uint32_t da = (dst >> 24) & 0xFF;
+    
+    // combine the color's own alpha with the glyph coverage mask
+    uint32_t srcAlpha = pA * alpha / 255;
+    uint32_t one_minus_alpha = 255 - srcAlpha;
 
-    uint32_t pr =  pcolor        & 0xFF;
-    uint32_t pg = (pcolor >>  8) & 0xFF;
-    uint32_t pb = (pcolor >> 16) & 0xFF;
+    uint32_t chan_b = (pB * srcAlpha + db * one_minus_alpha) / 255;
+    uint32_t chan_g = (pG * srcAlpha + dg * one_minus_alpha) / 255;
+    uint32_t chan_r = (pR * srcAlpha + dr * one_minus_alpha) / 255;
+    uint32_t chan_a = srcAlpha + da * one_minus_alpha / 255;
 
-    return ((pa + da * ia / 255) << 24) |
-           (((pb * pa + db * ia) / 255) << 16) |
-           (((pg * pa + dg * ia) / 255) <<  8) |
-            ((pr * pa + dr * ia) / 255);
+    // result is written back in BGRA order, premultiplied by alpha
+    return (chan_a << 24) | (chan_r << 16) | (chan_g << 8) | chan_b;
 }
 static inline void copy_rect(int32_t startx, int32_t starty, T_SurfaceData* surface, SFT_Image* img, uint32_t color)
 {
@@ -478,7 +503,9 @@ static inline void copy_rect(int32_t startx, int32_t starty, T_SurfaceData* surf
     int32_t j = 0;
     int32_t dsti = starty;
     int32_t dstj = startx;
-    uint32_t* surfaceData = (uint32_t*)surface->data;
+    uint32_t* surfaceData4 = (uint32_t*)surface->data;
+    uint8_t* surfaceData = surface->data;
+    
     uint8_t* imageData = ((uint8_t*)img->pixels);
     for (j = min_src_x,dstj = startx+min_src_x; j < max_src_x; j++, dstj++ ) {
         for (i = min_src_y, dsti = starty+min_src_y; i < max_src_y; i++, dsti++ ) {
@@ -486,7 +513,12 @@ static inline void copy_rect(int32_t startx, int32_t starty, T_SurfaceData* surf
             int32_t src_pix = (i*img->width) + j;
             uint8_t src_alpha = imageData[src_pix];
             if (src_alpha > 0) {  // Only copy non-transparent pixels
-                surfaceData[dst_pix] = blend_rgba(surfaceData[dst_pix], color,src_alpha);
+                if (surface->color) {
+                    surfaceData4[dst_pix] = blend_bgra_premultiplied(surfaceData4[dst_pix], color,src_alpha);
+                } else {
+                    uint32_t da = surfaceData[dst_pix];
+                    surfaceData[dst_pix] = (uint8_t)(src_alpha + da * (255 - src_alpha) / 255);
+                }
             }
         }
     }
