@@ -16,14 +16,17 @@ import hu.qgears.textrender.TrueTypeNativeInterface;
 		if (data == null) {
 			throw new NullPointerException("data");
 		}
+		int rowStride = w;
 		switch (co) {
 		case BGRA:
+			break;
 		case ALPHA:
+			rowStride = ((w +3 ) & ~3);
 			break;
 		default:
 			throw new RuntimeException("Unsupported color format " + co);
 		}
-		if (data.capacity() < w * h * co.getNCHannels()) {
+		if (data.capacity() < rowStride * h * co.getNCHannels()) {
 
 			throw new IllegalArgumentException("invalid buffer size");
 		}

@@ -505,11 +505,13 @@ static inline void copy_rect(int32_t startx, int32_t starty, T_SurfaceData* surf
     int32_t dstj = startx;
     uint32_t* surfaceData4 = (uint32_t*)surface->data;
     uint8_t* surfaceData = surface->data;
+    // non-color surfaces need each row padded to a 4-byte boundary; color rows (4 bytes/pixel) are aligned trivially
+    int32_t rowStride = surface->color ? surface->width : ((surface->width + 3) & ~3);
     
     uint8_t* imageData = ((uint8_t*)img->pixels);
     for (j = min_src_x,dstj = startx+min_src_x; j < max_src_x; j++, dstj++ ) {
         for (i = min_src_y, dsti = starty+min_src_y; i < max_src_y; i++, dsti++ ) {
-            int32_t dst_pix = (dsti*surface->width) + dstj;
+            int32_t dst_pix = (dsti*rowStride) + dstj;
             int32_t src_pix = (i*img->width) + j;
             uint8_t src_alpha = imageData[src_pix];
             if (src_alpha > 0) {  // Only copy non-transparent pixels
