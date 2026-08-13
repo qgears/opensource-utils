@@ -1,6 +1,7 @@
 package hu.qgears.textrender.stbtt;
 import java.nio.ByteBuffer;
 
+import hu.qgears.images.ENativeImageComponentOrder;
 import hu.qgears.images.SizeInt;
 import hu.qgears.images.text.EHorizontalAlign;
 import hu.qgears.images.text.EVerticalAlign;
@@ -12,7 +13,7 @@ import hu.qgears.textrender.TrueTypeNativeInterface;
 /*package*/ class StbTrueTypeNative implements TrueTypeNativeInterface {
 
 	@Override
-	public long createSurfaceWithData(ByteBuffer data, int w, int h) {
+	public long createSurfaceWithData(ByteBuffer data, int w, int h, ENativeImageComponentOrder co) {
 		if (data == null) {
 			throw new NullPointerException("data");
 		}
@@ -20,6 +21,7 @@ import hu.qgears.textrender.TrueTypeNativeInterface;
 
 			throw new IllegalArgumentException("invalid buffer size");
 		}
+		//TODO support co in native code!!
 		return createSurfaceWithDataPrivate(data, w, h);
 	}
 

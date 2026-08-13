@@ -2,6 +2,7 @@ package hu.qgears.textrender;
 
 import java.nio.ByteBuffer;
 
+import hu.qgears.images.ENativeImageComponentOrder;
 import hu.qgears.images.SizeInt;
 import hu.qgears.images.text.EHorizontalAlign;
 import hu.qgears.images.text.EVerticalAlign;
@@ -16,10 +17,11 @@ public interface TrueTypeNativeInterface {
 	 * @param data
 	 * @param w
 	 * @param h
+	 * @param co
 	 * 
 	 *             Returns the surface id (handle) that identifies this instance.
 	 */
-	long createSurfaceWithData(ByteBuffer data, int w, int h);
+	long createSurfaceWithData(ByteBuffer data, int w, int h, ENativeImageComponentOrder co);
 
 	/**
 	 * Disposes the surface instance allocated earlier with

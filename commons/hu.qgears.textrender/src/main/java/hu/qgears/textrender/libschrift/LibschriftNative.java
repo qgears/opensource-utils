@@ -1,6 +1,7 @@
 package hu.qgears.textrender.libschrift;
 import java.nio.ByteBuffer;
 
+import hu.qgears.images.ENativeImageComponentOrder;
 import hu.qgears.images.SizeInt;
 import hu.qgears.images.text.EHorizontalAlign;
 import hu.qgears.images.text.EVerticalAlign;
@@ -11,18 +12,25 @@ import hu.qgears.textrender.TrueTypeNativeInterface;
 /*package*/ class LibschriftNative implements TrueTypeNativeInterface {
 
 	@Override
-	public long createSurfaceWithData(ByteBuffer data, int w, int h) {
+	public long createSurfaceWithData(ByteBuffer data, int w, int h, ENativeImageComponentOrder co) {
 		if (data == null) {
 			throw new NullPointerException("data");
 		}
-		if (data.capacity() < w * h * 4) {
+		switch (co) {
+		case BGRA:
+		case ALPHA:
+			break;
+		default:
+			throw new RuntimeException("Unsupported color format " + co);
+		}
+		if (data.capacity() < w * h * co.getNCHannels()) {
 
 			throw new IllegalArgumentException("invalid buffer size");
 		}
-		return createSurfaceWithDataPrivate(data, w, h);
+		return createSurfaceWithDataPrivate(data, w, h, co.ordinal());
 	}
 
-	private native long createSurfaceWithDataPrivate(ByteBuffer data, int w, int h);
+	private native long createSurfaceWithDataPrivate(ByteBuffer data, int w, int h, int pixelFormat);
 
 	@Override
 	public SizeInt renderText(long surfaceHandle, TrueTypeFont fontFamily, String str, EHorizontalAlign hAlign,
