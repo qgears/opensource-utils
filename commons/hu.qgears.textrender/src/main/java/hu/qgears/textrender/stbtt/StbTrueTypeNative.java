@@ -6,7 +6,6 @@ import hu.qgears.images.SizeInt;
 import hu.qgears.images.text.EHorizontalAlign;
 import hu.qgears.images.text.EVerticalAlign;
 import hu.qgears.images.text.EWrapMode;
-import hu.qgears.images.text.RGBAColor;
 import hu.qgears.textrender.TrueTypeFont;
 import hu.qgears.textrender.TrueTypeNativeInterface;
 
@@ -17,15 +16,24 @@ import hu.qgears.textrender.TrueTypeNativeInterface;
 		if (data == null) {
 			throw new NullPointerException("data");
 		}
-		if (data.capacity() < w * h * 4) {
+		int rowStride = w;
+		switch (co) {
+		case BGRA:
+			break;
+		case ALPHA:
+			rowStride = ((w +3 ) & ~3);
+			break;
+		default:
+			throw new RuntimeException("Unsupported color format " + co);
+		}
+		if (data.capacity() < rowStride * h * co.getNCHannels()) {
 
 			throw new IllegalArgumentException("invalid buffer size");
 		}
-		//TODO support co in native code!!
-		return createSurfaceWithDataPrivate(data, w, h);
+		return createSurfaceWithDataPrivate(data, w, h, co.ordinal());
 	}
 
-	private native long createSurfaceWithDataPrivate(ByteBuffer data, int w, int h);
+	private native long createSurfaceWithDataPrivate(ByteBuffer data, int w, int h, int pixelFormat);
 
 	@Override
 	public SizeInt renderText(long surfaceHandle, TrueTypeFont fontFamily, String str, EHorizontalAlign hAlign,
@@ -34,7 +42,6 @@ import hu.qgears.textrender.TrueTypeNativeInterface;
 
 		// TODO parameter verficifation : handle null args here instead of the native
 		// impl
-		RGBAColor.fromFloats(r, g, b, a).toIntPixel();
 		return renderTextPrivate(surfaceHandle, fontFamily, str, hAlign, vAlign, x, y, width, height, r, g, b, a, clip,
 				wrapMode);
 	}
@@ -44,10 +51,10 @@ import hu.qgears.textrender.TrueTypeNativeInterface;
 			boolean clip, EWrapMode wrapMode);
 
 	@Override
-	public SizeInt layoutText(TrueTypeFont fontFamily, String text, EHorizontalAlign hAlign, EVerticalAlign vAlign, int width,
+	public SizeInt layoutText(TrueTypeFont font, String text, EHorizontalAlign hAlign, EVerticalAlign vAlign, int width,
 			int height, EWrapMode wrapMode) {
 		// TODO parameter verification
-		return layoutTextPrivate(fontFamily, text, hAlign, vAlign, width, height, wrapMode);
+		return layoutTextPrivate(font, text, hAlign, vAlign, width, height, wrapMode);
 	}
 
 	private native SizeInt layoutTextPrivate(TrueTypeFont fontFamily, String text, EHorizontalAlign hAlign,

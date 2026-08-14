@@ -10,6 +10,45 @@
 extern "C" {
 #endif
 
+typedef enum  {
+	ENICO_RGB,
+	ENICO_BGR,
+	ENICO_BGRA,
+	ENICO_RGBA,
+	ENICO_ARGB,
+	ENICO_ABGR,
+	ENICO_MONO,
+	ENICO_ALPHA,
+	ENICO_BIM
+} ENativeImageComponentOrder;
+
+typedef enum {
+    QLS_ERROR_OK,
+    QLS_ERROR_INVALID_SURFACE,
+    QLS_ERROR_SURFACE_DATA_NULL,
+    QLS_ERROR_MISSING_FONT,
+    QLS_ERROR_LONG_FONT_PATH,
+    QLS_ERROR_FONT_LOAD,
+    QLS_ERROR_GLIPH_MISSING,
+    QLS_ERROR_GLIPH_METRICS_BAD,
+    QLS_ERROR_GLIPH_RENDER,
+    QLS_ERROR_GLIPH_KERNING,
+    QLS_ERROR_LINE_METRICS,
+    QLS_ERROR_UNSUPPORTED_PIXEL_FORMAT
+} QLS_ERROR_CODE;
+
+#define QLS_MAX_ERROR_MSG_SIZE (256u)
+
+typedef struct {
+    QLS_ERROR_CODE code;
+    const char* file;
+    uint32_t line;
+    char errorMsg[QLS_MAX_ERROR_MSG_SIZE];
+} T_ErrorHandler;
+
+#define ERROR(eh,ec,...) do { eh->code = ec;eh->file = __FILE__; eh->line = __LINE__; snprintf(eh->errorMsg,QLS_MAX_ERROR_MSG_SIZE, __VA_ARGS__); } while (0)
+
+
 /**
  * C representation of Java TrueTypeFont object
  */
@@ -41,14 +80,15 @@ typedef struct {
  * Creates a render surface. Assumptions :
  * 
  * * RGBA pixel representation. * Size of data equals w * h * 4
- * 
+ * @param T_ErrorHandler* eh the error handler object
  * @param data Pointer to the surface data buffer
  * @param w Width of the surface
  * @param h Height of the surface
+ * @param pixelformat The expected pixelformat, see ENativeImageComponentOrder
  * 
  * @return The surface id (handle) that identifies this instance.
  */
-uint64_t qstb_createSurfaceWithDataPrivate(uint8_t* data, int32_t w, int32_t h);
+uint64_t qstb_createSurfaceWithDataPrivate(T_ErrorHandler *eh, uint8_t* data, int32_t w, int32_t h, int32_t pixelFormat);
 
 /**
  * Disposes the surface instance allocated earlier with
@@ -79,13 +119,14 @@ void qstb_disposeSurfacePrivate(uint64_t surfaceHandle);
  * 
  * @return The bounding box calculated during laying out the text
  */
-T_SizeInt qstb_renderTextPrivate(uint64_t surfaceHandle, T_TrueTypeFont* font, const char* text, 
+T_SizeInt qstb_renderTextPrivate(T_ErrorHandler* errorHandler, uint64_t surfaceHandle, T_TrueTypeFont* font, const char* text,
                             uint32_t hAlign, uint32_t vAlign, int32_t x, int32_t y, int32_t width, int32_t height,
                             float r, float g, float b, float a, bool clip, uint32_t wrapMode);
 
 /**
  * Calculates the layout of text without rendering it
  * 
+ * @param errorHandler The error handler
  * @param font The font parameters
  * @param text Text to calculate layout for
  * @param hAlign Horizontal alignment
@@ -96,7 +137,7 @@ T_SizeInt qstb_renderTextPrivate(uint64_t surfaceHandle, T_TrueTypeFont* font, c
  * 
  * @return The bounding box calculated during laying out the text
  */
-T_SizeInt qstb_layoutTextPrivate(T_TrueTypeFont* font, const char* text, 
+T_SizeInt qstb_layoutTextPrivate(T_ErrorHandler* errorHandler, T_TrueTypeFont* font, const char* text,
                             uint32_t hAlign, uint32_t vAlign, int32_t width, int32_t height, uint32_t wrapMode);
 
 #ifdef __cplusplus
