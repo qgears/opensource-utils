@@ -66,7 +66,7 @@ struct LineReader linereader_peek(struct LineReader reader, int32_t width, uint3
 static struct LineInfo line_next(struct LineInfo line, struct utf8 utf8
                           , int32_t width, float scale, double letterSpacing
                           , const stbtt_fontinfo* font, uint32_t wrapmode);
-struct LineReader linereader_next(struct LineReader reader) {
+struct LineReader linereader_next(struct LineReader reader, int32_t width, uint32_t wrapmode) {
     reader.line = line_next(reader.line, reader.s
         , width, reader.font->stb.scale, reader.font->letterSpacing
         , &reader.font->stb.font, wrapmode);
@@ -77,7 +77,7 @@ struct LineReader linereader_next(struct LineReader reader) {
 
 struct LineReader linereader_reset_line(struct LineReader reader) {
     reader.line = (struct LineInfo) {
-        .off = reader.line.off
+        .off = reader.line.off,
         .end = reader.line.end
     };
     reader.lastPrintable = 0;
@@ -132,7 +132,7 @@ static struct utf8 utf8_advance(struct utf8 utf8) {
     while (is_ignore(utf8.codepoint)) {
         utf8 = utf8_read(utf8);
     }
-    reader.s = utf8_ignore(reader.s);
+    utf8 = utf8_ignore(utf8);
 
     if (utf8.codepoint == '\r') {
         utf8 = utf8_read(utf8);

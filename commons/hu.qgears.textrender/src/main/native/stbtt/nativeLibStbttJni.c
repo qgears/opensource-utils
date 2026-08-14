@@ -19,13 +19,19 @@ static void disposeTrueTypeFont(JNIEnv *env, jobject fontObject, T_TrueTypeFont*
  * Signature: (Ljava/nio/ByteBuffer;II)J
  */
 JNIEXPORT jlong JNICALL Java_hu_qgears_textrender_stbtt_StbTrueTypeNative_createSurfaceWithDataPrivate
-  (JNIEnv *env, jobject obj, jobject buffer, jint width, jint height)
+  (JNIEnv *env, jobject obj, jobject buffer, jint width, jint height, jint pixelFormat)
 {
     // Get the direct buffer address
     uint8_t* data = (uint8_t*)(*env)->GetDirectBufferAddress(env, buffer);
-    
+    T_ErrorHandler eh = {0};
     // Forward to native implementation
-    return qstb_createSurfaceWithDataPrivate(data, width, height);
+    uint64_t result = qls_createSurfaceWithDataPrivate(&eh,data, width, height,pixelFormat);
+    if (eh.code == QLS_ERROR_OK) {
+        return (jlong)(uintptr_t)result;
+    } else {
+        throwException(env,&eh);
+        return 0;
+    }
 }
 
 /*
@@ -46,8 +52,9 @@ JNIEXPORT jobject JNICALL Java_hu_qgears_textrender_stbtt_StbTrueTypeNative_rend
     int vAlignValue = (*env)->CallIntMethod(env, vAlign, (*env)->GetMethodID(env, (*env)->GetObjectClass(env, vAlign), "ordinal", "()I"));
     int wrapModeValue = (*env)->CallIntMethod(env, wrapMode, (*env)->GetMethodID(env, (*env)->GetObjectClass(env, wrapMode), "ordinal", "()I"));
     
+    T_ErrorHandler eh = {0};
     // Forward to native implementation
-    T_SizeInt result = qstb_renderTextPrivate(surfaceId, &c_font, c_text , 
+    T_SizeInt result = qstb_renderTextPrivate(&eh, surfaceId, &c_font, c_text,
                                          hAlignValue, vAlignValue, x, y, width, height, r, g, 
                                          b, a, clip, wrapModeValue);
     
@@ -87,8 +94,9 @@ JNIEXPORT jobject JNICALL Java_hu_qgears_textrender_stbtt_StbTrueTypeNative_layo
     int vAlignValue = (*env)->CallIntMethod(env, vAlign, (*env)->GetMethodID(env, (*env)->GetObjectClass(env, vAlign), "ordinal", "()I"));
     int wrapModeValue = (*env)->CallIntMethod(env, wrapMode, (*env)->GetMethodID(env, (*env)->GetObjectClass(env, wrapMode), "ordinal", "()I"));
     
+    T_ErrorHandler eh = {};
     // Forward to native implementation
-    T_SizeInt result = qstb_layoutTextPrivate(&c_font, c_text , hAlignValue, vAlignValue, width, height, wrapModeValue);
+    T_SizeInt result = qstb_layoutTextPrivate(&eh, &c_font, c_text , hAlignValue, vAlignValue, width, height, wrapModeValue);
     
     // Release the Java strings
     (*env)->ReleaseStringUTFChars(env, text, c_text);

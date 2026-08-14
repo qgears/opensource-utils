@@ -22,7 +22,7 @@ typedef struct {
 
 static T_SurfaceData* qstb_get_surfacedata(uint64_t id);
 
-uint64_t qstb_createSurfaceWithDataPrivate(uint8_t* data, int32_t w, int32_t h)
+uint64_t qstb_createSurfaceWithDataPrivate(T_ErrorHandler *eh, uint8_t* data, int32_t w, int32_t h, int32_t pixelFormat)
 {
     // Allocate memory for surface data structure
     T_SurfaceData* surfaceData = (T_SurfaceData*)malloc(sizeof(T_SurfaceData));
@@ -39,11 +39,11 @@ uint64_t qstb_createSurfaceWithDataPrivate(uint8_t* data, int32_t w, int32_t h)
     return (uint64_t)surfaceData;
 }
 
-T_SizeInt qstb_renderTextPrivate(uint64_t surfaceHandle, T_TrueTypeFont* font, const char* text, 
+T_SizeInt qstb_renderTextPrivate(T_ErrorHandler* eh, uint64_t surfaceHandle, T_TrueTypeFont* font, const char* text,
                             uint32_t hAlign, uint32_t vAlign, int32_t x, int32_t y, int32_t width, int32_t height,
                             float r, float g, float b, float a, bool clip, uint32_t wrapMode);
 
-T_SizeInt qstb_layoutTextPrivate(T_TrueTypeFont* font, const char* text, 
+T_SizeInt qstb_layoutTextPrivate(T_ErrorHandler* eh, T_TrueTypeFont* font, const char* text,
                             uint32_t hAlign, uint32_t vAlign, int32_t width, int32_t height, uint32_t wrapMode);
 
 void qstb_disposeSurfacePrivate(uint64_t surfaceHandle)
@@ -104,7 +104,7 @@ static void qstb_InitFont(T_TrueTypeFont* font) {
     font->stb.inited = true;
 }
 
-T_SizeInt qstb_layoutTextPrivate(T_TrueTypeFont* font, const char* text,
+T_SizeInt qstb_layoutTextPrivate(T_ErrorHandler* eh, T_TrueTypeFont* font, const char* text,
                             uint32_t hAlign, uint32_t vAlign, int32_t width, int32_t height, uint32_t wrapMode)
 {
 
@@ -195,7 +195,7 @@ static void qstb_MemBlend(
     }
 }
 
-T_SizeInt qstb_renderTextPrivate(uint64_t surfaceHandle, T_TrueTypeFont* font, const char* text,
+T_SizeInt qstb_renderTextPrivate(T_ErrorHandler* eh, uint64_t surfaceHandle, T_TrueTypeFont* font, const char* text,
                             uint32_t hAlign, uint32_t vAlign, int32_t x, int32_t y, int32_t width, int32_t height,
                             float r, float g, float b, float a, bool clip, uint32_t wrapMode)
 {
@@ -309,7 +309,7 @@ T_SizeInt qstb_renderTextPrivate(uint64_t surfaceHandle, T_TrueTypeFont* font, c
         idraw.y += font->stb.ascent - font->stb.descent + font->stb.lineGap;
     } while (line.end < s.len);
 
-    T_SizeInt ret = qstb_layoutTextPrivate(font, text, hAlign, vAlign, width, height, wrapMode);
+    T_SizeInt ret = qstb_layoutTextPrivate(eh, font, text, hAlign, vAlign, width, height, wrapMode);
     if (!wasInited) {
         font->stb.inited = false;
         free(font->stb.font.data);
