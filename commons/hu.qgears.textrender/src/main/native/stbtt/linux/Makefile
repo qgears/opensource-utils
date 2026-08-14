@@ -44,6 +44,7 @@ all : ../hu_qgears_textrender_stbtt_StbTrueTypeNative.h
 debug:
 	mkdir -p $(OUTPUTDIR)
 	gcc -std=c99 -Og -g -Wl,-g \
+	-Wall -Wfatal-errors -Wpedantic \
 	-o $(OUTPUTDIR)/$(SO_NAME).exe \
 	-fPIC -D_REENTRANT -shared-libgcc \
 	${JNI_INCLUDE_PLATFORM} ${JNI_INCLUDE} \
