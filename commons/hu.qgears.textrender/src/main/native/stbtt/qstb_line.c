@@ -49,6 +49,7 @@ struct LineReader linereader_extend(struct LineReader reader) {
     reader.lastPrintable = reader.s.codepoint;
     reader.s = utf8_read(reader.s);
     reader.s = utf8_ignore(reader.s);
+    return reader;
 }
 
 static struct LineInfo line_peek(struct LineInfo line, struct utf8 utf8
@@ -86,6 +87,7 @@ struct LineReader linereader_reset_line(struct LineReader reader) {
         reader.s = utf8_read(reader.s);
     }
     reader.s = utf8_ignore(reader.s);
+    return reader;
 }
 
 // static struct utf8 utf8_advance(struct utf8 utf8);

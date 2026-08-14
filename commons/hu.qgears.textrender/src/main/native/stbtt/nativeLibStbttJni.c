@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include <jni.h>
 #include "nativeLibStbtt.h"
 #include "hu_qgears_textrender_stbtt_StbTrueTypeNative.h"
@@ -10,6 +12,8 @@
  * @return T_TrueTypeFont struct with converted values
  */
 static T_TrueTypeFont convertJavaTrueTypeFont(JNIEnv *env, jobject fontObject);
+
+static void throwException(JNIEnv *env, T_ErrorHandler* eh);
 
 static void disposeTrueTypeFont(JNIEnv *env, jobject fontObject, T_TrueTypeFont* font);
 
@@ -25,7 +29,7 @@ JNIEXPORT jlong JNICALL Java_hu_qgears_textrender_stbtt_StbTrueTypeNative_create
     uint8_t* data = (uint8_t*)(*env)->GetDirectBufferAddress(env, buffer);
     T_ErrorHandler eh = {0};
     // Forward to native implementation
-    uint64_t result = qls_createSurfaceWithDataPrivate(&eh,data, width, height,pixelFormat);
+    uint64_t result = qstb_createSurfaceWithDataPrivate(&eh,data, width, height,pixelFormat);
     if (eh.code == QLS_ERROR_OK) {
         return (jlong)(uintptr_t)result;
     } else {
@@ -94,7 +98,7 @@ JNIEXPORT jobject JNICALL Java_hu_qgears_textrender_stbtt_StbTrueTypeNative_layo
     int vAlignValue = (*env)->CallIntMethod(env, vAlign, (*env)->GetMethodID(env, (*env)->GetObjectClass(env, vAlign), "ordinal", "()I"));
     int wrapModeValue = (*env)->CallIntMethod(env, wrapMode, (*env)->GetMethodID(env, (*env)->GetObjectClass(env, wrapMode), "ordinal", "()I"));
     
-    T_ErrorHandler eh = {};
+    T_ErrorHandler eh = {0};
     // Forward to native implementation
     T_SizeInt result = qstb_layoutTextPrivate(&eh, &c_font, c_text , hAlignValue, vAlignValue, width, height, wrapModeValue);
     
@@ -204,5 +208,46 @@ static void disposeTrueTypeFont(JNIEnv *env, jobject fontObject, T_TrueTypeFont*
              (*env)->ReleaseStringUTFChars(env, fontFamilyString, font->fontFamily);
              font->fontFamily = NULL;
         }
+    }
+}
+
+const char *filename(const char *str)
+{
+    if (str == NULL) {
+        return NULL;
+    }
+
+    const char *last = str;
+
+    for (const char *p = str; *p != '\0'; p++) {
+        if (*p == '/') {
+            last = p+1;
+        }
+    }
+
+    return last;  // if not found → original str
+}
+
+static void throwException(JNIEnv *env, T_ErrorHandler* eh) {
+    jclass exc = (*env)->FindClass(env, "java/lang/RuntimeException");
+    eh->errorMsg[QLS_MAX_ERROR_MSG_SIZE-1] = '\0';
+    uint32_t len = (uint32_t)strlen(eh->errorMsg);
+    if (len < QLS_MAX_ERROR_MSG_SIZE){
+        char* msgPtr = &(eh->errorMsg[len]);
+        if (eh->file){
+            snprintf(msgPtr,QLS_MAX_ERROR_MSG_SIZE - len,
+                " at %s#%d. Error code %d",
+                filename(eh->file),
+                eh->line,
+                eh->code);
+        } else {
+            snprintf(msgPtr,QLS_MAX_ERROR_MSG_SIZE - len,
+                " Error code %d",
+                eh->code);
+        }
+    }
+
+    if (exc != NULL) {
+        (*env)->ThrowNew(env, exc, eh->errorMsg);
     }
 }

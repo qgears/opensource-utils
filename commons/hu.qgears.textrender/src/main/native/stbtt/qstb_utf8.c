@@ -89,7 +89,7 @@ static struct result_utf8d_read utf8d_read(const uint8_t* s, const size_t off) {
             , UTF16_SURROGATE_MAX = 0xDFFF
         };
         if (codepoint < UTF16_SURROGATE_MIN
-            || UTF16_SURROGATE_MAX < codepoint && codepoint <= UNICODE_MAX)
+            || (UTF16_SURROGATE_MAX < codepoint && codepoint <= UNICODE_MAX))
         {
             return (struct result_utf8d_read) {
                 .codepoint = codepoint,

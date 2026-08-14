@@ -60,7 +60,15 @@ static void init_message8(void) {
 
 int main(void) {
     stbtt_fontinfo font;
-    fread(bufFont, 1, 1000000, fopen("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", "rb"));
+    {
+		FILE* fFont = fopen("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", "rb");
+		assert(fFont != NULL);
+		enum { N_ITEMS = 1000000 };
+	    size_t ret = fread(bufFont, 1, 1000000, fFont);
+	    assert(ret == N_ITEMS);
+	    assert(!ferror(fFont));
+	    fclose(fFont);
+    }
     stbtt_InitFont(&font, bufFont, 0);
 
     const float scale = stbtt_ScaleForPixelHeight(&font, 16);
@@ -84,14 +92,14 @@ int main(void) {
     // }
 
     enum { WIDTH = 10 };
-    struct LineInfo resultLine = line_peek((struct LineInfo){}, utf8, WIDTH, scale, 0.0, &font, WRAP_WORD);
+    struct LineInfo resultLine = line_peek((struct LineInfo){0}, utf8, WIDTH, scale, 0.0, &font, WRAP_WORD);
 
     for (utf8 = utf8_seek(utf8, 0); utf8.codepoint != 0 && utf8 .off < resultLine.end; utf8 = utf8_read(utf8)) {
         printf("0x%04x %c\n\n", utf8.codepoint, utf8.codepoint);
         struct {
             unsigned char* p;
             int w, h;
-        } bmp = {};
+        } bmp = {0};
         bmp.p = stbtt_GetCodepointBitmap(&font, scale, scale, utf8.codepoint, &bmp.w, &bmp.h, NULL, NULL);
         for (int y = 0; y < bmp.h; y++) {
             for (int x = 0; x < bmp.w; x++) {

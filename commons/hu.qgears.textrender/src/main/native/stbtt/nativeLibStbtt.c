@@ -114,7 +114,7 @@ T_SizeInt qstb_layoutTextPrivate(T_ErrorHandler* eh, T_TrueTypeFont* font, const
     int32_t nLines = 0;
     double maxLineWidth = 0;
     struct utf8 utf8 = utf8_init(text);
-    struct LineInfo line = line_peek((struct LineInfo){}, utf8, width
+    struct LineInfo line = line_peek((struct LineInfo){0}, utf8, width
         , font->stb.scale, font->letterSpacing, &font->stb.font, wrapMode);
     do { //even the empty string is at least one line long
         nLines += 1;
@@ -218,7 +218,7 @@ T_SizeInt qstb_renderTextPrivate(T_ErrorHandler* eh, uint64_t surfaceHandle, T_T
     struct {
         uint8_t* p;
         int32_t w, h;
-    } tmp = {};
+    } tmp = {0};
     {
         int32_t unscaled_height = font->stb.y1 - font->stb.y0 + 1;
         int32_t unscaled_width = font->stb.x1 - font->stb.x0 + 1;
@@ -228,7 +228,7 @@ T_SizeInt qstb_renderTextPrivate(T_ErrorHandler* eh, uint64_t surfaceHandle, T_T
     }
 
     struct utf8 s = utf8_init(text);
-    struct LineInfo line = line_peek((struct LineInfo){}, s, width
+    struct LineInfo line = line_peek((struct LineInfo){0}, s, width
         , font->stb.scale, font->letterSpacing, &font->stb.font, wrapMode);
 
     struct {
@@ -266,7 +266,7 @@ T_SizeInt qstb_renderTextPrivate(T_ErrorHandler* eh, uint64_t surfaceHandle, T_T
                 struct {
                     int32_t lsb;
                     int32_t y0;
-                } codepoint = {};
+                } codepoint = {0};
                 {
                     assert(is_graph(s.codepoint));
                     stbtt_GetCodepointHMetrics(&font->stb.font, s.codepoint, NULL, &codepoint.lsb);
