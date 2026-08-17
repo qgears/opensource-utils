@@ -104,40 +104,40 @@ static void qstb_InitFont(T_TrueTypeFont* font) {
     font->stb.inited = true;
 }
 
-T_SizeInt qstb_layoutTextPrivate(T_ErrorHandler* eh, T_TrueTypeFont* font, const char* text,
-                            uint32_t hAlign, uint32_t vAlign, int32_t width, int32_t height, uint32_t wrapMode)
-{
-
-    const bool wasInited = font->stb.inited;
-    qstb_InitFont(font);
-
-    int32_t nLines = 0;
-    double maxLineWidth = 0;
-    struct utf8 utf8 = utf8_init(text);
-    struct LineInfo line = line_peek((struct LineInfo){0}, utf8, width
-        , font->stb.scale, font->letterSpacing, &font->stb.font, wrapMode);
-    do { //even the empty string is at least one line long
-        nLines += 1;
-        double lineWidth = line_width(line, font->stb.scale, font->letterSpacing);
-        if (maxLineWidth < lineWidth) {
-            maxLineWidth = lineWidth;
-        }
-        line = line_next(line, utf8, width
-            , font->stb.scale, font->letterSpacing, &font->stb.font, wrapMode);
-    } while (line.end < utf8.len);
-
-    //TODO special handling for 0 ink width lines?
-
-    if (!wasInited) {
-        font->stb.inited = false;
-        free(font->stb.font.data);
-    }
-
-    return (T_SizeInt) {
-        .width = ceil(maxLineWidth),
-        .height = ceil(nLines * (font->stb.ascent - font->stb.descent + font->stb.lineGap) * font->stb.scale)
-    };
-}
+// T_SizeInt qstb_layoutTextPrivate(T_ErrorHandler* eh, T_TrueTypeFont* font, const char* text,
+//                             uint32_t hAlign, uint32_t vAlign, int32_t width, int32_t height, uint32_t wrapMode)
+// {
+//
+//     const bool wasInited = font->stb.inited;
+//     qstb_InitFont(font);
+//
+//     int32_t nLines = 0;
+//     double maxLineWidth = 0;
+//     struct utf8 utf8 = utf8_init(text);
+//     struct LineInfo line = line_peek((struct LineInfo){0}, utf8, width
+//         , font->stb.scale, font->letterSpacing, &font->stb.font, wrapMode);
+//     do { //even the empty string is at least one line long
+//         nLines += 1;
+//         double lineWidth = line_width(line, font->stb.scale, font->letterSpacing);
+//         if (maxLineWidth < lineWidth) {
+//             maxLineWidth = lineWidth;
+//         }
+//         line = line_next(line, utf8, width
+//             , font->stb.scale, font->letterSpacing, &font->stb.font, wrapMode);
+//     } while (line.end < utf8.len);
+//
+//     //TODO special handling for 0 ink width lines?
+//
+//     if (!wasInited) {
+//         font->stb.inited = false;
+//         free(font->stb.font.data);
+//     }
+//
+//     return (T_SizeInt) {
+//         .width = ceil(maxLineWidth),
+//         .height = ceil(nLines * (font->stb.ascent - font->stb.descent + font->stb.lineGap) * font->stb.scale)
+//     };
+// }
 
 static int32_t max(const int32_t a, const int32_t b) {
     return a < b ? b : a;
@@ -195,125 +195,138 @@ static void qstb_MemBlend(
     }
 }
 
+// T_SizeInt qstb_renderTextPrivate(T_ErrorHandler* eh, uint64_t surfaceHandle, T_TrueTypeFont* font, const char* text,
+//                             uint32_t hAlign, uint32_t vAlign, int32_t x, int32_t y, int32_t width, int32_t height,
+//                             float r, float g, float b, float a, bool clip, uint32_t wrapMode)
+// {
+//     /*
+//      * TODO count lines, implement valign bottom, valign middle
+//      *      Should valign bottom/middle default to valign top if the text is too tall?
+//      *      What about leading/trailing empty lines?
+//      * TODO check each line's width. Implement halign right, middle, justify
+//      * TODO qstb_MemBlend clips on surface.width and surface.height. Let params width and height be provided instead, and implement CLIP
+//      */
+//
+//     const T_SurfaceData* const surface = qstb_get_surfacedata(surfaceHandle);
+//     if (surface == NULL || surface->data == NULL) {
+//         return (T_SizeInt) {0, 0};
+//     }
+//
+//     const bool wasInited = font->stb.inited;
+//     qstb_InitFont(font);
+//
+//     struct {
+//         uint8_t* p;
+//         int32_t w, h;
+//     } tmp = {0};
+//     {
+//         int32_t unscaled_height = font->stb.y1 - font->stb.y0 + 1;
+//         int32_t unscaled_width = font->stb.x1 - font->stb.x0 + 1;
+//         tmp.w = ceil(unscaled_width * font->stb.scale) + 1;
+//         tmp.h = ceil(unscaled_height * font->stb.scale) + 1;
+//         tmp.p = calloc(tmp.w * tmp.h, 1);
+//     }
+//
+//     struct utf8 s = utf8_init(text);
+//     struct LineInfo line = line_peek((struct LineInfo){0}, s, width
+//         , font->stb.scale, font->letterSpacing, &font->stb.font, wrapMode);
+//
+//     struct {
+//         //unscaled, counted from param x & y, y increases down
+//         int32_t x, y;
+//     } idraw = {
+//         .y = font->stb.ascent
+//     };
+//
+//     do { // there is always a first/last line (even in the empty string). Stop once the processed line has just been the last line.
+//         s = utf8_seek(s, line.off);
+//         while (is_ignore(s.codepoint) && s.end <= line.end) {
+//             s = utf8_read(s);
+//         }
+//
+//         idraw.x = 0;
+//         if (s.end <= line.end && s.codepoint != '\0') {
+//             int32_t leftSideBearing = 0;
+//             stbtt_GetCodepointHMetrics(&font->stb.font, s.codepoint, NULL, &leftSideBearing);
+//             idraw.x = leftSideBearing;
+//         }
+//
+//         int32_t iPrintable = 0;
+//         while (s.end <= line.end && s.codepoint != '\0') {
+//             assert(is_print(s.codepoint));
+//
+//             int32_t advanceWidth = 0;
+//             stbtt_GetCodepointHMetrics(&font->stb.font, s.codepoint, &advanceWidth, NULL);
+//
+//             if (is_graph(s.codepoint)) {
+// #define SHIFT(x) ((x) - floor((x)))
+//                 float shift_x;
+//                 const float shift_y = SHIFT(idraw.y * font->stb.scale);
+//
+//                 struct {
+//                     int32_t lsb;
+//                     int32_t y0;
+//                 } codepoint = {0};
+//                 {
+//                     assert(is_graph(s.codepoint));
+//                     stbtt_GetCodepointHMetrics(&font->stb.font, s.codepoint, NULL, &codepoint.lsb);
+//                     shift_x = SHIFT((idraw.x + codepoint.lsb) * font->stb.scale + iPrintable * font->letterSpacing);
+// #undef SHIFT
+//                     stbtt_GetCodepointBitmapBoxSubpixel(&font->stb.font, s.codepoint
+//                         , font->stb.scale, font->stb.scale, shift_x, shift_y
+//                         , NULL, &codepoint.y0, NULL, NULL);
+//                 }
+//
+//                 struct {
+//                     //scaled, counted from param x & y, y increases down
+//                     int32_t x, y;
+//                 } icorner = {
+//                     //shift_x is calculated without lsb...
+//                     .x = (idraw.x + codepoint.lsb) * font->stb.scale + iPrintable * font->letterSpacing,
+//                     .y = (idraw.y * font->stb.scale) + codepoint.y0
+//                 };
+//
+//                 memset(tmp.p, 0x00, tmp.w * tmp.h);
+//                 stbtt_MakeCodepointBitmapSubpixel(&font->stb.font, tmp.p, tmp.w, tmp.h, tmp.w
+//                     , font->stb.scale, font->stb.scale, shift_x, shift_y
+//                     , s.codepoint);
+//
+//                 qstb_MemBlend(surface, x + icorner.x, y + icorner.y
+//                     , tmp.p, tmp.w, tmp.h
+//                     , r, g, b, a);
+//             }
+//
+//             //loop variables...
+//             iPrintable += 1;
+//             idraw.x += advanceWidth;
+//             s = utf8_read(s);
+//             while (is_ignore(s.codepoint) && s.end <= line.end) {
+//                 s = utf8_read(s);
+//             }
+//         }
+//
+//         line = line_next(line, s, width, font->stb.scale, font->letterSpacing, &font->stb.font, wrapMode);
+//         idraw.y += font->stb.ascent - font->stb.descent + font->stb.lineGap;
+//     } while (line.end < s.len);
+//
+//     T_SizeInt ret = qstb_layoutTextPrivate(eh, font, text, hAlign, vAlign, width, height, wrapMode);
+//     if (!wasInited) {
+//         font->stb.inited = false;
+//         free(font->stb.font.data);
+//     }
+//     free(tmp.p);
+//     return ret;
+// }
+
+T_SizeInt qstb_layoutTextPrivate(T_ErrorHandler* eh, T_TrueTypeFont* font, const char* text,
+                            uint32_t hAlign, uint32_t vAlign, int32_t width, int32_t height, uint32_t wrapMode)
+{
+    return (T_SizeInt) {0};
+}
+
 T_SizeInt qstb_renderTextPrivate(T_ErrorHandler* eh, uint64_t surfaceHandle, T_TrueTypeFont* font, const char* text,
                             uint32_t hAlign, uint32_t vAlign, int32_t x, int32_t y, int32_t width, int32_t height,
                             float r, float g, float b, float a, bool clip, uint32_t wrapMode)
 {
-    /*
-     * TODO count lines, implement valign bottom, valign middle
-     *      Should valign bottom/middle default to valign top if the text is too tall?
-     *      What about leading/trailing empty lines?
-     * TODO check each line's width. Implement halign right, middle, justify
-     * TODO qstb_MemBlend clips on surface.width and surface.height. Let params width and height be provided instead, and implement CLIP
-     */
-
-    const T_SurfaceData* const surface = qstb_get_surfacedata(surfaceHandle);
-    if (surface == NULL || surface->data == NULL) {
-        return (T_SizeInt) {0, 0};
-    }
-
-    const bool wasInited = font->stb.inited;
-    qstb_InitFont(font);
-
-    struct {
-        uint8_t* p;
-        int32_t w, h;
-    } tmp = {0};
-    {
-        int32_t unscaled_height = font->stb.y1 - font->stb.y0 + 1;
-        int32_t unscaled_width = font->stb.x1 - font->stb.x0 + 1;
-        tmp.w = ceil(unscaled_width * font->stb.scale) + 1;
-        tmp.h = ceil(unscaled_height * font->stb.scale) + 1;
-        tmp.p = calloc(tmp.w * tmp.h, 1);
-    }
-
-    struct utf8 s = utf8_init(text);
-    struct LineInfo line = line_peek((struct LineInfo){0}, s, width
-        , font->stb.scale, font->letterSpacing, &font->stb.font, wrapMode);
-
-    struct {
-        //unscaled, counted from param x & y, y increases down
-        int32_t x, y;
-    } idraw = {
-        .y = font->stb.ascent
-    };
-
-    do { // there is always a first/last line (even in the empty string). Stop once the processed line has just been the last line.
-        s = utf8_seek(s, line.off);
-        while (is_ignore(s.codepoint) && s.end <= line.end) {
-            s = utf8_read(s);
-        }
-
-        idraw.x = 0;
-        if (s.end <= line.end && s.codepoint != '\0') {
-            int32_t leftSideBearing = 0;
-            stbtt_GetCodepointHMetrics(&font->stb.font, s.codepoint, NULL, &leftSideBearing);
-            idraw.x = leftSideBearing;
-        }
-
-        int32_t iPrintable = 0;
-        while (s.end <= line.end && s.codepoint != '\0') {
-            assert(is_print(s.codepoint));
-
-            int32_t advanceWidth = 0;
-            stbtt_GetCodepointHMetrics(&font->stb.font, s.codepoint, &advanceWidth, NULL);
-
-            if (is_graph(s.codepoint)) {
-#define SHIFT(x) ((x) - floor((x)))
-                float shift_x;
-                const float shift_y = SHIFT(idraw.y * font->stb.scale);
-
-                struct {
-                    int32_t lsb;
-                    int32_t y0;
-                } codepoint = {0};
-                {
-                    assert(is_graph(s.codepoint));
-                    stbtt_GetCodepointHMetrics(&font->stb.font, s.codepoint, NULL, &codepoint.lsb);
-                    shift_x = SHIFT((idraw.x + codepoint.lsb) * font->stb.scale + iPrintable * font->letterSpacing);
-#undef SHIFT
-                    stbtt_GetCodepointBitmapBoxSubpixel(&font->stb.font, s.codepoint
-                        , font->stb.scale, font->stb.scale, shift_x, shift_y
-                        , NULL, &codepoint.y0, NULL, NULL);
-                }
-
-                struct {
-                    //scaled, counted from param x & y, y increases down
-                    int32_t x, y;
-                } icorner = {
-                    //shift_x is calculated without lsb...
-                    .x = (idraw.x + codepoint.lsb) * font->stb.scale + iPrintable * font->letterSpacing,
-                    .y = (idraw.y * font->stb.scale) + codepoint.y0
-                };
-
-                memset(tmp.p, 0x00, tmp.w * tmp.h);
-                stbtt_MakeCodepointBitmapSubpixel(&font->stb.font, tmp.p, tmp.w, tmp.h, tmp.w
-                    , font->stb.scale, font->stb.scale, shift_x, shift_y
-                    , s.codepoint);
-
-                qstb_MemBlend(surface, x + icorner.x, y + icorner.y
-                    , tmp.p, tmp.w, tmp.h
-                    , r, g, b, a);
-            }
-
-            //loop variables...
-            iPrintable += 1;
-            idraw.x += advanceWidth;
-            s = utf8_read(s);
-            while (is_ignore(s.codepoint) && s.end <= line.end) {
-                s = utf8_read(s);
-            }
-        }
-
-        line = line_next(line, s, width, font->stb.scale, font->letterSpacing, &font->stb.font, wrapMode);
-        idraw.y += font->stb.ascent - font->stb.descent + font->stb.lineGap;
-    } while (line.end < s.len);
-
-    T_SizeInt ret = qstb_layoutTextPrivate(eh, font, text, hAlign, vAlign, width, height, wrapMode);
-    if (!wasInited) {
-        font->stb.inited = false;
-        free(font->stb.font.data);
-    }
-    free(tmp.p);
-    return ret;
+    return (T_SizeInt) {0};
 }

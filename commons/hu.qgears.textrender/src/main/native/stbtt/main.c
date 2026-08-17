@@ -59,56 +59,56 @@ static void init_message8(void) {
 }
 
 int main(void) {
-    stbtt_fontinfo font;
-    {
-		FILE* fFont = fopen("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", "rb");
-		assert(fFont != NULL);
-		enum { N_ITEMS = 1000000 };
-	    size_t ret = fread(bufFont, 1, 1000000, fFont);
-	    assert(ret == N_ITEMS);
-	    assert(!ferror(fFont));
-	    fclose(fFont);
-    }
-    stbtt_InitFont(&font, bufFont, 0);
-
-    const float scale = stbtt_ScaleForPixelHeight(&font, 16);
-    init_message8();
-
-    struct utf8 utf8;
-    utf8 = utf8_init(message);
-    // for (utf8 = utf8_init(message); utf8.codepoint != 0; utf8 = utf8_read(utf8)) {
-    //     printf("0x%04x %c\n", utf8.codepoint, utf8.codepoint);
-    //     struct {
-    //         unsigned char* p;
-    //         int w, h;
-    //     } bmp = {};
-    //     bmp.p = stbtt_GetCodepointBitmap(&font, scale, scale, utf8.codepoint, &bmp.w, &bmp.h, NULL, NULL);
-    //     for (int y = 0; y < bmp.h; y++) {
-    //         for (int x = 0; x < bmp.w; x++) {
-    //             putchar(" .:ioVM@"[bmp.p[y * bmp.w + x] >> 5]);
-    //         }
-    //         putchar('\n');
-    //     }
-    // }
-
-    enum { WIDTH = 10 };
-    struct LineInfo resultLine = line_peek((struct LineInfo){0}, utf8, WIDTH, scale, 0.0, &font, WRAP_WORD);
-
-    for (utf8 = utf8_seek(utf8, 0); utf8.codepoint != 0 && utf8 .off < resultLine.end; utf8 = utf8_read(utf8)) {
-        printf("0x%04x %c\n\n", utf8.codepoint, utf8.codepoint);
-        struct {
-            unsigned char* p;
-            int w, h;
-        } bmp = {0};
-        bmp.p = stbtt_GetCodepointBitmap(&font, scale, scale, utf8.codepoint, &bmp.w, &bmp.h, NULL, NULL);
-        for (int y = 0; y < bmp.h; y++) {
-            for (int x = 0; x < bmp.w; x++) {
-                putchar(" .:ioVM@"[bmp.p[y * bmp.w + x] >> 5]);
-            }
-            putchar('\n');
-        }
-        putchar('\n');
-    }
-
+  //   stbtt_fontinfo font;
+  //   {
+		// FILE* fFont = fopen("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", "rb");
+		// assert(fFont != NULL);
+		// enum { N_ITEMS = 1000000 };
+	 //    size_t ret = fread(bufFont, 1, 1000000, fFont);
+	 //    assert(ret == N_ITEMS);
+	 //    assert(!ferror(fFont));
+	 //    fclose(fFont);
+  //   }
+  //   stbtt_InitFont(&font, bufFont, 0);
+  //
+  //   const float scale = stbtt_ScaleForPixelHeight(&font, 16);
+  //   init_message8();
+  //
+  //   struct utf8 utf8;
+  //   utf8 = utf8_init(message);
+  //   // for (utf8 = utf8_init(message); utf8.codepoint != 0; utf8 = utf8_read(utf8)) {
+  //   //     printf("0x%04x %c\n", utf8.codepoint, utf8.codepoint);
+  //   //     struct {
+  //   //         unsigned char* p;
+  //   //         int w, h;
+  //   //     } bmp = {};
+  //   //     bmp.p = stbtt_GetCodepointBitmap(&font, scale, scale, utf8.codepoint, &bmp.w, &bmp.h, NULL, NULL);
+  //   //     for (int y = 0; y < bmp.h; y++) {
+  //   //         for (int x = 0; x < bmp.w; x++) {
+  //   //             putchar(" .:ioVM@"[bmp.p[y * bmp.w + x] >> 5]);
+  //   //         }
+  //   //         putchar('\n');
+  //   //     }
+  //   // }
+  //
+  //   enum { WIDTH = 10 };
+  //   struct LineInfo resultLine = line_peek((struct LineInfo){0}, utf8, WIDTH, scale, 0.0, &font, WRAP_WORD);
+  //
+  //   for (utf8 = utf8_seek(utf8, 0); utf8.codepoint != 0 && utf8 .off < resultLine.end; utf8 = utf8_read(utf8)) {
+  //       printf("0x%04x %c\n\n", utf8.codepoint, utf8.codepoint);
+  //       struct {
+  //           unsigned char* p;
+  //           int w, h;
+  //       } bmp = {0};
+  //       bmp.p = stbtt_GetCodepointBitmap(&font, scale, scale, utf8.codepoint, &bmp.w, &bmp.h, NULL, NULL);
+  //       for (int y = 0; y < bmp.h; y++) {
+  //           for (int x = 0; x < bmp.w; x++) {
+  //               putchar(" .:ioVM@"[bmp.p[y * bmp.w + x] >> 5]);
+  //           }
+  //           putchar('\n');
+  //       }
+  //       putchar('\n');
+  //   }
+  //
     return 0;
 }
