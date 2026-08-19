@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "stb_truetype.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -18,6 +20,13 @@ typedef struct {
     bool bold;
     bool italic;
     bool underline;
+    struct {
+        stbtt_fontinfo font; //font.data is dynamically allocated
+        int32_t ascent, descent, lineGap;
+        int32_t x0, y0, x1, y1;
+        float scale;
+        bool inited;
+    } stb;
 } T_TrueTypeFont;
 
 /**
