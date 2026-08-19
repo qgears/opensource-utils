@@ -38,7 +38,8 @@ JNIEXPORT jobject JNICALL Java_hu_qgears_textrender_stbtt_StbTrueTypeNative_rend
    jfloat a, jboolean clip, jobject wrapMode)
 {
     // Convert Java strings to C strings
-    const char* c_text = (*env)->GetStringUTFChars(env, text, 0);
+    const jchar* c_text = (*env)->GetStringChars(env, text, 0);
+    //TODO check length
     T_TrueTypeFont c_font = convertJavaTrueTypeFont(env,font);
     
     // Extract enum values from Java objects
@@ -47,12 +48,12 @@ JNIEXPORT jobject JNICALL Java_hu_qgears_textrender_stbtt_StbTrueTypeNative_rend
     int wrapModeValue = (*env)->CallIntMethod(env, wrapMode, (*env)->GetMethodID(env, (*env)->GetObjectClass(env, wrapMode), "ordinal", "()I"));
     
     // Forward to native implementation
-    T_SizeInt result = qstb_renderTextPrivate(surfaceId, &c_font, c_text , 
+    T_SizeInt result = qstb_renderTextPrivate(surfaceId, &c_font, (const uint16_t*) c_text ,
                                          hAlignValue, vAlignValue, x, y, width, height, r, g, 
                                          b, a, clip, wrapModeValue);
     
     // Release the Java strings
-    (*env)->ReleaseStringUTFChars(env, text, c_text);
+    (*env)->ReleaseStringChars(env, text, c_text);
     disposeTrueTypeFont(env,font,&c_font);
 
     // Create and return SizeInt object from T_SizeInt result
@@ -79,7 +80,7 @@ JNIEXPORT jobject JNICALL Java_hu_qgears_textrender_stbtt_StbTrueTypeNative_layo
    jint width, jint height, jobject wrapMode)
 {
     // Convert Java strings to C strings
-    const char* c_text = (*env)->GetStringUTFChars(env, text, 0);
+    const jchar* c_text = (*env)->GetStringChars(env, text, 0);
     T_TrueTypeFont c_font = convertJavaTrueTypeFont(env,font);
     
     // Extract enum values from Java objects
@@ -88,10 +89,10 @@ JNIEXPORT jobject JNICALL Java_hu_qgears_textrender_stbtt_StbTrueTypeNative_layo
     int wrapModeValue = (*env)->CallIntMethod(env, wrapMode, (*env)->GetMethodID(env, (*env)->GetObjectClass(env, wrapMode), "ordinal", "()I"));
     
     // Forward to native implementation
-    T_SizeInt result = qstb_layoutTextPrivate(&c_font, c_text , hAlignValue, vAlignValue, width, height, wrapModeValue);
+    T_SizeInt result = qstb_layoutTextPrivate(&c_font, (const uint16_t*) c_text , hAlignValue, vAlignValue, width, height, wrapModeValue);
     
     // Release the Java strings
-    (*env)->ReleaseStringUTFChars(env, text, c_text);
+    (*env)->ReleaseStringChars(env, text, c_text);
     disposeTrueTypeFont(env,font,&c_font);
     
     // Create and return SizeInt object from T_SizeInt result
