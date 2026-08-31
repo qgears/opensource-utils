@@ -17,15 +17,24 @@ import hu.qgears.textrender.TrueTypeNativeInterface;
 		if (data == null) {
 			throw new NullPointerException("data");
 		}
-		if (data.capacity() < w * h * 4) {
+		int rowStride = w;
+		switch (co) {
+		case BGRA:
+			break;
+		case ALPHA:
+			rowStride = ((w +3 ) & ~3);
+			break;
+		default:
+			throw new RuntimeException("Unsupported color format " + co);
+		}
+		if (data.capacity() < rowStride * h * co.getNCHannels()) {
 
 			throw new IllegalArgumentException("invalid buffer size");
 		}
-		//TODO support co in native code!!
-		return createSurfaceWithDataPrivate(data, w, h);
+		return createSurfaceWithDataPrivate(data, w, h, co.ordinal());
 	}
 
-	private native long createSurfaceWithDataPrivate(ByteBuffer data, int w, int h);
+	private native long createSurfaceWithDataPrivate(ByteBuffer data, int w, int h, int pixelFormat);
 
 	@Override
 	public SizeInt renderText(long surfaceHandle, TrueTypeFont fontFamily, String str, EHorizontalAlign hAlign,

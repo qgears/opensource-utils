@@ -4,9 +4,23 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "stb_truetype.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+typedef enum  {
+	ENICO_RGB,
+	ENICO_BGR,
+	ENICO_BGRA,
+	ENICO_RGBA,
+	ENICO_ARGB,
+	ENICO_ABGR,
+	ENICO_MONO,
+	ENICO_ALPHA,
+	ENICO_BIM
+} ENativeImageComponentOrder;
 
 /**
  * C representation of Java TrueTypeFont object
@@ -18,6 +32,13 @@ typedef struct {
     bool bold;
     bool italic;
     bool underline;
+    struct {
+        stbtt_fontinfo font; //check if font.data is dynamically allocated
+        int32_t ascent, descent, lineGap;
+        int32_t x0, y0, x1, y1;
+        float scale;
+        bool inited;
+    } stb;
 } T_TrueTypeFont;
 
 /**
@@ -36,10 +57,11 @@ typedef struct {
  * @param data Pointer to the surface data buffer
  * @param w Width of the surface
  * @param h Height of the surface
+ * @param pixelformat The expected pixelformat, see ENativeImageComponentOrder
  * 
  * @return The surface id (handle) that identifies this instance.
  */
-uint64_t qstb_createSurfaceWithDataPrivate(uint8_t* data, int32_t w, int32_t h);
+uint64_t qstb_createSurfaceWithDataPrivate(uint8_t* data, int32_t w, int32_t h, int32_t pixelFormat);
 
 /**
  * Disposes the surface instance allocated earlier with
@@ -54,7 +76,7 @@ void qstb_disposeSurfacePrivate(uint64_t surfaceHandle);
  * 
  * @param surfaceHandle The surface handle returned by {@link #createSurfaceWithData(ByteBuffer, int, int)}.
  * @param font The font parameters
- * @param text Text to render
+ * @param text Text to render as UTF-16 character array (as JNI->GetStringChars returns)
  * @param hAlign Horizontal alignment
  * @param vAlign Vertical alignment  
  * @param x X coordinate of top left corner
@@ -70,7 +92,7 @@ void qstb_disposeSurfacePrivate(uint64_t surfaceHandle);
  * 
  * @return The bounding box calculated during laying out the text
  */
-T_SizeInt qstb_renderTextPrivate(uint64_t surfaceHandle, T_TrueTypeFont* font, const char* text, 
+T_SizeInt qstb_renderTextPrivate(uint64_t surfaceHandle, T_TrueTypeFont* font, const uint16_t* text,
                             uint32_t hAlign, uint32_t vAlign, int32_t x, int32_t y, int32_t width, int32_t height,
                             float r, float g, float b, float a, bool clip, uint32_t wrapMode);
 
@@ -87,7 +109,7 @@ T_SizeInt qstb_renderTextPrivate(uint64_t surfaceHandle, T_TrueTypeFont* font, c
  * 
  * @return The bounding box calculated during laying out the text
  */
-T_SizeInt qstb_layoutTextPrivate(T_TrueTypeFont* font, const char* text, 
+T_SizeInt qstb_layoutTextPrivate(T_TrueTypeFont* font, const uint16_t* text,
                             uint32_t hAlign, uint32_t vAlign, int32_t width, int32_t height, uint32_t wrapMode);
 
 #ifdef __cplusplus

@@ -1,24 +1,28 @@
 #include "nativeLibStbtt.h"
-
-#define STB_TRUETYPE_IMPLEMENTATION
-#define STBTT_STATIC
-#include "stb_truetype.h"
-
-#include <stddef.h>
 #include <stdio.h>
+#include <stdbool.h>
+#include <stddef.h>
 #include <stdlib.h>
-#include <uchar.h>
+#include <string.h>
+#include <math.h>
+#include <assert.h>
+#include <fontconfig/fontconfig.h>
+
+#include "qstb_glyphreader.h"
+#include "qstb_line.h"
 
 // Structure to represent surface data
 typedef struct {
     uint8_t* data;
     int32_t width;
     int32_t height;
+    int32_t stride;
+    int32_t pixelSize;
 } T_SurfaceData;
 
 static T_SurfaceData* qstb_get_surfacedata(uint64_t id);
 
-uint64_t qstb_createSurfaceWithDataPrivate(uint8_t* data, int32_t w, int32_t h)
+uint64_t qstb_createSurfaceWithDataPrivate(uint8_t* data, int32_t w, int32_t h, int32_t pixelformat)
 {
     // Allocate memory for surface data structure
     T_SurfaceData* surfaceData = (T_SurfaceData*)malloc(sizeof(T_SurfaceData));
@@ -30,17 +34,54 @@ uint64_t qstb_createSurfaceWithDataPrivate(uint8_t* data, int32_t w, int32_t h)
     surfaceData->data = data;
     surfaceData->width = w;
     surfaceData->height = h;
-    
+    switch (pixelformat) {
+        case ENICO_BGRA: {
+            surfaceData->stride = w;
+            surfaceData->pixelSize = 4;
+            break;
+        }
+        default:
+        case ENICO_ALPHA: {
+            surfaceData->stride = (w + 3) & ~3;
+            surfaceData->pixelSize = 1;
+            break;
+        }
+    }
+
     // Return the memory address as the handle
     return (uint64_t)surfaceData;
 }
 
-T_SizeInt qstb_renderTextPrivate(uint64_t surfaceHandle, T_TrueTypeFont* font, const char* text, 
+T_SizeInt qstb_renderTextPrivate(uint64_t surfaceHandle, T_TrueTypeFont* font, const uint16_t* text,
                             uint32_t hAlign, uint32_t vAlign, int32_t x, int32_t y, int32_t width, int32_t height,
                             float r, float g, float b, float a, bool clip, uint32_t wrapMode);
+// {
+//     T_SurfaceData* surface = qstb_get_surfacedata(surfaceHandle);
+//     if (surface) {
+//         uint32_t* surfaceData = (uint32_t*)surface->data;
+//         if (surfaceData)
+//         {
+//             // Dummy implementation - draw some "random" lines
+//             uint32_t i = 0;
+//             uint32_t j = 0;
+//             for (j = x; j < width; j++ ) {
+//                 surfaceData[i*width + j] = 0xFF0000FF;//RED
+//                 i = ((i+1) % height);
+//             }
+//         }
+//
+//         T_SizeInt result = {100, 50}; // dummy values
+//         return result;
+//     }
+// }
 
-T_SizeInt qstb_layoutTextPrivate(T_TrueTypeFont* font, const char* text, 
+T_SizeInt qstb_layoutTextPrivate(T_TrueTypeFont* font, const uint16_t* text,
                             uint32_t hAlign, uint32_t vAlign, int32_t width, int32_t height, uint32_t wrapMode);
+// {
+//     // Stub implementation - to be filled later
+//     T_SizeInt result = {100, 50}; // dummy values
+//     return result;
+// }
 
 void qstb_disposeSurfacePrivate(uint64_t surfaceHandle)
 {
@@ -59,190 +100,327 @@ static T_SurfaceData* qstb_get_surfacedata(uint64_t id) {
     return (T_SurfaceData*)id;
 }
 
-//--
+//----------------------------------------------------------------------------
 
-static struct T_TrueTypeFont2 {
-    stbtt_fontinfo font; //font.data is dynamically allocated
-    const T_TrueTypeFont* pSource;
-    int32_t ascent, descent, lineGap;
-    int32_t x0, y0, x1, y1;
-    float scale;
-};
+static bool get_font_file(const T_TrueTypeFont *font, char *filePath, uint32_t filePathLength) {
+    bool retSuccess = true;
+    FcInit();
 
-static void qstb_InitFont(const T_TrueTypeFont* const source, struct T_TrueTypeFont2* const result) {
-    assert(result != NULL);
-    result->pSource = source;
-    { //stbtt_InitFont
-        FILE* fFont = fopen("/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf", "rb"); //TODO find the font file
-        assert(fFont != NULL); // no error
-        int ret = fseek(fFont, 0 , SEEK_END);
-        assert(ret == 0); // no error
-        const long size = ftell(fFont);
-        ret = fseek(fFont, 0, SEEK_SET);
-        assert(ret == 0); // no error
-        uint8_t* bufFont = malloc(size);
-        assert(bufFont != NULL); // no error
-        size_t ret2 = fread(bufFont, size, 1, fFont);
-        assert(ret2 == 1); // no error
-        ret = fclose(fFont);
-        assert(ret == 0);
-        ret = stbtt_InitFont(&result->font, bufFont, 0);
-        assert(ret != 0); // no error
-        assert(result->font.data == bufFont); // can free later
+    FcPattern *pat = FcPatternCreate();
+
+    FcPatternAddString(pat, FC_FAMILY, (FcChar8 *) font->fontFamily);
+    FcPatternAddInteger(pat, FC_WEIGHT, font->bold ? FC_WEIGHT_BOLD : FC_WEIGHT_NORMAL);
+    FcPatternAddInteger(pat, FC_SLANT, font->italic ? FC_SLANT_ITALIC : FC_SLANT_ROMAN);
+
+    FcConfigSubstitute(NULL, pat, FcMatchPattern);
+    FcDefaultSubstitute(pat);
+
+    FcResult result;
+    FcPattern *fc_font = FcFontMatch(NULL, pat, &result);
+
+    if (fc_font) {
+        char *file;
+        // int index;
+
+        if (FcPatternGetString(fc_font, FC_FILE, 0, (FcChar8 **) &file) == FcResultMatch) {
+            uint32_t fLen = (uint32_t) strlen(file);
+            if (fLen < filePathLength - 1) {
+                memcpy(filePath, file, fLen);
+                filePath[fLen] = '\0';
+                // LOG("Font file: %s\n", filePath);
+            } else {
+                // ERROR(eh, QLS_ERROR_LONG_FONT_PATH, "File path for font %s too long : %d", font->fontFamily, fLen);
+                retSuccess = false;
+            }
+        }
+        FcPatternDestroy(fc_font);
+    } else {
+        // ERROR(eh, QLS_ERROR_MISSING_FONT, "No matching font found %s.", font->fontFamily);
+        retSuccess = false;
     }
-    stbtt_GetFontVMetrics(&result->font, &result->ascent, &result->descent, &result->lineGap);
-    assert(0 <= result->ascent);
-    assert(result->descent <= 0);
-    stbtt_GetFontBoundingBox(&result->font, &result->x0, &result->y0, &result->x1, &result->y1);
-    assert(result->x0 <= result->x1);
-    assert(result->y0 <= result->y1);
-    // assert(result->ascent <= -result->y0);
-    result->scale = stbtt_ScaleForPixelHeight(&result->font, source->fontSize);
-    assert(0.0f <= result->scale);
+
+    return retSuccess;
 }
 
-T_SizeInt qstb_layoutTextPrivate(T_TrueTypeFont* font, const char* text,
+static void qstb_InitFont(T_TrueTypeFont* font) {
+    if (font->stb.inited) {
+        return;
+    }
+
+    // const char* const pathFont = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
+    static char pathFont[256] = {0};
+    memset(pathFont, 0, sizeof(pathFont));
+    bool bRet = get_font_file(font, pathFont, sizeof(pathFont));
+    assert(bRet);
+
+    FILE* const fFont = fopen(pathFont, "rb");
+    assert(fFont != NULL);
+    static uint8_t bufFont[10 * 1024 * 1024] = {0};
+    memset(bufFont, 0, sizeof(bufFont));
+    size_t zuRet = fread(bufFont, 1, sizeof(bufFont), fFont);
+    // assert(zuRet == 1);
+    (void) zuRet;
+    fclose(fFont);
+
+    stbtt_InitFont(&font->stb.font, bufFont, 0);
+
+    stbtt_GetFontVMetrics(&font->stb.font, &font->stb.ascent, &font->stb.descent, &font->stb.lineGap);
+
+    stbtt_GetFontBoundingBox(&font->stb.font, &font->stb.x0, &font->stb.y0, &font->stb.x1, &font->stb.y1);
+
+    font->stb.scale = stbtt_ScaleForPixelHeight(&font->stb.font, font->fontSize);
+
+    font->stb.inited = true;
+
+    font->stb.scale *= (double) abs(font->stb.y1 - font->stb.y0) / abs(font->stb.ascent - font->stb.descent);
+    //Is this how Cairo calculates the scale?
+    //seems silly...
+    //TODO consider a flat 393/345
+}
+
+T_SizeInt qstb_layoutTextPrivateTopLeft(T_TrueTypeFont* font, const uint16_t* text,
+                            int32_t width, int32_t height, uint32_t wrapMode)
+{
+    qstb_InitFont(font);
+
+    struct glyphreader reader = glyphreader_init(text);
+    struct line line = line_peek(font, reader, width, font->stb.scale, wrapMode);
+
+    struct line lineBefore;
+    size_t nLines = 0;
+    int32_t wLineMax = 0;
+    do {
+        nLines += 1;
+        if (wLineMax < line.w) {
+            wLineMax = line.w;
+        }
+
+        // reader = reader.seek(line.end);
+        reader = glyphreader_seek(reader, line.end);
+        lineBefore = line;
+        line = line_next(font, reader, width, font->stb.scale, wrapMode);
+    } while (lineBefore.end != line.end);
+
+    return (T_SizeInt) {
+        .width = wLineMax * font->stb.scale, //TODO rounding, LSB?
+        .height = (font->stb.ascent - font->stb.descent + font->stb.lineGap) * nLines * font->stb.scale //TODO last lineGap?
+    };
+}
+
+T_SizeInt qstb_layoutTextPrivate(T_TrueTypeFont* font, const uint16_t* text,
                             uint32_t hAlign, uint32_t vAlign, int32_t width, int32_t height, uint32_t wrapMode)
 {
-    const size_t len = strlen(text);
-    if (len == 0) {
-        /**
-         *  TODO semantics
-         *  Should the height be set anyway?
-         **/
-        return (T_SizeInt) {0, 0};
-    }
-
-    assert(len != 0);
-    struct T_TrueTypeFont2 f;
-    qstb_InitFont(font, &f); //TODO cache
-
-    float cx = 0.0f;
-    struct {
-        int32_t x0, y0, x1, y1, advanceWidth;
-    } box = {};
-    for (int32_t i = 0; i < len; i++) {
-        const char32_t c = text[i]; //TODO mbrtoc32
-        memset(&box, 0x00, sizeof(box));
-        stbtt_GetCodepointHMetrics(&f.font, c, &box.advanceWidth, NULL);
-        stbtt_GetCodepointBitmapBoxSubpixel(&f.font, c, f.scale, f.scale, (cx - floorf(cx)), 0.0f
-            , &box.x0, &box.y0, &box.x1, &box.y1);
-        if (i == 0) {
-            cx += -box.x0;
-        }
-        if (i < len - 1) {
-            cx += f.scale * box.advanceWidth;
-            cx += f.scale * stbtt_GetCodepointKernAdvance(&f.font, c, text[i+1]);
-        }
-    }
-
-    //TODO linebreaks
-    //TODO should the result reflect exceptionally high/low characters? Should it be snug heightwise?
-    return (T_SizeInt) { floorf(cx) + box.x1, f.scale * (f.ascent - f.descent) };
+    return qstb_layoutTextPrivateTopLeft(font, text, width, height, wrapMode);
 }
 
-static int32_t max(const int32_t a, const int32_t b) {
-    return a < b ? b : a;
-}
-static int32_t min(const int32_t a, const int32_t b) {
-    return a < b ? a : b;
-}
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
+#define MAX(a, b) (((a) < (b)) ? (b) : (a))
+#define CLAMP(a, b, c) (MIN(MAX((a), (b)), (c)))
 
-static void qstb_MemBlend(
-    const T_SurfaceData* const surface
-    , const int32_t px0o, const int32_t py0o
-    , const uint8_t* const pp
-    , const int32_t pw, const int32_t ph
-    , const float pr, const float pg, const float pb, const float pa)
-{
-    const int32_t x0o = max(0, px0o);
-    const int32_t y0o = max(0, py0o);
-    const int32_t xendo = min(px0o + pw, surface->width);
-    const int32_t yendo = min(py0o + ph, surface->height);
-    const int32_t x0i = 0 + (x0o - px0o);
-    const int32_t y0i = 0 + (y0o - py0o);
-
-    enum { R, G, B, A };
-    for (int32_t yo = y0o, yi = y0i; yo < yendo; yo++, yi++) {
-        for (int32_t xo = x0o, xi = x0i; xo < xendo; xo++, xi++) {
-            const uint8_t* const inb = pp + yi * pw + xi;
-            uint8_t* const outb = surface->data + (yo * surface->width + xo) * 4;
-            const float inf[4] = { pr, pg, pb, (pa * ((float)*inb/0xffu)) };
-            float outf[4] = { (float)outb[R]/0xffu, (float)outb[G]/0xffu, (float)outb[B]/0xffu, (float)outb[A]/0xffu };
-            float outa = inf[A] + outf[A] * (1.0f - inf[A]);
-            if (outa > 0.0f) {
-                outf[R] = (inf[R] * inf[A] + outf[R] * outf[A] * (1.0f - inf[A])) / outa;
-                outf[G] = (inf[G] * inf[A] + outf[G] * outf[A] * (1.0f - inf[A])) / outa;
-                outf[B] = (inf[B] * inf[A] + outf[B] * outf[A] * (1.0f - inf[A])) / outa;
-            }
-            outf[A] = outa;
-
-            outb[R] = 0xffu * outf[R];
-            outb[G] = 0xffu * outf[G];
-            outb[B] = 0xffu * outf[B];
-            outb[A] = 0xffu * outf[A];
-        }
-    }
-}
-
-T_SizeInt qstb_renderTextPrivate(uint64_t surfaceHandle, T_TrueTypeFont* font, const char* text,
+static void qstb_MemBlend4(T_SurfaceData* surface, const T_SurfaceData* in
+    , int32_t px, int32_t py
+    , int32_t px0, int32_t py0, int32_t width, int32_t height, bool clip
+    , uint8_t pr, uint8_t pg, uint8_t pb, uint8_t pa);
+T_SizeInt qstb_renderTextPrivate(uint64_t surfaceHandle, T_TrueTypeFont* font, const uint16_t* text,
                             uint32_t hAlign, uint32_t vAlign, int32_t x, int32_t y, int32_t width, int32_t height,
                             float r, float g, float b, float a, bool clip, uint32_t wrapMode)
 {
-    const T_SurfaceData* const surface = qstb_get_surfacedata(surfaceHandle);
-    if (surface == NULL) {
-        return (T_SizeInt) {0, 0}; //TODO what to do
-    }
-    {
-        uint32_t* const surfaceData = (uint32_t*)surface->data;
-        if (surfaceData == NULL) {
-            return (T_SizeInt) {0, 0}; //TODO what to do
+    qstb_InitFont(font);
+    int32_t vAlignY;
+    T_SurfaceData* surface;
+    { //init vars
+        enum { VALIGN_TOP, VALIGN_MIDDLE, VALIGN_BOTTOM };
+
+        switch (vAlign) {
+            default:
+            case VALIGN_TOP: {
+                vAlignY = 0;
+                break;
+            }
+            case VALIGN_MIDDLE: {
+                int32_t textHeight = qstb_layoutTextPrivate(font, text, hAlign, vAlign, width, height, wrapMode).height;
+                vAlignY = (height - textHeight) / 2;
+                break;
+            }
+            case VALIGN_BOTTOM: {
+                int32_t textHeight = qstb_layoutTextPrivate(font, text, hAlign, vAlign, width, height, wrapMode).height;
+                vAlignY = height - textHeight;
+                break;
+            }
+        }
+
+        surface = qstb_get_surfacedata(surfaceHandle);
+        if (!surface) {
+            //TODO
+            return (T_SizeInt) { 0, 0 };
+        }
+        if (!surface->data) {
+            //TODO
+            return (T_SizeInt) { 0, 0 };
         }
     }
 
-    const size_t len = strlen(text);
-    if (len == 0) {
-        return (T_SizeInt) {0, 0}; //TODO what to do
+    struct glyphreader reader = glyphreader_init(text);
+    enum { WITHOUT, WITH, WHOLE };
+    struct line line[3] = {0};
+
+    line[WITHOUT] = line_init(reader.off);
+    line[WITH] = line[WITHOUT];
+    line[WHOLE] = line_peek(font, reader, width, font->stb.scale, wrapMode);
+
+    enum { W_TEMP_BUFFER = 256, H_TEMP_BUFFER = 256 };
+    static uint8_t tmpbuffer[W_TEMP_BUFFER * H_TEMP_BUFFER] = {0};
+    memset(tmpbuffer, 0, sizeof(tmpbuffer));
+
+    T_SurfaceData tmp = {0};
+    tmp.pixelSize = 1;
+    tmp.width = (int)((font->stb.x1 - font->stb.x0) * font->stb.scale) + 2;
+    tmp.height = (int)((font->stb.y1 - font->stb.y0) * font->stb.scale) + 2;
+    if (tmp.width <= W_TEMP_BUFFER && tmp.height <= H_TEMP_BUFFER) {
+        tmp.data = tmpbuffer;
+        tmp.stride = W_TEMP_BUFFER;
+    } else {
+        tmp.stride = tmp.width;
+        tmp.data = calloc(tmp.height * tmp.stride, sizeof(uint8_t));
     }
 
-    struct T_TrueTypeFont2 f;
-    qstb_InitFont(font, &f);
+    size_t iLine = 0;
+    struct line lineBefore;
 
-    float cx = 0;
-    {
-        assert(len != 0);
-        int32_t x0 = 0;
-        stbtt_GetCodepointBitmapBoxSubpixel(&f.font, text[0], f.scale, f.scale, 0.0f, 0.0f,
-            &x0, NULL, NULL, NULL);
-        // assert(x0 <= 0); //TODO else what to do
-        cx += -x0;
-    }
-    int32_t cy = f.scale * f.ascent; //TODO ceil? TODO linebreaks, centering
-    struct {
-        int32_t x0, y0, x1, y1, advanceWidth;
-    } box = {};
-    for (int32_t iText = 0; iText < len; iText++) {
-        const char32_t c = text[iText]; //TODO mbrtoc32
-        memset(&box, 0x00, sizeof(box));
-        stbtt_GetCodepointBitmapBoxSubpixel(&f.font, c, f.scale, f.scale, (cx - floorf(cx)), 0.0f
-            , &box.x0, &box.y0, &box.x1, &box.y1);
-        stbtt_GetCodepointHMetrics(&f.font, c, &box.advanceWidth, NULL);
-        struct {
-            uint8_t* p;
-            int32_t w, h, xoff, yoff;
-        } bmp = {};
-        bmp.p = stbtt_GetCodepointBitmapSubpixel(&f.font, f.scale, f.scale, (cx - floorf(cx)), 0.0f, c
-            , &bmp.w, &bmp.h, &bmp.xoff, &bmp.yoff); //TODO MakeCodepointBitmapSubpixel, MakeGlyphBitmapSubpixel
-        if (bmp.p != NULL) {
-            qstb_MemBlend(surface, cx + box.x0, cy + box.y0, bmp.p, bmp.w, bmp.h, r, g, b, a);
-            free(bmp.p);
+    do {
+        int32_t hAlignX;
+        enum { HALIGN_LEFT, HALIGN_CENTER, HALIGN_RIGHT, HALIGN_JUSTIFY };
+        switch (hAlign) {
+            default:
+            case HALIGN_LEFT: {
+                hAlignX = 0;
+                break;
+            }
+            case HALIGN_CENTER: {
+                hAlignX = (width - (int32_t)(line[WHOLE].w * font->stb.scale)) / 2;
+                break;
+            }
+            case HALIGN_RIGHT: {
+                hAlignX = width - (int32_t)(line[WHOLE].w * font->stb.scale);
+            }
+            //TODO justify
         }
-        if (iText < len - 1) {
-            cx += f.scale * box.advanceWidth;
-            cx += f.scale * stbtt_GetCodepointKernAdvance(&f.font, c, text[iText + 1]);
+
+        while (line[WITHOUT].end < line[WHOLE].end) {
+            reader = glyphreader_seek(reader, line[WITHOUT].end);
+            line[WITH] = line_extend(font, line[WITHOUT], reader);
+
+            const char32_t lastPrintable = line[WITHOUT].lastPrintable;
+            const char32_t codepoint = line[WITH].lastPrintable;
+            const int32_t wSpace = line[WITHOUT].wSpace;
+            //TODO is \0 handling guaranteed?
+            const int32_t kernAdvance = stbtt_GetCodepointKernAdvance(&font->stb.font, lastPrintable, codepoint);
+
+            // int32_t leftSideBearing = 0;
+            // stbtt_GetCodepointHMetrics(&font->stb.font, codepoint, NULL, &leftSideBearing);
+
+            const int32_t relativeUnscaledX = wSpace /*- leftSideBearing*/ + kernAdvance;
+            const float shift_x = fmodf(relativeUnscaledX * font->stb.scale, 1.0f);
+
+            const int32_t relativeUnscaledY = iLine * (font->stb.ascent - font->stb.descent + font->stb.lineGap) + font->stb.ascent;
+            const float shift_y = fmodf(relativeUnscaledY * font->stb.scale, 1.0f);
+
+            if (is_graph(codepoint)) { //render & blend
+                int32_t ix0, iy0, ix1, iy1;
+                stbtt_GetCodepointBitmapBoxSubpixel(&font->stb.font, codepoint, font->stb.scale, font->stb.scale
+                        , shift_x, shift_y, &ix0, &iy0, &ix1, &iy1);
+
+                memset(tmp.data, 0, tmp.height * tmp.stride);
+                stbtt_MakeCodepointBitmapSubpixel(&font->stb.font, tmp.data, tmp.width, tmp.height, tmp.stride
+                        , font->stb.scale, font->stb.scale, shift_x, shift_y, codepoint);
+
+                int32_t targetX = hAlignX + x + ((int32_t)(relativeUnscaledX * font->stb.scale) /*+ 1*/) + ix0;
+                //TODO line-first character x?
+                int32_t targetY = vAlignY + y + (int32_t)(relativeUnscaledY * font->stb.scale) + iy0;
+                qstb_MemBlend4(surface, &tmp, targetX, targetY, x, y, width, height, clip
+                       , CLAMP(0.0f, r, 1.0f) * 0xFFu
+                       , CLAMP(0.0f, g, 1.0f) * 0xFFu
+                       , CLAMP(0.0f, b, 1.0f) * 0xFFu
+                       , CLAMP(0.0f, a, 1.0f) * 0xFFu);
+            }
+
+            line[WITHOUT] = line[WITH];
         }
+
+
+        iLine += 1;
+        lineBefore = line[WHOLE];
+        reader = glyphreader_seek(reader, line[WHOLE].end);
+        line[WHOLE] = line_next(font, reader, width, font->stb.scale, wrapMode);
+        line[WITHOUT] = line_init(line[WHOLE].off);
+        line[WITH] = line[WITHOUT];
+        reader = glyphreader_seek(reader, line[WHOLE].off);
+    } while (lineBefore.end < line[WHOLE].end);
+
+
+    if (tmp.data != tmpbuffer) {
+        free(tmp.data);
     }
 
-    return (T_SizeInt) {floorf(cx) + box.x1, f.scale * (f.ascent - f.descent)};
-    // return (T_SizeInt) { 0, 0 };
+    return qstb_layoutTextPrivate(font, text, hAlign, vAlign, width, height, wrapMode);
+}
+
+static void qstb_MemBlend4(T_SurfaceData* surface, const T_SurfaceData* in
+    , int32_t px, int32_t py
+    , int32_t px0, int32_t py0, int32_t width, int32_t height, bool clip
+    , const uint8_t pr, const uint8_t pg, const uint8_t pb, const uint8_t pa)
+{
+    int32_t xei = MIN(in->width, surface->width - px);
+    if (clip) {
+        xei = MIN(xei, (width + px0) - px);
+    }
+
+    int32_t yei = MIN(in->height, surface->height - py);
+    if (clip) {
+        yei = MIN(yei, (height + py0) - py);
+    }
+
+    int32_t x0i = 0;
+    int32_t y0i = 0;
+    if (px < 0) {
+        x0i -= px;
+    }
+    if (py < 0) {
+        y0i -= py;
+    }
+
+    for (int32_t y = y0i; y < yei; y++) {
+        for (int32_t x = x0i; x < xei; x++) {
+            uint8_t bin = CLAMP(0u, (unsigned) in->data[y * in->stride + x] * pa / 0xFFu, 0xFFu);
+
+            switch (surface->pixelSize) {
+                case 4: {
+                    uint8_t* pout = surface->data + 4 * ((y + py) * surface->stride + (x + px));
+
+                    enum { B, G, R, A };
+                    if (bin != 0) {
+                        uint8_t r = CLAMP(0u, (unsigned) pr * bin / 0xFFu, 0xFFu);
+                        uint8_t g = CLAMP(0u, (unsigned) pg * bin / 0xFFu, 0xFFu);
+                        uint8_t b = CLAMP(0u, (unsigned) pb * bin / 0xFFu, 0xFFu);
+
+                        // premultiplied
+                        pout[R] = CLAMP(0u, r + (unsigned) pout[R] * (0xFFu - bin) / 0xFFu, 0xFFu);
+                        pout[G] = CLAMP(0u, g + (unsigned) pout[G] * (0xFFu - bin) / 0xFFu, 0xFFu);
+                        pout[B] = CLAMP(0u, b + (unsigned) pout[B] * (0xFFu - bin) / 0xFFu, 0xFFu);
+                        pout[A] = CLAMP(0u, bin + (unsigned) pout[A] * (0xFFu - bin) / 0xFFu, 0xFFu);
+                    }
+                    break;
+                }
+                default:
+                case 1: {
+                    uint8_t* pout = surface->data + ((y + py) * surface->stride + (x + px));
+
+                    if (bin != 0) {
+                        pout[0] = CLAMP(0u, bin + (unsigned) pout[0] * (0xFFu - bin) / 0xFFu, 0xFFu);
+                    }
+                    break;
+                }
+            }
+        }
+    }
 }

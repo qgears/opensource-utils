@@ -13,7 +13,7 @@ extern "C" {
  * Signature: (Ljava/nio/ByteBuffer;II)J
  */
 JNIEXPORT jlong JNICALL Java_hu_qgears_textrender_stbtt_StbTrueTypeNative_createSurfaceWithDataPrivate
-  (JNIEnv *, jobject, jobject, jint, jint);
+  (JNIEnv *, jobject, jobject, jint, jint, jint);
 
 /*
  * Class:     hu_qgears_textrender_stbtt_StbTrueTypeNative
