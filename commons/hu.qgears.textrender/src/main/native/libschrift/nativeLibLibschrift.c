@@ -75,6 +75,15 @@ static inline int32_t dToI (double d);
 /*** External function implementations     ***/
 /*********************************************/
 
+void qls_clearSurfacePrivate(uint64_t id) {
+    T_SurfaceData* surface = qls_get_surfacedata(id);
+    if (surface->data) {
+		int32_t pixelSize = surface->color ? 4 : 1;
+		int32_t stride = surface->color ? surface->width : surface->width + 3 & 4;
+        memset(surface->data, 0, surface->height * stride * pixelSize);
+    }
+}
+
 uint64_t qls_createSurfaceWithDataPrivate(T_ErrorHandler *eh, uint8_t* data, int32_t w, int32_t h, int32_t pixelFormat)
 {
     // Allocate memory for surface data structure
