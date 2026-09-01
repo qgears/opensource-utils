@@ -33,7 +33,7 @@ all : ../hu_qgears_textrender_libschrift_LibschriftNative.h
 	mkdir -p $(OUTPUTDIR)
 	gcc -o $(OUTPUTDIR)/$(SO_NAME) \
 	-fPIC -D_REENTRANT -shared \
-	-g -std=c99 -pedantic -Wconversion \
+	-g -std=c99 -O3 -pedantic -Wconversion \
 	${JNI_INCLUDE_PLATFORM} ${JNI_INCLUDE} -Wl,-soname,$(SO_NAME) \
 	../nativeLibLibschrift.c ../nativeLibLibschriftJni.c ../schrift.c \
 	$(shell pkg-config --cflags --libs fontconfig) -lm
