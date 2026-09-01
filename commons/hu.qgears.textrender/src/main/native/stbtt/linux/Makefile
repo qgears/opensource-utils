@@ -30,7 +30,7 @@ JNI_HEADERS :=  $(PROJDIR)/src/main/native/stbtt
 
 all : ../hu_qgears_textrender_stbtt_StbTrueTypeNative.h
 	mkdir -p $(OUTPUTDIR)
-	gcc -std=c99 \
+	gcc -std=c99 -O3 \
 	-o $(OUTPUTDIR)/$(SO_NAME) \
 	-fPIC -D_REENTRANT -shared \
 	${JNI_INCLUDE_PLATFORM} ${JNI_INCLUDE} -Wl,-soname,$(SO_NAME) \
