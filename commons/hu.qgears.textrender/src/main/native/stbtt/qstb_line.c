@@ -31,10 +31,10 @@ struct line line_extend(const T_TrueTypeFont* font, struct line line, struct gly
 
     { //line.wSpace += ...
         int32_t advanceWidth = 0;
-        stbtt_GetCodepointHMetrics(&font->stb.font, gr.codepoint, &advanceWidth, NULL);
+        stbtt_GetCodepointHMetrics(font->stb.font, gr.codepoint, &advanceWidth, NULL);
         line.wSpace += advanceWidth;
         if (line.lastPrintable != 0) {
-            line.wSpace += stbtt_GetCodepointKernAdvance(&font->stb.font, line.lastPrintable, gr.codepoint);
+            line.wSpace += stbtt_GetCodepointKernAdvance(font->stb.font, line.lastPrintable, gr.codepoint);
         }
     }
     line.lSpace += 1;

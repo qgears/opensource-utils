@@ -33,7 +33,7 @@ typedef struct {
     bool italic;
     bool underline;
     struct {
-        stbtt_fontinfo font; //check if font.data is dynamically allocated
+        stbtt_fontinfo* font; //check if font.data is dynamically allocated
         int32_t ascent, descent, lineGap;
         int32_t x0, y0, x1, y1;
         float scale;

@@ -143,6 +143,8 @@ static bool get_font_file(const T_TrueTypeFont *font, char *filePath, uint32_t f
 }
 
 static void qstb_InitFont(T_TrueTypeFont* font) {
+    static stbtt_fontinfo staticFont = {0};
+
     if (font->stb.inited) {
         return;
     }
@@ -162,13 +164,16 @@ static void qstb_InitFont(T_TrueTypeFont* font) {
     (void) zuRet;
     fclose(fFont);
 
-    stbtt_InitFont(&font->stb.font, bufFont, 0);
+    stbtt_InitFont(&staticFont, bufFont, 0);
 
-    stbtt_GetFontVMetrics(&font->stb.font, &font->stb.ascent, &font->stb.descent, &font->stb.lineGap);
 
-    stbtt_GetFontBoundingBox(&font->stb.font, &font->stb.x0, &font->stb.y0, &font->stb.x1, &font->stb.y1);
+    font->stb.font = &staticFont;
 
-    font->stb.scale = stbtt_ScaleForPixelHeight(&font->stb.font, font->fontSize);
+    stbtt_GetFontVMetrics(font->stb.font, &font->stb.ascent, &font->stb.descent, &font->stb.lineGap);
+
+    stbtt_GetFontBoundingBox(font->stb.font, &font->stb.x0, &font->stb.y0, &font->stb.x1, &font->stb.y1);
+
+    font->stb.scale = stbtt_ScaleForPixelHeight(font->stb.font, font->fontSize);
 
     font->stb.inited = true;
 
@@ -314,7 +319,7 @@ T_SizeInt qstb_renderTextPrivate(uint64_t surfaceHandle, T_TrueTypeFont* font, c
             const char32_t codepoint = line[WITH].lastPrintable;
             const int32_t wSpace = line[WITHOUT].wSpace;
             //TODO is \0 handling guaranteed?
-            const int32_t kernAdvance = stbtt_GetCodepointKernAdvance(&font->stb.font, lastPrintable, codepoint);
+            const int32_t kernAdvance = stbtt_GetCodepointKernAdvance(font->stb.font, lastPrintable, codepoint);
 
             // int32_t leftSideBearing = 0;
             // stbtt_GetCodepointHMetrics(&font->stb.font, codepoint, NULL, &leftSideBearing);
@@ -327,11 +332,11 @@ T_SizeInt qstb_renderTextPrivate(uint64_t surfaceHandle, T_TrueTypeFont* font, c
 
             if (is_graph(codepoint)) { //render & blend
                 int32_t ix0, iy0, ix1, iy1;
-                stbtt_GetCodepointBitmapBoxSubpixel(&font->stb.font, codepoint, font->stb.scale, font->stb.scale
+                stbtt_GetCodepointBitmapBoxSubpixel(font->stb.font, codepoint, font->stb.scale, font->stb.scale
                         , shift_x, shift_y, &ix0, &iy0, &ix1, &iy1);
 
                 memset(tmp.data, 0, tmp.height * tmp.stride);
-                stbtt_MakeCodepointBitmapSubpixel(&font->stb.font, tmp.data, tmp.width, tmp.height, tmp.stride
+                stbtt_MakeCodepointBitmapSubpixel(font->stb.font, tmp.data, tmp.width, tmp.height, tmp.stride
                         , font->stb.scale, font->stb.scale, shift_x, shift_y, codepoint);
 
                 int32_t targetX = hAlignX + x + ((int32_t)(relativeUnscaledX * font->stb.scale) /*+ 1*/) + ix0;
