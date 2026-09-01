@@ -199,3 +199,9 @@ static void disposeTrueTypeFont(JNIEnv *env, jobject fontObject, T_TrueTypeFont*
         }
     }
 }
+
+JNIEXPORT void JNICALL Java_hu_qgears_textrender_stbtt_StbTrueTypeNative_clearSurfacePrivate
+  (JNIEnv * env, jobject obj, jlong surfaceId)
+{
+    qstb_clearSurfacePrivate(surfaceId);
+}

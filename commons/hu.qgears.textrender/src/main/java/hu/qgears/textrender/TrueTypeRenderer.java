@@ -64,8 +64,7 @@ public class TrueTypeRenderer {
 		
 		long s = rendererNative.createSurfaceWithData(image.getBuffer().getJavaAccessor(), image.getWidth(), image.getHeight(), image.getComponentOrder());
 		if (clear) {
-			//TODO should we do it in native code? (for performance reason, memset vs ByteBuffer manipulation from java)
-			new NativeImageEditor(image).fillWithColor(TRANSPARENT);
+			rendererNative.clearSurface(s);
 		}
 		try {
 			float[] c = params.c.toFloatVector();

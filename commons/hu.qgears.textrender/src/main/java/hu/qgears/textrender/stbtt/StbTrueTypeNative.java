@@ -68,5 +68,10 @@ import hu.qgears.textrender.TrueTypeNativeInterface;
 	}
 	private native void disposeSurfacePrivate(long surfaceHandle);
 
-	
+	@Override
+	public void clearSurface(long surfaceHandle) {
+		clearSurfacePrivate(surfaceHandle);
+	}
+
+	private native void clearSurfacePrivate(long surfaceHandle);
 }

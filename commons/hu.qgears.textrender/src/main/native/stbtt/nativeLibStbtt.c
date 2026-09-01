@@ -100,6 +100,13 @@ static T_SurfaceData* qstb_get_surfacedata(uint64_t id) {
     return (T_SurfaceData*)id;
 }
 
+void qstb_clearSurfacePrivate(uint64_t id) {
+    T_SurfaceData* surface = qstb_get_surfacedata(id);
+    if (surface->data) {
+        memset(surface->data, 0, surface->height * surface->stride * surface->pixelSize);
+    }
+}
+
 //----------------------------------------------------------------------------
 
 static bool get_font_file(const T_TrueTypeFont *font, char *filePath, uint32_t filePathLength) {

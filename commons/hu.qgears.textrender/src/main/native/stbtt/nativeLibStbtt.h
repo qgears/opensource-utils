@@ -112,6 +112,9 @@ T_SizeInt qstb_renderTextPrivate(uint64_t surfaceHandle, T_TrueTypeFont* font, c
 T_SizeInt qstb_layoutTextPrivate(T_TrueTypeFont* font, const uint16_t* text,
                             uint32_t hAlign, uint32_t vAlign, int32_t width, int32_t height, uint32_t wrapMode);
 
+
+void qstb_clearSurfacePrivate(uint64_t id);
+
 #ifdef __cplusplus
 }
 #endif

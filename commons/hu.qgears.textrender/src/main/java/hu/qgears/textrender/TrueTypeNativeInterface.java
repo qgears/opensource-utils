@@ -23,6 +23,8 @@ public interface TrueTypeNativeInterface {
 	 */
 	long createSurfaceWithData(ByteBuffer data, int w, int h, ENativeImageComponentOrder co);
 
+	void clearSurface(long surfaceHandle);
+
 	/**
 	 * Disposes the surface instance allocated earlier with
 	 * {@link #createSurfaceWithData(ByteBuffer, int, int)}.

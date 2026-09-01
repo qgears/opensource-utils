@@ -10,7 +10,7 @@ extern "C" {
 /*
  * Class:     hu_qgears_textrender_stbtt_StbTrueTypeNative
  * Method:    createSurfaceWithDataPrivate
- * Signature: (Ljava/nio/ByteBuffer;II)J
+ * Signature: (Ljava/nio/ByteBuffer;III)J
  */
 JNIEXPORT jlong JNICALL Java_hu_qgears_textrender_stbtt_StbTrueTypeNative_createSurfaceWithDataPrivate
   (JNIEnv *, jobject, jobject, jint, jint, jint);
@@ -37,6 +37,14 @@ JNIEXPORT jobject JNICALL Java_hu_qgears_textrender_stbtt_StbTrueTypeNative_layo
  * Signature: (J)V
  */
 JNIEXPORT void JNICALL Java_hu_qgears_textrender_stbtt_StbTrueTypeNative_disposeSurfacePrivate
+  (JNIEnv *, jobject, jlong);
+
+/*
+ * Class:     hu_qgears_textrender_stbtt_StbTrueTypeNative
+ * Method:    clearSurfacePrivate
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL Java_hu_qgears_textrender_stbtt_StbTrueTypeNative_clearSurfacePrivate
   (JNIEnv *, jobject, jlong);
 
 #ifdef __cplusplus

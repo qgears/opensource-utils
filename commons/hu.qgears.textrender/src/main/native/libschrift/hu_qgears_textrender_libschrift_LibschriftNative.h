@@ -39,6 +39,14 @@ JNIEXPORT jobject JNICALL Java_hu_qgears_textrender_libschrift_LibschriftNative_
 JNIEXPORT void JNICALL Java_hu_qgears_textrender_libschrift_LibschriftNative_disposeSurfacePrivate
   (JNIEnv *, jobject, jlong);
 
+/*
+ * Class:     hu_qgears_textrender_libschrift_LibschriftNative
+ * Method:    clearSurfacePrivate
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL Java_hu_qgears_textrender_libschrift_LibschriftNative_clearSurfacePrivate
+  (JNIEnv *, jobject, jlong);
+
 #ifdef __cplusplus
 }
 #endif

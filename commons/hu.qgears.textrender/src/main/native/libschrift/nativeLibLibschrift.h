@@ -131,6 +131,8 @@ T_SizeInt qls_renderTextPrivate(T_ErrorHandler* errorHandler, uint64_t surfaceHa
 T_SizeInt qls_layoutTextPrivate(T_ErrorHandler* errorHandler, T_TrueTypeFont* font, const uint16_t* text, uint32_t textLen,
                          uint32_t hAlign, int32_t width, uint32_t wrapMode);
 
+void qls_clearSurfacePrivate(uint64_t id);
+
 #ifdef __cplusplus
 }
 #endif
