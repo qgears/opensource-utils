@@ -144,28 +144,31 @@ static bool get_font_file(const T_TrueTypeFont *font, char *filePath, uint32_t f
 
 static void qstb_InitFont(T_TrueTypeFont* font) {
     static stbtt_fontinfo staticFont = {0};
+    static bool inited = false;
 
     if (font->stb.inited) {
         return;
     }
 
-    // const char* const pathFont = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
-    static char pathFont[256] = {0};
-    memset(pathFont, 0, sizeof(pathFont));
-    bool bRet = get_font_file(font, pathFont, sizeof(pathFont));
-    assert(bRet);
+    if (!inited) {
+        inited = true;
+        // const char* const pathFont = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
+        static char pathFont[256] = {0};
+        memset(pathFont, 0, sizeof(pathFont));
+        bool bRet = get_font_file(font, pathFont, sizeof(pathFont));
+        assert(bRet);
 
-    FILE* const fFont = fopen(pathFont, "rb");
-    assert(fFont != NULL);
-    static uint8_t bufFont[10 * 1024 * 1024] = {0};
-    memset(bufFont, 0, sizeof(bufFont));
-    size_t zuRet = fread(bufFont, 1, sizeof(bufFont), fFont);
-    // assert(zuRet == 1);
-    (void) zuRet;
-    fclose(fFont);
+        FILE* const fFont = fopen(pathFont, "rb");
+        assert(fFont != NULL);
+        static uint8_t bufFont[10 * 1024 * 1024] = {0};
+        memset(bufFont, 0, sizeof(bufFont));
+        size_t zuRet = fread(bufFont, 1, sizeof(bufFont), fFont);
+        // assert(zuRet == 1);
+        (void) zuRet;
+        fclose(fFont);
 
-    stbtt_InitFont(&staticFont, bufFont, 0);
-
+        stbtt_InitFont(&staticFont, bufFont, 0);
+    }
 
     font->stb.font = &staticFont;
 
