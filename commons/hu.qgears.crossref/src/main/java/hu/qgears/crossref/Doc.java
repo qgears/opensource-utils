@@ -20,7 +20,7 @@ public class Doc extends CrossRefObject {
 	 */
 	private Set<CrossRefObject> changed=new HashSet<>();
 	public final UtilEvent<Set<CrossRefObject>> changesAtEndOfTransaction=new UtilEvent<>();
-	public Doc(CrossRefManager crossRefManager, String identifier) {
+	protected Doc(CrossRefManager crossRefManager, String identifier) {
 		super(crossRefManager);
 		id=identifier;
 	}

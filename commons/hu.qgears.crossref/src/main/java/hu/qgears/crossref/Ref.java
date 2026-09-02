@@ -78,4 +78,12 @@ public class Ref extends CrossRefObject {
 	public Doc getDoc() {
 		return crossrefDoc;
 	}
+	public Obj getSingleResolvedObject()
+	{
+		if(resolvedTo.size()!=1)
+		{
+			throw new IllegalStateException("Reference has to be resolved to a single target.");
+		}
+		return resolvedTo.get(0);
+	}
 }

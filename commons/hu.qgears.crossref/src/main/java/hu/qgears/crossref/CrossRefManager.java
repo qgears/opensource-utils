@@ -137,7 +137,7 @@ public class CrossRefManager {
 		// References are processed.
 		while(toResolve.size()>0)
 		{
-			System.out.println("To resolve: "+toResolve.size());
+			// System.out.println("To resolve: "+toResolve.size());
 			Set<Ref> rs=toResolve;
 			toResolve=new HashSet<>();
 			for(Ref r: rs)
@@ -468,6 +468,13 @@ public class CrossRefManager {
 			}
 			return ret;
 		}
+	}
+	public CrossRefManager setUserObject(String key, Object value)
+	{
+		synchronized (userObjects) {
+			userObjects.put(key, value);
+		}
+		return this;
 	}
 	/**
 	 * Called when a document has change notifications.

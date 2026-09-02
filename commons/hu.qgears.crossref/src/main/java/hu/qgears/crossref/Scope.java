@@ -26,6 +26,9 @@ public class Scope {
 	protected boolean sealed=false;
 	public List<GidSearch> typeSearch;
 	public final IFilterFunction filterFunction;
+	/**
+	 * @param ff may be null: accepts everything
+	 */
 	public Scope(String pack, String id, String searchLocalId, IFilterFunction ff) {
 		super();
 		this.pack = pack;
@@ -115,6 +118,6 @@ public class Scope {
 	}
 	@Override
 	public String toString() {
-		return "Scope_"+id+" "+localIdentifier+" "+allowedTypes;
+		return "Scope_"+id+" "+localIdentifier+" "+allowedTypes+" "+getPossibleGlobalIds();
 	}
 }
