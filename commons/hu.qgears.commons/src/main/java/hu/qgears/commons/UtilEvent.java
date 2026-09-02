@@ -18,6 +18,7 @@ public class UtilEvent<T> implements UtilEventListener<T> {
 	
 	private List<UtilEventListener<T>> listeners=null;
 	private UtilEventListener<T>[] listenersArray;
+	public static UtilEvent<Throwable> globalThrowableEvent=new UtilEvent<Throwable>();
 	/**
 	 * Add a listener to this event.
 	 * @param l listener to be added

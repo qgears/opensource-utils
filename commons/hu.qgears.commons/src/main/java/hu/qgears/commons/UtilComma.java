@@ -46,4 +46,7 @@ public class UtilComma {
 		}
 		return "";
 	}
+	public boolean isFirst() {
+		return first;
+	}
 }

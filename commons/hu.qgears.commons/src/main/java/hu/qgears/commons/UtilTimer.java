@@ -25,6 +25,8 @@ public class UtilTimer {
 	 * Single instance timer.
 	 * Each timer creates a separate thread so it is useful to use a single instance for
 	 * multiple goals. Users should not execute any long processing task on the timers.
+	 * Also the timers have to catch all exceptions because uncaught exceptions can destroy the
+	 * global timer and render the JVM unusable.
 	 */
 	public static final Timer javaTimer=new Timer(true);
 	

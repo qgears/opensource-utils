@@ -604,6 +604,18 @@ public final class UtilFile {
 	 */
 	public static String escapeToValidFileName(String string) {
 		StringBuilder ret=new StringBuilder();
+		if(string.length()==0)
+		{
+			return "null";
+		}
+		if(string.equals("."))
+		{
+			return ".null";
+		}
+		if(string.equals(".."))
+		{
+			return "..null";
+		}
 		for(int i=0;i<string.length();++i)
 		{
 			char c=string.charAt(i);

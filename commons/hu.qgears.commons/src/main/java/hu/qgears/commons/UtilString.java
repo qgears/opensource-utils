@@ -302,4 +302,17 @@ public class UtilString {
 		}
 		ret.append(utilComma.getPost());
 	}
+	/**
+	 * Crop a string to a given maxumum length.
+	 * @param source the source string to be cropped in case it is longer than maxLength. Must not be null.
+	 * @param maxLength maximum length allowed for return string
+	 * @return the maxLength character of the source string or the whole source string in case that is not longer than maxLength
+	 */
+	public static String cropToLength(String source, int maxLength) {
+		if(source.length()<maxLength)
+		{
+			return source;
+		}
+		return source.substring(0,maxLength);
+	}
 }

@@ -3,8 +3,10 @@ package hu.qgears.commons;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -152,7 +154,16 @@ public class UtilProcess {
 					String outStream = UtilFile
 							.loadAsString(p.getInputStream());
 					// writing on stdout is required here
-					System.out.println(outStream);// NOSONAR
+					if(outStream.length()>0)
+					{
+						if(!outStream.endsWith("\n"))
+						{
+							System.out.println(outStream);// NOSONAR
+						}else
+						{
+							System.out.print(outStream);// NOSONAR
+						}
+					}
 				} catch (Exception e) {
 					LOG.error("Streaming program's output stream terminated", e);
 				}
@@ -164,7 +175,16 @@ public class UtilProcess {
 					String errStream = UtilFile
 							.loadAsString(p.getErrorStream());
 					// writing on stderr is required here
-					System.err.println(errStream);// NOSONAR
+					if(errStream.length()>0)
+					{
+						if(!errStream.endsWith("\n"))
+						{
+							System.err.println(errStream);// NOSONAR
+						}else
+						{
+							System.err.print(errStream);// NOSONAR
+						}
+					}
 				} catch (Exception e) {
 					LOG.error("Streaming program's error stream terminated", e);
 				}
@@ -194,6 +214,46 @@ public class UtilProcess {
 				}
 			};
 		}.start();
+	}
+	/** Pipe the given input stream into a string.
+	 * A thread is started that reads all input until EOF. source object is closed finally.
+	 * Binary -> String encoding is done by UTF-8
+	 * @param iStream
+	 *            The input stream to pipe into given target output stream
+	 * @return listenable future object that will contain the input as a string or get throws an exception if there was an exception reading the stream.
+	 */
+	public static SignalFutureWrapper<String> streamToString(final InputStream source) {
+		SignalFutureWrapper<String> ret=new SignalFutureWrapper<String>();
+		Thread th=new Thread() {
+			public void run() {
+				try {
+					StringBuilder sb=new StringBuilder();
+					InputStreamReader isr=new InputStreamReader(source, StandardCharsets.UTF_8);
+					int bufferSize = UtilFile.defaultBufferSize.get();
+					
+					try {
+						int n;
+						char[] cbuf = new char[bufferSize];
+						while ((n = isr.read(cbuf)) > -1) {
+							sb.append(cbuf, 0, n);
+						}
+					} finally {
+						source.close();
+					}
+					ret.ready(sb.toString(), null);
+				} catch (Exception e) {
+					ret.ready(null, e);
+				}
+			};
+		};
+		th.start();
+		ret.setCancellationToken(new NoExceptionAutoClosable() {
+			@Override
+			public void close() {
+				th.interrupt();
+			}
+		});
+		return ret;
 	}
 	/**
 	 * Saves the output of given process as a {@link Future} object. Results will

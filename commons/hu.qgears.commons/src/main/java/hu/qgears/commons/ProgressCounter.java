@@ -1,5 +1,6 @@
 package hu.qgears.commons;
 
+import java.util.ArrayList;
 import java.util.Stack;
 import java.util.concurrent.CancellationException;
 
@@ -74,6 +75,10 @@ public class ProgressCounter implements AutoCloseable
 	private Stack<ProgressCounterSubTask> tasks=new Stack<ProgressCounterSubTask>();
 	private static ThreadLocal<ProgressCounter> threadProgess=new ThreadLocal<ProgressCounter>();
 	/**
+	 * A listenable event that is called whenever this progress counter was updated.
+	 */
+	private volatile UtilEvent<ProgressCounter> updated=new UtilEvent<>();
+	/**
 	 * Create a progress meter.
 	 * @param host callback that updates progress GUI. null is allowed
 	 * @param name Name of the whole task that is followed by the progress bar.
@@ -99,8 +104,15 @@ public class ProgressCounter implements AutoCloseable
 		finished=true;
 		currentProcessName="Finished";
 		currentProgress=1.0;
-		host.progressFinished();
-		host=null;
+		if(host!=null)
+		{
+			host.progressFinished();
+			host=null;
+		}
+		if(updated!=null)
+		{
+			updated.eventHappened(this);
+		}
 	}
 	public boolean isCancelled()
 	{
@@ -130,14 +142,23 @@ public class ProgressCounter implements AutoCloseable
 		}
 		return ret;
 	}
-	
+	public static ProgressCounter getCurrentAllowNull() {
+		ProgressCounter ret=threadProgess.get();
+		return ret;
+	}
+	public static void setCurrentAllowNull(ProgressCounter toSet) {
+		threadProgess.set(toSet);
+	}
 	protected void finished(ProgressCounterSubTask subTask) {
 		if(tasks.contains(subTask))
 		{
-			ProgressCounterSubTask st=tasks.pop();
-			while(st!=subTask)
-			{
+			ProgressCounterSubTask st;
+			synchronized (tasks) {
 				st=tasks.pop();
+				while(st!=subTask)
+				{
+					st=tasks.pop();
+				}
 			}
 			ProgressCounterSubTask parent=tasks.peek();
 			ProgressCounterSubTask whole=tasks.get(0);
@@ -150,6 +171,10 @@ public class ProgressCounter implements AutoCloseable
 				host.setProgressStatus(currentProcessName, currentProgress);
 				host.taskFinished(tasks, st);
 				host.progressStatusUpdate(tasks);
+			}
+			if(updated!=null)
+			{
+				updated.eventHappened(this);
 			}
 		}
 	}
@@ -172,13 +197,19 @@ public class ProgressCounter implements AutoCloseable
 	public ProgressCounterSubTask subTask(String string, double d) {
 		ProgressCounterSubTask parent=tasks.peek();
 		ProgressCounterSubTask ret=new ProgressCounterSubTask(this, parent, string, d);
-		tasks.push(ret);
+		synchronized (tasks) {
+			tasks.push(ret);
+		}
 		ProgressCounterSubTask whole=tasks.get(0);
 		if(host!=null)
 		{
 			host.setProgressStatus(ret.getName(), whole.getCurrent());
 			host.taskStarted(tasks);
 			host.progressStatusUpdate(tasks);
+		}
+		if(updated!=null)
+		{
+			updated.eventHappened(this);
 		}
 		return ret;
 	}
@@ -202,7 +233,7 @@ public class ProgressCounter implements AutoCloseable
 		return currentProcessName;
 	}
 	/**
-	 * Get the fnished state of this counter.
+	 * Get the finished state of this counter.
 	 * @return true means this process is finished.
 	 */
 	public boolean isFinished() {
@@ -214,5 +245,42 @@ public class ProgressCounter implements AutoCloseable
 		{
 			host.progressStatusUpdate(tasks);
 		}
+		if(updated!=null)
+		{
+			updated.eventHappened(this);
+		}
+	}
+	/**
+	 * Get a copy of the current subtasks.
+	 * @return
+	 */
+	public ArrayList<ProgressCounterSubTask> getSubTasks()
+	{
+		synchronized (tasks) {
+			return new ArrayList<ProgressCounterSubTask>(tasks);
+		}
+	}
+	public UtilEvent<ProgressCounter> getUpdatedEvent() {
+		synchronized (this) {
+			if(updated==null)
+			{
+				updated=new UtilEvent<>();
+			}
+			return updated;
+		}
+	}
+	@Override
+	public String toString() {
+		StringBuilder str=new StringBuilder();
+		//str.append(getCurrentProcessName()+" "+getCurrentProgressStatus()+" "+getCurrentProgress());
+		synchronized (tasks) {
+			for(ProgressCounterSubTask st: tasks)
+			{
+				str.append("/"+st.getSimpleName()+" "+
+						String.format("%.2f", (st.getCurrent()*100))+"%");
+			}
+		}
+		//str.append(getCurrentProcessName()+" "+getCurrentProgressStatus()+" "+getCurrentProgress());
+		return str.toString();
 	}
 }
