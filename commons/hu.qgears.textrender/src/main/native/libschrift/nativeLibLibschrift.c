@@ -149,7 +149,7 @@ T_SizeInt qls_renderTextPrivate(T_ErrorHandler* errorHandler, uint64_t surfaceHa
                 //specified target rectangle is invalid or empty
             }
             if (rData.sft.font != NULL){
-                sft_freefont(rData.sft.font);
+                //sft_freefont(rData.sft.font);
             }
         } 
         else
@@ -188,7 +188,7 @@ T_SizeInt qls_layoutTextPrivate(T_ErrorHandler* errorHandler, T_TrueTypeFont* fo
             result.height = dToI(r.lExtentMax.y+r.lExtentMin.y);
         }
         if (r.sft.font != NULL){
-            sft_freefont(r.sft.font);
+            //sft_freefont(r.sft.font);
         }
     }
     return result;
@@ -528,6 +528,14 @@ static inline void copy_rect(int32_t startx, int32_t starty, T_SurfaceData* surf
 
 static void qls_load_font(T_ErrorHandler* eh, T_RenderData* r, T_TrueTypeFont* font) {
     SFT* sft = &(r->sft);
+    static bool isInited = false;
+    static SFT_Font* zaFont;
+    if (isInited) {
+        sft->font = zaFont;
+        return;
+    } else {
+        isInited = true;
+    }
     //TODO font cache, load font by name etc...
     sft->xScale = font->fontSize;
     sft->yScale = font->fontSize;
@@ -538,6 +546,7 @@ static void qls_load_font(T_ErrorHandler* eh, T_RenderData* r, T_TrueTypeFont* f
     if (eh->code == QLS_ERROR_OK)
     {
         sft->font = sft_loadfile(font_path);
+        zaFont = sft->font;
         if (sft->font == NULL)
         {
             ERROR(eh,QLS_ERROR_FONT_LOAD, "TTF load failed %s" , font->fontFamily);
