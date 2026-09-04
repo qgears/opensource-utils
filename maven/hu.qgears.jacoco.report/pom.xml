@@ -30,7 +30,7 @@
 		<maven.compiler.source>11</maven.compiler.source>
 		<maven.compiler.target>11</maven.compiler.target>
 		<maven.compiler.release>11</maven.compiler.release>
-		<maven.version>3.3.9</maven.version>
+		<maven.version>3.8.1</maven.version>
 		<jacoco.version>0.8.14</jacoco.version>
 		<qgears-opensource-maven-nightly-url>qgears-opensource-maven-nightly-url</qgears-opensource-maven-nightly-url>
 	</properties>
