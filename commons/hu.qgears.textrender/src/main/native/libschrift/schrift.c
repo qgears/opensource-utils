@@ -234,11 +234,11 @@ sft_loadfile(char const *filename)
 void
 sft_freefont(SFT_Font *font)
 {
-	if (!font) return;
-	/* Only unmap if we mapped it ourselves. */
-	if (font->source == SrcMapping)
-		unmap_file(font);
-	free(font);
+	// if (!font) return;
+	// /* Only unmap if we mapped it ourselves. */
+	// if (font->source == SrcMapping)
+	// 	unmap_file(font);
+	// free(font);
 }
 
 int
