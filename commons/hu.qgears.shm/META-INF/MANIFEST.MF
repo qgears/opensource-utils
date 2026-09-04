@@ -1,25 +1,22 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1786441493655
-Build-Jdk: 21.0.11
-Built-By: agostoni
+Bnd-LastModified: 1788515545484
+Build-Jdk: 21.0.9
+Built-By: deveushu
 Bundle-Description: Custom effective shared memory implementation.
 Bundle-ManifestVersion: 2
 Bundle-Name: hu.qgears.shm
 Bundle-SymbolicName: hu.qgears.shm
-Bundle-Version: 12.5.1.SNAPSHOT
+Bundle-Version: 12.5.1
 Created-By: Apache Maven Bundle Plugin
-Export-Package: hu.qgears.shm;version="12.5.0.SNAPSHOT";uses:="hu.qgears
- .commons,hu.qgears.commons.mem,hu.qgears.nativeloader,hu.qgears.shm.sem
- ",hu.qgears.shm.dlmalloc;version="12.5.0.SNAPSHOT";uses:="hu.qgears.com
- mons,hu.qgears.commons.mem,hu.qgears.nativeloader",hu.qgears.shm.jmallo
- c;version="12.5.0.SNAPSHOT";uses:="hu.qgears.commons,hu.qgears.commons.
- mem",hu.qgears.shm.natives;version="12.5.0.SNAPSHOT";uses:="hu.qgears.n
- ativeloader",hu.qgears.shm.part;version="12.5.0.SNAPSHOT";uses:="hu.qge
- ars.commons,hu.qgears.commons.mem",hu.qgears.shm.sem;version="12.5.0.SN
- APSHOT";uses:="hu.qgears.commons,hu.qgears.shm"
-Import-Package: hu.qgears.commons;version="[12.5,13)",hu.qgears.commons.
- mem;version="[12.5,13)",hu.qgears.nativeloader,org.apache.log4j;version
- ="[1.2,2)"
-Originally-Created-By: Apache Maven Bundle Plugin
+Export-Package: hu.qgears.shm;uses:="hu.qgears.commons,hu.qgears.commons
+ .mem,hu.qgears.nativeloader,hu.qgears.shm.sem";version="12.5.1",hu.qgea
+ rs.shm.dlmalloc;uses:="hu.qgears.commons,hu.qgears.commons.mem,hu.qgear
+ s.nativeloader";version="12.5.1",hu.qgears.shm.jmalloc;uses:="hu.qgears
+ .commons,hu.qgears.commons.mem";version="12.5.1",hu.qgears.shm.natives;
+ uses:="hu.qgears.nativeloader";version="12.5.1",hu.qgears.shm.part;uses
+ :="hu.qgears.commons,hu.qgears.commons.mem";version="12.5.1",hu.qgears.
+ shm.sem;uses:="hu.qgears.commons,hu.qgears.shm";version="12.5.1"
+Import-Package: hu.qgears.commons,hu.qgears.commons.mem,hu.qgears.native
+ loader,org.apache.log4j;version="[1.2,2)"
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=11))"
 Tool: Bnd-2.3.0.201405100607
