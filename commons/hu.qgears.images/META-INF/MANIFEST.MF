@@ -1,23 +1,24 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1788515545986
-Build-Jdk: 21.0.9
-Built-By: deveushu
+Bnd-LastModified: 1788527318754
+Build-Jdk: 21.0.11
+Built-By: agostoni
 Bundle-Description: Java bindings to native image handling libraries. On
  ly libpng is used by the application.
 Bundle-ManifestVersion: 2
 Bundle-Name: hu.qgears.images
 Bundle-SymbolicName: hu.qgears.images
-Bundle-Version: 12.5.1
+Bundle-Version: 12.5.2.SNAPSHOT
 Created-By: Apache Maven Bundle Plugin
 Export-Package: hu.qgears.images;uses:="hu.qgears.commons,hu.qgears.comm
- ons.mem,hu.qgears.images.text";version="12.5.1",hu.qgears.images.libpng
- ;uses:="hu.qgears.commons.mem,hu.qgears.images,hu.qgears.nativeloader";
- version="12.5.1",hu.qgears.images.palette;uses:="hu.qgears.images";vers
- ion="12.5.1",hu.qgears.images.swing;uses:="hu.qgears.commons.mem,hu.qge
- ars.images";version="12.5.1",hu.qgears.images.text;version="12.5.1",hu.
- qgears.images.tiff;uses:="hu.qgears.commons,hu.qgears.commons.mem,hu.qg
- ears.images,hu.qgears.nativeloader";version="12.5.1",hu.qgears.images.v
- nc;uses:="hu.qgears.commons,hu.qgears.images";version="12.5.1"
+ ons.mem,hu.qgears.images.text";version="12.5.2.SNAPSHOT",hu.qgears.imag
+ es.libpng;uses:="hu.qgears.commons.mem,hu.qgears.images,hu.qgears.nativ
+ eloader";version="12.5.2.SNAPSHOT",hu.qgears.images.palette;uses:="hu.q
+ gears.images";version="12.5.2.SNAPSHOT",hu.qgears.images.swing;uses:="h
+ u.qgears.commons.mem,hu.qgears.images";version="12.5.2.SNAPSHOT",hu.qge
+ ars.images.text;version="12.5.2.SNAPSHOT",hu.qgears.images.tiff;uses:="
+ hu.qgears.commons,hu.qgears.commons.mem,hu.qgears.images,hu.qgears.nati
+ veloader";version="12.5.2.SNAPSHOT",hu.qgears.images.vnc;uses:="hu.qgea
+ rs.commons,hu.qgears.images";version="12.5.2.SNAPSHOT"
 Import-Package: hu.qgears.commons,hu.qgears.commons.mem,hu.qgears.native
  loader,org.apache.log4j;version="[1.2,2)"
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=11))"

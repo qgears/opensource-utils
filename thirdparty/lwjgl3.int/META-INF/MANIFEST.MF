@@ -1,23 +1,27 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1788515546861
-Build-Jdk: 21.0.9
-Built-By: deveushu
+Bnd-LastModified: 1788527319331
+Build-Jdk: 21.0.11
+Build-Jdk-Spec: 21
+Built-By: agostoni
 Bundle-Description: The lwjgl3.int bundle.
 Bundle-ManifestVersion: 2
 Bundle-Name: lwjgl3.int
 Bundle-SymbolicName: lwjgl3.int
-Bundle-Version: 12.5.1
+Bundle-Version: 12.5.2.SNAPSHOT
 Created-By: Apache Maven Bundle Plugin
-Export-Package: linux.x86.org.lwjgl;version="12.5.1",linux.x86.org.lwjgl
- .glfw;version="12.5.1",linux.x86.org.lwjgl.opengl;version="12.5.1",linu
- x.x86.org.lwjgl.opengles;version="12.5.1",linux.x86.org.lwjgl.stb;versi
- on="12.5.1",lwjgl.standalone;uses:="hu.qgears.nativeloader,org.lwjgl.op
- engl";version="12.5.1",org.lwjgl;version="12.5.1",org.lwjgl.input;versi
- on="12.5.1",org.lwjgl.opengl;uses:="org.lwjgl";version="12.5.1",org.lwj
- gl.util;version="12.5.1",org.lwjgl.util.glu;version="12.5.1",org.lwjgl.
- util.glu.tessellation;uses:="org.lwjgl.util.glu";version="12.5.1",org.l
- wjgl.util.vector;version="12.5.1"
+Export-Package: linux.x86.org.lwjgl;version="12.5.2.SNAPSHOT",linux.x86.
+ org.lwjgl.glfw;version="12.5.2.SNAPSHOT",linux.x86.org.lwjgl.opengl;ver
+ sion="12.5.2.SNAPSHOT",linux.x86.org.lwjgl.opengles;version="12.5.2.SNA
+ PSHOT",linux.x86.org.lwjgl.stb;version="12.5.2.SNAPSHOT",lwjgl.standalo
+ ne;uses:="hu.qgears.nativeloader,org.lwjgl.opengl";version="12.5.2.SNAP
+ SHOT",org.lwjgl;version="12.5.2.SNAPSHOT",org.lwjgl.input;version="12.5
+ .2.SNAPSHOT",org.lwjgl.opengl;uses:="org.lwjgl";version="12.5.2.SNAPSHO
+ T",org.lwjgl.util;version="12.5.2.SNAPSHOT",org.lwjgl.util.glu;version=
+ "12.5.2.SNAPSHOT",org.lwjgl.util.glu.tessellation;uses:="org.lwjgl.util
+ .glu";version="12.5.2.SNAPSHOT",org.lwjgl.util.vector;version="12.5.2.S
+ NAPSHOT"
 Import-Package: hu.qgears.nativeloader,org.apache.log4j;version="[1.2,2)
  ",org.lwjgl.glfw,org.lwjgl.system
+Originally-Created-By: Maven Integration for Eclipse
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=11))"
 Tool: Bnd-2.3.0.201405100607

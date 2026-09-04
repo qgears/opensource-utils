@@ -1,18 +1,18 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1788515552224
-Build-Jdk: 21.0.9
-Built-By: deveushu
+Bnd-LastModified: 1788527323974
+Build-Jdk: 21.0.11
+Built-By: agostoni
 Bundle-Description: Java remote tooling
 Bundle-ManifestVersion: 2
 Bundle-Name: hu.qgears.remote
 Bundle-SymbolicName: hu.qgears.remote
-Bundle-Version: 12.5.1
+Bundle-Version: 12.5.2.SNAPSHOT
 Created-By: Apache Maven Bundle Plugin
 Export-Package: hu.qgears.remote;uses:="hu.qgears.commons,hu.qgears.comm
  ons.signal,hu.qgears.coolrmi,hu.qgears.coolrmi.remoter,joptsimple.annot
- ,joptsimple.tool";version="12.5.1",hu.qgears.remote.ignore;uses:="hu.qg
- ears.commons";version="12.5.1",hu.qgears.remote.main;uses:="hu.qgears.r
- emote,joptsimple.tool";version="12.5.1"
+ ,joptsimple.tool";version="12.5.2.SNAPSHOT",hu.qgears.remote.ignore;use
+ s:="hu.qgears.commons";version="12.5.2.SNAPSHOT",hu.qgears.remote.main;
+ uses:="hu.qgears.remote,joptsimple.tool";version="12.5.2.SNAPSHOT"
 Import-Package: hu.qgears.commons,hu.qgears.commons.signal,hu.qgears.coo
  lrmi,hu.qgears.coolrmi.messages,hu.qgears.coolrmi.remoter,joptsimple.an
  not;version="[2.0,3)",joptsimple.tool;version="[2.0,3)"
