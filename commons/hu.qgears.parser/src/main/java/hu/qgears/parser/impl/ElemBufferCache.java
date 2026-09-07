@@ -8,8 +8,8 @@ import java.util.concurrent.TimeUnit;
 
 import hu.qgears.commons.NamedThreadFactory;
 
-/**
- * Cache an elem buffer instance for each thread.
+/** Cache an elem buffer instance for each thread.
+ * Manage the service that processes enqueued tasks.
  */
 public class ElemBufferCache {
 	private volatile ThreadLocal<ElemBuffer> tl=new ThreadLocal<>();

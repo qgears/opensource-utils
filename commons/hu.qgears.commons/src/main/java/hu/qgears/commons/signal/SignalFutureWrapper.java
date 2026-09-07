@@ -310,10 +310,18 @@ public class SignalFutureWrapper<T> implements SignalFuture<T>, Callable<T>, INa
 	/** Set the task to do when cancellation of the task was called.
 	 * The given cancellationToken will be disposed when cancel(true) was called.
 	 * @param cancellationToken
-	 * @return
+	 * @return this for chainable API
 	 */
 	public SignalFutureWrapper<T> setCancellationToken(NoExceptionAutoClosable cancellationToken) {
 		this.cancellationToken = cancellationToken;
+		return this;
+	}
+	/** Set the wrapped callable. Must be called before this object as Callable<T> is passed to an executor.
+	 * @param callable the stored wrapped callable reference of this object is set to this.
+	 * @return this for chainable API
+	 */
+	public SignalFutureWrapper<T> setCallable(Callable<T> callable) {
+		this.callable = callable;
 		return this;
 	}
 }

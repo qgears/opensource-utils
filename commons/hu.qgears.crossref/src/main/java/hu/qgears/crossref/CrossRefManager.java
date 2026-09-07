@@ -144,9 +144,12 @@ public class CrossRefManager {
 			{
 				resolveReference(r);
 			}
-			for(ICrossRefManagerListener l: getListenersCopy())
+			if(toResolve.size()==0)
 			{
-				l.resolveCycleFinished();
+				for(ICrossRefManagerListener l: getListenersCopy())
+				{
+					l.resolveCycleFinished();
+				}
 			}
 		}
 		List<Doc> ch=new ArrayList<>(changedDocs);
