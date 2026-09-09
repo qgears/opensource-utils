@@ -29,19 +29,31 @@ JNIDEPS=$(PROJDIR)/target/classes:$(PROJDIR)/../hu.qgears.images/target/classes:
 
 JNI_HEADERS :=  $(PROJDIR)/src/main/native/libschrift
 
+C_FLAGS=-fPIC -D_REENTRANT -shared \
+	-g -std=c99 -O3 -pedantic -Wconversion $(shell pkg-config --cflags fontconfig) \
+	${JNI_INCLUDE_PLATFORM} ${JNI_INCLUDE}
+
 all : ../hu_qgears_textrender_libschrift_LibschriftNative.h
 	mkdir -p $(OUTPUTDIR)
 	gcc -o $(OUTPUTDIR)/$(SO_NAME) \
-	-fPIC -D_REENTRANT -shared \
-	-g -std=c99 -O3 -pedantic -Wconversion \
-	${JNI_INCLUDE_PLATFORM} ${JNI_INCLUDE} -Wl,-soname,$(SO_NAME) \
+	$(C_FLAGS) \
+	 -Wl,-soname,$(SO_NAME) \
 	../nativeLibLibschrift.c ../nativeLibLibschriftJni.c ../schrift.c \
-	$(shell pkg-config --cflags --libs fontconfig) -lm
+	$(shell pkg-config --libs fontconfig) -lm
 	cp -f $(OUTPUTDIR)/$(SO_NAME) $(OUTPUTDIR)/$(SO_GENERIC_NAME)
 
 ../hu_qgears_textrender_libschrift_LibschriftNative.h : 
 	javac -cp $(JNIDEPS) \
 	-h $(JNI_HEADERS) $(PROJDIR)/src/main/java/hu/qgears/textrender/libschrift/LibschriftNative.java
+
+
+
+%.s : ../%.c 
+	gcc $(C_FLAGS) -S -o $@ $<
+
+
+asms : nativeLibLibschrift.s schrift.s nativeLibLibschriftJni.s
+	@echo "Create " $<
 
 clean:
 	rm -f $(OUTPUTDIR)/$(SO_NAME) $(OUTPUTDIR)/$(SO_GENERIC_NAME)
