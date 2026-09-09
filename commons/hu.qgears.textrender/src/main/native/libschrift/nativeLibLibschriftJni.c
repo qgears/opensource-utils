@@ -267,5 +267,5 @@ static void throwException(JNIEnv *env, T_ErrorHandler* eh) {
 JNIEXPORT void JNICALL Java_hu_qgears_textrender_libschrift_LibschriftNative_clearSurfacePrivate
   (JNIEnv * env, jobject obj, jlong surfaceHandle)
 {
-	qls_clearSurfacePrivate(surfaceHandle);
+	qls_clearSurfacePrivate((uint64_t)surfaceHandle);
 }
