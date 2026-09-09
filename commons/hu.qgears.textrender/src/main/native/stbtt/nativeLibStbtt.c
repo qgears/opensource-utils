@@ -7,9 +7,14 @@
 #include <math.h>
 #include <assert.h>
 #include <fontconfig/fontconfig.h>
+#include <time.h>
 
 #include "qstb_glyphreader.h"
 #include "qstb_line.h"
+
+int64_t testIteration = -1;
+int64_t nanosRasterize = 0;
+int64_t nanosBlend = 0;
 
 // Structure to represent surface data
 typedef struct {
@@ -240,6 +245,7 @@ T_SizeInt qstb_renderTextPrivate(uint64_t surfaceHandle, T_TrueTypeFont* font, c
                             uint32_t hAlign, uint32_t vAlign, int32_t x, int32_t y, int32_t width, int32_t height,
                             float r, float g, float b, float a, bool clip, uint32_t wrapMode)
 {
+    testIteration += 1;
     qstb_InitFont(font);
     int32_t vAlignY;
     T_SurfaceData* surface;
@@ -346,17 +352,33 @@ T_SizeInt qstb_renderTextPrivate(uint64_t surfaceHandle, T_TrueTypeFont* font, c
                         , shift_x, shift_y, &ix0, &iy0, &ix1, &iy1);
 
                 memset(tmp.data, 0, tmp.height * tmp.stride);
-                stbtt_MakeCodepointBitmapSubpixel(font->stb.font, tmp.data, tmp.width, tmp.height, tmp.stride
-                        , font->stb.scale, font->stb.scale, shift_x, shift_y, codepoint);
+                {
+                    struct timespec ts, ts2;
+                    clock_gettime(CLOCK_MONOTONIC, &ts);
+                    stbtt_MakeCodepointBitmapSubpixel(font->stb.font, tmp.data, tmp.width, tmp.height, tmp.stride
+                            , font->stb.scale, font->stb.scale, shift_x, shift_y, codepoint);
+                    clock_gettime(CLOCK_MONOTONIC, &ts2);
+                    nanosRasterize += (ts2.tv_sec - ts.tv_sec) * (int32_t)1e9;
+                    nanosRasterize += ts2.tv_nsec;
+                    nanosRasterize -= ts.tv_nsec;
+                }
 
                 int32_t targetX = hAlignX + x + ((int32_t)(relativeUnscaledX * font->stb.scale) /*+ 1*/) + ix0;
                 //TODO line-first character x?
                 int32_t targetY = vAlignY + y + (int32_t)(relativeUnscaledY * font->stb.scale) + iy0;
-                qstb_MemBlend4(surface, &tmp, targetX, targetY, x, y, width, height, clip
-                       , CLAMP(0.0f, r, 1.0f) * 0xFFu
-                       , CLAMP(0.0f, g, 1.0f) * 0xFFu
-                       , CLAMP(0.0f, b, 1.0f) * 0xFFu
-                       , CLAMP(0.0f, a, 1.0f) * 0xFFu);
+                {
+                    struct timespec ts, ts2;
+                    clock_gettime(CLOCK_MONOTONIC, &ts);
+                    qstb_MemBlend4(surface, &tmp, targetX, targetY, x, y, width, height, clip
+                        , CLAMP(0.0f, r, 1.0f) * 0xFFu
+                        , CLAMP(0.0f, g, 1.0f) * 0xFFu
+                        , CLAMP(0.0f, b, 1.0f) * 0xFFu
+                        , CLAMP(0.0f, a, 1.0f) * 0xFFu);
+                    clock_gettime(CLOCK_MONOTONIC, &ts2);
+                    nanosBlend += (ts2.tv_sec - ts.tv_sec) * (int32_t)1e9;
+                    nanosBlend += ts2.tv_nsec;
+                    nanosBlend -= ts.tv_nsec;
+                }
             }
 
             line[WITHOUT] = line[WITH];
@@ -377,6 +399,13 @@ T_SizeInt qstb_renderTextPrivate(uint64_t surfaceHandle, T_TrueTypeFont* font, c
         free(tmp.data);
     }
 
+    if (testIteration % 1000 == 0) {
+        printf("STBTT nanos rasterize (stbtt_MakeCodepointBitmap): %ld\n", nanosRasterize);
+        printf("STBTT nanos with blend: %ld\n", nanosRasterize + nanosBlend);
+        fflush(stdout);
+        nanosRasterize = 0;
+        nanosBlend = 0;
+    }
     return qstb_layoutTextPrivate(font, text, hAlign, vAlign, width, height, wrapMode);
 }
 

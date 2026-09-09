@@ -6,6 +6,11 @@
 #include <string.h>
 #include <fontconfig/fontconfig.h>
 #include <math.h>
+#include <time.h>
+
+int64_t testIteration = -1;
+int64_t nanosRasterize = 0;
+int64_t nanosBlend = 0;
 
 /*TODO delete this option from final version*/
 #define DUMMY_FONT_CACHE
@@ -136,6 +141,7 @@ T_SizeInt qls_renderTextPrivate(T_ErrorHandler* errorHandler, uint64_t surfaceHa
                             uint32_t hAlign, uint32_t vAlign, int32_t x, int32_t y, int32_t width, int32_t height,
                             float r, float g, float b, float a, bool clip, uint32_t wrapMode)
 {
+    testIteration += 1;
     T_SizeInt result = {0, 0};
     T_SurfaceData* surface = qls_get_surfacedata(surfaceHandle);
     if (surface) {
@@ -178,6 +184,12 @@ T_SizeInt qls_renderTextPrivate(T_ErrorHandler* errorHandler, uint64_t surfaceHa
         ERROR(errorHandler,QLS_ERROR_INVALID_SURFACE,"Invalid surface id");
     }
     
+    if (testIteration % 1000 == 0) {
+        LOG("Libschrift nanos rasterize (sft_render): %ld", nanosRasterize);
+        LOG("Libschrift nanos width blend: %ld", nanosRasterize + nanosBlend);
+        nanosRasterize = 0;
+        nanosBlend = 0;
+    }
     return result;
 }
 
@@ -384,13 +396,29 @@ static inline void qls_render_gliph(T_ErrorHandler* eh, T_RenderData * rData, ui
         };
         char pixels[img.width * img.height];
         img.pixels = pixels;
-        if (sft_render(sft, gid, img) < 0)
         {
-            ERROR(eh,QLS_ERROR_GLIPH_RENDER, "codepoint 0x%04X not rendered",cp);
-            return;
+            struct timespec ts, ts2;
+            clock_gettime(CLOCK_MONOTONIC, &ts);
+            if (sft_render(sft, gid, img) < 0)
+            {
+                ERROR(eh,QLS_ERROR_GLIPH_RENDER, "codepoint 0x%04X not rendered",cp);
+                return;
+            }
+            clock_gettime(CLOCK_MONOTONIC, &ts2);
+            nanosRasterize += (ts2.tv_sec - ts.tv_sec) * (int32_t)1e9;
+            nanosRasterize += ts2.tv_nsec;
+            nanosRasterize -= ts.tv_nsec;
         }
         
-        copy_rect(dToI(x) ,dToI(y), surface,&img,rData->color);
+        {
+            struct timespec ts, ts2;
+            clock_gettime(CLOCK_MONOTONIC, &ts);
+            copy_rect(dToI(x) ,dToI(y), surface,&img,rData->color);
+            clock_gettime(CLOCK_MONOTONIC, &ts2);
+            nanosBlend += (ts2.tv_sec - ts.tv_sec) * (int32_t)1e9;
+            nanosBlend += ts2.tv_nsec;
+            nanosBlend -= ts.tv_nsec;
+        }
     }
     rData->lExtentMax.x = MAX(dToI( rData->pen.x+mtx.advanceWidth),rData->lExtentMax.x);
     rData->pen.x += mtx.advanceWidth + kerning.xShift + rData->letterSpacing;
