@@ -58,7 +58,7 @@ debug:
 
 
 %.s : ../%.c 
-	gcc $(C_FLAGS) -S -o $@ $<
+	gcc $(C_FLAGS) -fverbose-asm -S -o $@ $<
 
 
 asms : nativeLibStbttJni.s qstb_glyphreader.s stb_truetype.s nativeLibStbtt.s qstb_ctype.s qstb_line.s
@@ -67,5 +67,6 @@ asms : nativeLibStbttJni.s qstb_glyphreader.s stb_truetype.s nativeLibStbtt.s qs
 
 clean:
 	rm -f $(OUTPUTDIR)/$(SO_NAME) $(OUTPUTDIR)/$(SO_GENERIC_NAME)
+	rm -f *.s
 
 
