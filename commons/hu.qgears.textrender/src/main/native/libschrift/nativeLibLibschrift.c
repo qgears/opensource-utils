@@ -8,8 +8,10 @@
 #include <math.h>
 
 /*TODO delete this option form final version*/
-#define DUMMY_FONT_CACHE
-
+//#define DUMMY_FONT_CACHE
+#ifdef DUMMY_FONT_CACHE
+    static SFT_Font* zaFont = NULL;
+#endif
 // Structure to represent surface data
 typedef struct {
     uint8_t* data;
@@ -546,35 +548,30 @@ static inline void copy_rect(int32_t startx, int32_t starty, T_SurfaceData* surf
 
 static void qls_load_font(T_ErrorHandler* eh, T_RenderData* r, T_TrueTypeFont* font) {
     SFT* sft = &(r->sft);
-#ifdef DUMMY_FONT_CACHE
-    static bool isInited = false;
-    static SFT_Font* zaFont;
-    if (isInited) {
-        sft->font = zaFont;
-        return;
-    } else {
-        isInited = true;
-    }
-#endif
     //TODO font cache, load font by name etc...
     sft->xScale = font->fontSize;
     sft->yScale = font->fontSize;
     sft->flags = SFT_DOWNWARD_Y;
+
+#ifdef DUMMY_FONT_CACHE
+    if (zaFont == NULL) {
+#endif
     static char font_path[256];
     get_font_file(eh,font,font_path,sizeof(font_path));
 
     if (eh->code == QLS_ERROR_OK)
     {
         sft->font = sft_loadfile(font_path);
-#ifdef DUMMY_FONT_CACHE
-        zaFont = sft->font;
-#endif
         if (sft->font == NULL)
         {
             ERROR(eh,QLS_ERROR_FONT_LOAD, "TTF load failed %s" , font->fontFamily);
         }
     }
-    
+#ifdef DUMMY_FONT_CACHE
+        zaFont = sft->font;
+    }
+    sft->font = zaFont;
+#endif
     if (sft_lmetrics(sft,&(r->lineMetrics)) < 0) {
         ERROR(eh,QLS_ERROR_LINE_METRICS, "Failed to init line metrics of font %s" , font->fontFamily);
     } else {
