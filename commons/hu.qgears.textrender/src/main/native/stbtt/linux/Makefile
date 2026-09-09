@@ -28,13 +28,17 @@ JNIDEPS=$(PROJDIR)/target/classes:$(PROJDIR)/../hu.qgears.images/target/classes:
 
 JNI_HEADERS :=  $(PROJDIR)/src/main/native/stbtt
 
+C_FLAGS=-std=c99 -O3 \
+ -fPIC -D_REENTRANT -shared  \
+ $(shell pkg-config --cflags fontconfig) \
+ ${JNI_INCLUDE_PLATFORM} ${JNI_INCLUDE}
+
 all : ../hu_qgears_textrender_stbtt_StbTrueTypeNative.h
 	mkdir -p $(OUTPUTDIR)
-	gcc -std=c99 -O3 \
+	gcc $(C_FLAGS) \
 	-o $(OUTPUTDIR)/$(SO_NAME) \
-	-fPIC -D_REENTRANT -shared \
-	${JNI_INCLUDE_PLATFORM} ${JNI_INCLUDE} -Wl,-soname,$(SO_NAME) \
-	${SOURCES} $(shell pkg-config --cflags --libs fontconfig) -lm
+	-Wl,-soname,$(SO_NAME) \
+	${SOURCES} $(shell pkg-config --libs fontconfig) -lm
 	cp -f $(OUTPUTDIR)/$(SO_NAME) $(OUTPUTDIR)/$(SO_GENERIC_NAME)
 
 ../hu_qgears_textrender_stbtt_StbTrueTypeNative.h : 
@@ -51,6 +55,15 @@ debug:
 	${SOURCES} ../main.c \
 	$(shell pkg-config --cflags --libs fontconfig) -lm
 	cp -f $(OUTPUTDIR)/$(SO_NAME).exe $(OUTPUTDIR)/$(SO_GENERIC_NAME).exe
+
+
+%.s : ../%.c 
+	gcc $(C_FLAGS) -S -o $@ $<
+
+
+asms : nativeLibStbttJni.s qstb_glyphreader.s stb_truetype.s nativeLibStbtt.s qstb_ctype.s qstb_line.s
+	@echo "Create " $<
+
 
 clean:
 	rm -f $(OUTPUTDIR)/$(SO_NAME) $(OUTPUTDIR)/$(SO_GENERIC_NAME)
