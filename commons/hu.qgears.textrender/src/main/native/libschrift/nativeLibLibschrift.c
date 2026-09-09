@@ -7,6 +7,9 @@
 #include <fontconfig/fontconfig.h>
 #include <math.h>
 
+/*TODO delete this option form final version*/
+#define DUMMY_FONT_CACHE
+
 // Structure to represent surface data
 typedef struct {
     uint8_t* data;
@@ -77,10 +80,11 @@ static inline int32_t dToI (double d);
 
 void qls_clearSurfacePrivate(uint64_t id) {
     T_SurfaceData* surface = qls_get_surfacedata(id);
-    if (surface->data) {
-		int32_t pixelSize = surface->color ? 4 : 1;
-		int32_t stride = surface->color ? surface->width : surface->width + 3 & 4;
-        memset(surface->data, 0, surface->height * stride * pixelSize);
+    if (surface && surface->data) {
+		uint32_t pixelSize = surface->color ? 4u : 1u;
+		int32_t stride = surface->color ?  surface->width : ((surface->width + 3) & ~3);
+        uint32_t sz = (uint32_t)surface->height * (uint32_t)stride * pixelSize;
+        memset(surface->data, 0, sz);
     }
 }
 
@@ -158,7 +162,9 @@ T_SizeInt qls_renderTextPrivate(T_ErrorHandler* errorHandler, uint64_t surfaceHa
                 //specified target rectangle is invalid or empty
             }
             if (rData.sft.font != NULL){
-                //sft_freefont(rData.sft.font);
+#ifndef DUMMY_FONT_CACHE
+                sft_freefont(rData.sft.font);
+#endif
             }
         } 
         else
@@ -196,8 +202,11 @@ T_SizeInt qls_layoutTextPrivate(T_ErrorHandler* errorHandler, T_TrueTypeFont* fo
             }
             result.height = dToI(r.lExtentMax.y+r.lExtentMin.y);
         }
-        if (r.sft.font != NULL){
-            //sft_freefont(r.sft.font);
+        if (r.sft.font != NULL)
+        {
+#ifndef DUMMY_FONT_CACHE
+            sft_freefont(r.sft.font);
+#endif
         }
     }
     return result;
@@ -537,6 +546,7 @@ static inline void copy_rect(int32_t startx, int32_t starty, T_SurfaceData* surf
 
 static void qls_load_font(T_ErrorHandler* eh, T_RenderData* r, T_TrueTypeFont* font) {
     SFT* sft = &(r->sft);
+#ifdef DUMMY_FONT_CACHE
     static bool isInited = false;
     static SFT_Font* zaFont;
     if (isInited) {
@@ -545,6 +555,7 @@ static void qls_load_font(T_ErrorHandler* eh, T_RenderData* r, T_TrueTypeFont* f
     } else {
         isInited = true;
     }
+#endif
     //TODO font cache, load font by name etc...
     sft->xScale = font->fontSize;
     sft->yScale = font->fontSize;
@@ -555,7 +566,9 @@ static void qls_load_font(T_ErrorHandler* eh, T_RenderData* r, T_TrueTypeFont* f
     if (eh->code == QLS_ERROR_OK)
     {
         sft->font = sft_loadfile(font_path);
+#ifdef DUMMY_FONT_CACHE
         zaFont = sft->font;
+#endif
         if (sft->font == NULL)
         {
             ERROR(eh,QLS_ERROR_FONT_LOAD, "TTF load failed %s" , font->fontFamily);
