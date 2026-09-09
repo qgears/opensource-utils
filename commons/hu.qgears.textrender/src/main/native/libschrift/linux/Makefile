@@ -49,7 +49,7 @@ all : ../hu_qgears_textrender_libschrift_LibschriftNative.h
 
 
 %.s : ../%.c 
-	gcc $(C_FLAGS) -S -o $@ $<
+	gcc $(C_FLAGS) -fverbose-asm -S -o $@ $<
 
 
 asms : nativeLibLibschrift.s schrift.s nativeLibLibschriftJni.s
@@ -57,5 +57,6 @@ asms : nativeLibLibschrift.s schrift.s nativeLibLibschriftJni.s
 
 clean:
 	rm -f $(OUTPUTDIR)/$(SO_NAME) $(OUTPUTDIR)/$(SO_GENERIC_NAME)
+	rm -f *.s
 
 
