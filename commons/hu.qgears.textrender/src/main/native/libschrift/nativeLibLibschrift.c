@@ -7,8 +7,8 @@
 #include <fontconfig/fontconfig.h>
 #include <math.h>
 
-/*TODO delete this option form final version*/
-//#define DUMMY_FONT_CACHE
+/*TODO delete this option from final version*/
+#define DUMMY_FONT_CACHE
 #ifdef DUMMY_FONT_CACHE
     static SFT_Font* zaFont = NULL;
 #endif
@@ -373,7 +373,9 @@ static inline void qls_render_gliph(T_ErrorHandler* eh, T_RenderData * rData, ui
     }
 
     rData->lExtentMin.x = MIN(x,rData->lExtentMin.x);
-    
+    //TODO allow xOffSet and yOffset
+    //sft->xOffset = rData->pen.x + dX - x;
+    //sft->yOffset = rData->pen.y + dY - y;
     if (render)
     {
         SFT_Image img = {
