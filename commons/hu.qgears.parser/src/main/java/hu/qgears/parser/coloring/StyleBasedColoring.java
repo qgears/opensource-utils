@@ -2,6 +2,7 @@ package hu.qgears.parser.coloring;
 
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 
 import hu.qgears.parser.IParserReceiver;
 import hu.qgears.parser.ITreeElem;
@@ -34,6 +35,8 @@ public class StyleBasedColoring {
 		public void tokenizeError(TokenizerException exc) throws TokenizerException {
 			parseErrorFeedback=new ParseErrorFeedback(exc.getMessage(), exc.getPosition(), 1);
 		}
+		private static final Pattern namePattern =
+		        Pattern.compile("^TERMINAL_\\d+[a-zA-Z][a-zA-Z0-9_]*$");
 		@Override
 		public void tokensUnfiltered(TokenArray tokensUnfiltered) {
 			for(int i = 0; i < tokensUnfiltered.size(); i++) 
@@ -45,7 +48,7 @@ public class StyleBasedColoring {
 //				d.getTokenizerDef().getRecognizers()
 				
 				String name=t.getTokenType().getName();
-				boolean matches = name.matches("^TERMINAL_\\d+[a-zA-Z][a-zA-Z0-9_]*$");
+				boolean matches = namePattern.matcher(name).matches();//name.matches("^TERMINAL_\\d+[a-zA-Z][a-zA-Z0-9_]*$");
 				String styleId=styleBasedColoringConfiguration.tokenToStyle.get(name);
 				if(matches || styleId != null)
 				{
