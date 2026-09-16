@@ -30,7 +30,7 @@ JNIDEPS=$(PROJDIR)/target/classes:$(PROJDIR)/../hu.qgears.images/target/classes:
 JNI_HEADERS :=  $(PROJDIR)/src/main/native/libschrift
 
 C_FLAGS=-fPIC -D_REENTRANT -shared \
-	-g -std=c99 -O3 -pedantic -Wconversion $(shell pkg-config --cflags fontconfig) \
+	-g -std=c99 -O0 -pedantic -Wconversion $(shell pkg-config --cflags fontconfig) \
 	${JNI_INCLUDE_PLATFORM} ${JNI_INCLUDE}
 
 all : ../hu_qgears_textrender_libschrift_LibschriftNative.h

@@ -8,9 +8,10 @@
 #include <math.h>
 
 /*TODO delete this option from final version*/
-#define DUMMY_FONT_CACHE
+//#define DUMMY_FONT_CACHE
 #ifdef DUMMY_FONT_CACHE
     static SFT_Font* zaFont = NULL;
+    static SFT_LMetrics zaLineMetrics = {0};
 #endif
 // Structure to represent surface data
 typedef struct {
@@ -567,18 +568,25 @@ static void qls_load_font(T_ErrorHandler* eh, T_RenderData* r, T_TrueTypeFont* f
         if (sft->font == NULL)
         {
             ERROR(eh,QLS_ERROR_FONT_LOAD, "TTF load failed %s" , font->fontFamily);
+            return;
         }
+        else
+        {
+		    if (sft_lmetrics(sft,&(r->lineMetrics)) < 0) {
+		        ERROR(eh,QLS_ERROR_LINE_METRICS, "Failed to init line metrics of font %s" , font->fontFamily);
+		        return;
+		    } else {
+		        LOG("LineMetrics asc %f, desc %f, gap %f",r->lineMetrics.ascender, r->lineMetrics.descender, r->lineMetrics.lineGap);
+		    }
+		}
     }
 #ifdef DUMMY_FONT_CACHE
         zaFont = sft->font;
+        zaLineMetrics = r->lineMetrics;
     }
     sft->font = zaFont;
+    r->lineMetrics = zaLineMetrics;
 #endif
-    if (sft_lmetrics(sft,&(r->lineMetrics)) < 0) {
-        ERROR(eh,QLS_ERROR_LINE_METRICS, "Failed to init line metrics of font %s" , font->fontFamily);
-    } else {
-        LOG("LineMetrics asc %f, desc %f, gap %f",r->lineMetrics.ascender, r->lineMetrics.descender, r->lineMetrics.lineGap);
-    }
 
 }
 
