@@ -295,7 +295,7 @@ T_SizeInt qstb_renderTextPrivate(uint64_t surfaceHandle, T_TrueTypeFont* font, c
         tmp.data = tmpbuffer;
         tmp.stride = W_TEMP_BUFFER;
     } else {
-        tmp.stride = tmp.width;
+        tmp.stride = (tmp.width + 3) & 3;
         tmp.data = calloc(tmp.height * tmp.stride, sizeof(uint8_t));
     }
 
