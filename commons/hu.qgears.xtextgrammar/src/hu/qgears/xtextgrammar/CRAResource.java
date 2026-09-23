@@ -15,6 +15,9 @@ public class CRAResource implements Adapter {
 	private Notifier target;
 	private Doc doc;
 	private StyleBasedColoring coloring;
+	
+	private LineIndex lineIndex;
+	
 	@Override
 	public void notifyChanged(Notification notification) {
 	}
@@ -65,4 +68,12 @@ public class CRAResource implements Adapter {
 	public StyleBasedColoring getColoring() {
 		return coloring;
 	}
+	
+	public LineIndex getLineIndex() {
+		return this.lineIndex;
+	}
+	public void makeLineIndex(String contentTxt) {
+		this.lineIndex = new LineIndex(contentTxt);
+	}
 }
+

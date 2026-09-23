@@ -32,7 +32,11 @@ public interface IDefinitionProvider {
 			this.end_line = end_line;
 			this.end_column = end_column;
 		}
-//		public String documentUri;
+		public String toString() {
+			return "Location:" + uri
+					+ " start: " + start_line + ":" + start_column
+					+ " end: " + end_line + ":" + end_column;
+		}
 		public String uri;
 		public int start_line;
 		public int start_column;
