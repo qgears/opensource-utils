@@ -30,6 +30,7 @@ JNI_HEADERS :=  $(PROJDIR)/src/main/native/stbtt
 
 C_FLAGS=-std=c99 -O3 \
  -fPIC -D_REENTRANT -shared  \
+ -fvisibility=hidden \
  $(shell pkg-config --cflags fontconfig) \
  ${JNI_INCLUDE_PLATFORM} ${JNI_INCLUDE}
 
