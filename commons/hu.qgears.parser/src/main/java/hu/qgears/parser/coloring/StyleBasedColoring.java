@@ -8,7 +8,6 @@ import hu.qgears.parser.IParserReceiver;
 import hu.qgears.parser.ITreeElem;
 import hu.qgears.parser.impl.ElemBuffer;
 import hu.qgears.parser.impl.ParseException;
-import hu.qgears.parser.language.ILanguage;
 import hu.qgears.parser.tokenizer.Token;
 import hu.qgears.parser.tokenizer.TokenArray;
 import hu.qgears.parser.tokenizer.TokenizerException;
@@ -21,6 +20,8 @@ public class StyleBasedColoring {
 	protected TreeMap<Integer, Range> froms=new TreeMap<>();
 	private TreeMap<Integer, Range> tos=new TreeMap<>();
 	private int length;
+	private static final Pattern namePattern =
+			Pattern.compile("^TERMINAL_\\d+[a-zA-Z][a-zA-Z0-9_]*$");
 	public class ParserCallback implements IParserReceiver {
 		public ParseErrorFeedback parseErrorFeedback;
 		@Override
@@ -35,8 +36,6 @@ public class StyleBasedColoring {
 		public void tokenizeError(TokenizerException exc) throws TokenizerException {
 			parseErrorFeedback=new ParseErrorFeedback(exc.getMessage(), exc.getPosition(), 1);
 		}
-		private static final Pattern namePattern =
-		        Pattern.compile("^TERMINAL_\\d+[a-zA-Z][a-zA-Z0-9_]*$");
 		@Override
 		public void tokensUnfiltered(TokenArray tokensUnfiltered) {
 			for(int i = 0; i < tokensUnfiltered.size(); i++) 
