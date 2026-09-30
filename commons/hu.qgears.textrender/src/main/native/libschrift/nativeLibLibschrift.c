@@ -2,17 +2,10 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "schrift.h"
 #include <string.h>
-#include <fontconfig/fontconfig.h>
 #include <math.h>
+#include "util.h"
 
-/*TODO delete this option from final version*/
-//#define DUMMY_FONT_CACHE
-#ifdef DUMMY_FONT_CACHE
-    static SFT_Font* zaFont = NULL;
-    static SFT_LMetrics zaLineMetrics = {0};
-#endif
 // Structure to represent surface data
 typedef struct {
     uint8_t* data;
@@ -153,21 +146,19 @@ T_SizeInt qls_renderTextPrivate(T_ErrorHandler* errorHandler, uint64_t surfaceHa
             if (rData.maxPen.y > rData.minPen.y && rData.maxPen.x > rData.minPen.x)
             {
                 qls_load_font(errorHandler, &rData,font);
-                qls_align(errorHandler,&rData,hAlign,vAlign,text,textLen);
-                rData.color = PIX(r) | (PIX(g) << 8) | (PIX(b) << 16) | (PIX(a) << 24);
-                qls_layoutAndRender(errorHandler,&rData,surface,text,textLen);
-
-                result.width = dToI(rData.lExtentMax.x-rData.lExtentMin.x);
-                result.height = dToI(rData.lExtentMax.y+rData.lExtentMin.y);
+                if (errorHandler->code == QLS_ERROR_OK)
+                {
+                    qls_align(errorHandler,&rData,hAlign,vAlign,text,textLen);
+                    rData.color = PIX(r) | (PIX(g) << 8) | (PIX(b) << 16) | (PIX(a) << 24);
+                    qls_layoutAndRender(errorHandler,&rData,surface,text,textLen);
+    
+                    result.width = dToI(rData.lExtentMax.x-rData.lExtentMin.x);
+                    result.height = dToI(rData.lExtentMax.y+rData.lExtentMin.y);
+                }
             }
             else
             {
                 //specified target rectangle is invalid or empty
-            }
-            if (rData.sft.font != NULL){
-#ifndef DUMMY_FONT_CACHE
-                sft_freefont(rData.sft.font);
-#endif
             }
         } 
         else
@@ -204,12 +195,6 @@ T_SizeInt qls_layoutTextPrivate(T_ErrorHandler* errorHandler, T_TrueTypeFont* fo
                 result.width = dToI(r.lExtentMax.x-r.lExtentMin.x);
             }
             result.height = dToI(r.lExtentMax.y+r.lExtentMin.y);
-        }
-        if (r.sft.font != NULL)
-        {
-#ifndef DUMMY_FONT_CACHE
-            sft_freefont(r.sft.font);
-#endif
         }
     }
     return result;
@@ -551,79 +536,38 @@ static inline void copy_rect(int32_t startx, int32_t starty, T_SurfaceData* surf
 
 static void qls_load_font(T_ErrorHandler* eh, T_RenderData* r, T_TrueTypeFont* font) {
     SFT* sft = &(r->sft);
-    //TODO font cache, load font by name etc...
     sft->xScale = font->fontSize;
     sft->yScale = font->fontSize;
     sft->flags = SFT_DOWNWARD_Y;
 
-#ifdef DUMMY_FONT_CACHE
-    if (zaFont == NULL) {
-#endif
-    static char font_path[256];
-    get_font_file(eh,font,font_path,sizeof(font_path));
-
-    if (eh->code == QLS_ERROR_OK)
+    if (font->font == NULL)
     {
-        sft->font = sft_loadfile(font_path);
-        if (sft->font == NULL)
+        //lazy init font
+        font->font = sft_loadfile(font->ttfFilePath);
+        if (font->font == NULL)
         {
-            ERROR(eh,QLS_ERROR_FONT_LOAD, "TTF load failed %s" , font->fontFamily);
+            ERROR(eh,QLS_ERROR_FONT_LOAD, "TTF load failed %s" , filename(font->ttfFilePath));
             return;
         }
         else
         {
-		    if (sft_lmetrics(sft,&(r->lineMetrics)) < 0) {
-		        ERROR(eh,QLS_ERROR_LINE_METRICS, "Failed to init line metrics of font %s" , font->fontFamily);
+            sft->font = font->font;
+		    if (sft_lmetrics(sft,&(font->lineMetrics)) < 0)
+            {
+		        ERROR(eh,QLS_ERROR_LINE_METRICS, "Failed to init line metrics of font %s" , filename(font->ttfFilePath));
 		        return;
 		    } else {
-		        LOG("LineMetrics asc %f, desc %f, gap %f",r->lineMetrics.ascender, r->lineMetrics.descender, r->lineMetrics.lineGap);
+		        LOG("LineMetrics of %s asc %f, desc %f, gap %f",
+                    filename(font->ttfFilePath),
+                    font->lineMetrics.ascender,
+                    font->lineMetrics.descender,
+                    font->lineMetrics.lineGap);
 		    }
 		}
     }
-#ifdef DUMMY_FONT_CACHE
-        zaFont = sft->font;
-        zaLineMetrics = r->lineMetrics;
-    }
-    sft->font = zaFont;
-    r->lineMetrics = zaLineMetrics;
-#endif
-
+    sft->font = font->font;
+    r->lineMetrics = font->lineMetrics;
 }
-
-static void get_font_file(T_ErrorHandler* eh,T_TrueTypeFont* font, char* filePath, uint32_t filePathLength){
-    FcInit();
-
-    FcPattern *pat = FcPatternCreate();
-
-    FcPatternAddString(pat, FC_FAMILY, (FcChar8 *)font->fontFamily);
-    FcPatternAddInteger(pat, FC_WEIGHT, font->bold ? FC_WEIGHT_BOLD : FC_WEIGHT_NORMAL);
-    FcPatternAddInteger(pat, FC_SLANT, font->italic ? FC_SLANT_ITALIC : FC_SLANT_ROMAN);
-
-    FcConfigSubstitute(NULL, pat, FcMatchPattern);
-    FcDefaultSubstitute(pat);
-
-    FcResult result;
-    FcPattern *fc_font = FcFontMatch(NULL, pat, &result);
-
-    if (fc_font) {
-        char *file;
-        int index;
-
-        if (FcPatternGetString(fc_font, FC_FILE, 0, (FcChar8**)&file) == FcResultMatch) {
-            uint32_t fLen =(uint32_t) strlen(file);
-            if (fLen < filePathLength-1){
-                memcpy(filePath,file,fLen);
-                filePath[fLen] = '\0';
-                LOG("Font file: %s\n", filePath);
-            } else {
-                ERROR(eh,QLS_ERROR_LONG_FONT_PATH,"File path for font %s too long : %d", font->fontFamily,fLen);
-            }
-        }
-        FcPatternDestroy(fc_font);
-    } else {
-        ERROR(eh,QLS_ERROR_MISSING_FONT ,"No matching font found %s.",font->fontFamily);
-    }
- }
 
 static T_SurfaceData* qls_get_surfacedata(uint64_t id) {
     // Cast the handle back to T_SurfaceData pointer

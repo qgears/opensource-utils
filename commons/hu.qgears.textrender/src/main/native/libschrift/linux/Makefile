@@ -30,7 +30,7 @@ JNIDEPS=$(PROJDIR)/target/classes:$(PROJDIR)/../hu.qgears.images/target/classes:
 JNI_HEADERS :=  $(PROJDIR)/src/main/native/libschrift
 
 C_FLAGS=-fPIC -D_REENTRANT -shared \
-	-g -std=c99 -O0 -pedantic -Wconversion $(shell pkg-config --cflags fontconfig) \
+	-g -std=c99 -O0 -pedantic -Wconversion  \
 	${JNI_INCLUDE_PLATFORM} ${JNI_INCLUDE}
 
 all : ../hu_qgears_textrender_libschrift_LibschriftNative.h
@@ -38,13 +38,13 @@ all : ../hu_qgears_textrender_libschrift_LibschriftNative.h
 	gcc -o $(OUTPUTDIR)/$(SO_NAME) \
 	$(C_FLAGS) \
 	 -Wl,-soname,$(SO_NAME) \
-	../nativeLibLibschrift.c ../nativeLibLibschriftJni.c ../schrift.c \
-	$(shell pkg-config --libs fontconfig) -lm
+	 ../nativeLibLibschrift.c ../nativeLibLibschriftJni.c ../schrift.c ../util.c \
+	 -lm
 	cp -f $(OUTPUTDIR)/$(SO_NAME) $(OUTPUTDIR)/$(SO_GENERIC_NAME)
 
 ../hu_qgears_textrender_libschrift_LibschriftNative.h : 
 	javac -cp $(JNIDEPS) \
-	-h $(JNI_HEADERS) $(PROJDIR)/src/main/java/hu/qgears/textrender/libschrift/LibschriftNative.java
+	-h $(JNI_HEADERS) $(PROJDIR)/src/main/java/hu/qgears/textrender/libschrift/LibschriftNative.java $(PROJDIR)/src/main/java/hu/qgears/textrender/TrueTypeFont.java
 
 
 
@@ -52,7 +52,7 @@ all : ../hu_qgears_textrender_libschrift_LibschriftNative.h
 	gcc $(C_FLAGS) -fverbose-asm -S -o $@ $<
 
 
-asms : nativeLibLibschrift.s schrift.s nativeLibLibschriftJni.s
+asms : nativeLibLibschrift.s schrift.s nativeLibLibschriftJni.s util.s
 	@echo "Create " $<
 
 clean:
