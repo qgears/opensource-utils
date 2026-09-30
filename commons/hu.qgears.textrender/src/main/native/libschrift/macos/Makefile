@@ -20,21 +20,21 @@ endif
 
 
 C_FLAGS=-fPIC -D_REENTRANT -shared \
-	-g -std=c99 -O0 -pedantic -Wconversion $(shell pkg-config --cflags fontconfig) \
+	-g -std=c99 -O0 -pedantic -Wconversion \
 	${JNI_INCLUDE} -I $(HOMEBREW)/include
 
 all : ../hu_qgears_textrender_libschrift_LibschriftNative.h
 	mkdir -p $(OUTPUTDIR)
 	gcc -o $(OUTPUTDIR)/$(SO_NAME) \
 	$(C_FLAGS) \
-	../natveLibLibschrift.c ../nativeLibLibschriftJni.c ../schrift.c \
-	-L $(HOMEBREW)/lib $(shell pkg-config --libs fontconfig) -lm
+	../natveLibLibschrift.c ../nativeLibLibschriftJni.c ../schrift.c ../util.c \
+	-L $(HOMEBREW)/lib  -lm
 
 %.s : ../%.c 
 	gcc $(C_FLAGS) -fverbose-asm -S -o $@ $<
 
 
-asms : nativeLibLibschrift.s schrift.s nativeLibLibschriftJni.s
+asms : nativeLibLibschrift.s schrift.s nativeLibLibschriftJni.s util.s
 	@echo "Create " $<
 
 clean:

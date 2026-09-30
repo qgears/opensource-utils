@@ -1,21 +1,19 @@
 #include <jni.h>
 #include "nativeLibLibschrift.h"
 #include "hu_qgears_textrender_libschrift_LibschriftNative.h"
+#include "hu_qgears_textrender_TrueTypeFont.h"
+#include "util.h"
 #include <stdio.h>
 #include <string.h>
-
-/**
- * Converts a Java TrueTypeFont object to a native C struct
- * 
- * @param env JNI environment pointer
- * @param fontObject Java TrueTypeFont object
- * @return T_TrueTypeFont struct with converted values
- */
-static T_TrueTypeFont convertJavaTrueTypeFont(JNIEnv *env, jobject fontObject);
+#include <stdlib.h>
 
 static void throwException(JNIEnv *env, T_ErrorHandler* eh);
-
-static void disposeTrueTypeFont(JNIEnv *env, jobject fontObject, T_TrueTypeFont* font);
+static void dispose_native_font(T_ErrorHandler* eh, JNIEnv *env, jobject fontObject);
+static T_TrueTypeFont* get_or_create_native_font(T_ErrorHandler * eh, JNIEnv *env, jobject fontObject);
+static jfieldID get_field_id(T_ErrorHandler * eh, JNIEnv *env, jobject object, const char* fieldName, const char* signature);
+static double get_double_field(T_ErrorHandler * eh, JNIEnv *env, jobject object, const char* fieldName);
+static float get_float_field(T_ErrorHandler * eh, JNIEnv *env, jobject object, const char* fieldName);
+static jstring get_string_field(T_ErrorHandler * eh, JNIEnv *env, jobject object, const char* fieldName);
 
 /*
  * Method:    createSurfaceWithDataPrivate
@@ -51,23 +49,26 @@ JNIEXPORT jobject JNICALL Java_hu_qgears_textrender_libschrift_LibschriftNative_
     // Convert Java strings to C strings
     const jchar* c_text = (*env)->GetStringChars(env, text, 0);
     
-    T_TrueTypeFont c_font = convertJavaTrueTypeFont(env,font);
     jsize length = (*env)->GetStringLength(env,text);
-
+    
     // Extract enum values from Java objects
     int hAlignValue = (*env)->CallIntMethod(env, hAlign, (*env)->GetMethodID(env, (*env)->GetObjectClass(env, hAlign), "ordinal", "()I"));
     int vAlignValue = (*env)->CallIntMethod(env, vAlign, (*env)->GetMethodID(env, (*env)->GetObjectClass(env, vAlign), "ordinal", "()I"));
     int wrapModeValue = (*env)->CallIntMethod(env, wrapMode, (*env)->GetMethodID(env, (*env)->GetObjectClass(env, wrapMode), "ordinal", "()I"));
     
     T_ErrorHandler eh = {0};
-    // Forward to native implementation
-    T_SizeInt result = qls_renderTextPrivate(&eh,(uint64_t)surfaceId, &c_font, c_text,(uint32_t) length,
-                                     (uint32_t)hAlignValue, (uint32_t)vAlignValue, x, y, width, height, r, g, 
-                                     b, a, clip, (uint32_t)wrapModeValue);
+    T_TrueTypeFont* c_font = get_or_create_native_font(&eh,env,font);
+    T_SizeInt result = {0};
+    if (eh.code == QLS_ERROR_OK)
+    {
+        // Forward to native implementation
+        result = qls_renderTextPrivate(&eh,(uint64_t)surfaceId, c_font, c_text,(uint32_t) length,
+                                         (uint32_t)hAlignValue, (uint32_t)vAlignValue, x, y, width, height, r, g, 
+                                         b, a, clip, (uint32_t)wrapModeValue);
+    }
     
     // Release the Java strings
     (*env)->ReleaseStringChars(env, text, c_text);
-    disposeTrueTypeFont(env,font,&c_font);
     
     if (eh.code == QLS_ERROR_OK) {
         // Create and return SizeInt object from T_SizeInt result
@@ -103,18 +104,26 @@ JNIEXPORT jobject JNICALL Java_hu_qgears_textrender_libschrift_LibschriftNative_
     // Convert Java strings to C strings
     const jchar* c_text = (*env)->GetStringChars(env, text, 0);
     uint32_t textLen = (uint32_t)( (*env)->GetStringLength(env,text) );
-    T_TrueTypeFont c_font = convertJavaTrueTypeFont(env,font);
     // Extract enum values from Java objects
     uint32_t wrapModeValue = (uint32_t)(*env)->CallIntMethod(env, wrapMode, (*env)->GetMethodID(env, (*env)->GetObjectClass(env, wrapMode), "ordinal", "()I"));
     uint32_t hAlignValue = (uint32_t)(*env)->CallIntMethod(env, hAlign, (*env)->GetMethodID(env, (*env)->GetObjectClass(env, hAlign), "ordinal", "()I"));
     
-    // Forward to native implementation
-    T_SizeInt result = qls_layoutTextPrivate(&eh,&c_font,c_text, textLen, hAlignValue, width, wrapModeValue);
+    T_TrueTypeFont* c_font = get_or_create_native_font(&eh,env,font);
+    T_SizeInt result;
+    if (eh.code == QLS_ERROR_OK)
+    {
+        // Forward to native implementation
+        result = qls_layoutTextPrivate(&eh,c_font,c_text, textLen, hAlignValue, width, wrapModeValue);
+    }
     
     // Release the Java strings
     (*env)->ReleaseStringChars(env, text, c_text);
-    disposeTrueTypeFont(env,font,&c_font);
-
+    
+    if (eh.code != QLS_ERROR_OK)
+    {
+        throwException(env,&eh);
+        return NULL;
+    }
     // Create and return SizeInt object from T_SizeInt result
     jclass sizeIntClass = (*env)->FindClass(env, "hu/qgears/images/SizeInt");
     if (sizeIntClass == NULL) {
@@ -144,100 +153,103 @@ JNIEXPORT void JNICALL Java_hu_qgears_textrender_libschrift_LibschriftNative_dis
     qls_disposeSurfacePrivate((uint64_t)surfaceId);
 }
 
-
-static T_TrueTypeFont convertJavaTrueTypeFont(JNIEnv *env, jobject fontObject) {
-    T_TrueTypeFont result = {0};
-    
-    if (fontObject == NULL) {
-        return result;
-    }
-    
-    // Get the class of the font object
-    jclass fontClass = (*env)->GetObjectClass(env, fontObject);
-    if (fontClass == NULL) {
-        return result;
-    }
-    
-    // Get fontFamily field (String)
-    jfieldID fontFamilyField = (*env)->GetFieldID(env, fontClass, "fontFamily", "Ljava/lang/String;");
-    if (fontFamilyField != NULL) {
-        jstring fontFamilyString = (*env)->GetObjectField(env, fontObject, fontFamilyField);
-        if (fontFamilyString != NULL) {
-            // Just store the string pointer - don't allocate new memory
-            result.fontFamily = (*env)->GetStringUTFChars(env, fontFamilyString, 0);
-            // Note: We won't release here as we're passing this to other functions that will handle it
-        }
-    }
-    
-    // Get fontSize field (float)
-    jfieldID fontSizeField = (*env)->GetFieldID(env, fontClass, "fontSize", "F");
-    if (fontSizeField != NULL) {
-        result.fontSize = (*env)->GetFloatField(env, fontObject, fontSizeField);
-    }
-    
-    // Get letterSpacing field (double)
-    jfieldID letterSpacingField = (*env)->GetFieldID(env, fontClass, "letterSpacing", "D");
-    if (letterSpacingField != NULL) {
-        result.letterSpacing = (*env)->GetDoubleField(env, fontObject, letterSpacingField);
-    }
-    
-    // Get bold field (boolean)
-    jfieldID boldField = (*env)->GetFieldID(env, fontClass, "bold", "Z");
-    if (boldField != NULL) {
-        result.bold = (*env)->GetBooleanField(env, fontObject, boldField);
-    }
-    
-    // Get italic field (boolean)
-    jfieldID italicField = (*env)->GetFieldID(env, fontClass, "italic", "Z");
-    if (italicField != NULL) {
-        result.italic = (*env)->GetBooleanField(env, fontObject, italicField);
-    }
-    
-    // Get underline field (boolean)
-    jfieldID underlineField = (*env)->GetFieldID(env, fontClass, "underline", "Z");
-    if (underlineField != NULL) {
-        result.underline = (*env)->GetBooleanField(env, fontObject, underlineField);
-    }
-    
-    return result;
-}
-
-static void disposeTrueTypeFont(JNIEnv *env, jobject fontObject, T_TrueTypeFont* font) {
-    if (fontObject == NULL || font == NULL || font->fontFamily == NULL) {
-        return;
-    }
-    
-    // Get the class of the font object
-    jclass fontClass = (*env)->GetObjectClass(env, fontObject);
-    if (fontClass == NULL) {
-        return ;
-    }
-    // Get fontFamily field (String)
-    jfieldID fontFamilyField = (*env)->GetFieldID(env, fontClass, "fontFamily", "Ljava/lang/String;");
-    if (fontFamilyField != NULL) {
-        jstring fontFamilyString = (*env)->GetObjectField(env, fontObject, fontFamilyField);
-        if (fontFamilyString != NULL) {
-             (*env)->ReleaseStringUTFChars(env, fontFamilyString, font->fontFamily);
-             font->fontFamily = NULL;
-        }
-    }
-}
-
-const char *filename(const char *str)
-{
-    if (str == NULL) {
+static jfieldID get_field_id(T_ErrorHandler * eh, JNIEnv *env, jobject object, const char* fieldName, const char* signature) {
+    if (object == NULL) {
+        ERROR(eh, QLS_ERROR_INVALID_FONT_OBJ, "Object is null while accessing field '%s'", fieldName);
         return NULL;
     }
+    jclass objectClass = (*env)->GetObjectClass(env, object);
+    if (objectClass == NULL) {
+        ERROR(eh, QLS_ERROR_INVALID_FONT_OBJ, "Class not found while accessing field '%s'", fieldName);
+        return NULL;
+    }
+    jfieldID fieldId = (*env)->GetFieldID(env, objectClass, fieldName, signature);
+    if (fieldId == NULL) {
+        // GetFieldID leaves a pending NoSuchFieldError that must not reach Java code
+        (*env)->ExceptionClear(env);
+        ERROR(eh, QLS_ERROR_INVALID_FONT_OBJ, "Field '%s' with signature '%s' is not found", fieldName, signature);
+    }
+    (*env)->DeleteLocalRef(env, objectClass);
+    return fieldId;
+}
 
-    const char *last = str;
+static double get_double_field(T_ErrorHandler * eh, JNIEnv *env, jobject object, const char* fieldName) {
+    jfieldID fieldId = get_field_id(eh, env, object, fieldName, "D");
+    if (fieldId == NULL) {
+        return 0.0;
+    }
+    return (double)(*env)->GetDoubleField(env, object, fieldId);
+}
+static float get_float_field(T_ErrorHandler * eh, JNIEnv *env, jobject object, const char* fieldName) {
+    jfieldID fieldId = get_field_id(eh, env, object, fieldName, "F");
+    if (fieldId == NULL) {
+        return 0.0;
+    }
+    return (float)(*env)->GetFloatField(env, object, fieldId);
+}
+static jstring get_string_field(T_ErrorHandler * eh, JNIEnv *env, jobject object, const char* fieldName) {
+    jfieldID fieldId = get_field_id(eh, env, object, fieldName, "Ljava/lang/String;");
+    if (fieldId == NULL) {
+        return NULL;
+    }
+    return (jstring)(*env)->GetObjectField(env, object, fieldId);
+}
 
-    for (const char *p = str; *p != '\0'; p++) {
-        if (*p == '/') {
-            last = p+1;
+static T_TrueTypeFont* get_or_create_native_font(T_ErrorHandler * eh, JNIEnv *env, jobject fontObject)
+{
+    T_TrueTypeFont* font;
+
+    jfieldID nativePtrFieldId = get_field_id(eh,env,fontObject,"nativePtr","J");
+    if (eh->code == QLS_ERROR_OK)
+    {
+        font = (T_TrueTypeFont*) ((*env)->GetLongField(env, fontObject, nativePtrFieldId));
+        if (!font)
+        {
+            font = (T_TrueTypeFont*) malloc(sizeof(T_TrueTypeFont));
+            (*env)->SetLongField(env, fontObject, nativePtrFieldId,(jlong)font);
+            memset(font,0, sizeof(T_TrueTypeFont));
+            font->letterSpacing = get_double_field(eh,env,fontObject, "letterSpacing");
+            if (eh->code == QLS_ERROR_OK)
+            {
+                jstring ttfFilePathString = get_string_field(eh,env,fontObject, "ttfFilePath");
+                if (eh->code == QLS_ERROR_OK)
+                {
+                    // Just store the string pointer - don't allocate new memory
+                    font->ttfFilePath = (*env)->GetStringUTFChars(env, ttfFilePathString, 0);
+                }
+            }
+            if (eh->code == QLS_ERROR_OK)
+            {
+                font->fontSize = get_float_field(eh,env,fontObject,"fontSize");
+            }
         }
     }
+    return font;
+}
 
-    return last;  // if not found → original str
+static void dispose_native_font(T_ErrorHandler* eh, JNIEnv *env, jobject fontObject)
+{
+    T_TrueTypeFont* font;
+    jfieldID nativePtrFieldId = get_field_id(eh,env,fontObject,"nativePtr","J");
+    if (eh->code == QLS_ERROR_OK)
+    {
+        font = (T_TrueTypeFont*) ((*env)->GetLongField(env, fontObject, nativePtrFieldId));
+        if (font)
+        {
+            (*env)->SetLongField(env, fontObject, nativePtrFieldId,0);
+            jstring ttfFilePathString = get_string_field(eh,env,fontObject, "ttfFilePath");
+            if (eh->code == QLS_ERROR_OK)
+            {
+                (*env)->ReleaseStringUTFChars(env, ttfFilePathString, font->ttfFilePath);
+                font->ttfFilePath = NULL;
+            }
+            if (font->font)
+            {
+                sft_freefont(font->font);
+                font->font = NULL;
+            }
+        }
+    }
 }
 
 static void throwException(JNIEnv *env, T_ErrorHandler* eh) {
@@ -268,4 +280,16 @@ JNIEXPORT void JNICALL Java_hu_qgears_textrender_libschrift_LibschriftNative_cle
   (JNIEnv * env, jobject obj, jlong surfaceHandle)
 {
 	qls_clearSurfacePrivate((uint64_t)surfaceHandle);
+}
+
+
+JNIEXPORT void JNICALL Java_hu_qgears_textrender_TrueTypeFont_nativeDispose
+  (JNIEnv *env, jobject fontObject)
+{
+    T_ErrorHandler eh = {0};
+    dispose_native_font(&eh,env,fontObject);
+    if (eh.code != QLS_ERROR_OK)
+    {
+        throwException(env,&eh);
+    }
 }

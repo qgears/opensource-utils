@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "schrift.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -32,7 +33,8 @@ typedef enum {
     QLS_ERROR_GLIPH_RENDER,
     QLS_ERROR_GLIPH_KERNING,
     QLS_ERROR_LINE_METRICS,
-    QLS_ERROR_UNSUPPORTED_PIXEL_FORMAT
+    QLS_ERROR_UNSUPPORTED_PIXEL_FORMAT,
+    QLS_ERROR_INVALID_FONT_OBJ
 } QLS_ERROR_CODE;
 
 #define QLS_MAX_ERROR_MSG_SIZE (256u)
@@ -51,12 +53,14 @@ typedef struct {
  * C representation of Java TrueTypeFont object
  */
 typedef struct {
-    const char* fontFamily;
+    /*The font loaded by libschrift - lazy init*/
+    SFT_Font * font;
+    /*The line metrics loaded by libschrift - lazy init*/
+    SFT_LMetrics lineMetrics;
     float fontSize;
     double letterSpacing;
-    bool bold;
-    bool italic;
-    bool underline;
+    /* Java UTF8 chars, read only! */
+    const char* ttfFilePath;
 } T_TrueTypeFont;
 
 /**
@@ -132,6 +136,7 @@ T_SizeInt qls_layoutTextPrivate(T_ErrorHandler* errorHandler, T_TrueTypeFont* fo
                          uint32_t hAlign, int32_t width, uint32_t wrapMode);
 
 void qls_clearSurfacePrivate(uint64_t id);
+
 
 #ifdef __cplusplus
 }

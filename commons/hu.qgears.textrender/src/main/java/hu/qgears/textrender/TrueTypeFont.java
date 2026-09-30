@@ -2,18 +2,23 @@ package hu.qgears.textrender;
 
 public class TrueTypeFont {
 
-	public String fontFamily;
-	public float fontSize;
-	public double letterSpacing;
+	public String ttfFilePath;
+	private double letterSpacing;
+	private float fontSize;
+	private long nativePtr = 0;
 	
-	public boolean bold;
-	public boolean italic;
-	public boolean underline;
-
-	public TrueTypeFont(String fontFamily, float fontSize) {
-		super();
-		this.fontFamily = fontFamily;
+	public TrueTypeFont(String ttfFilePath, float fontSize) {
+		this.ttfFilePath = ttfFilePath;
 		this.fontSize = fontSize;
 	}
 	
+	public void setLetterSpacing(double letterSpacing) {
+		this.letterSpacing = letterSpacing;
+	}
+	
+	public void dispose() {
+		nativeDispose();
+	}
+
+	private native void nativeDispose();
 }
