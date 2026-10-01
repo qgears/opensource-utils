@@ -36,38 +36,97 @@ import hu.qgears.textrender.TrueTypeNativeInterface;
 	private native long createSurfaceWithDataPrivate(ByteBuffer data, int w, int h, int pixelFormat);
 
 	@Override
-	public SizeInt renderText(long surfaceHandle, TrueTypeFont fontFamily, String str, EHorizontalAlign hAlign,
+	public SizeInt renderText(long surfaceHandle, TrueTypeFont font, String text, EHorizontalAlign hAlign,
 			EVerticalAlign vAlign, int x, int y, int width, int height, float r, float g, float b, float a,
 			boolean clip, EWrapMode wrapMode) {
-
-		// TODO parameter verficifation : handle null args here instead of the native
-		// impl
-		return renderTextPrivate(surfaceHandle, fontFamily, str, hAlign, vAlign, x, y, width, height, r, g, b, a, clip,
+		if (surfaceHandle == 0) {
+			throw new IllegalArgumentException("surfaceHandle must not be 0");
+		}
+		if (font == null) {
+			throw new IllegalArgumentException("font must not be null");
+		}
+		if (text == null) {
+			throw new IllegalArgumentException("text must not be null");
+		}
+		if (hAlign == null) {
+			throw new IllegalArgumentException("hAlign must not be null");
+		}
+		if (vAlign == null) {
+			throw new IllegalArgumentException("vAlign must not be null");
+		}
+		if (width < 0) {
+			throw new IllegalArgumentException("width must not be negative: " + width);
+		}
+		if (height < 0) {
+			throw new IllegalArgumentException("height must not be negative: " + height);
+		}
+		if (wrapMode == null) {
+			throw new IllegalArgumentException("wrapMode must not be null");
+		}
+		if (r < 0f || r > 1f) {
+			throw new IllegalArgumentException("r must be in range [0,1]: " + r);
+		}
+		if (g < 0f || g > 1f) {
+			throw new IllegalArgumentException("g must be in range [0,1]: " + g);
+		}
+		if (b < 0f || b > 1f) {
+			throw new IllegalArgumentException("b must be in range [0,1]: " + b);
+		}
+		if (a < 0f || a > 1f) {
+			throw new IllegalArgumentException("a must be in range [0,1]: " + a);
+		}
+		return renderTextPrivate(surfaceHandle, font, text, hAlign, vAlign, x, y, width, height, r, g, b, a, clip,
 				wrapMode);
 	}
 
-	private native SizeInt renderTextPrivate(long surfaceHandle, TrueTypeFont fontFamily, String str, EHorizontalAlign hAlign,
+	private native SizeInt renderTextPrivate(long surfaceHandle, TrueTypeFont font, String text, EHorizontalAlign hAlign,
 			EVerticalAlign vAlign, int x, int y, int width, int height, float r, float g, float b, float a,
 			boolean clip, EWrapMode wrapMode);
 
 	@Override
 	public SizeInt layoutText(TrueTypeFont font, String text, EHorizontalAlign hAlign, EVerticalAlign vAlign, int width,
 			int height, EWrapMode wrapMode) {
-		// TODO parameter verification
+		if (font == null) {
+			throw new IllegalArgumentException("font must not be null");
+		}
+		if (text == null) {
+			throw new IllegalArgumentException("text must not be null");
+		}
+		if (hAlign == null) {
+			throw new IllegalArgumentException("hAlign must not be null");
+		}
+		if (vAlign == null) {
+			throw new IllegalArgumentException("vAlign must not be null");
+		}
+		if (width < 0) {
+			throw new IllegalArgumentException("width must not be negative: " + width);
+		}
+		if (height < 0) {
+			throw new IllegalArgumentException("height must not be negative: " + height);
+		}
+		if (wrapMode == null) {
+			throw new IllegalArgumentException("wrapMode must not be null");
+		}
 		return layoutTextPrivate(font, text, hAlign, vAlign, width, height, wrapMode);
 	}
 
-	private native SizeInt layoutTextPrivate(TrueTypeFont fontFamily, String text, EHorizontalAlign hAlign,
+	private native SizeInt layoutTextPrivate(TrueTypeFont font, String text, EHorizontalAlign hAlign,
 			EVerticalAlign vAlign, int width, int height, EWrapMode wrapMode);
 
 	@Override
 	public void disposeSurface(long surfaceHandle) {
+		if (surfaceHandle == 0) {
+			throw new IllegalArgumentException("surfaceHandle must not be 0");
+		}
 		disposeSurfacePrivate(surfaceHandle);
 	}
 	private native void disposeSurfacePrivate(long surfaceHandle);
 
 	@Override
 	public void clearSurface(long surfaceHandle) {
+		if (surfaceHandle == 0) {
+			throw new IllegalArgumentException("surfaceHandle must not be 0");
+		}
 		clearSurfacePrivate(surfaceHandle);
 	}
 

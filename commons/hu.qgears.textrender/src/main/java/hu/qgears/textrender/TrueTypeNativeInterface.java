@@ -62,7 +62,7 @@ public interface TrueTypeNativeInterface {
 			boolean clip, EWrapMode wrapMode);
 	/**
 	 * 
-	 * @param fontFamily
+	 * @param font
 	 * @param text
 	 * @param hAlign
 	 * @param vAlign
