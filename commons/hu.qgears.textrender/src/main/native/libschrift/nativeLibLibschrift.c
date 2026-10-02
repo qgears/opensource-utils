@@ -76,6 +76,9 @@ static inline int32_t dToI (double d);
 static inline uint32_t utf16Read(const uint16_t* restrict * text);
 static inline void utf16Skip(const uint16_t* restrict * text);
 static inline uint32_t utf16Peek(const uint16_t* restrict text);
+static inline bool ctypeIsLineEnding(uint32_t c);
+static inline bool ctypeIsSpace(uint32_t c);
+static inline bool ctypeIsGraphical(uint32_t c);
 
 /*********************************************/
 /*** External function implementations     ***/
@@ -616,6 +619,21 @@ static inline void utf16Skip(const uint16_t* restrict * text) {
 }
 static inline uint32_t utf16Peek(const uint16_t* restrict text) {
     return utf16Read(&text);
+}
+
+static inline bool ctypeIsLineEnding(uint32_t c) {
+    switch (c) {
+        case '\0': case '\r': case '\n':
+            return true;
+        default:
+            return false;
+    }
+}
+static inline bool ctypeIsSpace(uint32_t c) {
+    return c == ' ';
+}
+static inline bool ctypeIsGraphical(uint32_t c) {
+    return !ctypeIsSpace(c) && !ctypeIsLineEnding(c);
 }
 
 int main() {
