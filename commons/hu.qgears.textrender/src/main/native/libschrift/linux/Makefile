@@ -29,16 +29,24 @@ JNIDEPS=$(PROJDIR)/target/classes:$(PROJDIR)/../hu.qgears.images/target/classes:
 
 JNI_HEADERS :=  $(PROJDIR)/src/main/native/libschrift
 
-C_FLAGS=-fPIC -D_REENTRANT -shared \
+C_FLAGS=-fPIC -D_REENTRANT \
 	-g -std=c99 -O0 -pedantic -Wconversion  \
 	${JNI_INCLUDE_PLATFORM} ${JNI_INCLUDE}
 
 all : ../hu_qgears_textrender_libschrift_LibschriftNative.h
 	mkdir -p $(OUTPUTDIR)
 	gcc -o $(OUTPUTDIR)/$(SO_NAME) \
-	$(C_FLAGS) \
+	$(C_FLAGS) -shared \
 	 -Wl,-soname,$(SO_NAME) \
 	 ../nativeLibLibschrift.c ../nativeLibLibschriftJni.c ../schrift.c ../util.c \
+	 -lm
+	cp -f $(OUTPUTDIR)/$(SO_NAME) $(OUTPUTDIR)/$(SO_GENERIC_NAME)
+
+bversion:
+	mkdir -p $(OUTPUTDIR)
+	gcc -o $(OUTPUTDIR)/$(SO_NAME).exe \
+	$(C_FLAGS) \
+	 ../nativeLibLibschrift.c ../schrift.c ../util.c \
 	 -lm
 	cp -f $(OUTPUTDIR)/$(SO_NAME) $(OUTPUTDIR)/$(SO_GENERIC_NAME)
 
