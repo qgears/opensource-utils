@@ -1,0 +1,15 @@
+{
+    "makefile.makeDirectory": "src/main/native/stbtt/linux",
+    "makefile.safeCommands": [
+        "find",
+        "uname",
+        "sed",
+        "grep",
+        "cut",
+        "mkdir",
+        "gcc",
+        "cp",
+        "javac",
+        "rm",
+    ],
+}

@@ -584,3 +584,8 @@ static inline int32_t dToI (double d)
     //     return (int32_t)(d + 0.5);
     // }
 }
+
+int main() {
+    puts("Hello World!");
+    return 0;
+}
