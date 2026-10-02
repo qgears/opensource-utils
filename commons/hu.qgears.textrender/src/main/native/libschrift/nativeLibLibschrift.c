@@ -79,6 +79,11 @@ static inline uint32_t utf16Peek(const uint16_t* restrict text);
 static inline bool ctypeIsLineEnding(uint32_t c);
 static inline bool ctypeIsSpace(uint32_t c);
 static inline bool ctypeIsGraphical(uint32_t c);
+/**
+ * Pass 0 for c1, if there is no previous character.
+ */
+static inline void advancePenBeforeRender(T_ErrorHandler* eh, const SFT* sft, double letterSpacing, uint32_t c1, uint32_t c2, double* penx);
+static inline void advancePenAfterRender(T_ErrorHandler* eh, const SFT* sft, double spaceJustification, uint32_t codepoint, double* penx);
 
 /*********************************************/
 /*** External function implementations     ***/
@@ -634,6 +639,46 @@ static inline bool ctypeIsSpace(uint32_t c) {
 }
 static inline bool ctypeIsGraphical(uint32_t c) {
     return !ctypeIsSpace(c) && !ctypeIsLineEnding(c);
+}
+
+static inline void advancePenBeforeRender(T_ErrorHandler* eh, const SFT* sft, double letterSpacing, uint32_t c1, uint32_t c2, double* penx) {
+    if (c1 != 0) {
+        SFT_Glyph g1;
+        if (sft_lookup(sft, c1, &g1) < 0) {
+            ERROR(eh, QLS_ERROR_GLIPH_MISSING, "codepoint 0x%04X missing", c1);
+            return;
+        }
+        SFT_Glyph g2;
+        if (sft_lookup(sft, c2, &g2) < 0) {
+            ERROR(eh, QLS_ERROR_GLIPH_MISSING, "codepoint 0x%04X missing", c2);
+            return;
+        }
+        SFT_Kerning kerning;
+        if (sft_kerning(sft, g1, g2, &kerning) < 0) {
+            ERROR(eh, QLS_ERROR_GLIPH_KERNING, "Invalid kerning between codepoints 0x%04X 0x%04X ", c1, c2);
+            return;
+        }
+
+        *penx += letterSpacing;
+        *penx += kerning.xShift;
+    }
+}
+static inline void advancePenAfterRender(T_ErrorHandler* eh, const SFT* sft, double spaceJustification, uint32_t codepoint, double* penx) {
+    SFT_Glyph g;
+    if (sft_lookup(sft, codepoint, &g) < 0) {
+        ERROR(eh, QLS_ERROR_GLIPH_MISSING, "codepoint 0x%04X missing", codepoint);
+        return;
+    }
+    SFT_GMetrics gMetrics;
+    if (sft_gmetrics(sft, g, &gMetrics) < 0) {
+        ERROR(eh, QLS_ERROR_GLIPH_MISSING, "codepoint 0x%04X bad glyph metrics", codepoint);
+        return;
+    }
+
+    if (ctypeIsSpace(codepoint)) {
+        *penx += spaceJustification;
+    }
+    *penx += gMetrics.advanceWidth;
 }
 
 int main() {
