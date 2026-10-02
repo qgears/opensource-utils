@@ -44,6 +44,16 @@ typedef struct {
     uint32_t wrapMode;
 } T_RenderData;
 
+typedef struct {
+    uint_fast16_t len, nSpaces;
+    //exclusive, consistent with `len`
+    const uint16_t* lineEnd;
+    //inclusive
+    const uint16_t* nextLineStart;
+    bool wasLastLine;
+    double width;
+} T_Result_PrescanLine;
+
 typedef enum {
     QLS_WRAP_CHAR,
     QLS_WRAP_WORD,
@@ -84,6 +94,25 @@ static inline bool ctypeIsGraphical(uint32_t c);
  */
 static inline void advancePenBeforeRender(T_ErrorHandler* eh, const SFT* sft, double letterSpacing, uint32_t c1, uint32_t c2, double* penx);
 static inline void advancePenAfterRender(T_ErrorHandler* eh, const SFT* sft, double spaceJustification, uint32_t codepoint, double* penx);
+/**
+ * Use this function to
+ *  * Get the number of codepoints to render in one line
+ *  * Get the start of the next line
+ * 
+ * Includes logic to
+ *  * Include leading whitespace
+ *  * Let the next line skip this line's trailing whitespace and hard wrap
+ *  * Check line width with some particular semantics (i.e. not taking left-side bearing and right-side bearing into account)
+ *  * Check for word break opportunities (Simple space, non-space check)
+ * 
+ * TODO: Improve line breaking algorithm to "minimize ruggedness"? (e.g. to protect against two words falling on the last line and being splayed out by justification)
+ * TODO: Support variable line-height (e.g. for ideographs coming from a fallback font with different line metrics)
+ * TODO: Let lines be rendered either in one or piecemeal, while remaining pixel perfect?
+ * TODO: Support more Unicode, e.g. ideographic space (how should it interact with justification etc.)
+ * TODO: Introduce grapheme layer, or decide on partial support and canonize input (e.g. the same accented letter can be represented as either one or two codepoints!)
+ */
+static inline void prescanLine(T_ErrorHandler* eh, SFT sft, const uint16_t* restrict const text, E_QLS_WRAP wrapMode, double availableWidth, double letterSpacing
+        , T_Result_PrescanLine* outResult);
 
 /*********************************************/
 /*** External function implementations     ***/
@@ -679,6 +708,119 @@ static inline void advancePenAfterRender(T_ErrorHandler* eh, const SFT* sft, dou
         *penx += spaceJustification;
     }
     *penx += gMetrics.advanceWidth;
+}
+
+static inline bool prescanLine_IsLineTooWide(double availableWidth, uint_fast16_t l, double w) {
+    return 1 <= l && availableWidth < w;
+}
+static inline void prescanLine(T_ErrorHandler* eh, SFT sft, const uint16_t* restrict const text, E_QLS_WRAP wrapMode, double availableWidth, double letterSpacing
+        , T_Result_PrescanLine* outResult) {
+
+    sft.xOffset = 0;
+    
+    typedef struct {
+        double w, wSpace;
+        uint_fast16_t l, lSpace;
+        uint32_t lastCodepoint;
+    } T_LayoutData;
+
+    T_LayoutData line = {0};
+    { // line = ...
+        enum { FOR_CHAR_BREAK, FOR_WORD_BREAK };
+        T_LayoutData candidates[2] = { line, line };
+        
+        const uint16_t* reader = text;
+        uint32_t codepoint;
+        // find line ending, or shortest non-fitting line of at least one codepoint
+        while (!(ctypeIsLineEnding(codepoint = utf16Peek(reader)) || prescanLine_IsLineTooWide(availableWidth, line.l, line.w))) {
+
+            candidates[FOR_CHAR_BREAK] = line;
+            { // OPT candidates[FOR_WORD_BREAK] = ...
+                const bool isWordBreak = line.l == 0 || (ctypeIsSpace(line.lastCodepoint) != ctypeIsSpace(codepoint));
+                if (isWordBreak) {
+                    candidates[FOR_WORD_BREAK] = line;
+                }
+            }
+
+            advancePenBeforeRender(eh, &sft, letterSpacing, line.lastCodepoint, codepoint, &line.wSpace);
+            if (eh->code != QLS_ERROR_OK) {
+                return;
+            }
+            advancePenAfterRender(eh, &sft, 0, codepoint, &line.wSpace);
+            if (eh->code != QLS_ERROR_OK) {
+                return;
+            }
+
+            line.lastCodepoint = codepoint;
+            line.lSpace += 1;
+            if (ctypeIsGraphical(codepoint)) {
+                line.l = line.lSpace;
+                line.w = line.wSpace;
+            }
+            utf16Skip(&reader);
+        }
+
+        const bool wrapchar = wrapMode != QLS_WRAP_WORD;
+        const bool wrapword = wrapMode != QLS_WRAP_CHAR;
+        if (!prescanLine_IsLineTooWide(availableWidth, line.l, line.w)) {
+            // line = line;
+        } else if (wrapword && 0 < candidates[FOR_WORD_BREAK].lSpace) {
+            line = candidates[FOR_WORD_BREAK];
+        } else if (wrapchar && 0 < candidates[FOR_CHAR_BREAK].lSpace) {
+            line = candidates[FOR_CHAR_BREAK];
+        } else if (wrapchar) {
+            // line = line;
+        } else /* wrapword */ {
+            // include the rest of the last word
+            while (ctypeIsGraphical(codepoint = utf16Peek(reader))) {
+                advancePenBeforeRender(eh, &sft, letterSpacing, line.lastCodepoint, codepoint, &line.wSpace);
+                if (eh->code != QLS_ERROR_OK) {
+                    return;
+                }
+                advancePenAfterRender(eh, &sft, 0, codepoint, &line.wSpace);
+                if (eh->code != QLS_ERROR_OK) {
+                    return;
+                }
+
+                line.lastCodepoint = codepoint;
+                line.lSpace += 1;
+                line.l = line.lSpace;
+                line.w = line.wSpace;
+                utf16Skip(&reader);
+            }
+        }
+    }
+
+    // with `line`, *outResult = ...
+
+    const uint16_t* reader = text;
+    uint32_t codepoint;
+    outResult->len = line.l;
+    outResult->width = line.w;
+    { // nSpaces = ...; lineEnd = ...
+        outResult->nSpaces = 0;
+        for (uint_fast16_t i = 0; i < line.l; ++i) {
+            if (ctypeIsSpace(codepoint = utf16Read(&reader))) {
+                outResult->nSpaces += 1;
+            }
+        }
+        outResult->lineEnd = reader;
+    }
+    {
+        // nextLineStart = ... : Skip any trailing spaces and hard wrap (if present)
+        // wasLastLine = ...
+        while (ctypeIsSpace(codepoint = utf16Peek(reader))) {
+            utf16Skip(&reader);
+        }
+        outResult->wasLastLine = '\0' == utf16Peek(reader);
+        if ('\r' == (codepoint = utf16Peek(reader))) {
+            utf16Skip(&reader);
+        }
+        if ('\n' == (codepoint = utf16Peek(reader))) {
+            utf16Skip(&reader);
+        }
+        outResult->nextLineStart = reader;
+    }
 }
 
 int main() {
