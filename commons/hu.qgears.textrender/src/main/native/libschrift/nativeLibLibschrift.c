@@ -70,6 +70,13 @@ static void get_font_file(T_ErrorHandler* eh, T_TrueTypeFont* font, char* filePa
 static T_SurfaceData* qls_get_surfacedata(uint64_t id);
 static inline int32_t dToI (double d);
 
+/**
+ * Stops advancing at the terminating '\0'.
+ */
+static inline uint32_t utf16Read(const uint16_t* restrict * text);
+static inline void utf16Skip(const uint16_t* restrict * text);
+static inline uint32_t utf16Peek(const uint16_t* restrict text);
+
 /*********************************************/
 /*** External function implementations     ***/
 /*********************************************/
@@ -583,6 +590,32 @@ static inline int32_t dToI (double d)
     // } else {
     //     return (int32_t)(d + 0.5);
     // }
+}
+
+static inline uint32_t utf16Read(const uint16_t* restrict * text) {
+    const uint16_t* p = *text;
+    uint32_t cp = *p++;
+    if (cp == '\0') {
+        return '\0';
+    } else {
+        if (cp >= 0xD800 && cp <= 0xDBFF)
+        {
+            uint32_t lo = *p++;
+            if (lo >= 0xDC00 && lo <= 0xDFFF)
+            {
+                cp = 0x10000 + (((cp - 0xD800) << 10) | (lo - 0xDC00));
+            }
+        }
+
+        *text = p;
+        return cp;
+    }
+}
+static inline void utf16Skip(const uint16_t* restrict * text) {
+    utf16Read(text);
+}
+static inline uint32_t utf16Peek(const uint16_t* restrict text) {
+    return utf16Read(&text);
 }
 
 int main() {
