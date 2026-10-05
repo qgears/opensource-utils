@@ -787,6 +787,8 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* 
     };
 }
 
+#if INCLUDE_MAIN
+
 int main() {
     puts("Hello World!");
     uint16_t message[256] = {0};
@@ -850,3 +852,5 @@ int main() {
 
     return eh.code;
 }
+
+#endif // INCLUDE_MAIN
