@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "schrift.h"
+#include "softfloat.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -57,8 +58,8 @@ typedef struct {
     SFT_Font * font;
     /*The line metrics loaded by libschrift - lazy init*/
     SFT_LMetrics lineMetrics;
-    float fontSize;
-    double letterSpacing;
+    SOFTFLOAT_32 fontSize;
+    SOFTFLOAT_64 letterSpacing;
     /* Java UTF8 chars, read only! */
     const char* ttfFilePath;
 } T_TrueTypeFont;
@@ -117,7 +118,7 @@ void qls_disposeSurfacePrivate(uint64_t surfaceHandle);
  */
 T_SizeInt qls_renderTextPrivate(T_ErrorHandler* errorHandler, uint64_t surfaceHandle, T_TrueTypeFont* font, const uint16_t* text, uint32_t textLen,  
                             uint32_t hAlign, uint32_t vAlign, int32_t x, int32_t y, int32_t width, int32_t height,
-                            float r, float g, float b, float a, bool clip, uint32_t wrapMode);
+                            SOFTFLOAT_32 r, SOFTFLOAT_32 g, SOFTFLOAT_32 b, SOFTFLOAT_32 a, bool clip, uint32_t wrapMode);
 
 /**
  * Calculates the layout of text without rendering it
