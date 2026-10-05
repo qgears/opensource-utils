@@ -6,6 +6,29 @@
 #include <math.h>
 #include "util.h"
 
+/**
+ * Iterating over codepoints:
+ * 
+ * uint32_t codepoint;
+ * const uint16_t* reader = text;
+ * while(foobar(codepoint = utf16Peek(reader))) {
+ *      advanceBeforeRender(... codepoint, &penx);
+ *      renderGlyph(... codepoint, penx);
+ *      advanceAfterRender(... codepoint, &penx);
+ *      utf16Skip(&reader);
+ * }
+ * 
+ * Iterating over lines:
+ * 
+ * T_Result_PrescanLine lineData = {0};
+ * const uint16_t* reader = text;
+ * do {
+ *      prescanLine(... reader, &lineData);
+ *      ...
+ *      reader = lineData.nextLineStart;
+ * } while (!lineData.wasLastLine);
+ */
+
 // Structure to represent surface data
 typedef struct {
     uint8_t* data;
