@@ -801,16 +801,12 @@ int main() {
         .width = WIDTH
     };
 
-    enum { HALIGN_LEFT, HALIGN_MIDDLE, HALIGN_RIGHT, HALIGN_JUSTIFY };
-    enum { VALIGN_TOP, VALIGN_MIDDLE, VALIGN_BOTTOM };
     T_RenderData r = {
         .color = ~(uint32_t)0,
         .minPen = {0, 0},
         .maxPen = {WIDTH, HEIGHT},
         .wrapMode = QLS_WRAP_WORD,
-        .letterSpacing = 1,
-        .hAlign = HALIGN_JUSTIFY,
-        .vAlign = VALIGN_BOTTOM
+        .letterSpacing = 1
     };
 
     enum { PX_SIZE = 8 };
@@ -826,19 +822,12 @@ int main() {
 
     layoutAndRender(&eh, &r, message, &surface);
 
-    for (int x = 0; x < WIDTH; ++x) {
-        putchar('-');
-    }
-    putchar('\n');
     for (int y = 0; y < HEIGHT; ++y) {
         for (int x = 0; x < WIDTH; ++x) {
             char c = " .:ioVM@"[canvas[y * STRIDE + x] >> 5];
             putchar(c);
         }
         putchar('\n');
-    }
-    for (int x = 0; x < WIDTH; ++x) {
-        putchar('-');
     }
 
     return eh.code;
