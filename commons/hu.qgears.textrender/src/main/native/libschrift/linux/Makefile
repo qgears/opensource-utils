@@ -45,6 +45,7 @@ all : ../hu_qgears_textrender_libschrift_LibschriftNative.h
 bversion:
 	mkdir -p $(OUTPUTDIR)
 	gcc -o $(OUTPUTDIR)/$(SO_NAME).exe \
+	-DINCLUDE_MAIN \
 	$(C_FLAGS) \
 	 ../nativeLibLibschrift.c ../schrift.c ../util.c \
 	 -lm
