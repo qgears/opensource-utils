@@ -686,7 +686,7 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* 
     };
     
     enum { VALIGN_TOP, VALIGN_MIDDLE, VALIGN_BOTTOM };
-    switch (r->vAlign) {
+    switch (r->vAlign) { // pen.y += ...
         default:
         case VALIGN_TOP: {
             break;
@@ -715,6 +715,13 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* 
     const uint16_t* reader = text;
     T_Result_PrescanLine lineData = {0};
     double lineWidthMax = 0;
+    /**
+     * do while !wasLastLine:
+     *      prescan line
+     *      halign: pen.x += ... ; spaceJustification = ...
+     *      lineWidthMax = ...
+     *      OPT render line: for (codepoint in line) advance & render
+     */
     do {
         prescanLine(eh, r->sft, reader, r->wrapMode, renderData_GetWidth(r), r->letterSpacing, &lineData);
         if (eh->code != QLS_ERROR_OK) {
@@ -725,7 +732,7 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* 
         pen.x = r->minPen.x;
         double spaceJustification = 0;
         enum { HALIGN_LEFT, HALIGN_MIDDLE, HALIGN_RIGHT, HALIGN_JUSTIFY }; //TODO single source of truth
-        switch (r->hAlign) {
+        switch (r->hAlign) { // pen.x += ... ; spaceJustification = ...; lineWidthMax = ...
             default:
             case HALIGN_LEFT: {
                 break;
@@ -748,7 +755,7 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* 
         }
 
         uint32_t lastCodepoint = 0;
-        for (uint_fast16_t i = 0; i < lineData.len; ++i) {
+        for (uint_fast16_t i = 0; i < lineData.len; ++i) { // renderGlyph(...)
             uint32_t codepoint = utf16Peek(reader);
             advancePenBeforeRender(eh, &sft, r->letterSpacing, lastCodepoint, codepoint, &pen.x);
             if (eh->code != QLS_ERROR_OK)  {
