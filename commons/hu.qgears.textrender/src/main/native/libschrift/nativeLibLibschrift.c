@@ -43,6 +43,7 @@ typedef struct {
     SFT_Glyph prev_gliph;
     uint32_t wrapMode;
     uint32_t hAlign;
+    uint32_t vAlign;
 } T_RenderData;
 
 typedef struct {
@@ -54,6 +55,10 @@ typedef struct {
     bool wasLastLine;
     double width;
 } T_Result_PrescanLine;
+
+typedef struct {
+    double textHeight;
+} T_Result_PrescanText;
 
 typedef enum {
     QLS_WRAP_CHAR,
@@ -117,6 +122,7 @@ static inline void advancePenAfterRender(T_ErrorHandler* eh, const SFT* sft, dou
  */
 static inline void prescanLine(T_ErrorHandler* eh, SFT sft, const uint16_t* restrict const text, E_QLS_WRAP wrapMode, double availableWidth, double letterSpacing
         , T_Result_PrescanLine* outResult);
+static inline void prescanText(T_ErrorHandler* eh, const T_RenderData* r, const uint16_t* restrict const text, T_Result_PrescanText* outResult);
 static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* r, const uint16_t* restrict const text, T_SurfaceData* surface);
 
 /*********************************************/
@@ -875,6 +881,33 @@ static inline int32_t renderData_GetWidth(const T_RenderData* r) {
 static inline double getSpareWidth(int32_t boxWidth, double lineWidth) {
     return boxWidth - lineWidth;
 }
+static inline int32_t renderData_GetHeight(const T_RenderData* r) {
+    return r->maxPen.y - r->minPen.y;
+}
+static inline double getSpareHeight(int32_t boxHeight, double textHeight) {
+    return boxHeight - textHeight;
+}
+
+static inline void prescanText(T_ErrorHandler* eh, const T_RenderData* r, const uint16_t* restrict const text, T_Result_PrescanText* outResult) {
+    SFT sft = r->sft;
+    sft.xOffset = 0;
+    sft.yOffset = 0;
+
+    uint_fast16_t nLines = 0;
+    const uint16_t* reader = text;
+    T_Result_PrescanLine lineData = {0};
+    do {
+        prescanLine(eh, sft, reader, r->wrapMode, renderData_GetWidth(r), r->letterSpacing, &lineData);
+        if (eh->code != QLS_ERROR_OK) {
+            return;
+        }
+        nLines += 1;
+        reader = lineData.nextLineStart;
+    } while (!lineData.wasLastLine);
+
+    outResult->textHeight = nLines * (r->lineMetrics.ascender - r->lineMetrics.descender + r->lineMetrics.lineGap) - r->lineMetrics.lineGap;
+}
+
 static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* r, const uint16_t* restrict const text, T_SurfaceData* surface) {
     /**
      * TODO
@@ -884,7 +917,36 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* 
      */
 
     SFT sft = r->sft;
-    T_DPoint pen = {0};
+    T_DPoint pen = {
+        .x = r->minPen.x,
+        .y = r->minPen.y + r->lineMetrics.ascender
+    };
+    
+    enum { VALIGN_TOP, VALIGN_MIDDLE, VALIGN_BOTTOM };
+    switch (r->vAlign) {
+        default:
+        case VALIGN_TOP: {
+            break;
+        }
+        case VALIGN_MIDDLE: {
+            T_Result_PrescanText textData = {0};
+            prescanText(eh, r, text, &textData);
+            if (eh->code != QLS_ERROR_OK) {
+                return (T_SizeInt) {0, 0};
+            }
+            pen.y += getSpareHeight(renderData_GetHeight(r), textData.textHeight) / 2;
+            break;
+        }
+        case VALIGN_BOTTOM: {
+            T_Result_PrescanText textData = {0};
+            prescanText(eh, r, text, &textData);
+            if (eh->code != QLS_ERROR_OK) {
+                return (T_SizeInt) {0, 0};
+            }
+            pen.y += getSpareHeight(renderData_GetHeight(r), textData.textHeight);
+            break;
+        }
+    }
 
     uint_fast16_t iLine = 0;
     const uint16_t* reader = text;
@@ -897,7 +959,6 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* 
         }
         lineWidthMax = MAX(lineWidthMax, lineData.width);
 
-        pen.y = r->lineMetrics.ascender + iLine * (r->lineMetrics.ascender - r->lineMetrics.descender + r->lineMetrics.lineGap);
         pen.x = r->minPen.x;
         enum { HALIGN_LEFT, HALIGN_MIDDLE, HALIGN_RIGHT, HALIGN_JUSTIFY }; //TODO single source of truth
         switch (r->hAlign) {
@@ -939,6 +1000,7 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* 
 
         iLine += 1;
         reader = lineData.nextLineStart;
+        pen.y += r->lineMetrics.ascender - r->lineMetrics.descender + r->lineMetrics.lineGap;
     } while (!lineData.wasLastLine);
 
     return (T_SizeInt) {
