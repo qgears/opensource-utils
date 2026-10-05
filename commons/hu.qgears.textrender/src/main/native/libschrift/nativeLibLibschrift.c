@@ -960,6 +960,7 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* 
         lineWidthMax = MAX(lineWidthMax, lineData.width);
 
         pen.x = r->minPen.x;
+        double spaceJustification = 0;
         enum { HALIGN_LEFT, HALIGN_MIDDLE, HALIGN_RIGHT, HALIGN_JUSTIFY }; //TODO single source of truth
         switch (r->hAlign) {
             default:
@@ -972,6 +973,13 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* 
             }
             case HALIGN_RIGHT: {
                 pen.x += getSpareWidth(renderData_GetWidth(r), lineData.width);
+                break;
+            }
+            case HALIGN_JUSTIFY: {
+                if (0 < lineData.nSpaces && 0 < getSpareWidth(renderData_GetWidth(r), lineData.width)) {
+                    spaceJustification = getSpareWidth(renderData_GetWidth(r), lineData.width) / lineData.nSpaces;
+                    lineWidthMax = MAX(lineWidthMax, renderData_GetWidth(r));
+                }
                 break;
             }
         }
@@ -989,7 +997,7 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* 
                     return (T_SizeInt) {0, 0};
                 }
             }
-            advancePenAfterRender(eh, &sft, 0, codepoint, &pen.x);
+            advancePenAfterRender(eh, &sft, spaceJustification, codepoint, &pen.x);
             if (eh->code != QLS_ERROR_OK) {
                 return (T_SizeInt) {0, 0};
             }
