@@ -116,6 +116,7 @@ static inline void advancePenAfterRender(T_ErrorHandler* eh, const SFT* sft, dou
  */
 static inline void prescanLine(T_ErrorHandler* eh, SFT sft, const uint16_t* restrict const text, E_QLS_WRAP wrapMode, double availableWidth, double letterSpacing
         , T_Result_PrescanLine* outResult);
+static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* r, const uint16_t* restrict const text, T_SurfaceData* surface);
 
 /*********************************************/
 /*** External function implementations     ***/
@@ -865,6 +866,66 @@ static inline void prescanLine(T_ErrorHandler* eh, SFT sft, const uint16_t* rest
         }
         outResult->nextLineStart = reader;
     }
+}
+
+static inline int32_t renderData_GetWidth(const T_RenderData* r) {
+    return r->maxPen.x - r->minPen.x;
+}
+static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* r, const uint16_t* restrict const text, T_SurfaceData* surface) {
+    /**
+     * TODO
+     * pen.y calculation will be complicated by the fallback-font feature
+     * Should we do anything special with text-leading and text-trailing blank lines?
+     * Should result.height = 0, when the whole text is blank?
+     */
+
+    SFT sft = r->sft;
+    T_DPoint pen = {0};
+
+    uint_fast16_t iLine = 0;
+    const uint16_t* reader = text;
+    T_Result_PrescanLine lineData = {0};
+    double lineWidthMax = 0;
+    do {
+        prescanLine(eh, r->sft, reader, r->wrapMode, renderData_GetWidth(r), r->letterSpacing, &lineData);
+        if (eh->code != QLS_ERROR_OK) {
+            return (T_SizeInt) {0, 0};
+        }
+        lineWidthMax = MAX(lineWidthMax, lineData.width);
+
+        pen.y = r->lineMetrics.ascender + iLine * (r->lineMetrics.ascender - r->lineMetrics.descender + r->lineMetrics.lineGap);
+        pen.x = 0;
+
+        uint32_t lastCodepoint = 0;
+        for (uint_fast16_t i = 0; i < lineData.len; ++i) {
+            uint32_t codepoint = utf16Peek(reader);
+            advancePenBeforeRender(eh, &sft, r->letterSpacing, lastCodepoint, codepoint, &pen.x);
+            if (eh->code != QLS_ERROR_OK)  {
+                return (T_SizeInt) {0, 0};
+            }
+            if (surface != NULL) {
+                renderGlyph(eh, &sft, &pen, r->color, codepoint, surface);
+                if (eh->code != QLS_ERROR_OK) {
+                    return (T_SizeInt) {0, 0};
+                }
+            }
+            advancePenAfterRender(eh, &sft, 0, codepoint, &pen.x);
+            if (eh->code != QLS_ERROR_OK) {
+                return (T_SizeInt) {0, 0};
+            }
+
+            lastCodepoint = codepoint;
+            utf16Skip(&reader);
+        }
+
+        iLine += 1;
+        reader = lineData.nextLineStart;
+    } while (!lineData.wasLastLine);
+
+    return (T_SizeInt) {
+        .height = iLine * (r->lineMetrics.ascender - r->lineMetrics.descender + r->lineMetrics.lineGap) - r->lineMetrics.lineGap,
+        .width = lineWidthMax
+    };
 }
 
 int main() {
