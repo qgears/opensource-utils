@@ -89,10 +89,13 @@ static inline uint32_t utf16Peek(const uint16_t* restrict text);
 static inline bool ctypeIsLineEnding(uint32_t c);
 static inline bool ctypeIsSpace(uint32_t c);
 static inline bool ctypeIsGraphical(uint32_t c);
+static inline int32_t wholePart(double d);
+static inline double fractionalPart(double d);
 /**
  * Pass 0 for c1, if there is no previous character.
  */
 static inline void advancePenBeforeRender(T_ErrorHandler* eh, const SFT* sft, double letterSpacing, uint32_t c1, uint32_t c2, double* penx);
+static inline void renderGlyph(T_ErrorHandler* eh, SFT* sft, const T_DPoint* pen, uint32_t color, uint32_t codepoint, T_SurfaceData* surface);
 static inline void advancePenAfterRender(T_ErrorHandler* eh, const SFT* sft, double spaceJustification, uint32_t codepoint, double* penx);
 /**
  * Use this function to
@@ -670,6 +673,13 @@ static inline bool ctypeIsGraphical(uint32_t c) {
     return !ctypeIsSpace(c) && !ctypeIsLineEnding(c);
 }
 
+static inline int32_t wholePart(double d) {
+    return (int32_t) d;
+}
+static inline double fractionalPart(double d) {
+    return d - wholePart(d);
+}
+
 static inline void advancePenBeforeRender(T_ErrorHandler* eh, const SFT* sft, double letterSpacing, uint32_t c1, uint32_t c2, double* penx) {
     if (c1 != 0) {
         SFT_Glyph g1;
@@ -691,6 +701,40 @@ static inline void advancePenBeforeRender(T_ErrorHandler* eh, const SFT* sft, do
         *penx += letterSpacing;
         *penx += kerning.xShift;
     }
+}
+static inline void renderGlyph(T_ErrorHandler* eh, SFT* sft, const T_DPoint* pen, uint32_t color, uint32_t codepoint, T_SurfaceData* surface) {
+    sft->xOffset = fractionalPart(pen->x);
+    sft->yOffset = fractionalPart(pen->y);
+
+    SFT_Glyph glyph;
+    if (sft_lookup(sft, codepoint, &glyph) < 0) {
+		ERROR(eh, QLS_ERROR_GLIPH_MISSING, "codepoint 0x%04X missing", codepoint);
+        return;
+    }
+
+    SFT_GMetrics gmtx;
+    if (sft_gmetrics(sft, glyph, &gmtx) < 0) {
+        ERROR(eh, QLS_ERROR_GLIPH_MISSING, "codepoint 0x%04X bad glyph metrics", codepoint);
+        return;
+    }
+
+    SFT_Image img = {
+        .width = (gmtx.minWidth + 3) & ~3, //TODO consider aligning to 8?
+        .height = gmtx.minHeight
+    };
+    // VLA!
+    uint8_t pixels[img.width * img.height];
+    memset(pixels, 0, img.width * img.height);
+    img.pixels = pixels;
+
+    if (sft_render(sft, glyph, img) < 0) {
+        ERROR(eh, QLS_ERROR_GLIPH_RENDER, "codepoint 0x%04X not rendered", codepoint);
+        return;
+    }
+
+    const int32_t screenX = wholePart(pen->x) + wholePart(gmtx.leftSideBearing);
+    const int32_t screenY = wholePart(pen->y) + gmtx.yOffset;
+    copy_rect(screenX, screenY, surface, &img, color);
 }
 static inline void advancePenAfterRender(T_ErrorHandler* eh, const SFT* sft, double spaceJustification, uint32_t codepoint, double* penx) {
     SFT_Glyph g;
