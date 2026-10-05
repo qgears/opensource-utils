@@ -42,6 +42,7 @@ typedef struct {
      */
     SFT_Glyph prev_gliph;
     uint32_t wrapMode;
+    uint32_t hAlign;
 } T_RenderData;
 
 typedef struct {
@@ -871,6 +872,9 @@ static inline void prescanLine(T_ErrorHandler* eh, SFT sft, const uint16_t* rest
 static inline int32_t renderData_GetWidth(const T_RenderData* r) {
     return r->maxPen.x - r->minPen.x;
 }
+static inline double getSpareWidth(int32_t boxWidth, double lineWidth) {
+    return boxWidth - lineWidth;
+}
 static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* r, const uint16_t* restrict const text, T_SurfaceData* surface) {
     /**
      * TODO
@@ -894,7 +898,22 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* 
         lineWidthMax = MAX(lineWidthMax, lineData.width);
 
         pen.y = r->lineMetrics.ascender + iLine * (r->lineMetrics.ascender - r->lineMetrics.descender + r->lineMetrics.lineGap);
-        pen.x = 0;
+        pen.x = r->minPen.x;
+        enum { HALIGN_LEFT, HALIGN_MIDDLE, HALIGN_RIGHT, HALIGN_JUSTIFY }; //TODO single source of truth
+        switch (r->hAlign) {
+            default:
+            case HALIGN_LEFT: {
+                break;
+            }
+            case HALIGN_MIDDLE: {
+                pen.x += getSpareWidth(renderData_GetWidth(r), lineData.width) / 2;
+                break;
+            }
+            case HALIGN_RIGHT: {
+                pen.x += getSpareWidth(renderData_GetWidth(r), lineData.width);
+                break;
+            }
+        }
 
         uint32_t lastCodepoint = 0;
         for (uint_fast16_t i = 0; i < lineData.len; ++i) {
