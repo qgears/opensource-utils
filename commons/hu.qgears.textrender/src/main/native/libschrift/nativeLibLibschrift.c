@@ -782,53 +782,5 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* 
 
 int main() {
     puts("Hello World!");
-    uint16_t message[256] = {0};
-    {
-        const unsigned char helloworld[] = "Hello World! ";
-        uint16_t* writer = message;
-        for (int j = 0; j < 5; ++j) {
-            for (int i = 0; helloworld[i] != '\0'; ++i) {
-                *writer++ = helloworld[i];
-            }
-        }
-    }
-
-    enum { HEIGHT = 50, WIDTH = 150, STRIDE = ((WIDTH + 3) & ~3)};
-    uint8_t canvas[HEIGHT * STRIDE] = {0};
-    T_SurfaceData surface = {
-        .data = canvas,
-        .height = HEIGHT,
-        .width = WIDTH
-    };
-
-    T_RenderData r = {
-        .color = ~(uint32_t)0,
-        .minPen = {0, 0},
-        .maxPen = {WIDTH, HEIGHT},
-        .wrapMode = QLS_WRAP_WORD,
-        .letterSpacing = 1
-    };
-
-    enum { PX_SIZE = 8 };
-    r.sft.flags |= SFT_DOWNWARD_Y;
-    r.sft.xScale = PX_SIZE;
-    r.sft.yScale = PX_SIZE;
-    r.sft.font = sft_loadfile("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf");
-
-    sft_lmetrics(&r.sft, &r.lineMetrics);
-
-    T_ErrorHandler eh = {0};
-
-
-    layoutAndRender(&eh, &r, message, &surface);
-
-    for (int y = 0; y < HEIGHT; ++y) {
-        for (int x = 0; x < WIDTH; ++x) {
-            char c = " .:ioVM@"[canvas[y * STRIDE + x] >> 5];
-            putchar(c);
-        }
-        putchar('\n');
-    }
-
-    return eh.code;
+    return 0;
 }
