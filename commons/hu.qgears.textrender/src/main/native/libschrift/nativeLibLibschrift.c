@@ -780,7 +780,3 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* 
     };
 }
 
-int main() {
-    puts("Hello World!");
-    return 0;
-}
