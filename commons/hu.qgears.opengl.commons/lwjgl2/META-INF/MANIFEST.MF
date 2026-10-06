@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1788527321628
-Build-Jdk: 21.0.11
+Bnd-LastModified: 1791300367404
+Build-Jdk: 21.0.12
 Built-By: agostoni
 Bundle-Description: OpenGL helper methods and object oriented abstractio
  n layer over OpenGL API.
@@ -44,10 +44,7 @@ Export-Package: hu.qgears.opengl.commons;uses:="hu.qgears.commons,hu.qge
 Import-Package: hu.qgears.commons,hu.qgears.commons.mem,hu.qgears.common
  s.signal,hu.qgears.images,hu.qgears.images.libpng,hu.qgears.images.text
  ,hu.qgears.images.vnc,hu.qgears.nativeloader,javax.swing,lwjgl.standalo
- ne;version="[12.0,13)",org.apache.log4j;version="[1.2,2)",org.lwjgl;ver
- sion="[12.0,13)",org.lwjgl.input;version="[12.0,13)",org.lwjgl.opengl;v
- ersion="[12.0,13)",org.lwjgl.system,org.lwjgl.util;version="[12.0,13)",
- org.lwjgl.util.glu;version="[12.0,13)",org.lwjgl.util.vector;version="[
- 12.0,13)"
+ ne,org.apache.log4j,org.lwjgl,org.lwjgl.input,org.lwjgl.opengl,org.lwjg
+ l.system,org.lwjgl.util,org.lwjgl.util.glu,org.lwjgl.util.vector
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=11))"
 Tool: Bnd-2.3.0.201405100607

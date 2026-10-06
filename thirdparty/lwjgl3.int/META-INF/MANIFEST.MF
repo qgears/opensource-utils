@@ -1,7 +1,6 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1788527319331
-Build-Jdk: 21.0.11
-Build-Jdk-Spec: 21
+Bnd-LastModified: 1791300363409
+Build-Jdk: 21.0.12
 Built-By: agostoni
 Bundle-Description: The lwjgl3.int bundle.
 Bundle-ManifestVersion: 2
@@ -20,8 +19,7 @@ Export-Package: linux.x86.org.lwjgl;version="12.5.2.SNAPSHOT",linux.x86.
  "12.5.2.SNAPSHOT",org.lwjgl.util.glu.tessellation;uses:="org.lwjgl.util
  .glu";version="12.5.2.SNAPSHOT",org.lwjgl.util.vector;version="12.5.2.S
  NAPSHOT"
-Import-Package: hu.qgears.nativeloader,org.apache.log4j;version="[1.2,2)
- ",org.lwjgl.glfw,org.lwjgl.system
-Originally-Created-By: Maven Integration for Eclipse
+Import-Package: hu.qgears.nativeloader,org.apache.log4j,org.lwjgl.glfw,o
+ rg.lwjgl.system
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=11))"
 Tool: Bnd-2.3.0.201405100607

@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1788527324759
-Build-Jdk: 21.0.11
+Bnd-LastModified: 1791300387125
+Build-Jdk: 21.0.12
 Built-By: agostoni
 Bundle-Description: The hu.qgears.emfcollab bundle.
 Bundle-ManifestVersion: 2
@@ -26,10 +26,9 @@ Export-Package: hu.qgears.emfcollab;uses:="hu.qgears.emfcollab.impl,hu.q
  mf.ecore.resource.impl,org.eclipse.emf.ecore.xmi,org.eclipse.emf.ecore.
  xmi.impl";version="12.5.2.SNAPSHOT"
 Import-Package: hu.qgears.commons,hu.qgears.commons.signal,org.eclipse.e
- mf.common.notify;version="[2.46,3)",org.eclipse.emf.common.util;version
- ="[2.46,3)",org.eclipse.emf.ecore,org.eclipse.emf.ecore.resource;versio
- n="[2.43,3)",org.eclipse.emf.ecore.resource.impl;version="[2.43,3)",org
- .eclipse.emf.ecore.util;version="[2.43,3)",org.eclipse.emf.ecore.xmi;ve
- rsion="[2.41,3)",org.eclipse.emf.ecore.xmi.impl;version="[2.41,3)"
+ mf.common.notify,org.eclipse.emf.common.util,org.eclipse.emf.ecore,org.
+ eclipse.emf.ecore.resource,org.eclipse.emf.ecore.resource.impl,org.ecli
+ pse.emf.ecore.util,org.eclipse.emf.ecore.xmi,org.eclipse.emf.ecore.xmi.
+ impl
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=11))"
 Tool: Bnd-2.3.0.201405100607

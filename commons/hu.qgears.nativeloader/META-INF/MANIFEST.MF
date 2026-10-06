@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1788527318167
-Build-Jdk: 21.0.11
+Bnd-LastModified: 1791300357074
+Build-Jdk: 21.0.12
 Built-By: agostoni
 Bundle-Description: Generic native shared object loader implementation.
 Bundle-ManifestVersion: 2
@@ -10,7 +10,7 @@ Bundle-Version: 12.5.2.SNAPSHOT
 Created-By: Apache Maven Bundle Plugin
 Export-Package: hu.qgears.nativeloader;uses:="javax.xml.parsers,org.xml.
  sax,org.xml.sax.helpers";version="12.5.2.SNAPSHOT"
-Import-Package: hu.qgears.commons,javax.xml.parsers,org.apache.log4j;ver
- sion="[1.2,2)",org.xml.sax,org.xml.sax.helpers
+Import-Package: hu.qgears.commons,javax.xml.parsers,org.apache.log4j,org
+ .xml.sax,org.xml.sax.helpers
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=11))"
 Tool: Bnd-2.3.0.201405100607
