@@ -86,7 +86,7 @@ typedef enum {
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 #define LIMIT(x,min,max) ((x) < (min) ? (min) : ((x) > (max) ? (max) : (x)))
-#define PIX(r)  SOFTFLOAT_32_floor_to_u8_to_u32((SOFTFLOAT_32_mul_u32(r , 0xFFu)))
+#define PIX(r)  SOFTFLOAT_32_trunc_to_u8_to_u32((SOFTFLOAT_32_mul_u32(r , 0xFFu)))
 #define LOG(...) ;printf(__VA_ARGS__);printf("\n");fflush(stdout)
 
 static inline uint32_t blend_bgra_premultiplied(uint32_t dst, uint32_t pcolor, uint8_t mask);
@@ -446,7 +446,7 @@ static inline bool ctypeIsGraphical(uint32_t c) {
 
 static inline int32_t wholePart(SOFTFLOAT_64 d) {
     // TODO optimize wholePart/fractionalPart counting of SOFTFLOAT
-    return SOFTFLOAT_64_floor_cast_to_s32( d);
+    return SOFTFLOAT_64_trunc_cast_to_s32( d);
 }
 static inline SOFTFLOAT_64 fractionalPart(SOFTFLOAT_64 d) {
     // TODO optimize wholePart/fractionalPart counting of SOFTFLOAT

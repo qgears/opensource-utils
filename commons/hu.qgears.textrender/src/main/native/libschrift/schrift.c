@@ -1528,7 +1528,7 @@ post_process(Raster buf, uint8_t *image)
 		value    = SOFTFLOAT_64_abs(SOFTFLOAT_64_add(accum , cell.area));
 		value    = SOFTFLOAT_64_min(value, SOFTFLOAT_64_const_1);
 		value    = SOFTFLOAT_64_add(SOFTFLOAT_64_mul(value , SOFTFLOAT_64_const_255) , SOFTFLOAT_64_const_half);
-		image[i] = (uint8_t) SOFTFLOAT_64_floor_to_s32(value);
+		image[i] = (uint8_t) SOFTFLOAT_64_trunc_to_s32(value);
 		SOFTFLOAT_64_addEq(accum   , cell.cover);
 	}
 }
