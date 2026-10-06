@@ -796,3 +796,130 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* 
     };
 }
 
+#if INCLUDE_MAIN
+
+int save_tga(const char *filename,
+             const uint8_t *canvas,
+             int width,
+             int height,
+             int stride)
+{
+    FILE *f = fopen(filename, "wb");
+    if (!f)
+        return 0;
+
+    /*
+     * TGA header: 18 bytes
+     *
+     * Byte  0: ID length
+     * Byte  1: Color map type
+     * Byte  2: Image type (3 = uncompressed grayscale)
+     * Bytes 3-7: Color map specification
+     * Bytes 8-9: X origin
+     * Bytes 10-11: Y origin
+     * Bytes 12-13: Width
+     * Bytes 14-15: Height
+     * Byte 16: Bits per pixel
+     * Byte 17: Image descriptor
+     */
+    uint8_t header[18] = {0};
+
+    header[2] = 3;                         // Uncompressed grayscale
+    header[12] = (uint8_t)(width & 0xff);
+    header[13] = (uint8_t)((width >> 8) & 0xff);
+    header[14] = (uint8_t)(height & 0xff);
+    header[15] = (uint8_t)((height >> 8) & 0xff);
+    header[16] = 8;                        // 8 bits/pixel
+
+    /*
+     * Image descriptor:
+     * bit 5 = 0 -> origin is bottom-left.
+     *
+     * This means we write the canvas starting from its last row.
+     */
+    header[17] = 0x00;
+
+    if (fwrite(header, 1, sizeof(header), f) != sizeof(header)) {
+        fclose(f);
+        return 0;
+    }
+
+    // TGA with bottom-left origin: write rows bottom-to-top.
+    for (int y = height - 1; y >= 0; --y) {
+        if (fwrite(canvas + y * stride, 1, (size_t)width, f) != (size_t)width) {
+            fclose(f);
+            return 0;
+        }
+    }
+
+    fclose(f);
+    return 1;
+}
+
+int main() {
+    puts("Hello World!");
+    uint16_t message[256] = {0};
+    {
+        const unsigned char helloworld[] = "Hello World! ";
+        uint16_t* writer = message;
+        for (int j = 0; j < 5; ++j) {
+            for (int i = 0; helloworld[i] != '\0'; ++i) {
+                *writer++ = helloworld[i];
+            }
+        }
+    }
+
+    enum { HEIGHT = 50, WIDTH = 150, STRIDE = ((WIDTH + 3) & ~3)};
+    uint8_t canvas[HEIGHT * STRIDE] = {0};
+    T_SurfaceData surface = {
+        .data = canvas,
+        .height = HEIGHT,
+        .width = WIDTH
+    };
+
+    enum { HALIGN_LEFT, HALIGN_MIDDLE, HALIGN_RIGHT, HALIGN_JUSTIFY };
+    enum { VALIGN_TOP, VALIGN_MIDDLE, VALIGN_BOTTOM };
+    T_RenderData r = {
+        .color = ~(uint32_t)0,
+        .minPen = {0, 0},
+        .maxPen = {WIDTH, HEIGHT},
+        .wrapMode = QLS_WRAP_WORD,
+        .letterSpacing = 1,
+        .hAlign = HALIGN_JUSTIFY,
+        .vAlign = VALIGN_BOTTOM
+    };
+
+    enum { PX_SIZE = 8 };
+    r.sft.flags |= SFT_DOWNWARD_Y;
+    r.sft.xScale = SOFTFLOAT_64_from_s32(PX_SIZE);
+    r.sft.yScale = SOFTFLOAT_64_from_s32(PX_SIZE);
+    r.sft.font = sft_loadfile("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf");
+
+    sft_lmetrics(&r.sft, &r.lineMetrics);
+
+    T_ErrorHandler eh = {0};
+
+
+    layoutAndRender(&eh, &r, message, &surface);
+
+    for (int x = 0; x < WIDTH; ++x) {
+        putchar('-');
+    }
+    putchar('\n');
+    for (int y = 0; y < HEIGHT; ++y) {
+        for (int x = 0; x < WIDTH; ++x) {
+            char c = " .:ioVM@"[canvas[y * STRIDE + x] >> 5];
+            putchar(c);
+        }
+        putchar('\n');
+    }
+    for (int x = 0; x < WIDTH; ++x) {
+        putchar('-');
+    }
+    
+    save_tga("/tmp/out.tga", canvas, WIDTH, HEIGHT, STRIDE);
+
+    return eh.code;
+}
+
+#endif // INCLUDE_MAIN

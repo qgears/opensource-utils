@@ -2,50 +2,50 @@
 #define SOFTFLOAT_H_
 
 #include <stdbool.h>
+#include <math.h>
 
 /// TODO according to C spec long is minimum 32 bit. But on most platforms it is 64 bit. Review if 32 bit is enough or not?
 typedef int32_t integer_long;
-typedef struct{uint8_t a[4];}  SOFTFLOAT_32;
-typedef struct{uint8_t a[8];} SOFTFLOAT_64;
+typedef float  SOFTFLOAT_32;
+typedef double SOFTFLOAT_64;
 
 /// TODO usage should be explicite whether round, floor, etc.
-int32_t SOFTFLOAT_64_cast_to_s32(SOFTFLOAT_64 f);
-int32_t SOFTFLOAT_64_floor_to_s32(SOFTFLOAT_64 f);
-uint32_t SOFTFLOAT_32_floor_to_u32(SOFTFLOAT_32 f);
-int32_t SOFTFLOAT_64_floor_to_s32(SOFTFLOAT_64 f);
-int32_t SOFTFLOAT_64_ceil_to_s32(SOFTFLOAT_64 f);
-SOFTFLOAT_32 SOFTFLOAT_32_from_float(float f);
-SOFTFLOAT_32 SOFTFLOAT_32_mul_u32(SOFTFLOAT_32 f, uint32_t u);
-SOFTFLOAT_64 SOFTFLOAT_64_from_double(double f);
-double SOFTFLOAT_64_to_double(SOFTFLOAT_64 f);
-SOFTFLOAT_64 SOFTFLOAT_64_from_u16_fast(uint_fast16_t v);
-SOFTFLOAT_64 SOFTFLOAT_64_from_s32(int32_t v);
+static inline int32_t SOFTFLOAT_64_cast_to_s32(SOFTFLOAT_64 f) {return (int32_t) f;}
+static inline int32_t SOFTFLOAT_64_floor_to_s32(SOFTFLOAT_64 f) {return (int32_t)floor(f);}
+static inline uint32_t SOFTFLOAT_32_floor_to_u32(SOFTFLOAT_32 f) {return (uint32_t)floor(f);}
+static inline int32_t SOFTFLOAT_64_ceil_to_s32(SOFTFLOAT_64 f) {return (int32_t)ceil(f);}
+static inline SOFTFLOAT_32 SOFTFLOAT_32_from_float(float f)  {return f;}
+static inline SOFTFLOAT_32 SOFTFLOAT_32_mul_u32(SOFTFLOAT_32 f, uint32_t u) {return f*(float)u;}
+static inline SOFTFLOAT_64 SOFTFLOAT_64_from_double(double f)  {return f;}
+static inline double SOFTFLOAT_64_to_double(SOFTFLOAT_64 f)  {return f;}
+static inline SOFTFLOAT_64 SOFTFLOAT_64_from_u16_fast(uint_fast16_t v) {return (double) v;}
+static inline SOFTFLOAT_64 SOFTFLOAT_64_from_s32(int32_t v) {return (double) v;}
 /// TODO decide whether long is 32 or 64 bit!
-SOFTFLOAT_64 SOFTFLOAT_64_from_long(long v);
-SOFTFLOAT_64 SOFTFLOAT_64_from_SOFTFLOAT_32(SOFTFLOAT_32 v);
-SOFTFLOAT_64 SOFTFLOAT_64_sub (SOFTFLOAT_64 a, SOFTFLOAT_64 b);
-SOFTFLOAT_64 SOFTFLOAT_64_add (SOFTFLOAT_64 a, SOFTFLOAT_64 b);
-SOFTFLOAT_64 SOFTFLOAT_64_mul (SOFTFLOAT_64 a, SOFTFLOAT_64 b);
-SOFTFLOAT_64 SOFTFLOAT_64_div (SOFTFLOAT_64 a, SOFTFLOAT_64 b);
-SOFTFLOAT_64 SOFTFLOAT_64_neg (SOFTFLOAT_64 a);
-SOFTFLOAT_64 SOFTFLOAT_64_abs (SOFTFLOAT_64 a);
+static inline SOFTFLOAT_64 SOFTFLOAT_64_from_long(long v) {return (double) v;}
+static inline SOFTFLOAT_64 SOFTFLOAT_64_from_SOFTFLOAT_32(SOFTFLOAT_32 v) {return (double) v;}
+static inline SOFTFLOAT_64 SOFTFLOAT_64_sub (SOFTFLOAT_64 a, SOFTFLOAT_64 b) {return a-b;}
+static inline SOFTFLOAT_64 SOFTFLOAT_64_add (SOFTFLOAT_64 a, SOFTFLOAT_64 b) {return a+b;}
+static inline SOFTFLOAT_64 SOFTFLOAT_64_mul (SOFTFLOAT_64 a, SOFTFLOAT_64 b) {return a*b;}
+static inline SOFTFLOAT_64 SOFTFLOAT_64_div (SOFTFLOAT_64 a, SOFTFLOAT_64 b) {return a/b;}
+static inline SOFTFLOAT_64 SOFTFLOAT_64_neg (SOFTFLOAT_64 a) {return -a;}
+static inline SOFTFLOAT_64 SOFTFLOAT_64_abs (SOFTFLOAT_64 a) {return fabs(a);}
 /// a<0?-1:(a>0?1:0)
-int32_t SOFTFLOAT_64_signum (SOFTFLOAT_64 a);
+static inline int32_t SOFTFLOAT_64_signum (SOFTFLOAT_64 a) {return (a<0) ? -1:(a>0?1:0);}
 
 
-SOFTFLOAT_64 SOFTFLOAT_64_mul_s32_SOFTFLOAT_64(int32_t a, SOFTFLOAT_64 b);
+static inline SOFTFLOAT_64 SOFTFLOAT_64_mul_s32_SOFTFLOAT_64(int32_t a, SOFTFLOAT_64 b) {return a*b;}
 /// a < b
-bool SOFTFLOAT_64_compare_lt(SOFTFLOAT_64 a, SOFTFLOAT_64 b);
+static inline bool SOFTFLOAT_64_compare_lt(SOFTFLOAT_64 a, SOFTFLOAT_64 b) {return a<b;}
 /// a>=b
-bool SOFTFLOAT_64_compare_gteq(SOFTFLOAT_64 a, SOFTFLOAT_64 b);
+static inline bool SOFTFLOAT_64_compare_gteq(SOFTFLOAT_64 a, SOFTFLOAT_64 b) {return a>=b;}
 /// a<=b
-bool SOFTFLOAT_64_compare_lteq(SOFTFLOAT_64 a, SOFTFLOAT_64 b);
+static inline bool SOFTFLOAT_64_compare_lteq(SOFTFLOAT_64 a, SOFTFLOAT_64 b) {return a<=b;}
 /// max(a,b);
-SOFTFLOAT_64 SOFTFLOAT_64_max(SOFTFLOAT_64 a, SOFTFLOAT_64 b);
+static inline SOFTFLOAT_64 SOFTFLOAT_64_max(SOFTFLOAT_64 a, SOFTFLOAT_64 b)  {return fmax(a,b);}
 /// min(a,b);
-SOFTFLOAT_64 SOFTFLOAT_64_min(SOFTFLOAT_64 a, SOFTFLOAT_64 b);
+static inline SOFTFLOAT_64 SOFTFLOAT_64_min(SOFTFLOAT_64 a, SOFTFLOAT_64 b)  {return fmin(a,b);}
 /// nextafter(a,b);
-SOFTFLOAT_64 SOFTFLOAT_64_nextafter(SOFTFLOAT_64 a, SOFTFLOAT_64 b);
+static inline SOFTFLOAT_64 SOFTFLOAT_64_nextafter(SOFTFLOAT_64 a, SOFTFLOAT_64 b)  {return nextafter(a,b);}
 /// TODO very much not optimal if it is not const folded by the compiler.
 #define SOFTFLOAT_64_const_half (SOFTFLOAT_64_div(SOFTFLOAT_64_from_s32(1), SOFTFLOAT_64_from_s32(2)))
 #define SOFTFLOAT_64_const_zero (SOFTFLOAT_64_from_s32(0))
