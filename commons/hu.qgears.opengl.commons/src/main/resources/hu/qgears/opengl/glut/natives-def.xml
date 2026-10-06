@@ -5,6 +5,9 @@
 			<platform distroId="ubuntu" distroVersion="14.04">			
 				<lib id="libqglut" path="libqglut-ubuntu-14.04-x86_64.so" installPath="/opt/qgears/libqglut-ubuntu-14.04-x86_64.so" />
 			</platform>
+			<platform distroId="ubuntu" distroVersion="24.04">			
+				<lib id="libqglut" path="libqglut-ubuntu-24.04-x86_64.so" installPath="/opt/qgears/libqglut-ubuntu-24.04-x86_64.so" />
+			</platform>
 			<platform distroId="debian" distroVersion="10">			
 				<lib id="libqglut" path="libqglut-debian-10-x86_64.so" installPath="/opt/qgears/libqglut-debian-10-x86_64.so" />
 			</platform>
