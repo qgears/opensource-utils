@@ -1,9 +1,3 @@
-#ifndef SOFTFLOAT_H_
-#define SOFTFLOAT_H_
-
-#include <stdbool.h>
-#include <math.h>
-
 #define integer_long long
 #define SOFTFLOAT_32 float
 #define SOFTFLOAT_64 double
@@ -36,20 +30,15 @@
 #define SOFTFLOAT_64_compare_lteq(a,b)a<=b
 #define SOFTFLOAT_64_signum(a)SIGN(a)
 #define SOFTFLOAT_64_min(a,b)MIN(a,b)
+#define SOFTFLOAT_64_max(a,b)MAX(a,b)
 #define SOFTFLOAT_64_floor_to_s32(a)a
+#define SOFTFLOAT_64_floor_cast_to_s32(a)(int32_t)a
 #define SOFTFLOAT_64_return_fast_floor(x)int i = (int) x; return i - (i > x)
 #define SOFTFLOAT_64_return_fast_ceil(x)int i = (int) x; return i + (i < x)
-
-static inline uint32_t SOFTFLOAT_32_floor_to_u32(SOFTFLOAT_32 f) {return (uint32_t)floor(f);}
-static inline SOFTFLOAT_32 SOFTFLOAT_32_from_float(float f)  {return f;}
-static inline SOFTFLOAT_32 SOFTFLOAT_32_mul_u32(SOFTFLOAT_32 f, uint32_t u) {return f*(float)u;}
-static inline SOFTFLOAT_64 SOFTFLOAT_64_from_SOFTFLOAT_32(SOFTFLOAT_32 v) {return (double) v;}
-static inline double SOFTFLOAT_64_to_double(SOFTFLOAT_64 f)  {return f;}
-static inline SOFTFLOAT_64 SOFTFLOAT_64_from_u16_fast(uint_fast16_t v) {return (double) v;}
-static inline SOFTFLOAT_64 SOFTFLOAT_64_max(SOFTFLOAT_64 a, SOFTFLOAT_64 b)  {return fmax(a,b);}
-static inline int32_t SOFTFLOAT_64_cast_to_s32(SOFTFLOAT_64 f) {return (int32_t) f;}
+#define SOFTFLOAT_64_from_SOFTFLOAT_32(f)f
+#define SOFTFLOAT_64_to_double(f)f
+#define SOFTFLOAT_32_mul_u32(a,b)a*b
 #define SOFTFLOAT_32_floor_to_u8_to_u32(a)(uint32_t)(((uint8_t)a))
-#define SOFTFLOAT_64_floor_cast_to_s32(a)(int32_t)a
-
-#endif
+#define SOFTFLOAT_64_from_u16_fast(a)a
+#define SOFTFLOAT_64_cast_to_s32(f)f
 

@@ -46,8 +46,8 @@ typedef struct {
     int32_t y;
 } T_IPoint;
 typedef struct {
-    SOFTFLOAT_64 x;
-    SOFTFLOAT_64 y;
+    double x;
+    double y;
 } T_DPoint;
 
 typedef struct {
@@ -56,7 +56,7 @@ typedef struct {
     T_IPoint minPen;
     T_IPoint maxPen;
     uint32_t color;
-    SOFTFLOAT_64 letterSpacing;
+    double letterSpacing;
     uint32_t wrapMode;
     uint32_t hAlign;
     uint32_t vAlign;
@@ -69,11 +69,11 @@ typedef struct {
     //inclusive
     const uint16_t* nextLineStart;
     bool wasLastLine;
-    SOFTFLOAT_64 width;
+    double width;
 } T_Result_PrescanLine;
 
 typedef struct {
-    SOFTFLOAT_64 textHeight;
+    double textHeight;
 } T_Result_PrescanText;
 
 typedef enum {
@@ -86,7 +86,7 @@ typedef enum {
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 #define LIMIT(x,min,max) ((x) < (min) ? (min) : ((x) > (max) ? (max) : (x)))
-#define PIX(r)  SOFTFLOAT_32_floor_to_u8_to_u32((SOFTFLOAT_32_mul_u32(r , 0xFFu)))
+#define PIX(r)  (uint32_t)(((uint8_t)(r * 0xFFu)))
 #define LOG(...) ;printf(__VA_ARGS__);printf("\n");fflush(stdout)
 
 static inline uint32_t blend_bgra_premultiplied(uint32_t dst, uint32_t pcolor, uint8_t mask);
@@ -104,14 +104,14 @@ static inline uint32_t utf16Peek(const uint16_t* restrict text);
 static inline bool ctypeIsLineEnding(uint32_t c);
 static inline bool ctypeIsSpace(uint32_t c);
 static inline bool ctypeIsGraphical(uint32_t c);
-static inline int32_t wholePart(SOFTFLOAT_64 d);
-static inline SOFTFLOAT_64 fractionalPart(SOFTFLOAT_64 d);
+static inline int32_t wholePart(double d);
+static inline double fractionalPart(double d);
 /**
  * Pass 0 for c1, if there is no previous character.
  */
-static inline void advancePenBeforeRender(T_ErrorHandler* eh, const SFT* sft, SOFTFLOAT_64 letterSpacing, uint32_t c1, uint32_t c2, SOFTFLOAT_64* penx);
+static inline void advancePenBeforeRender(T_ErrorHandler* eh, const SFT* sft, double letterSpacing, uint32_t c1, uint32_t c2, double* penx);
 static inline void renderGlyph(T_ErrorHandler* eh, SFT* sft, const T_DPoint* pen, uint32_t color, uint32_t codepoint, T_SurfaceData* surface);
-static inline void advancePenAfterRender(T_ErrorHandler* eh, const SFT* sft, SOFTFLOAT_64 spaceJustification, uint32_t codepoint, SOFTFLOAT_64* penx);
+static inline void advancePenAfterRender(T_ErrorHandler* eh, const SFT* sft, double spaceJustification, uint32_t codepoint, double* penx);
 /**
  * Use this function to
  *  * Get the number of codepoints to render in one line
@@ -129,7 +129,7 @@ static inline void advancePenAfterRender(T_ErrorHandler* eh, const SFT* sft, SOF
  * TODO: Support more Unicode, e.g. ideographic space (how should it interact with justification etc.)
  * TODO: Introduce grapheme layer, or decide on partial support and canonize input (e.g. the same accented letter can be represented as either one or two codepoints!)
  */
-static inline void prescanLine(T_ErrorHandler* eh, SFT sft, const uint16_t* restrict const text, E_QLS_WRAP wrapMode, SOFTFLOAT_64 availableWidth, SOFTFLOAT_64 letterSpacing
+static inline void prescanLine(T_ErrorHandler* eh, SFT sft, const uint16_t* restrict const text, E_QLS_WRAP wrapMode, double availableWidth, double letterSpacing
         , T_Result_PrescanLine* outResult);
 static inline void prescanText(T_ErrorHandler* eh, const T_RenderData* r, const uint16_t* restrict const text, T_Result_PrescanText* outResult);
 static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* r, const uint16_t* restrict const text, T_SurfaceData* surface);
@@ -192,7 +192,7 @@ void qls_disposeSurfacePrivate(uint64_t surfaceHandle)
 
 T_SizeInt qls_renderTextPrivate(T_ErrorHandler* errorHandler, uint64_t surfaceHandle, T_TrueTypeFont* font, const uint16_t* text, uint32_t textLen,
                             uint32_t hAlign, uint32_t vAlign, int32_t x, int32_t y, int32_t width, int32_t height,
-                            SOFTFLOAT_32 r, SOFTFLOAT_32 g, SOFTFLOAT_32 b, SOFTFLOAT_32 a, bool clip, uint32_t wrapMode)
+                            float r, float g, float b, float a, bool clip, uint32_t wrapMode)
 {
     T_SizeInt result = {0, 0};
     T_SurfaceData* surface = qls_get_surfacedata(surfaceHandle);
@@ -365,8 +365,8 @@ static inline void copy_rect(int32_t startx, int32_t starty, T_SurfaceData* surf
 
 static void qls_load_font(T_ErrorHandler* eh, T_RenderData* r, T_TrueTypeFont* font) {
     SFT* sft = &(r->sft);
-    sft->xScale = SOFTFLOAT_64_from_SOFTFLOAT_32(font->fontSize);
-    sft->yScale = SOFTFLOAT_64_from_SOFTFLOAT_32(font->fontSize);
+    sft->xScale = font->fontSize;
+    sft->yScale = font->fontSize;
     sft->flags = SFT_DOWNWARD_Y;
 
     if (font->font == NULL)
@@ -388,9 +388,9 @@ static void qls_load_font(T_ErrorHandler* eh, T_RenderData* r, T_TrueTypeFont* f
 		    } else {
 		        LOG("LineMetrics of %s asc %lf, desc %lf, gap %lf",
                     filename(font->ttfFilePath),
-                    SOFTFLOAT_64_to_double(font->lineMetrics.ascender),
-                    SOFTFLOAT_64_to_double(font->lineMetrics.descender),
-                    SOFTFLOAT_64_to_double(font->lineMetrics.lineGap));
+                    font->lineMetrics.ascender,
+                    font->lineMetrics.descender,
+                    font->lineMetrics.lineGap);
 		    }
 		}
     }
@@ -444,16 +444,16 @@ static inline bool ctypeIsGraphical(uint32_t c) {
     return !ctypeIsSpace(c) && !ctypeIsLineEnding(c);
 }
 
-static inline int32_t wholePart(SOFTFLOAT_64 d) {
+static inline int32_t wholePart(double d) {
     // TODO optimize wholePart/fractionalPart counting of SOFTFLOAT
-    return SOFTFLOAT_64_floor_cast_to_s32( d);
+    return (int32_t) d;
 }
-static inline SOFTFLOAT_64 fractionalPart(SOFTFLOAT_64 d) {
+static inline double fractionalPart(double d) {
     // TODO optimize wholePart/fractionalPart counting of SOFTFLOAT
-    return SOFTFLOAT_64_sub(d , SOFTFLOAT_64_from_s32(wholePart(d)));
+    return d - wholePart(d);
 }
 
-static inline void advancePenBeforeRender(T_ErrorHandler* eh, const SFT* sft, SOFTFLOAT_64 letterSpacing, uint32_t c1, uint32_t c2, SOFTFLOAT_64* penx) {
+static inline void advancePenBeforeRender(T_ErrorHandler* eh, const SFT* sft, double letterSpacing, uint32_t c1, uint32_t c2, double* penx) {
     if (c1 != 0) {
         SFT_Glyph g1;
         if (sft_lookup(sft, c1, &g1) < 0) {
@@ -471,8 +471,8 @@ static inline void advancePenBeforeRender(T_ErrorHandler* eh, const SFT* sft, SO
             return;
         }
 
-        SOFTFLOAT_64_addEq(*penx , letterSpacing);
-        SOFTFLOAT_64_addEq(*penx , kerning.xShift);
+        *penx += letterSpacing;
+        *penx += kerning.xShift;
     }
 }
 static inline void renderGlyph(T_ErrorHandler* eh, SFT* sft, const T_DPoint* pen, uint32_t color, uint32_t codepoint, T_SurfaceData* surface) {
@@ -510,7 +510,7 @@ static inline void renderGlyph(T_ErrorHandler* eh, SFT* sft, const T_DPoint* pen
     const int32_t screenY = wholePart(pen->y) + gmtx.yOffset;
     copy_rect(screenX, screenY, surface, &img, color);
 }
-static inline void advancePenAfterRender(T_ErrorHandler* eh, const SFT* sft, SOFTFLOAT_64 spaceJustification, uint32_t codepoint, SOFTFLOAT_64* penx) {
+static inline void advancePenAfterRender(T_ErrorHandler* eh, const SFT* sft, double spaceJustification, uint32_t codepoint, double* penx) {
     SFT_Glyph g;
     if (sft_lookup(sft, codepoint, &g) < 0) {
         ERROR(eh, QLS_ERROR_GLIPH_MISSING, "codepoint 0x%04X missing", codepoint);
@@ -523,21 +523,21 @@ static inline void advancePenAfterRender(T_ErrorHandler* eh, const SFT* sft, SOF
     }
 
     if (ctypeIsSpace(codepoint)) {
-        SOFTFLOAT_64_addEq(*penx , spaceJustification);
+        *penx += spaceJustification;
     }
-    SOFTFLOAT_64_addEq(*penx , gMetrics.advanceWidth);
+    *penx += gMetrics.advanceWidth;
 }
 
-static inline bool prescanLine_IsLineTooWide(SOFTFLOAT_64 availableWidth, uint_fast16_t l, SOFTFLOAT_64 w) {
-    return 1 <= l && SOFTFLOAT_64_compare_lt(availableWidth , w);
+static inline bool prescanLine_IsLineTooWide(double availableWidth, uint_fast16_t l, double w) {
+    return 1 <= l && availableWidth < w;
 }
-static inline void prescanLine(T_ErrorHandler* eh, SFT sft, const uint16_t* restrict const text, E_QLS_WRAP wrapMode, SOFTFLOAT_64 availableWidth, SOFTFLOAT_64 letterSpacing
+static inline void prescanLine(T_ErrorHandler* eh, SFT sft, const uint16_t* restrict const text, E_QLS_WRAP wrapMode, double availableWidth, double letterSpacing
         , T_Result_PrescanLine* outResult) {
 
-    sft.xOffset = SOFTFLOAT_64_from_s32(0);
+    sft.xOffset = 0;
     
     typedef struct {
-        SOFTFLOAT_64 w, wSpace;
+        double w, wSpace;
         uint_fast16_t l, lSpace;
         uint32_t lastCodepoint;
     } T_LayoutData;
@@ -564,7 +564,7 @@ static inline void prescanLine(T_ErrorHandler* eh, SFT sft, const uint16_t* rest
             if (eh->code != QLS_ERROR_OK) {
                 return;
             }
-            advancePenAfterRender(eh, &sft, SOFTFLOAT_64_from_s32(0), codepoint, &line.wSpace);
+            advancePenAfterRender(eh, &sft, 0, codepoint, &line.wSpace);
             if (eh->code != QLS_ERROR_OK) {
                 return;
             }
@@ -595,7 +595,7 @@ static inline void prescanLine(T_ErrorHandler* eh, SFT sft, const uint16_t* rest
                 if (eh->code != QLS_ERROR_OK) {
                     return;
                 }
-                advancePenAfterRender(eh, &sft, SOFTFLOAT_64_from_s32(0), codepoint, &line.wSpace);
+                advancePenAfterRender(eh, &sft, 0, codepoint, &line.wSpace);
                 if (eh->code != QLS_ERROR_OK) {
                     return;
                 }
@@ -644,26 +644,26 @@ static inline void prescanLine(T_ErrorHandler* eh, SFT sft, const uint16_t* rest
 static inline int32_t renderData_GetWidth(const T_RenderData* r) {
     return r->maxPen.x - r->minPen.x;
 }
-static inline SOFTFLOAT_64 getSpareWidth(int32_t boxWidth, SOFTFLOAT_64 lineWidth) {
-    return SOFTFLOAT_64_sub(SOFTFLOAT_64_from_s32(boxWidth) , lineWidth);
+static inline double getSpareWidth(int32_t boxWidth, double lineWidth) {
+    return boxWidth - lineWidth;
 }
 static inline int32_t renderData_GetHeight(const T_RenderData* r) {
     return r->maxPen.y - r->minPen.y;
 }
-static inline SOFTFLOAT_64 getSpareHeight(int32_t boxHeight, SOFTFLOAT_64 textHeight) {
-    return SOFTFLOAT_64_sub(SOFTFLOAT_64_from_s32(boxHeight) , textHeight);
+static inline double getSpareHeight(int32_t boxHeight, double textHeight) {
+    return boxHeight - textHeight;
 }
 
 static inline void prescanText(T_ErrorHandler* eh, const T_RenderData* r, const uint16_t* restrict const text, T_Result_PrescanText* outResult) {
     SFT sft = r->sft;
-    sft.xOffset = SOFTFLOAT_64_from_s32(0);
-    sft.yOffset = SOFTFLOAT_64_from_s32(0);
+    sft.xOffset = 0;
+    sft.yOffset = 0;
 
     uint_fast16_t nLines = 0;
     const uint16_t* reader = text;
     T_Result_PrescanLine lineData = {0};
     do {
-        prescanLine(eh, sft, reader, r->wrapMode, SOFTFLOAT_64_from_s32(renderData_GetWidth(r)), r->letterSpacing, &lineData);
+        prescanLine(eh, sft, reader, r->wrapMode, renderData_GetWidth(r), r->letterSpacing, &lineData);
         if (eh->code != QLS_ERROR_OK) {
             return;
         }
@@ -671,7 +671,7 @@ static inline void prescanText(T_ErrorHandler* eh, const T_RenderData* r, const 
         reader = lineData.nextLineStart;
     } while (!lineData.wasLastLine);
 
-    outResult->textHeight = SOFTFLOAT_64_sub(SOFTFLOAT_64_mul(SOFTFLOAT_64_from_u16_fast(nLines) , (SOFTFLOAT_64_add(SOFTFLOAT_64_sub(r->lineMetrics.ascender , r->lineMetrics.descender) , r->lineMetrics.lineGap))) , r->lineMetrics.lineGap);
+    outResult->textHeight = nLines * (r->lineMetrics.ascender - r->lineMetrics.descender + r->lineMetrics.lineGap) - r->lineMetrics.lineGap;
 }
 
 static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* r, const uint16_t* restrict const text, T_SurfaceData* surface) {
@@ -684,8 +684,8 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* 
 
     SFT sft = r->sft;
     T_DPoint pen = {
-        .x = SOFTFLOAT_64_from_s32(r->minPen.x),
-        .y = SOFTFLOAT_64_add(SOFTFLOAT_64_from_s32(r->minPen.y) , r->lineMetrics.ascender)
+        .x = r->minPen.x,
+        .y = r->minPen.y + r->lineMetrics.ascender
     };
     
     enum { VALIGN_TOP, VALIGN_MIDDLE, VALIGN_BOTTOM };
@@ -700,7 +700,7 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* 
             if (eh->code != QLS_ERROR_OK) {
                 return (T_SizeInt) {0, 0};
             }
-            SOFTFLOAT_64_addEq(pen.y , SOFTFLOAT_64_div(getSpareHeight(renderData_GetHeight(r), textData.textHeight) , SOFTFLOAT_64_from_s32(2)));
+            pen.y += getSpareHeight(renderData_GetHeight(r), textData.textHeight) / 2;
             break;
         }
         case VALIGN_BOTTOM: {
@@ -709,7 +709,7 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* 
             if (eh->code != QLS_ERROR_OK) {
                 return (T_SizeInt) {0, 0};
             }
-            SOFTFLOAT_64_addEq(pen.y , getSpareHeight(renderData_GetHeight(r), textData.textHeight));
+            pen.y += getSpareHeight(renderData_GetHeight(r), textData.textHeight);
             break;
         }
     }
@@ -717,7 +717,7 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* 
     uint_fast16_t iLine = 0;
     const uint16_t* reader = text;
     T_Result_PrescanLine lineData = {0};
-    SOFTFLOAT_64 lineWidthMax = SOFTFLOAT_64_from_s32(0);
+    double lineWidthMax = 0;
     /**
      * do while !wasLastLine:
      *      prescan line
@@ -726,14 +726,14 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* 
      *      OPT render line: for (codepoint in line) advance & render
      */
     do {
-        prescanLine(eh, r->sft, reader, r->wrapMode, SOFTFLOAT_64_from_s32(renderData_GetWidth(r)), r->letterSpacing, &lineData);
+        prescanLine(eh, r->sft, reader, r->wrapMode, renderData_GetWidth(r), r->letterSpacing, &lineData);
         if (eh->code != QLS_ERROR_OK) {
             return (T_SizeInt) {0, 0};
         }
-        lineWidthMax = SOFTFLOAT_64_max(lineWidthMax, lineData.width);
+        lineWidthMax = MAX(lineWidthMax, lineData.width);
 
-        pen.x = SOFTFLOAT_64_from_s32(r->minPen.x);
-        SOFTFLOAT_64 spaceJustification = SOFTFLOAT_64_from_s32(0);
+        pen.x = r->minPen.x;
+        double spaceJustification = 0;
         enum { HALIGN_LEFT, HALIGN_MIDDLE, HALIGN_RIGHT, HALIGN_JUSTIFY }; //TODO single source of truth
         switch (r->hAlign) { // pen.x += ... ; spaceJustification = ...; lineWidthMax = ...
             default:
@@ -741,17 +741,17 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* 
                 break;
             }
             case HALIGN_MIDDLE: {
-                SOFTFLOAT_64_addEq(pen.x , SOFTFLOAT_64_div(getSpareWidth(renderData_GetWidth(r), lineData.width) , SOFTFLOAT_64_from_s32(2)));
+                pen.x += getSpareWidth(renderData_GetWidth(r), lineData.width) / 2;
                 break;
             }
             case HALIGN_RIGHT: {
-                SOFTFLOAT_64_addEq(pen.x , getSpareWidth(renderData_GetWidth(r), lineData.width));
+                pen.x += getSpareWidth(renderData_GetWidth(r), lineData.width);
                 break;
             }
             case HALIGN_JUSTIFY: {
-                if (0 < lineData.nSpaces && SOFTFLOAT_64_compare_lt(SOFTFLOAT_64_from_s32(0) , getSpareWidth(renderData_GetWidth(r), lineData.width))) {
-                    spaceJustification = SOFTFLOAT_64_div(getSpareWidth(renderData_GetWidth(r), lineData.width) , SOFTFLOAT_64_from_u16_fast(lineData.nSpaces));
-                    lineWidthMax = SOFTFLOAT_64_max(lineWidthMax, SOFTFLOAT_64_from_s32(renderData_GetWidth(r)));
+                if (0 < lineData.nSpaces && 0 < getSpareWidth(renderData_GetWidth(r), lineData.width)) {
+                    spaceJustification = getSpareWidth(renderData_GetWidth(r), lineData.width) / lineData.nSpaces;
+                    lineWidthMax = MAX(lineWidthMax, renderData_GetWidth(r));
                 }
                 break;
             }
@@ -781,13 +781,13 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* 
 
         iLine += 1;
         reader = lineData.nextLineStart;
-        SOFTFLOAT_64_addEq(pen.y , SOFTFLOAT_64_add(SOFTFLOAT_64_sub(r->lineMetrics.ascender , r->lineMetrics.descender) , r->lineMetrics.lineGap));
+        pen.y += r->lineMetrics.ascender - r->lineMetrics.descender + r->lineMetrics.lineGap;
     } while (!lineData.wasLastLine);
 
     	// TODO should not sizes be rounded up instead of just casting to int?
     return (T_SizeInt) {
-        .height = SOFTFLOAT_64_cast_to_s32(SOFTFLOAT_64_sub(SOFTFLOAT_64_mul(SOFTFLOAT_64_from_u16_fast(iLine) , (SOFTFLOAT_64_add(SOFTFLOAT_64_sub(r->lineMetrics.ascender , r->lineMetrics.descender) , r->lineMetrics.lineGap))) , r->lineMetrics.lineGap)),
-        .width = SOFTFLOAT_64_cast_to_s32(lineWidthMax)
+        .height = iLine * (r->lineMetrics.ascender - r->lineMetrics.descender + r->lineMetrics.lineGap) - r->lineMetrics.lineGap,
+        .width = lineWidthMax
     };
 }
 
@@ -886,8 +886,8 @@ int main() {
 
     enum { PX_SIZE = 8 };
     r.sft.flags |= SFT_DOWNWARD_Y;
-    r.sft.xScale = SOFTFLOAT_64_from_s32(PX_SIZE);
-    r.sft.yScale = SOFTFLOAT_64_from_s32(PX_SIZE);
+    r.sft.xScale = PX_SIZE;
+    r.sft.yScale = PX_SIZE;
     r.sft.font = sft_loadfile("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf");
 
     sft_lmetrics(&r.sft, &r.lineMetrics);
