@@ -55,14 +55,16 @@ public class CrossRefManager {
 	 */
 	public Doc createDocument(String identifier)
 	{
-		Doc prev=docs.remove(identifier);
-		if(prev!=null)
-		{
-			prev.close();
+		synchronized (syncObj) {
+			Doc prev=docs.remove(identifier);
+			if(prev!=null)
+			{
+				prev.close();
+			}
+			Doc ret=new Doc(this, identifier);
+			docs.put(identifier, ret);
+			return ret;
 		}
-		Doc ret=new Doc(this, identifier);
-		docs.put(identifier, ret);
-		return ret;
 	}
 	
 	
