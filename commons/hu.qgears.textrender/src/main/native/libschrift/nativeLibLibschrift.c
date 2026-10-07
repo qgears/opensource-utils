@@ -205,7 +205,8 @@ T_SizeInt qls_renderTextPrivate(T_ErrorHandler* errorHandler, uint64_t surfaceHa
             rData.minPen.y = y;
             rData.maxPen.x = x + width;
             rData.maxPen.y = y + height;
-            rData.letterSpacing = font->letterSpacing;
+            // rData.letterSpacing = font->letterSpacing;
+            rData.letterSpacing = 0;
             rData.wrapMode = wrapMode;
             rData.hAlign = hAlign;
             rData.vAlign = vAlign;
@@ -246,7 +247,8 @@ T_SizeInt qls_layoutTextPrivate(T_ErrorHandler* errorHandler, T_TrueTypeFont* fo
     r.maxPen.x = width;
     r.maxPen.y = INT32_MAX;
     r.sft.flags = SFT_DOWNWARD_Y;
-    r.letterSpacing = font->letterSpacing;
+    // r.letterSpacing = font->letterSpacing;
+    r.letterSpacing = font->letterSpacing = 0;
     r.wrapMode = wrapMode;
     r.hAlign = hAlign;
     enum { VALIGN_TOP, VALIGN_MIDDLE, VALIGN_BOTTOM }; // TODO single source of truth
@@ -781,9 +783,13 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* 
         pen.y += r->lineMetrics.ascender - r->lineMetrics.descender + r->lineMetrics.lineGap;
     } while (!lineData.wasLastLine);
 
+    // return (T_SizeInt) {
+    //     .height = iLine * (r->lineMetrics.ascender - r->lineMetrics.descender + r->lineMetrics.lineGap) - r->lineMetrics.lineGap,
+    //     .width = lineWidthMax
+    // };
     return (T_SizeInt) {
-        .height = iLine * (r->lineMetrics.ascender - r->lineMetrics.descender + r->lineMetrics.lineGap) - r->lineMetrics.lineGap,
-        .width = lineWidthMax
+        .height = 2 * iLine * (r->lineMetrics.ascender - r->lineMetrics.descender + r->lineMetrics.lineGap) - r->lineMetrics.lineGap,
+        .width = 2 * lineWidthMax
     };
 }
 
