@@ -452,4 +452,26 @@ static inline S_F32 S_F32_nextafter(S_F32 a, S_F32 b)
 	return S_F32_create(s, e, (u32)(u64)m);
 }
 #endif
+#ifdef SOFTFLOAT_LIB_TEST
+#ifndef SOFTFLOAT_LIB_TEST_H_
+#define SOFTFLOAT_LIB_TEST_H_
+static inline void S_F32_TEST_assertEq(S_F32 v, float expv)
+{
+	float fv=S_F32_toFloat(v);
+	if(fv!=expv)
+	{
+		printf("S_F32_TEST_assertEq error %f != %f\n", fv, expv);
+		exit(1);
+	}
+}
+static inline S_F32 S_F32_div_TEST(S_F32 a, S_F32 b)
+{
+	S_F32 ret=S_F32_div(a, b);
+	printf("%f/%f\n", S_F32_toFloat(a), S_F32_toFloat(b));
+	S_F32_TEST_assertEq(ret, S_F32_toFloat(a)/S_F32_toFloat(b));
+	return ret;
+}
+#warning TEST_ASDASDASDASDAD
+#endif
+#endif
 
