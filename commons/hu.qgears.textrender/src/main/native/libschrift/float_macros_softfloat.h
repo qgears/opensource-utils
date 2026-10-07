@@ -8,7 +8,7 @@ typedef uint64_t u64;
 typedef int32_t s32;
 typedef int64_t s64;
 #define SOFTFLOAT_LIB_TEST
-#include "softfloat_impl.h"
+#include "softfloat.h"
 
 
 #define integer_long int32_t

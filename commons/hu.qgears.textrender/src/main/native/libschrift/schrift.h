@@ -19,7 +19,7 @@
 
 #include <stddef.h> /* size_t */
 #include <stdint.h> /* uint_fast32_t, uint_least32_t */
-#include "softfloat.h"
+#include "float_macros.h"
 
 #ifdef __cplusplus
 extern "C" {

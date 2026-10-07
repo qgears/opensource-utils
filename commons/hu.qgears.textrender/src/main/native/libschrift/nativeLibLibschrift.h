@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "schrift.h"
-#include "softfloat.h"
+#include "float_macros.h"
 
 #ifdef __cplusplus
 extern "C" {

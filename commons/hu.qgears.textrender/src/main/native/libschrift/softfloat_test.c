@@ -30,7 +30,7 @@ void print_binary64(uint64_t x)
 }
 
 #define SOFTFLOAT_IMPL 1
-#include "softfloat_impl.h"
+#include "softfloat.h"
 
 static void compare(float a, float b)
 {

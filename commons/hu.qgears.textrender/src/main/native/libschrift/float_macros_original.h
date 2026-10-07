@@ -42,6 +42,8 @@
 #define SOFTFLOAT_32_trunc_to_u8_to_u32(a)(uint32_t)(((uint8_t)a))
 #define SOFTFLOAT_64_from_u16_fast(a)a
 #define SOFTFLOAT_64_cast_to_s32(f)f
+#define SOFTFLOAT_32_from_float(f)f
+#define SOFTFLOAT_64_from_double(d)d
 
 
 

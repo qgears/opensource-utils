@@ -1476,6 +1476,12 @@ draw_line(Raster buf, Point origin, Point goal)
 	halfDeltaX = 0.5 * delta.x;
 
 	for (step = 0; step < numSteps; ++step) {
+		if(pixel.y<0 || pixel.y>=buf.height ||pixel.x<0 || pixel.x>=buf.width)
+		{
+			// TODO this should not happen but also when happens should be handled so that program can not fail!
+			printf("ERROR: out of raster pixel addressed!\n");
+			continue;
+		}
 		xAverage = origin.x + (prevDistance + nextDistance) * halfDeltaX;
 		yDifference = (nextDistance - prevDistance) * delta.y;
 		cptr = &buf.cells[pixel.y * buf.width + pixel.x];
@@ -1492,7 +1498,12 @@ draw_line(Raster buf, Point origin, Point goal)
 		nextCrossing.y += alongX ? 0.0 : crossingIncr.y;
 		nextDistance = MIN(nextCrossing.x, nextCrossing.y);
 	}
-
+	if(pixel.y<0 || pixel.y>=buf.height ||pixel.x<0 || pixel.x>=buf.width)
+	{
+		// TODO this should not happen but also when happens should be handled so that program can not fail!
+		printf("ERROR: out of raster pixel addressed!\n");
+		return;
+	}
 	xAverage = origin.x + (prevDistance + 1.0) * halfDeltaX;
 	yDifference = (1.0 - prevDistance) * delta.y;
 	cptr = &buf.cells[pixel.y * buf.width + pixel.x];
