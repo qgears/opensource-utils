@@ -281,7 +281,7 @@ static inline u64 S_F32_wholeDown(s32 e, u64 m)
 	// shift 23 right to get whole number
 	int32_t shift=-23;
 	shift+=e;
-	if(shift<-23)
+	if(shift<-63)
 	{
 		return 0;
 	}else if(shift<0)
@@ -297,7 +297,9 @@ static inline u64 S_F32_wholeDown(s32 e, u64 m)
 }
 static inline u64 S_F32_wholeUp(s32 e, u64 m)
 {
-	return S_F32_wholeDown(e, m+(u64)(1<<23));
+	u64 one=(u64)(1<<(23-e));
+	u64 add=one-1;
+	return S_F32_wholeDown(e, m+add);
 }
 static inline s32 S_F32_trunc_to_s32(S_F32 a)
 {
@@ -553,26 +555,25 @@ static inline s32 S_F32_floor_to_s32_TEST(S_F32 a)
 {
 	s32 ret=S_F32_floor_to_s32(a);
 	s32 exp=(s32)floorf(a.dbg);
-//	if(ret!=exp)
-//	{
-//		printf("ALMA err\n");
-//	}
-//	S_F32_TEST_assertEq_s32(ret, exp);
-//	return ret;
-	return exp;
+	if(ret!=exp)
+	{
+		printf("ALMA err\n");
+		S_F32_floor_to_s32(a);
+	}
+	S_F32_TEST_assertEq_s32(ret, exp);
+	return ret;
 }
 static inline s32 S_F32_ceil_to_s32_TEST(S_F32 a)
 {
 	s32 ret=S_F32_ceil_to_s32(a);
 	s32 exp=(s32)ceilf(a.dbg);
-	return exp;
-//	if(ret!=exp)
-//	{
-//		printf("ALMA err\n");
-//		S_F32_ceil_to_s32(a);
-//	}
-//	S_F32_TEST_assertEq_s32(ret, exp);
-//	return ret;
+	if(ret!=exp)
+	{
+		printf("ALMA err\n");
+		S_F32_ceil_to_s32(a);
+	}
+	S_F32_TEST_assertEq_s32(ret, exp);
+	return ret;
 }
 #endif
 #endif
