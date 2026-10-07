@@ -764,9 +764,7 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* 
                 return (T_SizeInt) {0, 0};
             }
             if (surface != NULL) {
-                T_DPoint pen2 = pen;
-                pen2.y -= i % 2 * 10;
-                renderGlyph(eh, &sft, &pen2, r->color, codepoint, surface);
+                renderGlyph(eh, &sft, &pen, r->color, codepoint, surface);
                 if (eh->code != QLS_ERROR_OK) {
                     return (T_SizeInt) {0, 0};
                 }
