@@ -39,24 +39,24 @@ typedef struct SFT_Image    SFT_Image;
 struct SFT
 {
 	SFT_Font *font;
-	SOFTFLOAT_64    xScale;
-	SOFTFLOAT_64    yScale;
-	SOFTFLOAT_64    xOffset;
-	SOFTFLOAT_64    yOffset;
+	SCHRIFT_F64    xScale;
+	SCHRIFT_F64    yScale;
+	SCHRIFT_F64    xOffset;
+	SCHRIFT_F64    yOffset;
 	uint32_t       flags;
 };
 
 struct SFT_LMetrics
 {
-	SOFTFLOAT_64 ascender;
-	SOFTFLOAT_64 descender;
-	SOFTFLOAT_64 lineGap;
+	SCHRIFT_F64 ascender;
+	SCHRIFT_F64 descender;
+	SCHRIFT_F64 lineGap;
 };
 
 struct SFT_GMetrics
 {
-	SOFTFLOAT_64 advanceWidth;
-	SOFTFLOAT_64 leftSideBearing;
+	SCHRIFT_F64 advanceWidth;
+	SCHRIFT_F64 leftSideBearing;
 	int32_t    yOffset;
 	int32_t    minWidth;
 	int32_t    minHeight;
@@ -64,8 +64,8 @@ struct SFT_GMetrics
 
 struct SFT_Kerning
 {
-	SOFTFLOAT_64 xShift;
-	SOFTFLOAT_64 yShift;
+	SCHRIFT_F64 xShift;
+	SCHRIFT_F64 yShift;
 };
 
 struct SFT_Image

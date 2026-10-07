@@ -63,8 +63,8 @@ JNIEXPORT jobject JNICALL Java_hu_qgears_textrender_libschrift_LibschriftNative_
     {
         // Forward to native implementation
         result = qls_renderTextPrivate(&eh,(uint64_t)surfaceId, c_font, c_text,(uint32_t) length,
-                                         (uint32_t)hAlignValue, (uint32_t)vAlignValue, x, y, width, height, SOFTFLOAT_32_from_float(r), SOFTFLOAT_32_from_float(g), 
-                                         SOFTFLOAT_32_from_float(b), SOFTFLOAT_32_from_float(a), clip, (uint32_t)wrapModeValue);
+                                         (uint32_t)hAlignValue, (uint32_t)vAlignValue, x, y, width, height, SCHRIFT_F32_from_float(r), SCHRIFT_F32_from_float(g), 
+                                         SCHRIFT_F32_from_float(b), SCHRIFT_F32_from_float(a), clip, (uint32_t)wrapModeValue);
     }
     
     // Release the Java strings
@@ -208,7 +208,7 @@ static T_TrueTypeFont* get_or_create_native_font(T_ErrorHandler * eh, JNIEnv *en
             font = (T_TrueTypeFont*) malloc(sizeof(T_TrueTypeFont));
             (*env)->SetLongField(env, fontObject, nativePtrFieldId,(jlong)font);
             memset(font,0, sizeof(T_TrueTypeFont));
-            font->letterSpacing = SOFTFLOAT_64_from_double( get_double_field(eh,env,fontObject, "letterSpacing") );
+            font->letterSpacing = SCHRIFT_F64_from_double( get_double_field(eh,env,fontObject, "letterSpacing") );
             if (eh->code == QLS_ERROR_OK)
             {
                 jstring ttfFilePathString = get_string_field(eh,env,fontObject, "ttfFilePath");
@@ -220,7 +220,7 @@ static T_TrueTypeFont* get_or_create_native_font(T_ErrorHandler * eh, JNIEnv *en
             }
             if (eh->code == QLS_ERROR_OK)
             {
-                font->fontSize = SOFTFLOAT_32_from_float(get_float_field(eh,env,fontObject,"fontSize"));
+                font->fontSize = SCHRIFT_F32_from_float(get_float_field(eh,env,fontObject,"fontSize"));
             }
         }
     }
