@@ -1,34 +1,68 @@
 #ifndef SOFTFLOAT_LIB_H_
 #define SOFTFLOAT_LIB_H_
-/* Software float library aims to be IEEE 754 compatible 32 bit float. */
+#include "softfloat_types.h"
+/* Software float library.
+ Differences from IEEE 754:
+ * infinity is qNaN (quiet NaN)
+ * subnormal is 0
+ **/
 
 
 /// TODO: infinity, subnormal, +-0 implementations
 /// TODO: how to handle div by zero?
 
 /// 32 bit float is stored as an unsigned integer
-typedef struct {union{ u32 v; float dbg;};} S_F32;
-
-static inline S_F32 S_F32_normalize_create(u32 s, s32 e, u64 m);
-
+typedef struct {union{ u32 v; float dbg;} u;} S_F32;
 
 /// Get fields of a float value: sign bit
-static inline u32 S_F32_getSign(S_F32 v)
-{
-	return (v.v>>31)&1;
-}
+static inline u32 S_F32_getSign(S_F32 v);
 /// Get fields of a float value: exponent. @return the exponent value on the -127->128 range. 0 means the implicite 1 of the mantissa means 1.0f.
-static inline s32 S_F32_getExp(S_F32 v)
-{
-	return ((s32)((v.v>>23)&0xFF))-127;
-}
+static inline s32 S_F32_getExp(S_F32 v);
 /// Get fields of a float value: mantissa. @return the mantissa as stored. Does not return the implicite 1 on the position 23bit
-static inline u32 S_F32_getMantissa(S_F32 v)
-{
-	return v.v&((1<<23)-1);
-}
+static inline u32 S_F32_getMantissa(S_F32 v);
+/// Get fields of a float value: mantissa with the extended 1 value on pos 23. @return the mantissa as stored plus the implicite 1 on the position 23bit
+static inline u32 S_F32_getMantissaExtended(S_F32 v);
 /// Create a f32 value by storing its fields: sign, exponent, mantissa
 /// @param exp is on the range -127- +128 range. +127 is added before storing it.
+/// @param mantissa: low 23 bits are stored higher bits are masked without checking
+/// @oaram additionalRemainder: below the explicite mantissa there is 1 non-0 bit (division only)
+static inline S_F32 S_F32_normalize_create(u32 s, s32 e, u64 m, bool additionalRemainder);
+static inline S_F32 S_F32_createNaN();
+static inline S_F32 S_F32_createZero(u32 sign);
+
+/// Convert an S_F32 value to a native float.
+/// TODO only works if the native float storage is the same as implemented by S_F32 which is normally true.
+static inline float S_F32_toFloat(S_F32 v);
+/// Convert a native float to S_F32.
+/// TODO only works if the native float storage is the same as implemented by S_F32 which is normally true.
+static inline S_F32 S_F32_fromFloat(float f);
+/// u32 max function for convenience
+static inline u32 S_F32_u32_max(u32 a, u32 b);
+/// s32 max function for convenience
+static inline s32 S_F32_s32_max(s32 a, s32 b);
+/// Check if the floating point value is 0 (+0 or -0)
+static inline bool S_F32_isZero(S_F32 a);
+
+
+/// @return a+b
+static inline S_F32 S_F32_add(S_F32 a, S_F32 b);
+
+static inline u32 S_F32_getSign(S_F32 v)
+{
+	return (v.u.v>>31)&1;
+}
+static inline s32 S_F32_getExp(S_F32 v)
+{
+	return ((s32)((v.u.v>>23)&0xFF))-127;
+}
+static inline u32 S_F32_getMantissa(S_F32 v)
+{
+	return v.u.v&((1<<23)-1);
+}
+static inline u32 S_F32_getMantissaExtended(S_F32 v)
+{
+	return (v.u.v&((1<<23)-1))|(1<<23);
+}
 static inline S_F32 S_F32_create(u32 sign, s32 exp, u32 mantissa)
 {
 	u32 signSH=((sign&1)<<31);
@@ -38,24 +72,32 @@ static inline S_F32 S_F32_create(u32 sign, s32 exp, u32 mantissa)
 	#ifdef S_F32_LOG
 	printf("sign: %d expSH: %d mant: %d\n", signSH, expSH, mantSH);
 	#endif
-	S_F32 ret={.v=(signSH | expSH | mantSH)};
+	S_F32 ret={.u={.v=(signSH | expSH | mantSH)}};
 	return ret;
+}
+static inline S_F32 S_F32_createNaN()
+{
+	return S_F32_create(0, 128, (1<<23)-1);
+}
+static inline S_F32 S_F32_createZero(u32 sign)
+{
+	return S_F32_create(sign, -127, 0);
 }
 /// Convert an S_F32 value to a native float.
 /// TODO only works if the native float storage is the same as implemented by S_F32 which is normally true.
 static inline float S_F32_toFloat(S_F32 v)
 {
-//	union{S_F32 v; float f;} u;
-//	u.v=v;
-	return v.dbg;
+	union{u32 v; float f;} u;
+	u.v=v.u.v;
+	return u.f;
 }
 /// Convert a native float to S_F32.
 /// TODO only works if the native float storage is the same as implemented by S_F32 which is normally true.
 static inline S_F32 S_F32_fromFloat(float f)
 {
-//	union{S_F32 v; float f;} u;
-//	u.f=f;
-	S_F32 ret={.dbg=f};
+	union{u32 v; float f;} u;
+	u.f=f;
+	S_F32 ret={.u={.v=u.v}};
 	return ret;
 }
 /// u32 max function for convenience
@@ -73,15 +115,18 @@ static inline bool S_F32_isZero(S_F32 a)
 {
 	return S_F32_getExp(a)==-127 && S_F32_getMantissa(a)==0;
 }
-/// @return a+b
+static inline bool S_F32_isNaN(S_F32 a)
+{
+	return S_F32_getExp(a)==128 && S_F32_getMantissa(a)!=0;
+}
 static inline S_F32 S_F32_add(S_F32 a, S_F32 b)
 {
 	u32 as=S_F32_getSign(a);
 	s32 ae=S_F32_getExp(a);
-	s64 am=(s64)S_F32_getMantissa(a);
+	s64 am=(s64)S_F32_getMantissaExtended(a);
 	u32 bs=S_F32_getSign(b);
 	s32 be=S_F32_getExp(b);
-	s64 bm=(s64)S_F32_getMantissa(b);
+	s64 bm=(s64)S_F32_getMantissaExtended(b);
 	s32 e=S_F32_s32_max(ae,be);
 	if(S_F32_isZero(a))
 	{
@@ -95,13 +140,18 @@ static inline S_F32 S_F32_add(S_F32 a, S_F32 b)
 		#endif
 		return a;
 	}
+	if(S_F32_isNaN(a))
+	{
+		return a;
+	}
+	if(S_F32_isNaN(b))
+	{
+		return b;
+	}
 	// Shift up to high 32 bit
 	am<<=32;
 	bm<<=32;
 	e-=32;
-	// Set implicite 1
-	am|=(((u64)1)<<(23+32));
-	bm|=(((u64)1)<<(23+32));
 	s32 shift=ae-be;
 	if(shift>0)
 	{
@@ -138,18 +188,18 @@ static inline S_F32 S_F32_add(S_F32 a, S_F32 b)
 	{
 		s=0;
 	}
-	return S_F32_normalize_create(s, e, (u64)m);
+	return S_F32_normalize_create(s, e, (u64)m, false);
 }
 /// @return a*b
 static inline S_F32 S_F32_mul(S_F32 a, S_F32 b)
 {
 	u32 as=S_F32_getSign(a);
 	s32 ae=S_F32_getExp(a);
-	u64 am=(u64)S_F32_getMantissa(a);
+	u64 am=(u64)S_F32_getMantissaExtended(a);
 	u32 bs=S_F32_getSign(b);
 	s32 be=S_F32_getExp(b);
-	u64 bm=(u64)S_F32_getMantissa(b);
-	u32 e=ae+be;
+	u64 bm=(u64)S_F32_getMantissaExtended(b);
+	s32 e=ae+be-23;
 	if(S_F32_isZero(a))
 	{
 		// TODO handle minus0?
@@ -160,35 +210,9 @@ static inline S_F32 S_F32_mul(S_F32 a, S_F32 b)
 		// TODO handle minus0?
 		return b;
 	}
-	// Set implicite 1
-	am|=(((u64)1)<<(23));
-	bm|=(((u64)1)<<(23));
 	u64 m=am*bm;
-	u32 firstOneIndex=__builtin_clzll(m);
-	if(firstOneIndex==17)
-	{
-		m>>=14;
-	}else
-	{
-		m>>=15;
-		e+=1;
-	}
-	if((m&(((u64)1)<<31))!=0)
-	{
-		// Rounding up when first lost bit is 1
-		m+=(((u64)1)<<32);
-	}
-	m>>=9;
-//	e+=17-firstOneIndex;
 	u32 s=as+bs; // Value is cropped by S_F32_create
-	#ifdef S_F32_LOG
-	printf("mul result: ae: %d be: %d e: %d m: %d\n", ae, be, e, m);
-	printf("firstOneIndex: %d\n",firstOneIndex);
-	print_binary64(am);
-	print_binary64(bm);
-	print_binary64(m);
-	#endif
-	return S_F32_create(s, e, (u32)(u64)m);
+	return S_F32_normalize_create(s, e, m, false);
 }
 static inline S_F32 S_F32_from_s64(s64 v)
 {
@@ -196,7 +220,7 @@ static inline S_F32 S_F32_from_s64(s64 v)
 	u32 sign;
 	if(v==0)
 	{
-		return S_F32_create(0,-127,0);
+		return S_F32_createZero(0);
 	}
 	if(v<0)
 	{
@@ -219,32 +243,53 @@ static inline S_F32 S_F32_from_s64(s64 v)
 		uv<<=-shift;
 	}
 	s32 e=shift+23;
-	return S_F32_create(sign, e, uv);
+	return S_F32_create(sign, e, (u32)uv);
 }
-static inline S_F32 S_F32_normalize_create(u32 s, s32 e, u64 m)
+static inline S_F32 S_F32_normalize_create(u32 s, s32 e, u64 m, bool additionalRemainder)
 {
 	if(m==0)
 	{
 		return S_F32_create(s, -127, 0);
 	}
 	s32 usefulDigits=64-__builtin_clzll(m);
-	s32 shift=usefulDigits-24; // We store 24 useful digits
+	s32 shift=usefulDigits-24; // We store 24 useful digits and we keep the most significant deleted bit here for rounding
+	u64 remainder=0;
+	u64 remainderHalf=0;
+	u32 round=0;
 	if(shift>0)
 	{
+		remainder=((((u64)1)<<shift)-1)&m;
+		remainderHalf=((u64)1)<<(shift-1);
 		m>>=shift;
+		if(remainder==remainderHalf)
+		{
+			if(additionalRemainder)
+			{
+				round=1;
+			}else
+			{
+				round=m&1;
+			}
+		}else if(remainder>remainderHalf)
+		{
+			round=1;
+		}
 	}else if(shift<0)
 	{
 		m<<=shift;
 	}
-	
-//	// TODO round
-//	if((m&(((u64)1)<<31))!=0)
-//	{
-//		// Rounding up when first lost bit is 1
-//		m+=(((u64)1)<<32);
-//	}
-//	m>>=9;
+	m+=round;
+	if((m&(1<<24))!=0)
+	{
+		m>>=1;
+		e++;
+	}
 	e+=shift;
+	if(e>127)
+	{
+		// We do not handle inf but go to NaN at once
+		return S_F32_createNaN();
+	}
 	return S_F32_create(s, e, (u32)m);
 }
 
@@ -253,28 +298,31 @@ static inline S_F32 S_F32_div(S_F32 a, S_F32 b)
 {
 	u32 as=S_F32_getSign(a);
 	s32 ae=S_F32_getExp(a);
-	u64 am=(u64)S_F32_getMantissa(a);
+	u64 am=(u64)S_F32_getMantissaExtended(a);
 	u32 bs=S_F32_getSign(b);
 	s32 be=S_F32_getExp(b);
-	u64 bm=(u64)S_F32_getMantissa(b);
-	if(S_F32_isZero(a))
-	{
-		// TODO handle minus0?
-		return a;
-	}
+	u64 bm=(u64)S_F32_getMantissaExtended(b);
 	if(S_F32_isZero(b))
 	{
-		// TODO INF
-		return a;
+		return S_F32_createNaN();
 	}
-	// Set implicite 1
-	am|=(((u64)1)<<(23));
-	bm|=(((u64)1)<<(23));
+	if(S_F32_isZero(a))
+	{
+		return S_F32_createZero(as+bs);
+	}
+	if(S_F32_isNaN(a)||S_F32_isNaN(b))
+	{
+		return S_F32_createNaN();
+	}
 	am<<=(8+32);
 	u64 m=am/bm;
+	u64 mod=am%bm;
 	u32 s=as+bs; // Value is cropped by S_F32_create
 	s32 e=ae-be+23-40;
-	return S_F32_normalize_create(s, e, (u64)m);
+	// TODO rounding is not always correct with this math because the number of useful bits is not sufficient
+	// Worst case we have about 16 bit digits cropped and that is not enough to signal a repeated 1 pattern
+	// Proper solution is to use am/bm plus am%bm
+	return S_F32_normalize_create(s, e, (u64)m, mod!=0);
 }
 static inline u64 S_F32_wholeDown(s32 e, u64 m)
 {
@@ -297,7 +345,9 @@ static inline u64 S_F32_wholeDown(s32 e, u64 m)
 }
 static inline u64 S_F32_wholeUp(s32 e, u64 m)
 {
-	u64 one=(u64)(1<<(23-e));
+	s32 shift=23-e;
+	// TODO this does not work for very small numbers
+	u64 one=(u64)(1<<(shift));
 	u64 add=one-1;
 	return S_F32_wholeDown(e, m+add);
 }
@@ -363,6 +413,11 @@ static inline s32 S_F32_signum(S_F32 a)
 }
 static inline s32 S_F32_compare(S_F32 a, S_F32 b)
 {
+	if(S_F32_isNaN(a) || S_F32_isNaN(b))
+	{
+		// Arbitrary but deterministic result
+		return 0;
+	}
 	s32 sa=S_F32_signum(a);
 	s32 sb=S_F32_signum(b);
 	if(sa==0 && sb==0)
@@ -433,6 +488,9 @@ static inline S_F32 S_F32_nextafter(S_F32 a, S_F32 b)
 #ifdef SOFTFLOAT_LIB_TEST
 #ifndef SOFTFLOAT_LIB_TEST_H_
 #define SOFTFLOAT_LIB_TEST_H_
+#include <stdio.h>
+#include <stdio.h>
+#include <stdlib.h>
 #define FLOAT_EPS 0.001f
 static inline bool S_F32_TEST_eqEPS(float a, float b)
 {
@@ -440,6 +498,8 @@ static inline bool S_F32_TEST_eqEPS(float a, float b)
 	{
 		return true;
 	}
+	return false;
+	/*
 	float err=fabsf(a-b);
 	if(err<FLOAT_EPS)
 	{
@@ -450,6 +510,7 @@ static inline bool S_F32_TEST_eqEPS(float a, float b)
 		return true;
 	}
 	return false;
+	*/
 } 
 
 static inline bool S_F32_TEST_checkNeq(S_F32 v, float expv)
@@ -457,17 +518,26 @@ static inline bool S_F32_TEST_checkNeq(S_F32 v, float expv)
 	float fv=S_F32_toFloat(v);
 	return !S_F32_TEST_eqEPS(fv, expv);
 }
+static inline void S_F32_TEST_printCanonical(float f)
+{
+	S_F32 v=S_F32_fromFloat(f);
+	printf("S_F32_fromCanonical(%d, %d, %d);\n", S_F32_getSign(v), S_F32_getExp(v), S_F32_getMantissa(v));
+}
 static inline void S_F32_TEST_assertEq(S_F32 v, float expv)
 {
 	float fv=S_F32_toFloat(v);
 	if(isnan(fv))
 	{
 		printf("S_F32_TEST_assertEq error NAN %f != %f\n", fv, expv);
+		S_F32_TEST_printCanonical(fv);
+		S_F32_TEST_printCanonical(expv);
 		exit(1);
 	}
 	if(!S_F32_TEST_eqEPS(fv,expv))
 	{
 		printf("S_F32_TEST_assertEq error %f != %f\n", fv, expv);
+		printf("Actual  :"); S_F32_TEST_printCanonical(fv);
+		printf("Expected:");S_F32_TEST_printCanonical(expv);
 		exit(1);
 	}
 }
@@ -510,7 +580,7 @@ static inline S_F32 S_F32_add_TEST(S_F32 a, S_F32 b)
 static inline S_F32 S_F32_nextafter_TEST(S_F32 a, S_F32 b)
 {
 	S_F32 ret=S_F32_nextafter(a, b);
-	S_F32_TEST_assertEq(ret, nextafter(S_F32_toFloat(a), S_F32_toFloat(b)));
+	S_F32_TEST_assertEq(ret, nextafterf(S_F32_toFloat(a), S_F32_toFloat(b)));
 	return ret;
 }
 static inline s32 S_F32_trunc_to_s32_TEST(S_F32 f)
@@ -542,7 +612,7 @@ static inline s32 S_F32_signum_TEST(S_F32 f)
 static inline s32 S_F32_compare_TEST(S_F32 a, S_F32 b)
 {
 	s32 ret=S_F32_compare(a, b);
-	s32 exp=a.dbg>b.dbg?1:(a.dbg<b.dbg?-1:0);
+	s32 exp=a.u.dbg>b.u.dbg?1:(a.u.dbg<b.u.dbg?-1:0);
 	if(ret!=exp)
 	{
 		printf("ALMA err\n");
@@ -554,7 +624,7 @@ static inline s32 S_F32_compare_TEST(S_F32 a, S_F32 b)
 static inline s32 S_F32_floor_to_s32_TEST(S_F32 a)
 {
 	s32 ret=S_F32_floor_to_s32(a);
-	s32 exp=(s32)floorf(a.dbg);
+	s32 exp=(s32)floorf(a.u.dbg);
 	if(ret!=exp)
 	{
 		printf("ALMA err\n");
@@ -566,7 +636,7 @@ static inline s32 S_F32_floor_to_s32_TEST(S_F32 a)
 static inline s32 S_F32_ceil_to_s32_TEST(S_F32 a)
 {
 	s32 ret=S_F32_ceil_to_s32(a);
-	s32 exp=(s32)ceilf(a.dbg);
+	s32 exp=(s32)ceilf(a.u.dbg);
 	if(ret!=exp)
 	{
 		printf("ALMA err\n");

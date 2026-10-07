@@ -44,7 +44,12 @@ all : ../hu_qgears_textrender_libschrift_LibschriftNative.h
 
 bversion:
 	mkdir -p $(OUTPUTDIR)
-	gcc -g -DSOFTFLOAT=1 -o libschrift_manualtest_softfloat.exe \
+	gcc -g -DSOFTFLOAT=1 \
+	-O2 \
+	-fno-fast-math \
+	-ffp-contract=off \
+	-fexcess-precision=standard \
+	-o libschrift_manualtest_softfloat.exe \
 	-DINCLUDE_MAIN \
 	$(C_FLAGS) \
 	 ../nativeLibLibschrift.c ../schrift.c ../util.c \
