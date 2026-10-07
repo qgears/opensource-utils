@@ -290,6 +290,11 @@ static inline S_F32 S_F32_normalize_create(u32 s, s32 e, u64 m, bool additionalR
 		// We do not handle inf but go to NaN at once
 		return S_F32_createNaN();
 	}
+	if(e<=-126)
+	{
+		// We do not handle subnormals to zero at once
+		return S_F32_createZero(s);
+	}
 	return S_F32_create(s, e, (u32)m);
 }
 
