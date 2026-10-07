@@ -220,6 +220,38 @@ static inline S_F32 S_F32_mul(S_F32 a, S_F32 b)
 	#endif
 	return S_F32_create(s, e, (u32)(u64)m);
 }
+static inline S_F32 S_F32_from_s64(s64 v)
+{
+	u64 uv;
+	u32 sign;
+	if(v==0)
+	{
+		return S_F32_create(0,-127,0);
+	}
+	if(v<0)
+	{
+		uv=(u64)-v;
+		sign=1;
+	}else
+	{
+		uv=(u64)v;
+		sign=0;
+	}
+	s32 leftZeros=__builtin_clzll(uv);
+	s32 lzTarget=40;
+	s32 shift=lzTarget-leftZeros;
+	if(shift>0)
+	{
+		uv>>=shift;
+	}
+	else if(shift<0)
+	{
+		uv<<=-shift;
+	}
+	s32 e=shift+23;
+	return S_F32_create(sign, e, uv);
+}
+
 /// @return a/b
 static inline S_F32 S_F32_div(S_F32 a, S_F32 b)
 {
@@ -291,7 +323,7 @@ static inline u64 S_F32_wholeUp(s32 e, u64 m)
 {
 	return S_F32_wholeDown(e, m+(u64)(1<<23));
 }
-static inline s32 S_F32_trunc_to_u32(S_F32 a)
+static inline s32 S_F32_trunc_to_s32(S_F32 a)
 {
 	s32 ae=S_F32_getExp(a);
 	u32 as=S_F32_getSign(a);
@@ -304,7 +336,7 @@ static inline s32 S_F32_trunc_to_u32(S_F32 a)
 	}
 	return mulSign*(s32)S_F32_wholeDown(ae, am);
 }
-static inline s32 S_F32_floor_to_u32(S_F32 a)
+static inline s32 S_F32_floor_to_s32(S_F32 a)
 {
 	s32 ae=S_F32_getExp(a);
 	u32 as=S_F32_getSign(a);
@@ -322,6 +354,102 @@ static inline s32 S_F32_floor_to_u32(S_F32 a)
 	{
 		return mulSign*(s32)S_F32_wholeDown(ae, am);
 	}
+}
+static inline s32 S_F32_ceil_to_s32(S_F32 a)
+{
+	s32 ae=S_F32_getExp(a);
+	u32 as=S_F32_getSign(a);
+	s32 mulSign=(as==0)?1:-1;
+	u64 am=(u64)S_F32_getMantissa(a);
+	am|=(((u64)1)<<(23));
+	if(S_F32_isZero(a))
+	{
+		return 0;
+	}
+	if(mulSign)
+	{
+		return mulSign*(s32)S_F32_wholeDown(ae, am);
+	}else
+	{
+		return mulSign*(s32)S_F32_wholeUp(ae, am);
+	}
+}
+static inline s32 S_F32_signum(S_F32 a)
+{
+	if(S_F32_isZero(a))
+	{
+		return 0;
+	}
+	u32 as=S_F32_getSign(a);
+	return as?-1:1;
+}
+static inline s32 S_F32_compare(S_F32 a, S_F32 b)
+{
+	s32 sa=S_F32_signum(a);
+	s32 sb=S_F32_signum(b);
+	if(sa==0 && sb==0)
+	{
+		return 0;
+	}
+	if(sa!=sb)
+	{
+		return sa>sb?1:-1;
+	}
+	s32 greater;
+	
+	u32 as=S_F32_getSign(a);
+	u32 bs=S_F32_getSign(b);
+
+	s32 ae=S_F32_getExp(a);
+	s32 be=S_F32_getExp(b);
+	if(ae>be)
+	{
+//		printf("S_F32_compare exponent a>b\n");
+		greater=1;
+	}else if(be>ae)
+	{
+//		printf("S_F32_compare exponent a<b\n");
+		greater=-1;
+	}else
+	{
+		u64 am=(u64)S_F32_getMantissa(a);
+		u64 bm=(u64)S_F32_getMantissa(b);
+		greater=(am>bm)?1:((am==bm)?0:-1);
+//		printf("S_F32_compare mantissa diff %d am: %lld bm: %lld\n", greater, am, bm);
+	}
+	return (sa==0)?greater:-greater;
+}
+static inline S_F32 S_F32_nextafter(S_F32 a, S_F32 b)
+{
+	s32 dir=S_F32_compare(a,b);
+	if(dir==0)
+	{
+		return a;
+	}
+	u32 s=S_F32_getSign(a);
+	bool inc=(dir>0) != (s==0);
+	u64 m=S_F32_getMantissa(a);
+	s32 e=S_F32_getExp(a);
+	m|=(((u64)1)<<(23));
+	if(inc)
+	{
+		m++;
+		if((m&(((u64)1)<<(24)))!=0)
+		{
+			m>>=1;
+			e++;
+		}
+	}else
+	{
+		m--;
+		if((m&(((u64)1)<<(22)))==0)
+		{
+			m<<=1;
+			e--;
+		}
+	}
+	// TODO this implementation does not handle all cases yet.
+	return S_F32_create(s, e, (u32)(u64)m);
 }
 #endif
 

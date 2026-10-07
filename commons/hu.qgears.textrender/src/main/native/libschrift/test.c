@@ -32,6 +32,10 @@ void print_binary64(uint64_t x)
 #define SOFTFLOAT_IMPL 1
 #include "softfloat_impl.h"
 
+static void compare(float a, float b)
+{
+	printf("%f ? %f = %d\n", a, b, S_F32_compare(S_F32_fromFloat(a),S_F32_fromFloat(b)));
+}
 
 int main(int argc, char ** argv)
 {
@@ -54,15 +58,26 @@ int main(int argc, char ** argv)
 	printf("1/2=%f\n", S_F32_toFloat(S_F32_div(one, two)));
 	printf("2/1=%f\n", S_F32_toFloat(S_F32_div(two, one)));
 	printf("1.0f/0.0f=%f\n", 1.0f/0.0f);
-	printf("(u32)0.9=%d\n", S_F32_trunc_to_u32(S_F32_fromFloat(0.9f)));
-	printf("(u32)1.0=%d\n", S_F32_trunc_to_u32(S_F32_fromFloat(1.0f)));
-	printf("(u32)1.5=%d\n", S_F32_trunc_to_u32(S_F32_fromFloat(1.5f)));
-	printf("(u32)2.0=%d\n", S_F32_trunc_to_u32(S_F32_fromFloat(2.0f)));
-	printf("(u32)-0.9=%d\n", S_F32_trunc_to_u32(S_F32_fromFloat(-0.9f)));
-	printf("(u32)-1.0=%d\n", S_F32_trunc_to_u32(S_F32_fromFloat(-1.0f)));
-	printf("(u32)-1.5=%d\n", S_F32_trunc_to_u32(S_F32_fromFloat(-1.5f)));
-	printf("(u32)-2.0=%d\n", S_F32_trunc_to_u32(S_F32_fromFloat(-2.0f)));
-	printf("(u32)-2.5=%d\n", S_F32_trunc_to_u32(S_F32_fromFloat(-2.5f)));
+	printf("(u32)0.9=%d\n", S_F32_trunc_to_s32(S_F32_fromFloat(0.9f)));
+	printf("(u32)1.0=%d\n", S_F32_trunc_to_s32(S_F32_fromFloat(1.0f)));
+	printf("(u32)1.5=%d\n", S_F32_trunc_to_s32(S_F32_fromFloat(1.5f)));
+	printf("(u32)2.0=%d\n", S_F32_trunc_to_s32(S_F32_fromFloat(2.0f)));
+	printf("(u32)-0.9=%d\n", S_F32_trunc_to_s32(S_F32_fromFloat(-0.9f)));
+	printf("(u32)-1.0=%d\n", S_F32_trunc_to_s32(S_F32_fromFloat(-1.0f)));
+	printf("(u32)-1.5=%d\n", S_F32_trunc_to_s32(S_F32_fromFloat(-1.5f)));
+	printf("(u32)-2.0=%d\n", S_F32_trunc_to_s32(S_F32_fromFloat(-2.0f)));
+	printf("(u32)-2.5=%d\n", S_F32_trunc_to_s32(S_F32_fromFloat(-2.5f)));
+	for(int32_t i=-20; i<21;++i)
+	{
+		printf("%d=%f signum: %d\n",i,S_F32_toFloat(S_F32_from_s64(i)),S_F32_signum(S_F32_from_s64(i)));
+	}
+	compare(0.0f, 0.0f);
+	compare(0.0001f, 0.0f);
+	compare(-0.0001f, 0.0f);
+	compare(-0.0001f, 0.0001f);
+	compare(0.0001f, -0.0001f);
+	compare(-0.0001f, -0.00011f);
+	compare(-0.0001f, -0.00009f);
 	return 0;
 }
 
