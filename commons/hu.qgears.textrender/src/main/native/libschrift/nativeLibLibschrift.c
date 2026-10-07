@@ -879,7 +879,7 @@ int main() {
         .minPen = {0, 0},
         .maxPen = {WIDTH, HEIGHT},
         .wrapMode = QLS_WRAP_WORD,
-        .letterSpacing = 1,
+        .letterSpacing = SOFTFLOAT_64_from_s32(1),
         .hAlign = HALIGN_JUSTIFY,
         .vAlign = VALIGN_BOTTOM
     };
