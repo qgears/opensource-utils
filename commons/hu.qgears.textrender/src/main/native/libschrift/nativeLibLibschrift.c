@@ -205,8 +205,7 @@ T_SizeInt qls_renderTextPrivate(T_ErrorHandler* errorHandler, uint64_t surfaceHa
             rData.minPen.y = y;
             rData.maxPen.x = x + width;
             rData.maxPen.y = y + height;
-            // rData.letterSpacing = font->letterSpacing;
-            rData.letterSpacing = 0;
+            rData.letterSpacing = font->letterSpacing;
             rData.wrapMode = wrapMode;
             rData.hAlign = hAlign;
             rData.vAlign = vAlign;
@@ -247,8 +246,7 @@ T_SizeInt qls_layoutTextPrivate(T_ErrorHandler* errorHandler, T_TrueTypeFont* fo
     r.maxPen.x = width;
     r.maxPen.y = INT32_MAX;
     r.sft.flags = SFT_DOWNWARD_Y;
-    // r.letterSpacing = font->letterSpacing;
-    r.letterSpacing = font->letterSpacing = 0;
+    r.letterSpacing = font->letterSpacing;
     r.wrapMode = wrapMode;
     r.hAlign = hAlign;
     enum { VALIGN_TOP, VALIGN_MIDDLE, VALIGN_BOTTOM }; // TODO single source of truth
