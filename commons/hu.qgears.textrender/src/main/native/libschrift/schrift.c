@@ -1476,6 +1476,12 @@ draw_line(Raster buf, Point origin, Point goal)
 	halfDeltaX = SOFTFLOAT_64_mul(SOFTFLOAT_64_const_half , delta.x);
 
 	for (step = 0; step < numSteps; ++step) {
+		if(pixel.y<0 || pixel.y>=buf.height ||pixel.x<0 || pixel.x>=buf.width)
+		{
+			// TODO this should not happen but also when happens should be handled so that program can not fail!
+			printf("ERROR: out of raster pixel addressed!\n");
+			continue;
+		}
 		xAverage = SOFTFLOAT_64_add(origin.x , SOFTFLOAT_64_mul((SOFTFLOAT_64_add(prevDistance , nextDistance)) , halfDeltaX));
 		yDifference = SOFTFLOAT_64_mul((SOFTFLOAT_64_sub(nextDistance , prevDistance)) , delta.y);
 		cptr = &buf.cells[pixel.y * buf.width + pixel.x];
@@ -1492,7 +1498,12 @@ draw_line(Raster buf, Point origin, Point goal)
 		SOFTFLOAT_64_addEq(nextCrossing.y , alongX ? SOFTFLOAT_64_const_zero : crossingIncr.y);
 		nextDistance = SOFTFLOAT_64_min(nextCrossing.x, nextCrossing.y);
 	}
-
+	if(pixel.y<0 || pixel.y>=buf.height ||pixel.x<0 || pixel.x>=buf.width)
+	{
+		// TODO this should not happen but also when happens should be handled so that program can not fail!
+		printf("ERROR: out of raster pixel addressed!\n");
+		return;
+	}
 	xAverage = SOFTFLOAT_64_add(origin.x , SOFTFLOAT_64_mul((SOFTFLOAT_64_add(prevDistance , SOFTFLOAT_64_const_1)) , halfDeltaX));
 	yDifference = SOFTFLOAT_64_mul((SOFTFLOAT_64_sub(SOFTFLOAT_64_const_1 , prevDistance)) , delta.y);
 	cptr = &buf.cells[pixel.y * buf.width + pixel.x];

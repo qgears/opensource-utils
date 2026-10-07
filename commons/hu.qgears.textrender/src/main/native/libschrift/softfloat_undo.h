@@ -31,14 +31,17 @@
 #define SOFTFLOAT_64_signum(a)SIGN(a)
 #define SOFTFLOAT_64_min(a,b)MIN(a,b)
 #define SOFTFLOAT_64_max(a,b)MAX(a,b)
-#define SOFTFLOAT_64_floor_to_s32(a)a
-#define SOFTFLOAT_64_floor_cast_to_s32(a)(int32_t)a
+#define SOFTFLOAT_64_trunc_to_s32(a)a
+//#define SOFTFLOAT_64_floor_to_s32(a)a
+#define SOFTFLOAT_64_trunc_cast_to_s32(a)(int32_t)a
 #define SOFTFLOAT_64_return_fast_floor(x)int i = (int) x; return i - (i > x)
 #define SOFTFLOAT_64_return_fast_ceil(x)int i = (int) x; return i + (i < x)
 #define SOFTFLOAT_64_from_SOFTFLOAT_32(f)f
 #define SOFTFLOAT_64_to_double(f)f
 #define SOFTFLOAT_32_mul_u32(a,b)a*b
-#define SOFTFLOAT_32_floor_to_u8_to_u32(a)(uint32_t)(((uint8_t)a))
+#define SOFTFLOAT_32_trunc_to_u8_to_u32(a)(uint32_t)(((uint8_t)a))
 #define SOFTFLOAT_64_from_u16_fast(a)a
 #define SOFTFLOAT_64_cast_to_s32(f)f
+
+
 

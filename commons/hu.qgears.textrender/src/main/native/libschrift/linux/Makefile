@@ -44,11 +44,12 @@ all : ../hu_qgears_textrender_libschrift_LibschriftNative.h
 
 bversion:
 	mkdir -p $(OUTPUTDIR)
-	gcc -o $(OUTPUTDIR)/$(SO_NAME).exe \
+	gcc -g -o libscrift_manualtest.exe \
 	-DINCLUDE_MAIN \
 	$(C_FLAGS) \
 	 ../nativeLibLibschrift.c ../schrift.c ../util.c \
 	 -lm
+	cp libscrift_manualtest.exe $(OUTPUTDIR)/$(SO_NAME)
 	cp -f $(OUTPUTDIR)/$(SO_NAME) $(OUTPUTDIR)/$(SO_GENERIC_NAME)
 
 ../hu_qgears_textrender_libschrift_LibschriftNative.h : 
