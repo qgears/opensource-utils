@@ -44,11 +44,12 @@ all : ../hu_qgears_textrender_libschrift_LibschriftNative.h
 
 bversion:
 	mkdir -p $(OUTPUTDIR)
-	gcc -o $(OUTPUTDIR)/$(SO_NAME).exe \
+	gcc -g -DSOFTFLOAT=1 -o libschrift_manualtest_softfloat.exe \
 	-DINCLUDE_MAIN \
 	$(C_FLAGS) \
 	 ../nativeLibLibschrift.c ../schrift.c ../util.c \
 	 -lm
+	cp libschrift_manualtest_softfloat.exe $(OUTPUTDIR)/$(SO_NAME)
 	cp -f $(OUTPUTDIR)/$(SO_NAME) $(OUTPUTDIR)/$(SO_GENERIC_NAME)
 
 ../hu_qgears_textrender_libschrift_LibschriftNative.h : 

@@ -19,6 +19,7 @@
 
 #include <stddef.h> /* size_t */
 #include <stdint.h> /* uint_fast32_t, uint_least32_t */
+#include "float_macros.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,40 +39,40 @@ typedef struct SFT_Image    SFT_Image;
 struct SFT
 {
 	SFT_Font *font;
-	double    xScale;
-	double    yScale;
-	double    xOffset;
-	double    yOffset;
-	int       flags;
+	SCHRIFT_F64    xScale;
+	SCHRIFT_F64    yScale;
+	SCHRIFT_F64    xOffset;
+	SCHRIFT_F64    yOffset;
+	uint32_t       flags;
 };
 
 struct SFT_LMetrics
 {
-	double ascender;
-	double descender;
-	double lineGap;
+	SCHRIFT_F64 ascender;
+	SCHRIFT_F64 descender;
+	SCHRIFT_F64 lineGap;
 };
 
 struct SFT_GMetrics
 {
-	double advanceWidth;
-	double leftSideBearing;
-	int    yOffset;
-	int    minWidth;
-	int    minHeight;
+	SCHRIFT_F64 advanceWidth;
+	SCHRIFT_F64 leftSideBearing;
+	int32_t    yOffset;
+	int32_t    minWidth;
+	int32_t    minHeight;
 };
 
 struct SFT_Kerning
 {
-	double xShift;
-	double yShift;
+	SCHRIFT_F64 xShift;
+	SCHRIFT_F64 yShift;
 };
 
 struct SFT_Image
 {
 	void *pixels;
-	int   width;
-	int   height;
+	int32_t   width;
+	int32_t   height;
 };
 
 const char *sft_version(void);
@@ -80,12 +81,12 @@ SFT_Font *sft_loadmem (const void *mem, size_t size);
 SFT_Font *sft_loadfile(const char *filename);
 void      sft_freefont(SFT_Font *font);
 
-int sft_lmetrics(const SFT *sft, SFT_LMetrics *metrics);
-int sft_lookup  (const SFT *sft, SFT_UChar codepoint, SFT_Glyph *glyph);
-int sft_gmetrics(const SFT *sft, SFT_Glyph glyph, SFT_GMetrics *metrics);
-int sft_kerning (const SFT *sft, SFT_Glyph leftGlyph, SFT_Glyph rightGlyph,
+int32_t sft_lmetrics(const SFT *sft, SFT_LMetrics *metrics);
+int32_t sft_lookup  (const SFT *sft, SFT_UChar codepoint, SFT_Glyph *glyph);
+int32_t sft_gmetrics(const SFT *sft, SFT_Glyph glyph, SFT_GMetrics *metrics);
+int32_t sft_kerning (const SFT *sft, SFT_Glyph leftGlyph, SFT_Glyph rightGlyph,
                  SFT_Kerning *kerning);
-int sft_render  (const SFT *sft, SFT_Glyph glyph, SFT_Image image);
+int32_t sft_render  (const SFT *sft, SFT_Glyph glyph, SFT_Image image);
 
 #ifdef __cplusplus
 }
