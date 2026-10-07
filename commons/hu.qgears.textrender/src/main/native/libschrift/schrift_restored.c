@@ -67,7 +67,7 @@
 #define GOT_A_SCALE_MATRIX         0x080
 
 /* macros */
-/// TODO we use SCHRIFT_F64 instead delete if not used for integers
+/// TODO we use double instead delete if not used for integers
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define SIGN(x)   (((x) > 0) - ((x) < 0))
 /* Allocate values on the stack if they are small enough, else spill to heap. */
@@ -87,10 +87,10 @@ typedef struct Cell    Cell;
 typedef struct Outline Outline;
 typedef struct Raster  Raster;
 
-struct Point { SCHRIFT_F64 x, y; };
+struct Point { double x, y; };
 struct Line  { uint_least16_t beg, end; };
 struct Curve { uint_least16_t beg, end, ctrl; };
-struct Cell  { SCHRIFT_F64 area, cover; };
+struct Cell  { double area, cover; };
 
 struct Outline
 {
@@ -129,15 +129,15 @@ struct SFT_Font
 /* function declarations */
 /* generic utility functions */
 static void *reallocarray(void *optr, size_t nmemb, size_t size);
-static inline int fast_floor(SCHRIFT_F64 x);
-static inline int fast_ceil (SCHRIFT_F64 x);
+static inline int fast_floor(double x);
+static inline int fast_ceil (double x);
 /* file loading */
 static int  map_file  (SFT_Font *font, const char *filename);
 static void unmap_file(SFT_Font *font);
 static int  init_font (SFT_Font *font);
 /* simple mathematical operations */
 static Point midpoint(Point a, Point b);
-static void transform_points(unsigned int numPts, Point *points, SCHRIFT_F64 trf[6]);
+static void transform_points(unsigned int numPts, Point *points, double trf[6]);
 static void clip_points(unsigned int numPts, Point *points, int width, int height);
 /* 'outline' data structure management */
 static int  init_outline(Outline *outl);
@@ -182,7 +182,7 @@ static void draw_lines(Outline *outl, Raster buf);
 /* post-processing */
 static void post_process(Raster buf, uint8_t *image);
 /* glyph rendering */
-static int  render_outline(Outline *outl, SCHRIFT_F64 transform[6], SFT_Image image);
+static int  render_outline(Outline *outl, double transform[6], SFT_Image image);
 
 /* function implementations */
 
@@ -245,17 +245,17 @@ sft_freefont(SFT_Font *font)
 int
 sft_lmetrics(const SFT *sft, SFT_LMetrics *metrics)
 {
-	SCHRIFT_F64 factor;
+	double factor;
 	uint_fast32_t hhea;
 	memset(metrics, 0, sizeof *metrics);
 	if (gettable(sft->font, "hhea", &hhea) < 0)
 		return -1;
 	if (!is_safe_offset(sft->font, hhea, 36))
 		return -1;
-	factor = SCHRIFT_F64_div(sft->yScale , SCHRIFT_F64_from_s32(sft->font->unitsPerEm));
-	metrics->ascender  = SCHRIFT_F64_mul(SCHRIFT_F64_from_s32(geti16(sft->font, hhea + 4)) , factor);
-	metrics->descender = SCHRIFT_F64_mul(SCHRIFT_F64_from_s32(geti16(sft->font, hhea + 6)) , factor);
-	metrics->lineGap   = SCHRIFT_F64_mul(SCHRIFT_F64_from_s32(geti16(sft->font, hhea + 8)) , factor);
+	factor = sft->yScale / sft->font->unitsPerEm;
+	metrics->ascender  = geti16(sft->font, hhea + 4) * factor;
+	metrics->descender = geti16(sft->font, hhea + 6) * factor;
+	metrics->lineGap   = geti16(sft->font, hhea + 8) * factor;
 	return 0;
 }
 
@@ -269,7 +269,7 @@ int
 sft_gmetrics(const SFT *sft, SFT_Glyph glyph, SFT_GMetrics *metrics)
 {
 	int adv, lsb;
-	SCHRIFT_F64 xScale = SCHRIFT_F64_div(sft->xScale , SCHRIFT_F64_from_s32(sft->font->unitsPerEm));
+	double xScale = sft->xScale / sft->font->unitsPerEm;
 	uint_fast32_t outline;
 	int bbox[4];
 
@@ -277,8 +277,8 @@ sft_gmetrics(const SFT *sft, SFT_Glyph glyph, SFT_GMetrics *metrics)
 
 	if (hor_metrics(sft->font, glyph, &adv, &lsb) < 0)
 		return -1;
-	metrics->advanceWidth    = SCHRIFT_F64_mul(SCHRIFT_F64_from_s32(adv) , xScale);
-	metrics->leftSideBearing = SCHRIFT_F64_add(SCHRIFT_F64_mul(SCHRIFT_F64_from_s32(lsb) , xScale) , sft->xOffset);
+	metrics->advanceWidth    = adv * xScale;
+	metrics->leftSideBearing = lsb * xScale + sft->xOffset;
 
 	if (outline_offset(sft->font, glyph, &outline) < 0)
 		return -1;
@@ -341,9 +341,9 @@ sft_kerning(const SFT *sft, SFT_Glyph leftGlyph, SFT_Glyph rightGlyph,
 				
 				value = geti16(sft->font, (uint_fast32_t) ((uint8_t *) match - sft->font->memory + 4));
 				if (flags & CROSS_STREAM_KERNING) {
-					SCHRIFT_F64_addEq(kerning->yShift , SCHRIFT_F64_from_s32(value));
+					kerning->yShift += value;
 				} else {
-					SCHRIFT_F64_addEq(kerning->xShift , SCHRIFT_F64_from_s32(value));
+					kerning->xShift += value;
 				}
 			}
 
@@ -353,8 +353,8 @@ sft_kerning(const SFT *sft, SFT_Glyph leftGlyph, SFT_Glyph rightGlyph,
 		--numTables;
 	}
 
-	kerning->xShift = SCHRIFT_F64_mul(SCHRIFT_F64_div(kerning->xShift , SCHRIFT_F64_from_s32(sft->font->unitsPerEm)) , sft->xScale);
-	kerning->yShift = SCHRIFT_F64_mul(SCHRIFT_F64_div(kerning->yShift , SCHRIFT_F64_from_s32(sft->font->unitsPerEm)) , sft->yScale);
+	kerning->xShift = kerning->xShift / sft->font->unitsPerEm * sft->xScale;
+	kerning->yShift = kerning->yShift / sft->font->unitsPerEm * sft->yScale;
 
 	return 0;
 }
@@ -363,7 +363,7 @@ int
 sft_render(const SFT *sft, SFT_Glyph glyph, SFT_Image image)
 {
 	uint_fast32_t outline;
-	SCHRIFT_F64 transform[6];
+	double transform[6];
 	int bbox[4];
 	Outline outl;
 
@@ -376,16 +376,16 @@ sft_render(const SFT *sft, SFT_Glyph glyph, SFT_Image image)
 	/* Set up the transformation matrix such that
 	 * the transformed bounding boxes min corner lines
 	 * up with the (0, 0) point. */
-	transform[0] = SCHRIFT_F64_div(sft->xScale , SCHRIFT_F64_from_s32(sft->font->unitsPerEm));
-	transform[1] = SCHRIFT_F64_const_zero;
-	transform[2] = SCHRIFT_F64_const_zero;
-	transform[4] = SCHRIFT_F64_sub(sft->xOffset , SCHRIFT_F64_from_s32(bbox[0]));
+	transform[0] = sft->xScale / sft->font->unitsPerEm;
+	transform[1] = 0.0;
+	transform[2] = 0.0;
+	transform[4] = sft->xOffset - bbox[0];
 	if (sft->flags & SFT_DOWNWARD_Y) {
-		transform[3] = SCHRIFT_F64_div(SCHRIFT_F64_neg(sft->yScale) , SCHRIFT_F64_from_s32(sft->font->unitsPerEm));
-		transform[5] = SCHRIFT_F64_sub(SCHRIFT_F64_from_s32(bbox[3]) , sft->yOffset);
+		transform[3] = -sft->yScale / sft->font->unitsPerEm;
+		transform[5] = bbox[3] - sft->yOffset;
 	} else {
-		transform[3] = SCHRIFT_F64_div(SCHRIFT_F64_pos(sft->yScale) , SCHRIFT_F64_from_s32(sft->font->unitsPerEm));
-		transform[5] = SCHRIFT_F64_sub(sft->yOffset , SCHRIFT_F64_from_s32(bbox[1]));
+		transform[3] = +sft->yScale / sft->font->unitsPerEm;
+		transform[5] = sft->yOffset - bbox[1];
 	}
 	
 	memset(&outl, 0, sizeof outl);
@@ -425,15 +425,15 @@ reallocarray(void *optr, size_t nmemb, size_t size)
 
 /* TODO maybe we should use long here instead of int. */
 static inline int
-fast_floor(SCHRIFT_F64 x)
+fast_floor(double x)
 {
-	SCHRIFT_F64_return_fast_floor(x);
+	int i = (int) x; return i - (i > x);
 }
 
 static inline int
-fast_ceil(SCHRIFT_F64 x)
+fast_ceil(double x)
 {
-	SCHRIFT_F64_return_fast_ceil(x);
+	int i = (int) x; return i + (i < x);
 }
 
 #if defined(_WIN32)
@@ -556,22 +556,22 @@ static Point
 midpoint(Point a, Point b)
 {
 	return (Point) {
-		SCHRIFT_F64_mul(SCHRIFT_F64_const_half , (SCHRIFT_F64_add(a.x , b.x))),
-		SCHRIFT_F64_mul(SCHRIFT_F64_const_half , (SCHRIFT_F64_add(a.y , b.y)))
+		0.5 * (a.x + b.x),
+		0.5 * (a.y + b.y)
 	};
 }
 
 /* Applies an affine linear transformation matrix to a set of points. */
 static void
-transform_points(unsigned int numPts, Point *points, SCHRIFT_F64 trf[6])
+transform_points(unsigned int numPts, Point *points, double trf[6])
 {
 	Point pt;
 	unsigned int i;
 	for (i = 0; i < numPts; ++i) {
 		pt = points[i];
 		points[i] = (Point) {
-			SCHRIFT_F64_add(SCHRIFT_F64_add(SCHRIFT_F64_mul(pt.x , trf[0]) , SCHRIFT_F64_mul(pt.y , trf[2])) , trf[4]),
-			SCHRIFT_F64_add(SCHRIFT_F64_add(SCHRIFT_F64_mul(pt.x , trf[1]) , SCHRIFT_F64_mul(pt.y , trf[3])) , trf[5])
+			pt.x * trf[0] + pt.y * trf[2] + trf[4],
+			pt.x * trf[1] + pt.y * trf[3] + trf[5]
 		};
 	}
 }
@@ -585,17 +585,17 @@ clip_points(unsigned int numPts, Point *points, int width, int height)
 	for (i = 0; i < numPts; ++i) {
 		pt = points[i];
 
-		if (SCHRIFT_F64_compare_lt(pt.x , SCHRIFT_F64_const_zero)) {
-			points[i].x = SCHRIFT_F64_const_zero;
+		if (pt.x < 0.0) {
+			points[i].x = 0.0;
 		}
-		if (SCHRIFT_F64_compare_gteq(pt.x , SCHRIFT_F64_from_s32(width))) {
-			points[i].x = SCHRIFT_F64_nextafter(SCHRIFT_F64_from_s32(width), SCHRIFT_F64_const_zero);
+		if (pt.x >= width) {
+			points[i].x = nextafter(width, 0.0);
 		}
-		if (SCHRIFT_F64_compare_lt(pt.y , SCHRIFT_F64_const_zero)) {
-			points[i].y = SCHRIFT_F64_const_zero;
+		if (pt.y < 0.0) {
+			points[i].y = 0.0;
 		}
-		if (SCHRIFT_F64_compare_gteq(pt.y , SCHRIFT_F64_from_s32(height))) {
-			points[i].y = SCHRIFT_F64_nextafter(SCHRIFT_F64_from_s32(height), SCHRIFT_F64_const_zero);
+		if (pt.y >= height) {
+			points[i].y = nextafter(height, 0.0);
 		}
 	}
 }
@@ -984,7 +984,7 @@ hor_metrics(SFT_Font *font, SFT_Glyph glyph, int *advanceWidth, int *leftSideBea
 static int
 glyph_bbox(const SFT *sft, uint_fast32_t outline, int box[4])
 {
-	SCHRIFT_F64 xScale, yScale;
+	double xScale, yScale;
 	/* Read the bounding box from the font file verbatim. */
 	if (!is_safe_offset(sft->font, outline, 10))
 		return -1;
@@ -995,12 +995,12 @@ glyph_bbox(const SFT *sft, uint_fast32_t outline, int box[4])
 	if (box[2] <= box[0] || box[3] <= box[1])
 		return -1;
 	/* Transform the bounding box into SFT coordinate space. */
-	xScale = SCHRIFT_F64_div(sft->xScale , SCHRIFT_F64_from_s32(sft->font->unitsPerEm));
-	yScale = SCHRIFT_F64_div(sft->yScale , SCHRIFT_F64_from_s32(sft->font->unitsPerEm));
-	box[0] = SCHRIFT_F64_floor_to_int(SCHRIFT_F64_add(SCHRIFT_F64_mul_s32_SCHRIFT_F64(box[0] , xScale) , sft->xOffset));
-	box[1] = SCHRIFT_F64_floor_to_int(SCHRIFT_F64_add(SCHRIFT_F64_mul_s32_SCHRIFT_F64(box[1] , yScale) , sft->yOffset));
-	box[2] = SCHRIFT_F64_ceil_to_int(SCHRIFT_F64_add(SCHRIFT_F64_mul_s32_SCHRIFT_F64(box[2] , xScale) , sft->xOffset));
-	box[3] = SCHRIFT_F64_ceil_to_int(SCHRIFT_F64_add(SCHRIFT_F64_mul_s32_SCHRIFT_F64(box[3] , yScale) , sft->yOffset));
+	xScale = sft->xScale / sft->font->unitsPerEm;
+	yScale = sft->yScale / sft->font->unitsPerEm;
+	box[0] = (int) floor(box[0] * xScale + sft->xOffset);
+	box[1] = (int) floor(box[1] * yScale + sft->yOffset);
+	box[2] = (int) ceil (box[2] * xScale + sft->xOffset);
+	box[3] = (int) ceil (box[3] * yScale + sft->yOffset);
 	return 0;
 }
 
@@ -1068,7 +1068,7 @@ simple_flags(SFT_Font *font, uint_fast32_t *offset, uint_fast16_t numPts, uint8_
 static int
 simple_points(SFT_Font *font, uint_fast32_t offset, uint_fast16_t numPts, uint8_t *flags, Point *points)
 {
-	integer_long accum, value, bit;
+	long accum, value, bit;
 	uint_fast16_t i;
 
 	accum = 0L;
@@ -1085,7 +1085,7 @@ simple_points(SFT_Font *font, uint_fast32_t offset, uint_fast16_t numPts, uint8_
 			accum += geti16(font, offset);
 			offset += 2;
 		}
-		points[i].x = SCHRIFT_F64_from_long( accum);
+		points[i].x = (double) accum;
 	}
 
 	accum = 0L;
@@ -1102,7 +1102,7 @@ simple_points(SFT_Font *font, uint_fast32_t offset, uint_fast16_t numPts, uint8_
 			accum += geti16(font, offset);
 			offset += 2;
 		}
-		points[i].y = SCHRIFT_F64_from_long( accum);
+		points[i].y = (double) accum;
 	}
 
 	return 0;
@@ -1260,7 +1260,7 @@ failure:
 static int
 compound_outline(SFT_Font *font, uint_fast32_t offset, int recDepth, Outline *outl)
 {
-	SCHRIFT_F64 local[6];
+	double local[6];
 	uint_fast32_t outline;
 	unsigned int flags, glyph, basePoint;
 	/* Guard against infinite recursion (compound glyphs that have themselves as component). */
@@ -1280,39 +1280,39 @@ compound_outline(SFT_Font *font, uint_fast32_t offset, int recDepth, Outline *ou
 		if (flags & OFFSETS_ARE_LARGE) {
 			if (!is_safe_offset(font, offset, 4))
 				return -1;
-			local[4] = SCHRIFT_F64_from_s32(geti16(font, offset));
-			local[5] = SCHRIFT_F64_from_s32(geti16(font, offset + 2));
+			local[4] = geti16(font, offset);
+			local[5] = geti16(font, offset + 2);
 			offset += 4;
 		} else {
 			if (!is_safe_offset(font, offset, 2))
 				return -1;
-			local[4] = SCHRIFT_F64_from_s32(geti8(font, offset));
-			local[5] = SCHRIFT_F64_from_s32(geti8(font, offset + 1));
+			local[4] = geti8(font, offset);
+			local[5] = geti8(font, offset + 1);
 			offset += 2;
 		}
 		if (flags & GOT_A_SINGLE_SCALE) {
 			if (!is_safe_offset(font, offset, 2))
 				return -1;
-			local[0] = SCHRIFT_F64_div(SCHRIFT_F64_from_s32(geti16(font, offset)) , SCHRIFT_F64_const_16384);
+			local[0] = geti16(font, offset) / 16384.0;
 			local[3] = local[0];
 			offset += 2;
 		} else if (flags & GOT_AN_X_AND_Y_SCALE) {
 			if (!is_safe_offset(font, offset, 4))
 				return -1;
-			local[0] = SCHRIFT_F64_div(SCHRIFT_F64_from_s32(geti16(font, offset + 0)) , SCHRIFT_F64_const_16384);
-			local[3] = SCHRIFT_F64_div(SCHRIFT_F64_from_s32(geti16(font, offset + 2)) , SCHRIFT_F64_const_16384);
+			local[0] = geti16(font, offset + 0) / 16384.0;
+			local[3] = geti16(font, offset + 2) / 16384.0;
 			offset += 4;
 		} else if (flags & GOT_A_SCALE_MATRIX) {
 			if (!is_safe_offset(font, offset, 8))
 				return -1;
-			local[0] = SCHRIFT_F64_div(SCHRIFT_F64_from_s32(geti16(font, offset + 0)) , SCHRIFT_F64_const_16384);
-			local[1] = SCHRIFT_F64_div(SCHRIFT_F64_from_s32(geti16(font, offset + 2)) , SCHRIFT_F64_const_16384);
-			local[2] = SCHRIFT_F64_div(SCHRIFT_F64_from_s32(geti16(font, offset + 4)) , SCHRIFT_F64_const_16384);
-			local[3] = SCHRIFT_F64_div(SCHRIFT_F64_from_s32(geti16(font, offset + 6)) , SCHRIFT_F64_const_16384);
+			local[0] = geti16(font, offset + 0) / 16384.0;
+			local[1] = geti16(font, offset + 2) / 16384.0;
+			local[2] = geti16(font, offset + 4) / 16384.0;
+			local[3] = geti16(font, offset + 6) / 16384.0;
 			offset += 8;
 		} else {
-			local[0] = SCHRIFT_F64_const_1;
-			local[3] = SCHRIFT_F64_const_1;
+			local[0] = 1.0;
+			local[3] = 1.0;
 		}
 		/* At this point, Apple's spec more or less tells you to scale the matrix by its own L1 norm.
 		 * But stb_truetype scales by the L2 norm. And FreeType2 doesn't scale at all.
@@ -1353,14 +1353,14 @@ decode_outline(SFT_Font *font, uint_fast32_t offset, int recDepth, Outline *outl
 static int
 is_flat(Outline *outl, Curve curve)
 {
-	const SCHRIFT_F64 maxArea2 = SCHRIFT_F64_const_2;
+	const double maxArea2 = 2.0;
 	Point a = outl->points[curve.beg];
 	Point b = outl->points[curve.ctrl];
 	Point c = outl->points[curve.end];
-	Point g = { SCHRIFT_F64_sub(b.x,a.x), SCHRIFT_F64_sub(b.y,a.y) };
-	Point h = { SCHRIFT_F64_sub(c.x,a.x), SCHRIFT_F64_sub(c.y,a.y) };
-	SCHRIFT_F64 area2 = SCHRIFT_F64_abs(SCHRIFT_F64_sub(SCHRIFT_F64_mul(g.x,h.y),SCHRIFT_F64_mul(h.x,g.y)));
-	return SCHRIFT_F64_compare_lteq(area2 , maxArea2);
+	Point g = { b.x-a.x, b.y-a.y };
+	Point h = { c.x-a.x, c.y-a.y };
+	double area2 = fabs(g.x*h.y-h.x*g.y);
+	return area2 <= maxArea2;
 }
 
 static int
@@ -1425,55 +1425,55 @@ draw_line(Raster buf, Point origin, Point goal)
 	Point delta;
 	Point nextCrossing;
 	Point crossingIncr;
-	SCHRIFT_F64 halfDeltaX;
-	SCHRIFT_F64 prevDistance = SCHRIFT_F64_const_zero, nextDistance;
-	SCHRIFT_F64 xAverage, yDifference;
+	double halfDeltaX;
+	double prevDistance = 0.0, nextDistance;
+	double xAverage, yDifference;
 	struct { int x, y; } pixel;
 	struct { int x, y; } dir;
 	int step, numSteps = 0;
 	Cell *restrict cptr, cell;
 
-	delta.x = SCHRIFT_F64_sub(goal.x , origin.x);
-	delta.y = SCHRIFT_F64_sub(goal.y , origin.y);
-	dir.x = SCHRIFT_F64_signum(delta.x);
-	dir.y = SCHRIFT_F64_signum(delta.y);
+	delta.x = goal.x - origin.x;
+	delta.y = goal.y - origin.y;
+	dir.x = SIGN(delta.x);
+	dir.y = SIGN(delta.y);
 
 	if (!dir.y) {
 		return;
 	}
 	
-	crossingIncr.x = dir.x ? SCHRIFT_F64_abs(SCHRIFT_F64_div(SCHRIFT_F64_const_1 , delta.x)) : SCHRIFT_F64_const_1;
-	crossingIncr.y = SCHRIFT_F64_abs(SCHRIFT_F64_div(SCHRIFT_F64_const_1 , delta.y));
+	crossingIncr.x = dir.x ? fabs(1.0 / delta.x) : 1.0;
+	crossingIncr.y = fabs(1.0 / delta.y);
 
 	if (!dir.x) {
 		pixel.x = fast_floor(origin.x);
-		nextCrossing.x = SCHRIFT_F64_const_100;
+		nextCrossing.x = 100.0;
 	} else {
 		if (dir.x > 0) {
 			pixel.x = fast_floor(origin.x);
-			nextCrossing.x = SCHRIFT_F64_mul((SCHRIFT_F64_sub(origin.x , SCHRIFT_F64_from_s32(pixel.x))) , crossingIncr.x);
-			nextCrossing.x = SCHRIFT_F64_sub(crossingIncr.x , nextCrossing.x);
+			nextCrossing.x = (origin.x - pixel.x) * crossingIncr.x;
+			nextCrossing.x = crossingIncr.x - nextCrossing.x;
 			numSteps += fast_ceil(goal.x) - fast_floor(origin.x) - 1;
 		} else {
 			pixel.x = fast_ceil(origin.x) - 1;
-			nextCrossing.x = SCHRIFT_F64_mul((SCHRIFT_F64_sub(origin.x , SCHRIFT_F64_from_s32(pixel.x))) , crossingIncr.x);
+			nextCrossing.x = (origin.x - pixel.x) * crossingIncr.x;
 			numSteps += fast_ceil(origin.x) - fast_floor(goal.x) - 1;
 		}
 	}
 
 	if (dir.y > 0) {
 		pixel.y = fast_floor(origin.y);
-		nextCrossing.y = SCHRIFT_F64_mul((SCHRIFT_F64_sub(origin.y , SCHRIFT_F64_from_s32(pixel.y))) , crossingIncr.y);
-		nextCrossing.y = SCHRIFT_F64_sub(crossingIncr.y , nextCrossing.y);
+		nextCrossing.y = (origin.y - pixel.y) * crossingIncr.y;
+		nextCrossing.y = crossingIncr.y - nextCrossing.y;
 		numSteps += fast_ceil(goal.y) - fast_floor(origin.y) - 1;
 	} else {
 		pixel.y = fast_ceil(origin.y) - 1;
-		nextCrossing.y = SCHRIFT_F64_mul((SCHRIFT_F64_sub(origin.y , SCHRIFT_F64_from_s32(pixel.y))) , crossingIncr.y);
+		nextCrossing.y = (origin.y - pixel.y) * crossingIncr.y;
 		numSteps += fast_ceil(origin.y) - fast_floor(goal.y) - 1;
 	}
 
-	nextDistance = SCHRIFT_F64_min(nextCrossing.x, nextCrossing.y);
-	halfDeltaX = SCHRIFT_F64_mul(SCHRIFT_F64_const_half , delta.x);
+	nextDistance = MIN(nextCrossing.x, nextCrossing.y);
+	halfDeltaX = 0.5 * delta.x;
 
 	for (step = 0; step < numSteps; ++step) {
 		if(pixel.y<0 || pixel.y>=buf.height ||pixel.x<0 || pixel.x>=buf.width)
@@ -1482,21 +1482,21 @@ draw_line(Raster buf, Point origin, Point goal)
 			printf("ERROR: out of raster pixel addressed!\n");
 			continue;
 		}
-		xAverage = SCHRIFT_F64_add(origin.x , SCHRIFT_F64_mul((SCHRIFT_F64_add(prevDistance , nextDistance)) , halfDeltaX));
-		yDifference = SCHRIFT_F64_mul((SCHRIFT_F64_sub(nextDistance , prevDistance)) , delta.y);
+		xAverage = origin.x + (prevDistance + nextDistance) * halfDeltaX;
+		yDifference = (nextDistance - prevDistance) * delta.y;
 		cptr = &buf.cells[pixel.y * buf.width + pixel.x];
 		cell = *cptr;
-		SCHRIFT_F64_addEq(cell.cover , yDifference);
-		SCHRIFT_F64_subEq(xAverage , SCHRIFT_F64_cast_from_s32( pixel.x));
-		SCHRIFT_F64_addEq(cell.area , SCHRIFT_F64_mul((SCHRIFT_F64_sub(SCHRIFT_F64_const_1 , xAverage)) , yDifference));
+		cell.cover += yDifference;
+		xAverage -= (double) pixel.x;
+		cell.area += (1.0 - xAverage) * yDifference;
 		*cptr = cell;
 		prevDistance = nextDistance;
-		int alongX = SCHRIFT_F64_compare_lt(nextCrossing.x , nextCrossing.y);
+		int alongX = nextCrossing.x < nextCrossing.y;
 		pixel.x += alongX ? dir.x : 0;
 		pixel.y += alongX ? 0 : dir.y;
-		SCHRIFT_F64_addEq(nextCrossing.x , alongX ? crossingIncr.x : SCHRIFT_F64_const_zero);
-		SCHRIFT_F64_addEq(nextCrossing.y , alongX ? SCHRIFT_F64_const_zero : crossingIncr.y);
-		nextDistance = SCHRIFT_F64_min(nextCrossing.x, nextCrossing.y);
+		nextCrossing.x += alongX ? crossingIncr.x : 0.0;
+		nextCrossing.y += alongX ? 0.0 : crossingIncr.y;
+		nextDistance = MIN(nextCrossing.x, nextCrossing.y);
 	}
 	if(pixel.y<0 || pixel.y>=buf.height ||pixel.x<0 || pixel.x>=buf.width)
 	{
@@ -1504,13 +1504,13 @@ draw_line(Raster buf, Point origin, Point goal)
 		printf("ERROR: out of raster pixel addressed!\n");
 		return;
 	}
-	xAverage = SCHRIFT_F64_add(origin.x , SCHRIFT_F64_mul((SCHRIFT_F64_add(prevDistance , SCHRIFT_F64_const_1)) , halfDeltaX));
-	yDifference = SCHRIFT_F64_mul((SCHRIFT_F64_sub(SCHRIFT_F64_const_1 , prevDistance)) , delta.y);
+	xAverage = origin.x + (prevDistance + 1.0) * halfDeltaX;
+	yDifference = (1.0 - prevDistance) * delta.y;
 	cptr = &buf.cells[pixel.y * buf.width + pixel.x];
 	cell = *cptr;
-	SCHRIFT_F64_addEq(cell.cover , yDifference);
-	SCHRIFT_F64_subEq(xAverage , SCHRIFT_F64_cast_from_s32( pixel.x));
-	SCHRIFT_F64_addEq(cell.area , SCHRIFT_F64_mul((SCHRIFT_F64_sub(SCHRIFT_F64_const_1 , xAverage)) , yDifference));
+	cell.cover += yDifference;
+	xAverage -= (double) pixel.x;
+	cell.area += (1.0 - xAverage) * yDifference;
 	*cptr = cell;
 }
 
@@ -1531,21 +1531,21 @@ static void
 post_process(Raster buf, uint8_t *image)
 {
 	Cell cell;
-	SCHRIFT_F64 accum = SCHRIFT_F64_const_zero, value;
+	double accum = 0.0, value;
 	unsigned int i, num;
 	num = (unsigned int) buf.width * (unsigned int) buf.height;
 	for (i = 0; i < num; ++i) {
 		cell     = buf.cells[i];
-		value    = SCHRIFT_F64_abs(SCHRIFT_F64_add(accum , cell.area));
-		value    = SCHRIFT_F64_min(value, SCHRIFT_F64_const_1);
-		value    = SCHRIFT_F64_add(SCHRIFT_F64_mul(value , SCHRIFT_F64_const_255) , SCHRIFT_F64_const_half);
-		image[i] = (uint8_t) SCHRIFT_F64_trunc_to_s32(value);
-		SCHRIFT_F64_addEq(accum   , cell.cover);
+		value    = fabs(accum + cell.area);
+		value    = MIN(value, 1.0);
+		value    = value * 255.0 + 0.5;
+		image[i] = (uint8_t) value;
+		accum   += cell.cover;
 	}
 }
 
 static int
-render_outline(Outline *outl, SCHRIFT_F64 transform[6], SFT_Image image)
+render_outline(Outline *outl, double transform[6], SFT_Image image)
 {
 	Cell *cells = NULL;
 	Raster buf;
