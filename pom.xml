@@ -22,6 +22,7 @@
 		<module>thirdparty/lwjgl3.int</module>
 		<module>commons/hu.qgears.remote</module>
 		<module>emfcollab/hu.qgears.emfcollab</module>
+		<module>commons/hu.qgears.xtextgrammar</module>
 	</modules>
     <build>
             <plugins>
