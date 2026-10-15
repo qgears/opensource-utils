@@ -469,7 +469,9 @@ static inline void advancePenBeforeRender(T_ErrorHandler* eh, const SFT* sft, do
             return;
         }
 
-        *penx += letterSpacing;
+        if (ctypeIsGraphical(c1) && ctypeIsGraphical(c2)) {
+            *penx += letterSpacing;
+        }
         *penx += kerning.xShift;
     }
 }
