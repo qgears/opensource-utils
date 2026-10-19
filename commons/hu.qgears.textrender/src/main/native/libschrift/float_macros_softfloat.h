@@ -3,10 +3,7 @@
 
 #include <stdbool.h>
 #include <math.h>
-typedef uint32_t u32;
-typedef uint64_t u64;
-typedef int32_t s32;
-typedef int64_t s64;
+//u32/u64/s32/s64 come from softfloat_types.h via softfloat.h
 #include "softfloat.h"
 
 

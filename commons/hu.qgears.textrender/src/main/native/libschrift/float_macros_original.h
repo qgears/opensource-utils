@@ -40,8 +40,8 @@
 #define SCHRIFT_F64_to_double(f)f
 #define SCHRIFT_F32_mul_u32(a,b)a*b
 #define SCHRIFT_F32_trunc_to_u8_to_u32(a)(uint32_t)(((uint8_t)a))
-#define SCHRIFT_F64_from_u16_fast(a)a
-#define SCHRIFT_F64_cast_to_s32(f)f
+#define SCHRIFT_F64_from_u16_fast(a)(double)(uint16_t)(a)
+#define SCHRIFT_F64_cast_to_s32(f)(int32_t)(f)
 #define SCHRIFT_F32_from_float(f)f
 #define SCHRIFT_F64_from_double(d)d
 
