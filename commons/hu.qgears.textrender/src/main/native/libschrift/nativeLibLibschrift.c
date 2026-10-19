@@ -489,8 +489,8 @@ static inline void advancePen(
 	}
 
 	 //restore offset for next char
-	 sft->xOffset = 0;
-	 sft->yOffset = 0;
+	 sft->xOffset = SCHRIFT_F64_from_s32(0);
+	 sft->yOffset = SCHRIFT_F64_from_s32(0);
 
 	 //after
 	if (ctypeIsSpace(currentCodepoint)) {
@@ -628,12 +628,12 @@ static inline void prescanLine(T_ErrorHandler* eh, T_RenderData* rData, UTF16_Re
         	//pen is still in front of the space
         	widthAtLastSpace = pen.x;
         }
-		advancePen(eh, rData, prevCodepoint, codepoint, &pen, NULL, 0);
+		advancePen(eh, rData, prevCodepoint, codepoint, &pen, NULL, SCHRIFT_F64_from_s32(0));
 		if (eh->code != QLS_ERROR_OK) {
 			return;
 		}
 
-		if ((pen.x > availableWidth)) {
+		if (SCHRIFT_F64_compare_lt(availableWidth, pen.x)) {
         	//current character does not fit into line
         	if (wrapword && lastSpace != NULL) {
         		ret.lineEnd = lastSpace;
