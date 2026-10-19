@@ -64,6 +64,7 @@ typedef struct {
 
 typedef struct {
     uint_fast16_t len, nSpaces;
+    const uint16_t* lineStart;
     //exclusive, consistent with `len`
     const uint16_t* lineEnd;
     //inclusive
@@ -110,6 +111,7 @@ static inline bool ctypeIsSpace(uint32_t c);
 static inline bool ctypeIsGraphical(uint32_t c);
 static inline int32_t wholePart(SCHRIFT_F64 d);
 static inline SCHRIFT_F64 fractionalPart(SCHRIFT_F64 d);
+static inline int32_t renderData_GetWidth(const T_RenderData* r);
 /**
  * Pass 0 for c1, if there is no previous character.
  */
@@ -133,8 +135,7 @@ static inline void advancePenAfterRender(T_ErrorHandler* eh, const SFT* sft, SCH
  * TODO: Support more Unicode, e.g. ideographic space (how should it interact with justification etc.)
  * TODO: Introduce grapheme layer, or decide on partial support and canonize input (e.g. the same accented letter can be represented as either one or two codepoints!)
  */
-static inline void prescanLine(T_ErrorHandler* eh, SFT sft, UTF16_Reader* text, E_QLS_WRAP wrapMode, SCHRIFT_F64 availableWidth, SCHRIFT_F64 letterSpacing
-        , T_Result_PrescanLine* outResult);
+static inline void prescanLine(T_ErrorHandler* eh, T_RenderData* rData, UTF16_Reader* reader, T_Result_PrescanLine* outResult);
 static inline void prescanText(T_ErrorHandler* eh, const T_RenderData* r, const uint16_t* restrict const text,uint32_t textLen, T_Result_PrescanText* outResult);
 static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* r, const uint16_t* restrict const text,uint32_t textLen, T_SurfaceData* surface);
 
@@ -431,6 +432,74 @@ static inline SCHRIFT_F64 fractionalPart(SCHRIFT_F64 d) {
     return SCHRIFT_F64_sub(d , SCHRIFT_F64_from_s32(wholePart(d)));
 }
 
+static inline void advancePen(
+		T_ErrorHandler* eh, T_RenderData * rData, uint32_t prevCodepoint, uint32_t currentCodepoint, T_DPoint* pen,T_SurfaceData* surface, SCHRIFT_F64 spaceJustification)
+{
+	SFT_Glyph glyph = 0;
+    SFT_GMetrics gmtx = {0};
+	SFT * sft = &rData->sft;
+	//before
+	if (sft_lookup(sft, currentCodepoint, &glyph) < 0) {
+		ERROR(eh, QLS_ERROR_GLIPH_MISSING, "codepoint 0x%04X missing", currentCodepoint);
+		return;
+	}
+	if (prevCodepoint != 0) {
+		SFT_Glyph gPrev;
+		if (sft_lookup(sft, prevCodepoint, &gPrev) < 0) {
+			ERROR(eh, QLS_ERROR_GLIPH_MISSING, "codepoint 0x%04X missing", prevCodepoint);
+			return;
+		}
+		SFT_Kerning kerning;
+		if (sft_kerning(sft, gPrev, glyph, &kerning) < 0) {
+			ERROR(eh, QLS_ERROR_GLIPH_KERNING, "Invalid kerning between codepoints 0x%04X 0x%04X ", prevCodepoint, currentCodepoint);
+			return;
+		}
+		SCHRIFT_F64_addEq(pen->x , rData->letterSpacing);
+		SCHRIFT_F64_addEq(pen->x , kerning.xShift);
+	}
+	//render
+	 sft->xOffset = fractionalPart(pen->x);
+	 sft->yOffset = fractionalPart(pen->y);
+	 if (sft_gmetrics(sft, glyph, &gmtx) < 0) {
+		ERROR(eh, QLS_ERROR_GLIPH_MISSING, "codepoint 0x%04X bad glyph metrics", currentCodepoint);
+		return;
+	 }
+
+	 //NOTE: sft->xOffset is read by sft_gmetrics
+	 if (surface != NULL)
+	 {
+		 //this is the real renderer stuff. Skip this in case of layout info calculation
+		SFT_Image img = {
+				.width = (gmtx.minWidth + 3) & ~3, //TODO consider aligning to 8?
+				.height = gmtx.minHeight
+		};
+		// VLA! TODO allocate variable array on stack?
+		uint8_t pixels[img.width * img.height];
+		// memset 0 is called by sft_render on array, no need to clean pixels
+		img.pixels = pixels;
+
+		if (sft_render(sft, glyph, img) < 0) {
+			ERROR(eh, QLS_ERROR_GLIPH_RENDER, "codepoint 0x%04X not rendered",
+					currentCodepoint);
+			return;
+		}
+
+		const int32_t screenX = wholePart(pen->x)
+				+ wholePart(gmtx.leftSideBearing);
+		const int32_t screenY = wholePart(pen->y) + gmtx.yOffset;
+		copy_rect(screenX, screenY, surface, &img, rData->color);
+	}
+
+	 //restore offset for next char
+	 sft->xOffset = 0;
+	 sft->yOffset = 0;
+
+	 //after
+	if (ctypeIsSpace(currentCodepoint)) {
+		SCHRIFT_F64_addEq(pen->x, spaceJustification);
+	}
+	SCHRIFT_F64_addEq(pen->x, gmtx.advanceWidth);
+}
 static inline void advancePenBeforeRender(T_ErrorHandler* eh, const SFT* sft, SCHRIFT_F64 letterSpacing, uint32_t c1, uint32_t c2, SCHRIFT_F64* penx) {
     if (c1 != 0) {
         SFT_Glyph g1;
@@ -510,11 +579,13 @@ static inline void advancePenAfterRender(T_ErrorHandler* eh, const SFT* sft, SCH
 static inline bool prescanLine_IsLineTooWide(SCHRIFT_F64 availableWidth, uint_fast16_t l, SCHRIFT_F64 w) {
     return 1 <= l && SCHRIFT_F64_compare_lt(availableWidth , w);
 }
-static inline void prescanLine(T_ErrorHandler* eh, SFT sft, UTF16_Reader* reader, E_QLS_WRAP wrapMode, SCHRIFT_F64 availableWidth, SCHRIFT_F64 letterSpacing
-        , T_Result_PrescanLine* outResult) {
 
-    sft.xOffset = SCHRIFT_F64_from_s32(0);
-    
+static inline void prescanLine(T_ErrorHandler* eh, T_RenderData* rData, UTF16_Reader* reader, T_Result_PrescanLine* outResult)
+{
+
+	SCHRIFT_F64 letterSpacing = rData->letterSpacing;
+	E_QLS_WRAP wrapMode = rData->wrapMode;
+    SCHRIFT_F64 availableWidth = SCHRIFT_F64_from_s32(renderData_GetWidth(rData));
     typedef struct {
         SCHRIFT_F64 w, wSpace;
         uint_fast16_t l, lSpace;
@@ -538,14 +609,13 @@ static inline void prescanLine(T_ErrorHandler* eh, SFT sft, UTF16_Reader* reader
                 }
             }
 
-            advancePenBeforeRender(eh, &sft, letterSpacing, line.lastCodepoint, codepoint, &line.wSpace);
+
+            T_DPoint pen = {line.wSpace,0};
+            advancePen(eh, rData, line.lastCodepoint, codepoint, &pen, NULL, 0);
             if (eh->code != QLS_ERROR_OK) {
-                return;
-            }
-            advancePenAfterRender(eh, &sft, SCHRIFT_F64_from_s32(0), codepoint, &line.wSpace);
-            if (eh->code != QLS_ERROR_OK) {
-                return;
-            }
+			   return;
+		    }
+            line.wSpace = pen.x;
 
             line.lastCodepoint = codepoint;
             line.lSpace += 1;
@@ -570,15 +640,12 @@ static inline void prescanLine(T_ErrorHandler* eh, SFT sft, UTF16_Reader* reader
             // include the rest of the last word
         	codepoint = utf16_read_codepoint(reader);
             while (ctypeIsGraphical(codepoint)) {
-                advancePenBeforeRender(eh, &sft, letterSpacing, line.lastCodepoint, codepoint, &line.wSpace);
+            	T_DPoint pen = {line.wSpace,0};
+            	advancePen(eh, rData, line.lastCodepoint, codepoint, &pen, NULL, 0);
                 if (eh->code != QLS_ERROR_OK) {
                     return;
                 }
-                advancePenAfterRender(eh, &sft, SCHRIFT_F64_from_s32(0), codepoint, &line.wSpace);
-                if (eh->code != QLS_ERROR_OK) {
-                    return;
-                }
-
+                line.wSpace = pen.x;
                 line.lastCodepoint = codepoint;
                 line.lSpace += 1;
                 line.l = line.lSpace;
@@ -611,7 +678,7 @@ static inline void prescanLine(T_ErrorHandler* eh, SFT sft, UTF16_Reader* reader
         while (ctypeIsSpace(codepoint)) {
         	codepoint = utf16_read_codepoint(reader);
         }
-        outResult->wasLastLine = '\0' == utf16Peek(reader);
+        outResult->wasLastLine = '\0' == codepoint;
         if ('\r' == codepoint) {
         	codepoint = utf16_read_codepoint(reader);
         }
@@ -636,10 +703,6 @@ static inline SCHRIFT_F64 getSpareHeight(int32_t boxHeight, SCHRIFT_F64 textHeig
 }
 
 static inline void prescanText(T_ErrorHandler* eh, const T_RenderData* r, const uint16_t* restrict const text, uint32_t textLen, T_Result_PrescanText* outResult) {
-    SFT sft = r->sft;
-    sft.xOffset = SCHRIFT_F64_from_s32(0);
-    sft.yOffset = SCHRIFT_F64_from_s32(0);
-
     uint_fast16_t nLines = 0;
 	UTF16_Reader reader = {
 			.start = text,
@@ -647,7 +710,7 @@ static inline void prescanText(T_ErrorHandler* eh, const T_RenderData* r, const 
 			.pos = text };
     T_Result_PrescanLine lineData = {0};
     do {
-        prescanLine(eh, sft, &reader, r->wrapMode, SCHRIFT_F64_from_s32(renderData_GetWidth(r)), r->letterSpacing, &lineData);
+        prescanLine(eh, r, &reader, &lineData);
         if (eh->code != QLS_ERROR_OK) {
             return;
         }
@@ -699,7 +762,14 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* 
     }
 
     uint_fast16_t iLine = 0;
-    const uint16_t* reader = text;
+    UTF16_Reader reader = {
+		.start = text,
+		.end = text + textLen,
+		.pos = text };
+    UTF16_Reader lineReader = {
+		.start = text,
+		.end = text + textLen,
+		.pos = text };
     T_Result_PrescanLine lineData = {0};
     SCHRIFT_F64 lineWidthMax = SCHRIFT_F64_from_s32(0);
     /**
@@ -710,7 +780,7 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* 
      *      OPT render line: for (codepoint in line) advance & render
      */
     do {
-        prescanLine(eh, r->sft, reader, r->wrapMode, SCHRIFT_F64_from_s32(renderData_GetWidth(r)), r->letterSpacing, &lineData);
+        prescanLine(eh, r, &reader, &lineData);
         if (eh->code != QLS_ERROR_OK) {
             return (T_SizeInt) {0, 0};
         }
@@ -741,9 +811,10 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* 
             }
         }
 
+
         uint32_t lastCodepoint = 0;
         for (uint_fast16_t i = 0; i < lineData.len; ++i) { // renderGlyph(...)
-            uint32_t codepoint = utf16Peek(reader);
+            uint32_t codepoint = utf16_read_codepoint(&lineReader);
             advancePenBeforeRender(eh, &sft, r->letterSpacing, lastCodepoint, codepoint, &pen.x);
             if (eh->code != QLS_ERROR_OK)  {
                 return (T_SizeInt) {0, 0};
@@ -760,11 +831,10 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* 
             }
 
             lastCodepoint = codepoint;
-            utf16Skip(&reader);
         }
 
         iLine += 1;
-        reader = lineData.nextLineStart;
+        lineReader.pos = lineData.nextLineStart;
         SCHRIFT_F64_addEq(pen.y , SCHRIFT_F64_add(SCHRIFT_F64_sub(r->lineMetrics.ascender , r->lineMetrics.descender) , r->lineMetrics.lineGap));
     } while (!lineData.wasLastLine);
 
