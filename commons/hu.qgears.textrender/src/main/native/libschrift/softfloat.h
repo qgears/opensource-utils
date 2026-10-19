@@ -459,6 +459,10 @@ static inline s32 S_F32_compare(S_F32 a, S_F32 b)
 }
 static inline S_F32 S_F32_nextafter(S_F32 a, S_F32 b)
 {
+	if(S_F32_isNaN(a) || S_F32_isNaN(b))
+	{
+		return S_F32_createNaN();
+	}
 	s32 dir=S_F32_compare(a,b);
 	if(dir==0)
 	{
@@ -466,28 +470,22 @@ static inline S_F32 S_F32_nextafter(S_F32 a, S_F32 b)
 	}
 	u32 s=S_F32_getSign(a);
 	bool inc=(dir>0) != (s==0);
-	u64 m=S_F32_getMantissa(a);
+	if(S_F32_isZero(a))
+	{
+		return S_F32_create(inc?0:1, -126, 0);
+	}
+	u64 m=S_F32_getMantissaExtended(a);
 	s32 e=S_F32_getExp(a);
-	m|=(((u64)1)<<(23));
 	if(inc)
 	{
 		m++;
-		if((m&(((u64)1)<<(24)))!=0)
-		{
-			m>>=1;
-			e++;
-		}
 	}else
 	{
+		m<<=1;
+		e--;
 		m--;
-		if((m&(((u64)1)<<(22)))==0)
-		{
-			m<<=1;
-			e--;
-		}
 	}
-	// TODO this implementation does not handle all cases yet.
-	return S_F32_create(s, e, (u32)(u64)m);
+	return S_F32_normalize_create(s, e, (u32)m, false);
 }
 #endif
 #ifdef SOFTFLOAT_LIB_TEST
