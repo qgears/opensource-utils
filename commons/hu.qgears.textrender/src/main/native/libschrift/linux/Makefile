@@ -33,40 +33,44 @@ C_FLAGS=-fPIC -D_REENTRANT \
 	-g -std=c99 -O0 -pedantic -Wconversion  \
 	${JNI_INCLUDE_PLATFORM} ${JNI_INCLUDE}
 
-all : ../hu_qgears_textrender_libschrift_LibschriftNative.h
+# sources shared by the shared library and the standalone manual-test programs
+SOURCES=../nativeLibLibschrift.c ../schrift.c ../util.c
+SOURCES_LIB=$(SOURCES) ../nativeLibLibschriftJni.c
+
+# flags shared by the standalone manual-test programs
+TESTPROG_FLAGS=-DINCLUDE_MAIN=1 \
+	-fno-fast-math \
+	-ffp-contract=off \
+	-fexcess-precision=standard
+
+.DEFAULT_GOAL := all
+.PHONY: all lib bversion testprog asms clean
+
+all : lib bversion testprog
+
+lib : ../hu_qgears_textrender_libschrift_LibschriftNative.h
 	mkdir -p $(OUTPUTDIR)
 	gcc -o $(OUTPUTDIR)/$(SO_NAME) \
 	$(C_FLAGS) -shared \
 	 -Wl,-soname,$(SO_NAME) \
-	 ../nativeLibLibschrift.c ../nativeLibLibschriftJni.c ../schrift.c ../util.c \
+	 $(SOURCES_LIB) \
 	 -lm
 	cp -f $(OUTPUTDIR)/$(SO_NAME) $(OUTPUTDIR)/$(SO_GENERIC_NAME)
 
 bversion:
-	mkdir -p $(OUTPUTDIR)
-	gcc -g -DSOFTFLOAT=1 \
-	-O2 \
-	-fno-fast-math \
-	-ffp-contract=off \
-	-fexcess-precision=standard \
+	gcc -DSOFTFLOAT=1 \
+	$(TESTPROG_FLAGS) \
 	-o libschrift_manualtest_softfloat.exe \
-	-DINCLUDE_MAIN \
 	$(C_FLAGS) \
-	 ../nativeLibLibschrift.c ../schrift.c ../util.c \
+	 $(SOURCES) \
 	 -lm
-	cp libschrift_manualtest_softfloat.exe $(OUTPUTDIR)/$(SO_NAME)
-	cp -f $(OUTPUTDIR)/$(SO_NAME) $(OUTPUTDIR)/$(SO_GENERIC_NAME)
 
 testprog:
-	mkdir -p $(OUTPUTDIR)
 	gcc \
-	-fno-fast-math \
-	-ffp-contract=off \
-	-fexcess-precision=standard \
-	-o libschrift_manualtest_softfloat.exe \
-	-DINCLUDE_MAIN \
+	$(TESTPROG_FLAGS) \
+	-o libschrift_manualtest.exe \
 	$(C_FLAGS) \
-	 ../nativeLibLibschrift.c ../schrift.c ../util.c \
+	 $(SOURCES) \
 	 -lm
 
 ../hu_qgears_textrender_libschrift_LibschriftNative.h : 
@@ -79,11 +83,12 @@ testprog:
 	gcc $(C_FLAGS) -fverbose-asm -S -o $@ $<
 
 
-asms : nativeLibLibschrift.s schrift.s nativeLibLibschriftJni.s util.s
+asms : $(notdir $(SOURCES_LIB:.c=.s))
 	@echo "Create " $<
 
 clean:
 	rm -f $(OUTPUTDIR)/$(SO_NAME) $(OUTPUTDIR)/$(SO_GENERIC_NAME)
 	rm -f *.s
+	rm -f *.exe
 
 

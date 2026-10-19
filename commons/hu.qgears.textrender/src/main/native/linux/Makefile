@@ -6,12 +6,12 @@ DEBIAN9 = $(shell grep 'Debian GNU/Linux 9' /etc/issue)
 #Render libs are built only for debian13 
 all:
 ifneq ($(strip $(DEBIAN13)),)
-	make -C ../libschrift/linux
-	make -C ../stbtt/linux
+	make -C ../libschrift/linux lib
+#	make -C ../stbtt/linux
 else
 ifneq ($(strip $(DEBIAN9)),)
-	make -C ../libschrift/linux
-	make -C ../stbtt/linux
+	make -C ../libschrift/linux lib
+#	make -C ../stbtt/linux
 else
 	@echo "This build system is only supported on Debian 13 and 9. Exiting."
 endif
