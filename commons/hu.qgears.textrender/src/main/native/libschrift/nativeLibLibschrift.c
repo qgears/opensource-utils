@@ -83,6 +83,12 @@ typedef enum {
     QLS_WRAP_NONE
 } E_QLS_WRAP;
 
+typedef struct {
+	uint16_t* start;
+	uint16_t* end;
+	uint16_t* pos;
+} UTF16_Reader;
+
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 #define LIMIT(x,min,max) ((x) < (min) ? (min) : ((x) > (max) ? (max) : (x)))
@@ -98,9 +104,7 @@ static T_SurfaceData* qls_get_surfacedata(uint64_t id);
 /**
  * Stops advancing at the terminating '\0'.
  */
-static inline uint32_t utf16Read(const uint16_t* restrict * text);
-static inline void utf16Skip(const uint16_t* restrict * text);
-static inline uint32_t utf16Peek(const uint16_t* restrict text);
+static inline uint32_t utf16_read_codepoint(UTF16_Reader* reader );
 static inline bool ctypeIsLineEnding(uint32_t c);
 static inline bool ctypeIsSpace(uint32_t c);
 static inline bool ctypeIsGraphical(uint32_t c);
@@ -129,10 +133,10 @@ static inline void advancePenAfterRender(T_ErrorHandler* eh, const SFT* sft, SCH
  * TODO: Support more Unicode, e.g. ideographic space (how should it interact with justification etc.)
  * TODO: Introduce grapheme layer, or decide on partial support and canonize input (e.g. the same accented letter can be represented as either one or two codepoints!)
  */
-static inline void prescanLine(T_ErrorHandler* eh, SFT sft, const uint16_t* restrict const text, E_QLS_WRAP wrapMode, SCHRIFT_F64 availableWidth, SCHRIFT_F64 letterSpacing
+static inline void prescanLine(T_ErrorHandler* eh, SFT sft, UTF16_Reader* text, E_QLS_WRAP wrapMode, SCHRIFT_F64 availableWidth, SCHRIFT_F64 letterSpacing
         , T_Result_PrescanLine* outResult);
-static inline void prescanText(T_ErrorHandler* eh, const T_RenderData* r, const uint16_t* restrict const text, T_Result_PrescanText* outResult);
-static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* r, const uint16_t* restrict const text, T_SurfaceData* surface);
+static inline void prescanText(T_ErrorHandler* eh, const T_RenderData* r, const uint16_t* restrict const text,uint32_t textLen, T_Result_PrescanText* outResult);
+static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* r, const uint16_t* restrict const text,uint32_t textLen, T_SurfaceData* surface);
 
 /*********************************************/
 /*** External function implementations     ***/
@@ -215,7 +219,7 @@ T_SizeInt qls_renderTextPrivate(T_ErrorHandler* errorHandler, uint64_t surfaceHa
                 if (errorHandler->code == QLS_ERROR_OK)
                 {
                     rData.color = PIX(r) | (PIX(g) << 8) | (PIX(b) << 16) | (PIX(a) << 24);
-                    result = layoutAndRender(errorHandler, &rData, text, surface);
+                    result = layoutAndRender(errorHandler, &rData, text, textLen, surface);
                     // if (errorHandler->code == QLS_ERROR_OK) {
                     // } else {
                     // }
@@ -254,7 +258,7 @@ T_SizeInt qls_layoutTextPrivate(T_ErrorHandler* errorHandler, T_TrueTypeFont* fo
     qls_load_font(errorHandler,&r,font);
     if (errorHandler->code == QLS_ERROR_OK)
     {
-        result = layoutAndRender(errorHandler, &r, text, NULL);
+        result = layoutAndRender(errorHandler, &r, text,textLen, NULL);
         // if (errorHandler->code == QLS_ERROR_OK)
         // {
         // }
@@ -403,32 +407,6 @@ static T_SurfaceData* qls_get_surfacedata(uint64_t id) {
     return (T_SurfaceData*)id;
 }
 
-static inline uint32_t utf16Read(const uint16_t* restrict * text) {
-    const uint16_t* p = *text;
-    uint32_t cp = *p++;
-    if (cp == '\0') {
-        return '\0';
-    } else {
-        if (cp >= 0xD800 && cp <= 0xDBFF)
-        {
-            uint32_t lo = *p++;
-            if (lo >= 0xDC00 && lo <= 0xDFFF)
-            {
-                cp = 0x10000 + (((cp - 0xD800) << 10) | (lo - 0xDC00));
-            }
-        }
-
-        *text = p;
-        return cp;
-    }
-}
-static inline void utf16Skip(const uint16_t* restrict * text) {
-    utf16Read(text);
-}
-static inline uint32_t utf16Peek(const uint16_t* restrict text) {
-    return utf16Read(&text);
-}
-
 static inline bool ctypeIsLineEnding(uint32_t c) {
     switch (c) {
         case '\0': case '\r': case '\n':
@@ -460,6 +438,7 @@ static inline void advancePenBeforeRender(T_ErrorHandler* eh, const SFT* sft, SC
             ERROR(eh, QLS_ERROR_GLIPH_MISSING, "codepoint 0x%04X missing", c1);
             return;
         }
+        //TODO c2 could be 0 - skip sft_lookup &kerning in this case
         SFT_Glyph g2;
         if (sft_lookup(sft, c2, &g2) < 0) {
             ERROR(eh, QLS_ERROR_GLIPH_MISSING, "codepoint 0x%04X missing", c2);
@@ -531,7 +510,7 @@ static inline void advancePenAfterRender(T_ErrorHandler* eh, const SFT* sft, SCH
 static inline bool prescanLine_IsLineTooWide(SCHRIFT_F64 availableWidth, uint_fast16_t l, SCHRIFT_F64 w) {
     return 1 <= l && SCHRIFT_F64_compare_lt(availableWidth , w);
 }
-static inline void prescanLine(T_ErrorHandler* eh, SFT sft, const uint16_t* restrict const text, E_QLS_WRAP wrapMode, SCHRIFT_F64 availableWidth, SCHRIFT_F64 letterSpacing
+static inline void prescanLine(T_ErrorHandler* eh, SFT sft, UTF16_Reader* reader, E_QLS_WRAP wrapMode, SCHRIFT_F64 availableWidth, SCHRIFT_F64 letterSpacing
         , T_Result_PrescanLine* outResult) {
 
     sft.xOffset = SCHRIFT_F64_from_s32(0);
@@ -547,10 +526,9 @@ static inline void prescanLine(T_ErrorHandler* eh, SFT sft, const uint16_t* rest
         enum { FOR_CHAR_BREAK, FOR_WORD_BREAK };
         T_LayoutData candidates[2] = { line, line };
         
-        const uint16_t* reader = text;
-        uint32_t codepoint;
+        uint32_t codepoint = utf16_read_codepoint(reader);
         // find line ending, or shortest non-fitting line of at least one codepoint
-        while (!(ctypeIsLineEnding(codepoint = utf16Peek(reader)) || prescanLine_IsLineTooWide(availableWidth, line.l, line.w))) {
+        while (!(ctypeIsLineEnding(codepoint) || prescanLine_IsLineTooWide(availableWidth, line.l, line.w))) {
 
             candidates[FOR_CHAR_BREAK] = line;
             { // OPT candidates[FOR_WORD_BREAK] = ...
@@ -575,7 +553,7 @@ static inline void prescanLine(T_ErrorHandler* eh, SFT sft, const uint16_t* rest
                 line.l = line.lSpace;
                 line.w = line.wSpace;
             }
-            utf16Skip(&reader);
+            codepoint = utf16_read_codepoint(reader);
         }
 
         const bool wrapchar = wrapMode != QLS_WRAP_WORD;
@@ -590,7 +568,8 @@ static inline void prescanLine(T_ErrorHandler* eh, SFT sft, const uint16_t* rest
             // line = line;
         } else /* wrapword */ {
             // include the rest of the last word
-            while (ctypeIsGraphical(codepoint = utf16Peek(reader))) {
+        	codepoint = utf16_read_codepoint(reader);
+            while (ctypeIsGraphical(codepoint)) {
                 advancePenBeforeRender(eh, &sft, letterSpacing, line.lastCodepoint, codepoint, &line.wSpace);
                 if (eh->code != QLS_ERROR_OK) {
                     return;
@@ -604,22 +583,24 @@ static inline void prescanLine(T_ErrorHandler* eh, SFT sft, const uint16_t* rest
                 line.lSpace += 1;
                 line.l = line.lSpace;
                 line.w = line.wSpace;
-                utf16Skip(&reader);
+                utf16_read_codepoint(reader);
             }
         }
     }
 
     // with `line`, *outResult = ...
-
-    const uint16_t* reader = text;
+    //reset the reader
+    reader->pos = reader->start;
     uint32_t codepoint;
     outResult->len = line.l;
     outResult->width = line.w;
     { // nSpaces = ...; lineEnd = ...
         outResult->nSpaces = 0;
         for (uint_fast16_t i = 0; i < line.l; ++i) {
-            if (ctypeIsSpace(codepoint = utf16Read(&reader))) {
+        	codepoint = utf16_read_codepoint(reader);
+            if (ctypeIsSpace(codepoint)) {
                 outResult->nSpaces += 1;
+				codepoint = utf16_read_codepoint(reader);
             }
         }
         outResult->lineEnd = reader;
@@ -627,15 +608,15 @@ static inline void prescanLine(T_ErrorHandler* eh, SFT sft, const uint16_t* rest
     {
         // nextLineStart = ... : Skip any trailing spaces and hard wrap (if present)
         // wasLastLine = ...
-        while (ctypeIsSpace(codepoint = utf16Peek(reader))) {
-            utf16Skip(&reader);
+        while (ctypeIsSpace(codepoint)) {
+        	codepoint = utf16_read_codepoint(reader);
         }
         outResult->wasLastLine = '\0' == utf16Peek(reader);
-        if ('\r' == (codepoint = utf16Peek(reader))) {
-            utf16Skip(&reader);
+        if ('\r' == codepoint) {
+        	codepoint = utf16_read_codepoint(reader);
         }
-        if ('\n' == (codepoint = utf16Peek(reader))) {
-            utf16Skip(&reader);
+        if ('\n' == codepoint) {
+        	codepoint = utf16_read_codepoint(reader);
         }
         outResult->nextLineStart = reader;
     }
@@ -654,27 +635,30 @@ static inline SCHRIFT_F64 getSpareHeight(int32_t boxHeight, SCHRIFT_F64 textHeig
     return SCHRIFT_F64_sub(SCHRIFT_F64_from_s32(boxHeight) , textHeight);
 }
 
-static inline void prescanText(T_ErrorHandler* eh, const T_RenderData* r, const uint16_t* restrict const text, T_Result_PrescanText* outResult) {
+static inline void prescanText(T_ErrorHandler* eh, const T_RenderData* r, const uint16_t* restrict const text, uint32_t textLen, T_Result_PrescanText* outResult) {
     SFT sft = r->sft;
     sft.xOffset = SCHRIFT_F64_from_s32(0);
     sft.yOffset = SCHRIFT_F64_from_s32(0);
 
     uint_fast16_t nLines = 0;
-    const uint16_t* reader = text;
+	UTF16_Reader reader = {
+			.start = text,
+			.end = text + textLen,
+			.pos = text };
     T_Result_PrescanLine lineData = {0};
     do {
-        prescanLine(eh, sft, reader, r->wrapMode, SCHRIFT_F64_from_s32(renderData_GetWidth(r)), r->letterSpacing, &lineData);
+        prescanLine(eh, sft, &reader, r->wrapMode, SCHRIFT_F64_from_s32(renderData_GetWidth(r)), r->letterSpacing, &lineData);
         if (eh->code != QLS_ERROR_OK) {
             return;
         }
         nLines += 1;
-        reader = lineData.nextLineStart;
+        //reader = lineData.nextLineStart;
     } while (!lineData.wasLastLine);
 
     outResult->textHeight = SCHRIFT_F64_sub(SCHRIFT_F64_mul(SCHRIFT_F64_from_u16_fast(nLines) , (SCHRIFT_F64_add(SCHRIFT_F64_sub(r->lineMetrics.ascender , r->lineMetrics.descender) , r->lineMetrics.lineGap))) , r->lineMetrics.lineGap);
 }
 
-static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* r, const uint16_t* restrict const text, T_SurfaceData* surface) {
+static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* r, const uint16_t* restrict const text, uint32_t textLen, T_SurfaceData* surface) {
     /**
      * TODO
      * pen.y calculation will be complicated by the fallback-font feature
@@ -696,7 +680,7 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* 
         }
         case VALIGN_MIDDLE: {
             T_Result_PrescanText textData = {0};
-            prescanText(eh, r, text, &textData);
+            prescanText(eh, r, text,textLen, &textData);
             if (eh->code != QLS_ERROR_OK) {
                 return (T_SizeInt) {0, 0};
             }
@@ -705,7 +689,7 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* 
         }
         case VALIGN_BOTTOM: {
             T_Result_PrescanText textData = {0};
-            prescanText(eh, r, text, &textData);
+            prescanText(eh, r, text,textLen, &textData);
             if (eh->code != QLS_ERROR_OK) {
                 return (T_SizeInt) {0, 0};
             }
@@ -789,6 +773,26 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* 
         .height = SCHRIFT_F64_cast_to_s32(SCHRIFT_F64_sub(SCHRIFT_F64_mul(SCHRIFT_F64_from_u16_fast(iLine) , (SCHRIFT_F64_add(SCHRIFT_F64_sub(r->lineMetrics.ascender , r->lineMetrics.descender) , r->lineMetrics.lineGap))) , r->lineMetrics.lineGap)),
         .width = SCHRIFT_F64_cast_to_s32(lineWidthMax)
     };
+}
+
+
+static inline uint32_t utf16_read_codepoint(UTF16_Reader* reader ) {
+	uint32_t cp = '\0';
+	if (reader->pos < reader->end)
+	{
+		cp = *reader->pos;
+		reader->pos++;
+		if (cp >= 0xD800 && cp <= 0xDBFF && (reader->pos < reader->end ))
+		{
+			uint32_t lo = *reader->pos;
+		reader->pos++;
+			if (lo >= 0xDC00 && lo <= 0xDFFF)
+			{
+				cp = 0x10000 + (((cp - 0xD800) << 10) | (lo - 0xDC00));
+			}
+		}
+	}
+	return cp;
 }
 
 #if INCLUDE_MAIN
