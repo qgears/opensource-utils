@@ -57,6 +57,18 @@ bversion:
 	cp libschrift_manualtest_softfloat.exe $(OUTPUTDIR)/$(SO_NAME)
 	cp -f $(OUTPUTDIR)/$(SO_NAME) $(OUTPUTDIR)/$(SO_GENERIC_NAME)
 
+testprog:
+	mkdir -p $(OUTPUTDIR)
+	gcc \
+	-fno-fast-math \
+	-ffp-contract=off \
+	-fexcess-precision=standard \
+	-o libschrift_manualtest_softfloat.exe \
+	-DINCLUDE_MAIN \
+	$(C_FLAGS) \
+	 ../nativeLibLibschrift.c ../schrift.c ../util.c \
+	 -lm
+
 ../hu_qgears_textrender_libschrift_LibschriftNative.h : 
 	javac -cp $(JNIDEPS) \
 	-h $(JNI_HEADERS) $(PROJDIR)/src/main/java/hu/qgears/textrender/libschrift/LibschriftNative.java $(PROJDIR)/src/main/java/hu/qgears/textrender/TrueTypeFont.java

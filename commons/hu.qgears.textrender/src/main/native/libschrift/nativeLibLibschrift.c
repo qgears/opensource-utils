@@ -63,7 +63,7 @@ typedef struct {
 } T_RenderData;
 
 typedef struct {
-    uint_fast16_t len, nSpaces;
+    uint32_t nSpaces;
     const uint16_t* lineStart;
     //exclusive, consistent with `len`
     const uint16_t* lineEnd;
@@ -85,9 +85,9 @@ typedef enum {
 } E_QLS_WRAP;
 
 typedef struct {
-	uint16_t* start;
-	uint16_t* end;
-	uint16_t* pos;
+	const uint16_t* start;
+	const uint16_t* end;
+	const uint16_t* pos;
 } UTF16_Reader;
 
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
@@ -99,25 +99,23 @@ typedef struct {
 static inline uint32_t blend_bgra_premultiplied(uint32_t dst, uint32_t pcolor, uint8_t mask);
 static inline void copy_rect(int32_t startx, int32_t starty, T_SurfaceData* surface, SFT_Image* img, uint32_t color);
 static void qls_load_font(T_ErrorHandler* eh,T_RenderData* r, T_TrueTypeFont* font);
-static void get_font_file(T_ErrorHandler* eh, T_TrueTypeFont* font, char* filePath, uint32_t filePathLength);
 static T_SurfaceData* qls_get_surfacedata(uint64_t id);
-
+static inline void advancePen(
+		T_ErrorHandler* eh, T_RenderData * rData, uint32_t prevCodepoint, uint32_t currentCodepoint, T_DPoint* pen,T_SurfaceData* surface, SCHRIFT_F64 spaceJustification);
 /**
  * Stops advancing at the terminating '\0'.
  */
 static inline uint32_t utf16_read_codepoint(UTF16_Reader* reader );
+/**
+ * Same as utf16_read_codepoint, but leaves the reader position unchanged.
+ */
+static inline uint32_t utf16_peek_codepoint(UTF16_Reader* reader );
 static inline bool ctypeIsLineEnding(uint32_t c);
 static inline bool ctypeIsSpace(uint32_t c);
 static inline bool ctypeIsGraphical(uint32_t c);
 static inline int32_t wholePart(SCHRIFT_F64 d);
 static inline SCHRIFT_F64 fractionalPart(SCHRIFT_F64 d);
-static inline int32_t renderData_GetWidth(const T_RenderData* r);
-/**
- * Pass 0 for c1, if there is no previous character.
- */
-static inline void advancePenBeforeRender(T_ErrorHandler* eh, const SFT* sft, SCHRIFT_F64 letterSpacing, uint32_t c1, uint32_t c2, SCHRIFT_F64* penx);
-static inline void renderGlyph(T_ErrorHandler* eh, SFT* sft, const T_DPoint* pen, uint32_t color, uint32_t codepoint, T_SurfaceData* surface);
-static inline void advancePenAfterRender(T_ErrorHandler* eh, const SFT* sft, SCHRIFT_F64 spaceJustification, uint32_t codepoint, SCHRIFT_F64* penx);
+static inline int32_t renderData_GetWidth(T_RenderData* r);
 /**
  * Use this function to
  *  * Get the number of codepoints to render in one line
@@ -136,8 +134,8 @@ static inline void advancePenAfterRender(T_ErrorHandler* eh, const SFT* sft, SCH
  * TODO: Introduce grapheme layer, or decide on partial support and canonize input (e.g. the same accented letter can be represented as either one or two codepoints!)
  */
 static inline void prescanLine(T_ErrorHandler* eh, T_RenderData* rData, UTF16_Reader* reader, T_Result_PrescanLine* outResult);
-static inline void prescanText(T_ErrorHandler* eh, const T_RenderData* r, const uint16_t* restrict const text,uint32_t textLen, T_Result_PrescanText* outResult);
-static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* r, const uint16_t* restrict const text,uint32_t textLen, T_SurfaceData* surface);
+static inline void prescanText(T_ErrorHandler* eh, T_RenderData* r, const uint16_t* text,uint32_t textLen, T_Result_PrescanText* outResult);
+static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, T_RenderData* r, const uint16_t* text,uint32_t textLen, T_SurfaceData* surface);
 
 /*********************************************/
 /*** External function implementations     ***/
@@ -500,81 +498,82 @@ static inline void advancePen(
 	}
 	SCHRIFT_F64_addEq(pen->x, gmtx.advanceWidth);
 }
-static inline void advancePenBeforeRender(T_ErrorHandler* eh, const SFT* sft, SCHRIFT_F64 letterSpacing, uint32_t c1, uint32_t c2, SCHRIFT_F64* penx) {
-    if (c1 != 0) {
-        SFT_Glyph g1;
-        if (sft_lookup(sft, c1, &g1) < 0) {
-            ERROR(eh, QLS_ERROR_GLIPH_MISSING, "codepoint 0x%04X missing", c1);
-            return;
-        }
-        //TODO c2 could be 0 - skip sft_lookup &kerning in this case
-        SFT_Glyph g2;
-        if (sft_lookup(sft, c2, &g2) < 0) {
-            ERROR(eh, QLS_ERROR_GLIPH_MISSING, "codepoint 0x%04X missing", c2);
-            return;
-        }
-        SFT_Kerning kerning;
-        if (sft_kerning(sft, g1, g2, &kerning) < 0) {
-            ERROR(eh, QLS_ERROR_GLIPH_KERNING, "Invalid kerning between codepoints 0x%04X 0x%04X ", c1, c2);
-            return;
-        }
-
-        SCHRIFT_F64_addEq(*penx , letterSpacing);
-        SCHRIFT_F64_addEq(*penx , kerning.xShift);
-    }
-}
-static inline void renderGlyph(T_ErrorHandler* eh, SFT* sft, const T_DPoint* pen, uint32_t color, uint32_t codepoint, T_SurfaceData* surface) {
-    sft->xOffset = fractionalPart(pen->x);
-    sft->yOffset = fractionalPart(pen->y);
-
-    SFT_Glyph glyph;
-    if (sft_lookup(sft, codepoint, &glyph) < 0) {
-		ERROR(eh, QLS_ERROR_GLIPH_MISSING, "codepoint 0x%04X missing", codepoint);
-        return;
-    }
-
-    SFT_GMetrics gmtx;
-    if (sft_gmetrics(sft, glyph, &gmtx) < 0) {
-        ERROR(eh, QLS_ERROR_GLIPH_MISSING, "codepoint 0x%04X bad glyph metrics", codepoint);
-        return;
-    }
-
-    SFT_Image img = {
-        .width = (gmtx.minWidth + 3) & ~3, //TODO consider aligning to 8?
-        .height = gmtx.minHeight
-    };
-    // VLA! TODO allocate variable array on stack?
-    uint8_t pixels[img.width * img.height];
-    // TODO check for memory safety: overflow or negative number may overindex memory.
-    memset(pixels, 0, img.width * img.height);
-    img.pixels = pixels;
-
-    if (sft_render(sft, glyph, img) < 0) {
-        ERROR(eh, QLS_ERROR_GLIPH_RENDER, "codepoint 0x%04X not rendered", codepoint);
-        return;
-    }
-
-    const int32_t screenX = wholePart(pen->x) + wholePart(gmtx.leftSideBearing);
-    const int32_t screenY = wholePart(pen->y) + gmtx.yOffset;
-    copy_rect(screenX, screenY, surface, &img, color);
-}
-static inline void advancePenAfterRender(T_ErrorHandler* eh, const SFT* sft, SCHRIFT_F64 spaceJustification, uint32_t codepoint, SCHRIFT_F64* penx) {
-    SFT_Glyph g;
-    if (sft_lookup(sft, codepoint, &g) < 0) {
-        ERROR(eh, QLS_ERROR_GLIPH_MISSING, "codepoint 0x%04X missing", codepoint);
-        return;
-    }
-    SFT_GMetrics gMetrics;
-    if (sft_gmetrics(sft, g, &gMetrics) < 0) {
-        ERROR(eh, QLS_ERROR_GLIPH_MISSING, "codepoint 0x%04X bad glyph metrics", codepoint);
-        return;
-    }
-
-    if (ctypeIsSpace(codepoint)) {
-        SCHRIFT_F64_addEq(*penx , spaceJustification);
-    }
-    SCHRIFT_F64_addEq(*penx , gMetrics.advanceWidth);
-}
+//
+//static inline void advancePenBeforeRender(T_ErrorHandler* eh, const SFT* sft, SCHRIFT_F64 letterSpacing, uint32_t c1, uint32_t c2, SCHRIFT_F64* penx) {
+//    if (c1 != 0) {
+//        SFT_Glyph g1;
+//        if (sft_lookup(sft, c1, &g1) < 0) {
+//            ERROR(eh, QLS_ERROR_GLIPH_MISSING, "codepoint 0x%04X missing", c1);
+//            return;
+//        }
+//        //TODO c2 could be 0 - skip sft_lookup &kerning in this case
+//        SFT_Glyph g2;
+//        if (sft_lookup(sft, c2, &g2) < 0) {
+//            ERROR(eh, QLS_ERROR_GLIPH_MISSING, "codepoint 0x%04X missing", c2);
+//            return;
+//        }
+//        SFT_Kerning kerning;
+//        if (sft_kerning(sft, g1, g2, &kerning) < 0) {
+//            ERROR(eh, QLS_ERROR_GLIPH_KERNING, "Invalid kerning between codepoints 0x%04X 0x%04X ", c1, c2);
+//            return;
+//        }
+//
+//        SCHRIFT_F64_addEq(*penx , letterSpacing);
+//        SCHRIFT_F64_addEq(*penx , kerning.xShift);
+//    }
+//}
+//static inline void renderGlyph(T_ErrorHandler* eh, SFT* sft, const T_DPoint* pen, uint32_t color, uint32_t codepoint, T_SurfaceData* surface) {
+//    sft->xOffset = fractionalPart(pen->x);
+//    sft->yOffset = fractionalPart(pen->y);
+//
+//    SFT_Glyph glyph;
+//    if (sft_lookup(sft, codepoint, &glyph) < 0) {
+//		ERROR(eh, QLS_ERROR_GLIPH_MISSING, "codepoint 0x%04X missing", codepoint);
+//        return;
+//    }
+//
+//    SFT_GMetrics gmtx;
+//    if (sft_gmetrics(sft, glyph, &gmtx) < 0) {
+//        ERROR(eh, QLS_ERROR_GLIPH_MISSING, "codepoint 0x%04X bad glyph metrics", codepoint);
+//        return;
+//    }
+//
+//    SFT_Image img = {
+//        .width = (gmtx.minWidth + 3) & ~3, //TODO consider aligning to 8?
+//        .height = gmtx.minHeight
+//    };
+//    // VLA! TODO allocate variable array on stack?
+//    uint8_t pixels[img.width * img.height];
+//    // TODO check for memory safety: overflow or negative number may overindex memory.
+//    memset(pixels, 0, img.width * img.height);
+//    img.pixels = pixels;
+//
+//    if (sft_render(sft, glyph, img) < 0) {
+//        ERROR(eh, QLS_ERROR_GLIPH_RENDER, "codepoint 0x%04X not rendered", codepoint);
+//        return;
+//    }
+//
+//    const int32_t screenX = wholePart(pen->x) + wholePart(gmtx.leftSideBearing);
+//    const int32_t screenY = wholePart(pen->y) + gmtx.yOffset;
+//    copy_rect(screenX, screenY, surface, &img, color);
+//}
+//static inline void advancePenAfterRender(T_ErrorHandler* eh, const SFT* sft, SCHRIFT_F64 spaceJustification, uint32_t codepoint, SCHRIFT_F64* penx) {
+//    SFT_Glyph g;
+//    if (sft_lookup(sft, codepoint, &g) < 0) {
+//        ERROR(eh, QLS_ERROR_GLIPH_MISSING, "codepoint 0x%04X missing", codepoint);
+//        return;
+//    }
+//    SFT_GMetrics gMetrics;
+//    if (sft_gmetrics(sft, g, &gMetrics) < 0) {
+//        ERROR(eh, QLS_ERROR_GLIPH_MISSING, "codepoint 0x%04X bad glyph metrics", codepoint);
+//        return;
+//    }
+//
+//    if (ctypeIsSpace(codepoint)) {
+//        SCHRIFT_F64_addEq(*penx , spaceJustification);
+//    }
+//    SCHRIFT_F64_addEq(*penx , gMetrics.advanceWidth);
+//}
 
 static inline bool prescanLine_IsLineTooWide(SCHRIFT_F64 availableWidth, uint_fast16_t l, SCHRIFT_F64 w) {
     return 1 <= l && SCHRIFT_F64_compare_lt(availableWidth , w);
@@ -582,127 +581,224 @@ static inline bool prescanLine_IsLineTooWide(SCHRIFT_F64 availableWidth, uint_fa
 
 static inline void prescanLine(T_ErrorHandler* eh, T_RenderData* rData, UTF16_Reader* reader, T_Result_PrescanLine* outResult)
 {
-
 	SCHRIFT_F64 letterSpacing = rData->letterSpacing;
-	E_QLS_WRAP wrapMode = rData->wrapMode;
     SCHRIFT_F64 availableWidth = SCHRIFT_F64_from_s32(renderData_GetWidth(rData));
-    typedef struct {
-        SCHRIFT_F64 w, wSpace;
-        uint_fast16_t l, lSpace;
-        uint32_t lastCodepoint;
-    } T_LayoutData;
+	outResult->lineStart = reader->pos;
 
-    T_LayoutData line = {0};
-    { // line = ...
-        enum { FOR_CHAR_BREAK, FOR_WORD_BREAK };
-        T_LayoutData candidates[2] = { line, line };
-        
-        uint32_t codepoint = utf16_read_codepoint(reader);
-        // find line ending, or shortest non-fitting line of at least one codepoint
-        while (!(ctypeIsLineEnding(codepoint) || prescanLine_IsLineTooWide(availableWidth, line.l, line.w))) {
-
-            candidates[FOR_CHAR_BREAK] = line;
-            { // OPT candidates[FOR_WORD_BREAK] = ...
-                const bool isWordBreak = line.l == 0 || (ctypeIsSpace(line.lastCodepoint) != ctypeIsSpace(codepoint));
-                if (isWordBreak) {
-                    candidates[FOR_WORD_BREAK] = line;
-                }
-            }
-
-
-            T_DPoint pen = {line.wSpace,0};
-            advancePen(eh, rData, line.lastCodepoint, codepoint, &pen, NULL, 0);
-            if (eh->code != QLS_ERROR_OK) {
-			   return;
-		    }
-            line.wSpace = pen.x;
-
-            line.lastCodepoint = codepoint;
-            line.lSpace += 1;
-            if (ctypeIsGraphical(codepoint)) {
-                line.l = line.lSpace;
-                line.w = line.wSpace;
-            }
-            codepoint = utf16_read_codepoint(reader);
+	bool wrapchar;
+	bool wrapword;
+	switch(rData->wrapMode){
+		case QLS_WRAP_WORD:
+			wrapchar = false;
+			wrapword = true;
+			break;
+		case QLS_WRAP_CHAR:
+			wrapchar = true;
+			wrapword = false;
+			break;
+		case QLS_WRAP_WORDCHAR:
+			wrapchar = true;
+			wrapword = true;
+			break;
+		case QLS_WRAP_NONE:
+		default:
+			wrapchar = false;
+			wrapword = false;
+			break;
+	}
+	T_Result_PrescanLine ret = {0};
+	ret.lineStart = reader->pos;
+	ret.lineEnd = reader->end;
+	T_DPoint pen = {0,0};
+	uint32_t prevCodepoint = 0;
+	uint32_t codepoint = 0;
+	const uint16_t* lastSpace = NULL;
+	SCHRIFT_F64 widthAtLastSpace = SCHRIFT_F64_from_s32(0);
+	while (reader-> pos < reader->end) {
+		//position in front of `codepoint`, so a codepoint that does not belong to this line can be excluded
+		const uint16_t* charStart = reader->pos;
+        codepoint = utf16_read_codepoint(reader);
+        if (ctypeIsLineEnding(codepoint) ) {
+        	ret.lineEnd = charStart;
+        	break;
         }
+        if (ctypeIsSpace(codepoint)){
+        	ret.nSpaces++;
+        	lastSpace = charStart;
+        	//pen is still in front of the space
+        	widthAtLastSpace = pen.x;
+        }
+		advancePen(eh, rData, prevCodepoint, codepoint, &pen, NULL, 0);
+		if (eh->code != QLS_ERROR_OK) {
+			return;
+		}
 
-        const bool wrapchar = wrapMode != QLS_WRAP_WORD;
-        const bool wrapword = wrapMode != QLS_WRAP_CHAR;
-        if (!prescanLine_IsLineTooWide(availableWidth, line.l, line.w)) {
-            // line = line;
-        } else if (wrapword && 0 < candidates[FOR_WORD_BREAK].lSpace) {
-            line = candidates[FOR_WORD_BREAK];
-        } else if (wrapchar && 0 < candidates[FOR_CHAR_BREAK].lSpace) {
-            line = candidates[FOR_CHAR_BREAK];
-        } else if (wrapchar) {
-            // line = line;
-        } else /* wrapword */ {
-            // include the rest of the last word
-        	codepoint = utf16_read_codepoint(reader);
-            while (ctypeIsGraphical(codepoint)) {
-            	T_DPoint pen = {line.wSpace,0};
-            	advancePen(eh, rData, line.lastCodepoint, codepoint, &pen, NULL, 0);
-                if (eh->code != QLS_ERROR_OK) {
-                    return;
-                }
-                line.wSpace = pen.x;
-                line.lastCodepoint = codepoint;
-                line.lSpace += 1;
-                line.l = line.lSpace;
-                line.w = line.wSpace;
-                utf16_read_codepoint(reader);
-            }
+		if ((pen.x > availableWidth)) {
+        	//current character does not fit into line
+        	if (wrapword && lastSpace != NULL) {
+        		ret.lineEnd = lastSpace;
+        		ret.nSpaces--;   // the break space is not part of the line
+        		ret.width = widthAtLastSpace;
+        		//we can wrap on last word
+        		break;
+        	} else if (wrapchar && charStart != ret.lineStart) {
+        		//we can wrap on char boundary, but never produce an empty line
+        		ret.lineEnd =  charStart;
+        		if (charStart == lastSpace) {
+        			//can happen in case of WRAP_CHAR
+        			ret.nSpaces--;   // the break space is not part of the line
+        		}
+        		break;
+         	} else {
+         		//wrap is not allowed, advance until next line break possibility
+         	}
         }
-    }
+		prevCodepoint = codepoint;
+		//kept one codepoint behind pen, so the `break`s above see the width excluding the breaking codepoint
+		ret.width = pen.x;
+	}
+	//ret.lineEnd is the break point; skip this line's trailing whitespace and hard wrap
+	//reset the reader to lineEnd
+	reader->pos = ret.lineEnd;
 
-    // with `line`, *outResult = ...
-    //reset the reader
-    reader->pos = reader->start;
-    uint32_t codepoint;
-    outResult->len = line.l;
-    outResult->width = line.w;
-    { // nSpaces = ...; lineEnd = ...
-        outResult->nSpaces = 0;
-        for (uint_fast16_t i = 0; i < line.l; ++i) {
-        	codepoint = utf16_read_codepoint(reader);
-            if (ctypeIsSpace(codepoint)) {
-                outResult->nSpaces += 1;
-				codepoint = utf16_read_codepoint(reader);
-            }
-        }
-        outResult->lineEnd = reader;
-    }
-    {
-        // nextLineStart = ... : Skip any trailing spaces and hard wrap (if present)
-        // wasLastLine = ...
-        while (ctypeIsSpace(codepoint)) {
-        	codepoint = utf16_read_codepoint(reader);
-        }
-        outResult->wasLastLine = '\0' == codepoint;
-        if ('\r' == codepoint) {
-        	codepoint = utf16_read_codepoint(reader);
-        }
-        if ('\n' == codepoint) {
-        	codepoint = utf16_read_codepoint(reader);
-        }
-        outResult->nextLineStart = reader;
-    }
+	//drop trailing spaces; the next line's leading spaces are kept
+	//peeked, not read: a consuming read would also swallow the first non-space
+	while (ctypeIsSpace(utf16_peek_codepoint(reader))) {
+		utf16_read_codepoint(reader);
+	}
+	//drop line endings, but only the first one!
+	if (reader->pos < reader->end && '\r' == *reader->pos) {
+		reader->pos++;
+	}
+	if (reader->pos < reader->end && '\n' == *reader->pos) {
+		reader->pos++;
+	}
+
+	ret.nextLineStart = reader->pos;
+	ret.wasLastLine = ret.nextLineStart == reader->end;
+	*outResult = ret;
+
+//
+//    typedef struct {
+//        SCHRIFT_F64 w, wSpace;
+//        uint_fast16_t l, lSpace;
+//        uint32_t lastCodepoint;
+//    } T_LayoutData;
+//
+//    T_LayoutData line = {0};
+//    { // line = ...
+//        enum { FOR_CHAR_BREAK, FOR_WORD_BREAK };
+//        T_LayoutData candidates[2] = { line, line };
+//
+//        // find line ending, or shortest non-fitting line of at least one codepoint
+//        while (!(ctypeIsLineEnding(codepoint) || prescanLine_IsLineTooWide(availableWidth, line.l, line.w))) {
+//
+//            candidates[FOR_CHAR_BREAK] = line;
+//            { // OPT candidates[FOR_WORD_BREAK] = ...
+//                const bool isWordBreak = line.l == 0 || (ctypeIsSpace(line.lastCodepoint) != ctypeIsSpace(codepoint));
+//                if (isWordBreak) {
+//                    candidates[FOR_WORD_BREAK] = line;
+//                }
+//            }
+//
+//
+//            T_DPoint pen = {line.wSpace,0};
+//            advancePen(eh, rData, line.lastCodepoint, codepoint, &pen, NULL, 0);
+//            if (eh->code != QLS_ERROR_OK) {
+//			   return;
+//		    }
+//            line.wSpace = pen.x;
+//
+//            line.lastCodepoint = codepoint;
+//            line.lSpace += 1;
+//            if (ctypeIsGraphical(codepoint)) {
+//                line.l = line.lSpace;
+//                line.w = line.wSpace;
+//            }
+//            codepoint = utf16_read_codepoint(reader);
+//        }
+//
+//
+//
+//        if (!prescanLine_IsLineTooWide(availableWidth, line.l, line.w)) {
+//            // line = line;
+//        } else if (wrapword && 0 < candidates[FOR_WORD_BREAK].lSpace) {
+//            line = candidates[FOR_WORD_BREAK];
+//        } else if (wrapchar && 0 < candidates[FOR_CHAR_BREAK].lSpace) {
+//            line = candidates[FOR_CHAR_BREAK];
+//        } else if (wrapchar) {
+//            // line = line;
+//        } else /* wrapword */ {
+//            // include the rest of the last word; `codepoint` is the one the loop above stopped on
+//            while (ctypeIsGraphical(codepoint)) {
+//            	T_DPoint pen = {line.wSpace,0};
+//            	advancePen(eh, rData, line.lastCodepoint, codepoint, &pen, NULL, 0);
+//                if (eh->code != QLS_ERROR_OK) {
+//                    return;
+//                }
+//                line.wSpace = pen.x;
+//                line.lastCodepoint = codepoint;
+//                line.lSpace += 1;
+//                line.l = line.lSpace;
+//                line.w = line.wSpace;
+//                codepoint = utf16_read_codepoint(reader);
+//            }
+//        }
+//    }
+//
+//    // with `line`, *outResult = ...
+//    //reset the reader
+//    reader->pos = outResult->lineStart;
+//    outResult->len = line.l;
+//    outResult->width = line.w;
+//    { // nSpaces = ...; lineEnd = ...
+//        outResult->nSpaces = 0;
+//        for (uint_fast16_t i = 0; i < line.l; ++i) {
+//        	uint32_t codepoint = utf16_read_codepoint(reader);
+//            if (ctypeIsSpace(codepoint)) {
+//                outResult->nSpaces += 1;
+//            }
+//        }
+//        outResult->lineEnd = reader->pos;
+//    }
+//    {
+//        // nextLineStart = ... : Skip any trailing spaces and hard wrap (if present)
+//        // wasLastLine = ...
+//        // `rewind` is the reader position in front of `codepoint`, so a codepoint that does not
+//        // belong to this line can be given back instead of being looked ahead at.
+//        const uint16_t* rewind = reader->pos;
+//        uint32_t codepoint = utf16_read_codepoint(reader);
+//        while (ctypeIsSpace(codepoint)) {
+//        	rewind = reader->pos;
+//        	codepoint = utf16_read_codepoint(reader);
+//        }
+//        outResult->wasLastLine = '\0' == codepoint;
+//        if ('\r' == codepoint) {
+//        	rewind = reader->pos;
+//        	codepoint = utf16_read_codepoint(reader);
+//        }
+//        if ('\n' == codepoint) {
+//        	rewind = reader->pos;
+//        }
+//        reader->pos = rewind;
+//        outResult->nextLineStart = reader->pos;
+//    }
 }
 
-static inline int32_t renderData_GetWidth(const T_RenderData* r) {
+static inline int32_t renderData_GetWidth(T_RenderData* r) {
     return r->maxPen.x - r->minPen.x;
 }
 static inline SCHRIFT_F64 getSpareWidth(int32_t boxWidth, SCHRIFT_F64 lineWidth) {
     return SCHRIFT_F64_sub(SCHRIFT_F64_from_s32(boxWidth) , lineWidth);
 }
-static inline int32_t renderData_GetHeight(const T_RenderData* r) {
+static inline int32_t renderData_GetHeight(T_RenderData* r) {
     return r->maxPen.y - r->minPen.y;
 }
 static inline SCHRIFT_F64 getSpareHeight(int32_t boxHeight, SCHRIFT_F64 textHeight) {
     return SCHRIFT_F64_sub(SCHRIFT_F64_from_s32(boxHeight) , textHeight);
 }
 
-static inline void prescanText(T_ErrorHandler* eh, const T_RenderData* r, const uint16_t* restrict const text, uint32_t textLen, T_Result_PrescanText* outResult) {
+static inline void prescanText(T_ErrorHandler* eh, T_RenderData* r, const uint16_t* text, uint32_t textLen, T_Result_PrescanText* outResult) {
     uint_fast16_t nLines = 0;
 	UTF16_Reader reader = {
 			.start = text,
@@ -721,17 +817,14 @@ static inline void prescanText(T_ErrorHandler* eh, const T_RenderData* r, const 
     outResult->textHeight = SCHRIFT_F64_sub(SCHRIFT_F64_mul(SCHRIFT_F64_from_u16_fast(nLines) , (SCHRIFT_F64_add(SCHRIFT_F64_sub(r->lineMetrics.ascender , r->lineMetrics.descender) , r->lineMetrics.lineGap))) , r->lineMetrics.lineGap);
 }
 
-static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* r, const uint16_t* restrict const text, uint32_t textLen, T_SurfaceData* surface) {
+static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, T_RenderData* r, const uint16_t* text, uint32_t textLen, T_SurfaceData* surface) {
     /**
      * TODO
      * pen.y calculation will be complicated by the fallback-font feature
      * Should we do anything special with text-leading and text-trailing blank lines?
      * Should result.height = 0, when the whole text is blank?
      */
-
-    SFT sft = r->sft;
     T_DPoint pen = {
-        .x = SCHRIFT_F64_from_s32(r->minPen.x),
         .y = SCHRIFT_F64_add(SCHRIFT_F64_from_s32(r->minPen.y) , r->lineMetrics.ascender)
     };
     
@@ -766,10 +859,6 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* 
 		.start = text,
 		.end = text + textLen,
 		.pos = text };
-    UTF16_Reader lineReader = {
-		.start = text,
-		.end = text + textLen,
-		.pos = text };
     T_Result_PrescanLine lineData = {0};
     SCHRIFT_F64 lineWidthMax = SCHRIFT_F64_from_s32(0);
     /**
@@ -779,6 +868,7 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* 
      *      lineWidthMax = ...
      *      OPT render line: for (codepoint in line) advance & render
      */
+
     do {
         prescanLine(eh, r, &reader, &lineData);
         if (eh->code != QLS_ERROR_OK) {
@@ -812,29 +902,19 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* 
         }
 
 
+        reader.pos = lineData.lineStart;
         uint32_t lastCodepoint = 0;
-        for (uint_fast16_t i = 0; i < lineData.len; ++i) { // renderGlyph(...)
-            uint32_t codepoint = utf16_read_codepoint(&lineReader);
-            advancePenBeforeRender(eh, &sft, r->letterSpacing, lastCodepoint, codepoint, &pen.x);
-            if (eh->code != QLS_ERROR_OK)  {
-                return (T_SizeInt) {0, 0};
+        while (reader.pos < lineData.lineEnd) { // renderGlyph(...)
+            uint32_t codepoint = utf16_read_codepoint(&reader);
+            advancePen(eh, r,  lastCodepoint, codepoint, &pen, surface, spaceJustification);
+            if (eh->code != QLS_ERROR_OK){
+            	return (T_SizeInt) {0, 0};
             }
-            if (surface != NULL) {
-                renderGlyph(eh, &sft, &pen, r->color, codepoint, surface);
-                if (eh->code != QLS_ERROR_OK) {
-                    return (T_SizeInt) {0, 0};
-                }
-            }
-            advancePenAfterRender(eh, &sft, spaceJustification, codepoint, &pen.x);
-            if (eh->code != QLS_ERROR_OK) {
-                return (T_SizeInt) {0, 0};
-            }
-
             lastCodepoint = codepoint;
         }
 
         iLine += 1;
-        lineReader.pos = lineData.nextLineStart;
+        reader.pos = lineData.nextLineStart;
         SCHRIFT_F64_addEq(pen.y , SCHRIFT_F64_add(SCHRIFT_F64_sub(r->lineMetrics.ascender , r->lineMetrics.descender) , r->lineMetrics.lineGap));
     } while (!lineData.wasLastLine);
 
@@ -855,7 +935,7 @@ static inline uint32_t utf16_read_codepoint(UTF16_Reader* reader ) {
 		if (cp >= 0xD800 && cp <= 0xDBFF && (reader->pos < reader->end ))
 		{
 			uint32_t lo = *reader->pos;
-		reader->pos++;
+			reader->pos++;
 			if (lo >= 0xDC00 && lo <= 0xDFFF)
 			{
 				cp = 0x10000 + (((cp - 0xD800) << 10) | (lo - 0xDC00));
@@ -865,6 +945,12 @@ static inline uint32_t utf16_read_codepoint(UTF16_Reader* reader ) {
 	return cp;
 }
 
+static inline uint32_t utf16_peek_codepoint(UTF16_Reader* reader ) {
+	const uint16_t* save = reader->pos;
+	uint32_t cp = utf16_read_codepoint(reader);
+	reader->pos = save;
+	return cp;
+}
 #if INCLUDE_MAIN
 
 int save_tga(const char *filename,
@@ -928,14 +1014,16 @@ int save_tga(const char *filename,
 int main() {
     puts("Hello World!");
     uint16_t message[256] = {0};
+
+    uint32_t l = 0;
+    uint32_t max = sizeof(message) / sizeof (uint16_t);
     {
-        const unsigned char helloworld[] = "Hello World! ";
+        const unsigned char helloworld[] = "Hello World!\nHello world";
         uint16_t* writer = message;
-        for (int j = 0; j < 5; ++j) {
-            for (int i = 0; helloworld[i] != '\0'; ++i) {
-                *writer++ = helloworld[i];
-            }
-        }
+		for (int i = 0; helloworld[i] != '\0' && l < max; ++i) {
+			*writer++ = helloworld[i];
+			l++;
+		}
     }
 
     enum { HEIGHT = 50, WIDTH = 150, STRIDE = ((WIDTH + 3) & ~3)};
@@ -969,7 +1057,7 @@ int main() {
     T_ErrorHandler eh = {0};
 
 
-    layoutAndRender(&eh, &r, message, &surface);
+    layoutAndRender(&eh, &r, message,l, &surface);
 
     for (int x = 0; x < WIDTH; ++x) {
         putchar('-');
