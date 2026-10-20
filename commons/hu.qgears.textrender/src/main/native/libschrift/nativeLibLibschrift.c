@@ -599,7 +599,8 @@ static inline void prescanLine(T_ErrorHandler* eh, T_RenderData* rData, UTF16_Re
 	}
 
 	ret.nextLineStart = reader->pos;
-	ret.wasLastLine = ret.nextLineStart == reader->end;
+	//NOTE: "foobar\n\0" is considered one line - since we skip first, and test after
+	ret.wasLastLine = reader->end <= ret.nextLineStart;
 	*outResult = ret;
 }
 
