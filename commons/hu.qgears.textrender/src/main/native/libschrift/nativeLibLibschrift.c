@@ -29,6 +29,8 @@
  * } while (!lineData.wasLastLine);
  */
 
+#include "fix32.h"
+
 // Structure to represent surface data
 typedef struct {
     uint8_t* data;
@@ -46,8 +48,8 @@ typedef struct {
     int32_t y;
 } T_IPoint;
 typedef struct {
-    double x;
-    double y;
+    fix32_t x;
+    fix32_t y;
 } T_DPoint;
 
 typedef struct {
@@ -56,7 +58,7 @@ typedef struct {
     T_IPoint minPen;
     T_IPoint maxPen;
     uint32_t color;
-    double letterSpacing;
+    fix32_t letterSpacing;
     uint32_t wrapMode;
     uint32_t hAlign;
     uint32_t vAlign;
@@ -69,11 +71,11 @@ typedef struct {
     //inclusive
     const uint16_t* nextLineStart;
     bool wasLastLine;
-    double width;
+    fix32_t width;
 } T_Result_PrescanLine;
 
 typedef struct {
-    double textHeight;
+    fix32_t textHeight;
 } T_Result_PrescanText;
 
 typedef enum {
@@ -104,14 +106,12 @@ static inline uint32_t utf16Peek(const uint16_t* restrict text);
 static inline bool ctypeIsLineEnding(uint32_t c);
 static inline bool ctypeIsSpace(uint32_t c);
 static inline bool ctypeIsGraphical(uint32_t c);
-static inline int32_t wholePart(double d);
-static inline double fractionalPart(double d);
 /**
  * Pass 0 for c1, if there is no previous character.
  */
-static inline void advancePenBeforeRender(T_ErrorHandler* eh, const SFT* sft, double letterSpacing, uint32_t c1, uint32_t c2, double* penx);
+static inline void advancePenBeforeRender(T_ErrorHandler* eh, const SFT* sft, fix32_t letterSpacing, uint32_t c1, uint32_t c2, fix32_t* penx);
 static inline void renderGlyph(T_ErrorHandler* eh, SFT* sft, const T_DPoint* pen, uint32_t color, uint32_t codepoint, T_SurfaceData* surface);
-static inline void advancePenAfterRender(T_ErrorHandler* eh, const SFT* sft, double spaceJustification, uint32_t codepoint, double* penx);
+static inline void advancePenAfterRender(T_ErrorHandler* eh, const SFT* sft, fix32_t spaceJustification, uint32_t codepoint, fix32_t* penx);
 /**
  * Use this function to
  *  * Get the number of codepoints to render in one line
@@ -129,7 +129,7 @@ static inline void advancePenAfterRender(T_ErrorHandler* eh, const SFT* sft, dou
  * TODO: Support more Unicode, e.g. ideographic space (how should it interact with justification etc.)
  * TODO: Introduce grapheme layer, or decide on partial support and canonize input (e.g. the same accented letter can be represented as either one or two codepoints!)
  */
-static inline void prescanLine(T_ErrorHandler* eh, SFT sft, const uint16_t* restrict const text, E_QLS_WRAP wrapMode, double availableWidth, double letterSpacing
+static inline void prescanLine(T_ErrorHandler* eh, SFT sft, const uint16_t* restrict const text, E_QLS_WRAP wrapMode, fix32_t availableWidth, fix32_t letterSpacing
         , T_Result_PrescanLine* outResult);
 static inline void prescanText(T_ErrorHandler* eh, const T_RenderData* r, const uint16_t* restrict const text, T_Result_PrescanText* outResult);
 static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* r, const uint16_t* restrict const text, T_SurfaceData* surface);
@@ -205,7 +205,7 @@ T_SizeInt qls_renderTextPrivate(T_ErrorHandler* errorHandler, uint64_t surfaceHa
             rData.minPen.y = y;
             rData.maxPen.x = x + width;
             rData.maxPen.y = y + height;
-            rData.letterSpacing = font->letterSpacing;
+            rData.letterSpacing = fix32FromDouble(font->letterSpacing);
             rData.wrapMode = wrapMode;
             rData.hAlign = hAlign;
             rData.vAlign = vAlign;
@@ -246,7 +246,7 @@ T_SizeInt qls_layoutTextPrivate(T_ErrorHandler* errorHandler, T_TrueTypeFont* fo
     r.maxPen.x = width;
     r.maxPen.y = INT32_MAX;
     r.sft.flags = SFT_DOWNWARD_Y;
-    r.letterSpacing = font->letterSpacing;
+    r.letterSpacing = fix32FromDouble(font->letterSpacing);
     r.wrapMode = wrapMode;
     r.hAlign = hAlign;
     enum { VALIGN_TOP, VALIGN_MIDDLE, VALIGN_BOTTOM }; // TODO single source of truth
@@ -444,14 +444,7 @@ static inline bool ctypeIsGraphical(uint32_t c) {
     return !ctypeIsSpace(c) && !ctypeIsLineEnding(c);
 }
 
-static inline int32_t wholePart(double d) {
-    return (int32_t) d;
-}
-static inline double fractionalPart(double d) {
-    return d - wholePart(d);
-}
-
-static inline void advancePenBeforeRender(T_ErrorHandler* eh, const SFT* sft, double letterSpacing, uint32_t c1, uint32_t c2, double* penx) {
+static inline void advancePenBeforeRender(T_ErrorHandler* eh, const SFT* sft, fix32_t letterSpacing, uint32_t c1, uint32_t c2, fix32_t* penx) {
     if (c1 != 0) {
         SFT_Glyph g1;
         if (sft_lookup(sft, c1, &g1) < 0) {
@@ -470,12 +463,14 @@ static inline void advancePenBeforeRender(T_ErrorHandler* eh, const SFT* sft, do
         }
 
         *penx += letterSpacing;
-        *penx += kerning.xShift;
+        *penx += fix32FromDouble(kerning.xShift);
     }
 }
 static inline void renderGlyph(T_ErrorHandler* eh, SFT* sft, const T_DPoint* pen, uint32_t color, uint32_t codepoint, T_SurfaceData* surface) {
-    sft->xOffset = fractionalPart(pen->x);
-    sft->yOffset = fractionalPart(pen->y);
+    sft->xOffset = fix32ToDouble(fix32FractionalPart(pen->x));
+    // sft->yOffset = fix32ToDouble(fix32FractionalPart(pen->y)); // The second line goes one pixel higher!?
+    sft->yOffset = -fix32ToDouble(fix32FractionalPart(pen->y));
+    // sft->yOffset = fix32FractionalPart(pen->y) == 0 ? 0 : fix32ToDouble(~fix32FractionalPart(pen->y) & 0xFF);
 
     SFT_Glyph glyph;
     if (sft_lookup(sft, codepoint, &glyph) < 0) {
@@ -503,11 +498,11 @@ static inline void renderGlyph(T_ErrorHandler* eh, SFT* sft, const T_DPoint* pen
         return;
     }
 
-    const int32_t screenX = wholePart(pen->x) + wholePart(gmtx.leftSideBearing);
-    const int32_t screenY = wholePart(pen->y) + gmtx.yOffset;
+    const int32_t screenX = fix32ToInt32(fix32WholePart(pen->x)) + (int32_t) gmtx.leftSideBearing;
+    const int32_t screenY = fix32ToInt32(fix32WholePart(pen->y)) + gmtx.yOffset;
     copy_rect(screenX, screenY, surface, &img, color);
 }
-static inline void advancePenAfterRender(T_ErrorHandler* eh, const SFT* sft, double spaceJustification, uint32_t codepoint, double* penx) {
+static inline void advancePenAfterRender(T_ErrorHandler* eh, const SFT* sft, fix32_t spaceJustification, uint32_t codepoint, fix32_t* penx) {
     SFT_Glyph g;
     if (sft_lookup(sft, codepoint, &g) < 0) {
         ERROR(eh, QLS_ERROR_GLIPH_MISSING, "codepoint 0x%04X missing", codepoint);
@@ -522,19 +517,19 @@ static inline void advancePenAfterRender(T_ErrorHandler* eh, const SFT* sft, dou
     if (ctypeIsSpace(codepoint)) {
         *penx += spaceJustification;
     }
-    *penx += gMetrics.advanceWidth;
+    *penx += fix32FromDouble(gMetrics.advanceWidth);
 }
 
-static inline bool prescanLine_IsLineTooWide(double availableWidth, uint_fast16_t l, double w) {
+static inline bool prescanLine_IsLineTooWide(fix32_t availableWidth, uint_fast16_t l, fix32_t w) {
     return 1 <= l && availableWidth < w;
 }
-static inline void prescanLine(T_ErrorHandler* eh, SFT sft, const uint16_t* restrict const text, E_QLS_WRAP wrapMode, double availableWidth, double letterSpacing
+static inline void prescanLine(T_ErrorHandler* eh, SFT sft, const uint16_t* restrict const text, E_QLS_WRAP wrapMode, fix32_t availableWidth, fix32_t letterSpacing
         , T_Result_PrescanLine* outResult) {
 
     sft.xOffset = 0;
     
     typedef struct {
-        double w, wSpace;
+        fix32_t w, wSpace;
         uint_fast16_t l, lSpace;
         uint32_t lastCodepoint;
     } T_LayoutData;
@@ -641,14 +636,14 @@ static inline void prescanLine(T_ErrorHandler* eh, SFT sft, const uint16_t* rest
 static inline int32_t renderData_GetWidth(const T_RenderData* r) {
     return r->maxPen.x - r->minPen.x;
 }
-static inline double getSpareWidth(int32_t boxWidth, double lineWidth) {
-    return boxWidth - lineWidth;
+static inline fix32_t getSpareWidth(int32_t boxWidth, fix32_t lineWidth) {
+    return fix32FromInt32(boxWidth) - lineWidth;
 }
 static inline int32_t renderData_GetHeight(const T_RenderData* r) {
     return r->maxPen.y - r->minPen.y;
 }
-static inline double getSpareHeight(int32_t boxHeight, double textHeight) {
-    return boxHeight - textHeight;
+static inline fix32_t getSpareHeight(int32_t boxHeight, fix32_t textHeight) {
+    return fix32FromInt32(boxHeight) - textHeight;
 }
 
 static inline void prescanText(T_ErrorHandler* eh, const T_RenderData* r, const uint16_t* restrict const text, T_Result_PrescanText* outResult) {
@@ -660,7 +655,7 @@ static inline void prescanText(T_ErrorHandler* eh, const T_RenderData* r, const 
     const uint16_t* reader = text;
     T_Result_PrescanLine lineData = {0};
     do {
-        prescanLine(eh, sft, reader, r->wrapMode, renderData_GetWidth(r), r->letterSpacing, &lineData);
+        prescanLine(eh, sft, reader, r->wrapMode, fix32FromInt32(renderData_GetWidth(r)), r->letterSpacing, &lineData);
         if (eh->code != QLS_ERROR_OK) {
             return;
         }
@@ -668,7 +663,7 @@ static inline void prescanText(T_ErrorHandler* eh, const T_RenderData* r, const 
         reader = lineData.nextLineStart;
     } while (!lineData.wasLastLine);
 
-    outResult->textHeight = nLines * (r->lineMetrics.ascender - r->lineMetrics.descender + r->lineMetrics.lineGap) - r->lineMetrics.lineGap;
+    outResult->textHeight = nLines * (fix32FromDouble(r->lineMetrics.ascender) - fix32FromDouble(r->lineMetrics.descender) + fix32FromDouble(r->lineMetrics.lineGap)) - fix32FromDouble(r->lineMetrics.lineGap);
 }
 
 static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* r, const uint16_t* restrict const text, T_SurfaceData* surface) {
@@ -681,8 +676,8 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* 
 
     SFT sft = r->sft;
     T_DPoint pen = {
-        .x = r->minPen.x,
-        .y = r->minPen.y + r->lineMetrics.ascender
+        .x = fix32FromInt32(r->minPen.x),
+        .y = fix32FromInt32(r->minPen.y) + fix32FromDouble(r->lineMetrics.ascender)
     };
     
     enum { VALIGN_TOP, VALIGN_MIDDLE, VALIGN_BOTTOM };
@@ -714,7 +709,7 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* 
     uint_fast16_t iLine = 0;
     const uint16_t* reader = text;
     T_Result_PrescanLine lineData = {0};
-    double lineWidthMax = 0;
+    fix32_t lineWidthMax = 0;
     /**
      * do while !wasLastLine:
      *      prescan line
@@ -723,14 +718,14 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* 
      *      OPT render line: for (codepoint in line) advance & render
      */
     do {
-        prescanLine(eh, r->sft, reader, r->wrapMode, renderData_GetWidth(r), r->letterSpacing, &lineData);
+        prescanLine(eh, r->sft, reader, r->wrapMode, fix32FromInt32(renderData_GetWidth(r)), r->letterSpacing, &lineData);
         if (eh->code != QLS_ERROR_OK) {
             return (T_SizeInt) {0, 0};
         }
         lineWidthMax = MAX(lineWidthMax, lineData.width);
 
-        pen.x = r->minPen.x;
-        double spaceJustification = 0;
+        pen.x = fix32FromInt32(r->minPen.x);
+        fix32_t spaceJustification = 0;
         enum { HALIGN_LEFT, HALIGN_MIDDLE, HALIGN_RIGHT, HALIGN_JUSTIFY }; //TODO single source of truth
         switch (r->hAlign) { // pen.x += ... ; spaceJustification = ...; lineWidthMax = ...
             default:
@@ -748,7 +743,7 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* 
             case HALIGN_JUSTIFY: {
                 if (0 < lineData.nSpaces && 0 < getSpareWidth(renderData_GetWidth(r), lineData.width)) {
                     spaceJustification = getSpareWidth(renderData_GetWidth(r), lineData.width) / lineData.nSpaces;
-                    lineWidthMax = MAX(lineWidthMax, renderData_GetWidth(r));
+                    lineWidthMax = MAX(lineWidthMax, fix32FromInt32(renderData_GetWidth(r)));
                 }
                 break;
             }
@@ -778,11 +773,11 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, const T_RenderData* 
 
         iLine += 1;
         reader = lineData.nextLineStart;
-        pen.y += r->lineMetrics.ascender - r->lineMetrics.descender + r->lineMetrics.lineGap;
+        pen.y += fix32FromDouble(r->lineMetrics.ascender) - fix32FromDouble(r->lineMetrics.descender) + fix32FromDouble(r->lineMetrics.lineGap);
     } while (!lineData.wasLastLine);
 
     return (T_SizeInt) {
-        .height = iLine * (r->lineMetrics.ascender - r->lineMetrics.descender + r->lineMetrics.lineGap) - r->lineMetrics.lineGap,
+        .height = iLine * (fix32FromDouble(r->lineMetrics.ascender) - fix32FromDouble(r->lineMetrics.descender) + fix32FromDouble(r->lineMetrics.lineGap)) - fix32FromDouble(r->lineMetrics.lineGap),
         .width = lineWidthMax
     };
 }
@@ -875,7 +870,7 @@ int main() {
         .minPen = {0, 0},
         .maxPen = {WIDTH, HEIGHT},
         .wrapMode = QLS_WRAP_WORD,
-        .letterSpacing = 1,
+        .letterSpacing = fix32FromInt32(1),
         .hAlign = HALIGN_JUSTIFY,
         .vAlign = VALIGN_BOTTOM
     };
