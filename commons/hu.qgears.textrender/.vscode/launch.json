@@ -28,7 +28,7 @@
             "type": "cppdbg",
             "request": "launch",
 
-            "program": "${workspaceFolder}/src/main/resources/hu/qgears/textrender/libschrift/libqlibschrift-ubuntu-24.04-x86_64.so.exe",
+            "program": "${workspaceFolder}/src/main/native/libschrift/linux/libschrift_manualtest_softfloat.exe",
             "cwd": "${workspaceFolder}/src/main/native/libschrift",
 
             "stopAtEntry": true,
