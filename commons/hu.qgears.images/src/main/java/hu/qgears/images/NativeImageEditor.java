@@ -420,4 +420,35 @@ public class NativeImageEditor {
 		cropYmax=yMax;
 		return this;
 	}
+
+	/**
+	 * Draws the outline (1 pixel wide) of a rectangle. Pixels outside of the
+	 * image (or outside of the {@link #setCropRectangle(int, int, int, int)
+	 * crop rectangle}) are ignored.
+	 * 
+	 * @param x the left coordinate of the rectangle
+	 * @param y the top coordinate of the rectangle
+	 * @param width the width of the rectangle in pixels
+	 * @param height the height of the rectangle in pixels
+	 * @param color the color of the outline
+	 * @return this editor for method chaining
+	 */
+	public NativeImageEditor drawRect(int x, int y, int width, int height, RGBAColor color) {
+		if (width < 1 || height < 1) {
+			return this;
+		}
+		// top and bottom edges
+		drawLineHorizontal(x, y, width, color, false);
+		if (height > 1) {
+			drawLineHorizontal(x, y + height - 1, width, color, false);
+		}
+		// left and right edges (corners already drawn above)
+		if (height > 2) {
+			drawLineVertical(x, y + 1, height - 2, color, false);
+			if (width > 1) {
+				drawLineVertical(x + width - 1, y + 1, height - 2, color, false);
+			}
+		}
+		return this;
+	}
 }
