@@ -53,7 +53,9 @@ typedef struct {
 /**
  * C representation of Java TrueTypeFont object
  */
-typedef struct {
+typedef struct _T_TrueTypeFont T_TrueTypeFont;
+
+struct _T_TrueTypeFont {
     /*The font loaded by libschrift - lazy init*/
     SFT_Font * font;
     /*The line metrics loaded by libschrift - lazy init*/
@@ -62,7 +64,9 @@ typedef struct {
     SCHRIFT_F64 letterSpacing;
     /* Java UTF8 chars, read only! */
     const char* ttfFilePath;
-} T_TrueTypeFont;
+    T_TrueTypeFont* fallbackFonts;
+    uint32_t fallbackFontsCount;
+};
 
 /**
  * C representation of Java SizeInt object
