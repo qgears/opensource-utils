@@ -91,7 +91,7 @@ typedef struct {
 	const uint16_t* pos;
 } UTF16_Reader;
 
-enum { HALIGN_LEFT, HALIGN_MIDDLE, HALIGN_RIGHT, HALIGN_JUSTIFY }; //TODO single source of truth
+enum { HALIGN_LEFT, HALIGN_CENTER, HALIGN_RIGHT, HALIGN_JUSTIFY }; //TODO single source of truth
 enum { VALIGN_TOP, VALIGN_MIDDLE, VALIGN_BOTTOM };
 
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
@@ -738,7 +738,7 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, T_RenderData* r, con
             case HALIGN_LEFT: {
                 break;
             }
-            case HALIGN_MIDDLE: {
+            case HALIGN_CENTER: {
                 SCHRIFT_F64_addEq(pen.x , SCHRIFT_F64_div(getSpareWidth(renderData_GetWidth(r), lineData.width) , SCHRIFT_F64_from_s32(2)));
                 break;
             }
@@ -750,6 +750,9 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, T_RenderData* r, con
                 if (0 < lineData.nSpaces && SCHRIFT_F64_compare_lt(SCHRIFT_F64_from_s32(0) , getSpareWidth(renderData_GetWidth(r), lineData.width))) {
                     spaceJustification = SCHRIFT_F64_div(getSpareWidth(renderData_GetWidth(r), lineData.width) , SCHRIFT_F64_from_u16_fast(lineData.nSpaces));
                     lineWidthMax = SCHRIFT_F64_max(lineWidthMax, SCHRIFT_F64_from_s32(renderData_GetWidth(r)));
+                } else {
+                	//copy behavior of cairo - align CENTER
+                	SCHRIFT_F64_addEq(pen.x , SCHRIFT_F64_div(getSpareWidth(renderData_GetWidth(r), lineData.width) , SCHRIFT_F64_from_s32(2)));
                 }
                 break;
             }
