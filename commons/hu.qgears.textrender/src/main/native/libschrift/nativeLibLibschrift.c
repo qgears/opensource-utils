@@ -52,7 +52,7 @@ typedef struct {
 
 typedef struct {
     SFT sft;
-    SFT_LMetrics lineMetrics;
+    T_TrueTypeFont* font;
     T_IPoint minPen;
     T_IPoint maxPen;
     uint32_t color;
@@ -71,6 +71,7 @@ typedef struct {
     const uint16_t* nextLineStart;
     bool wasLastLine;
     SCHRIFT_F64 width;
+    SFT_LMetrics* lMetrics;
 } T_Result_PrescanLine;
 
 typedef struct {
@@ -90,6 +91,9 @@ typedef struct {
 	const uint16_t* pos;
 } UTF16_Reader;
 
+enum { HALIGN_LEFT, HALIGN_MIDDLE, HALIGN_RIGHT, HALIGN_JUSTIFY }; //TODO single source of truth
+enum { VALIGN_TOP, VALIGN_MIDDLE, VALIGN_BOTTOM };
+
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 #define LIMIT(x,min,max) ((x) < (min) ? (min) : ((x) > (max) ? (max) : (x)))
@@ -100,6 +104,15 @@ static inline uint32_t blend_bgra_premultiplied(uint32_t dst, uint32_t pcolor, u
 static inline void copy_rect(int32_t startx, int32_t starty, T_SurfaceData* surface, SFT_Image* img, uint32_t color);
 static void qls_load_font(T_ErrorHandler* eh,T_RenderData* r, T_TrueTypeFont* font);
 static T_SurfaceData* qls_get_surfacedata(uint64_t id);
+/**
+ * Looks up the glyph belonging to the given codepoint. If the codepoint is not
+ * present in the currently loaded font, the configured fallback fonts are
+ * queried, too.
+ *
+ * @return the glyph id, or 0 if the codepoint was not found in any of the
+ *         fonts. In case of error the error handler is filled and 0 returned.
+ */
+static inline SFT_Glyph qls_lookup(T_ErrorHandler* eh, T_RenderData* rData, uint32_t codepoint);
 static inline void advancePen(
 		T_ErrorHandler* eh, T_RenderData * rData, uint32_t prevCodepoint, uint32_t currentCodepoint, T_DPoint* pen,T_SurfaceData* surface, SCHRIFT_F64 spaceJustification);
 /**
@@ -398,12 +411,48 @@ static void qls_load_font(T_ErrorHandler* eh, T_RenderData* r, T_TrueTypeFont* f
 		}
     }
     sft->font = font->font;
-    r->lineMetrics = font->lineMetrics;
+    r->font = font;
 }
 
 static T_SurfaceData* qls_get_surfacedata(uint64_t id) {
     // Cast the handle back to T_SurfaceData pointer
     return (T_SurfaceData*)id;
+}
+
+static inline SFT_Glyph qls_lookup(T_ErrorHandler* eh, T_RenderData* rData, uint32_t codepoint)
+{
+	SFT_Glyph glyph = 0;
+	SFT* sft = &rData->sft;
+	if (sft_lookup(sft, codepoint, &glyph) < 0) {
+		ERROR(eh, QLS_ERROR_GLIPH_MISSING, "codepoint 0x%04X missing", codepoint);
+		return 0;
+	}
+	T_TrueTypeFont* orig = rData->font;
+	if (glyph == 0 && (orig->fallbackFontsCount > 0))
+	{
+		//codepoint has not been not found, try to fallback
+		for (uint32_t i = 0; (i < orig->fallbackFontsCount) && (glyph == 0); i++) {
+			T_TrueTypeFont* fallBack = &(orig->fallbackFonts[i]);
+			qls_load_font(eh, rData, fallBack);
+			if (eh->code != QLS_ERROR_OK){
+				return 0;
+			}
+			if (sft_lookup(sft, codepoint, &glyph) < 0) {
+				ERROR(eh, QLS_ERROR_GLIPH_MISSING, "codepoint 0x%04X missing", codepoint);
+				return 0;
+			}
+		}
+		//restore
+		qls_load_font(eh, rData, orig);
+		if (eh->code != QLS_ERROR_OK){
+			return 0;
+		}
+	}
+	if (glyph == 0)
+	{
+		LOG("WARN codepoint not found %d -> glyph %ld",codepoint,glyph);
+	}
+	return glyph;
 }
 
 static inline bool ctypeIsLineEnding(uint32_t c) {
@@ -433,18 +482,18 @@ static inline SCHRIFT_F64 fractionalPart(SCHRIFT_F64 d) {
 static inline void advancePen(
 		T_ErrorHandler* eh, T_RenderData * rData, uint32_t prevCodepoint, uint32_t currentCodepoint, T_DPoint* pen,T_SurfaceData* surface, SCHRIFT_F64 spaceJustification)
 {
-	SFT_Glyph glyph = 0;
     SFT_GMetrics gmtx = {0};
 	SFT * sft = &rData->sft;
 	//before
-	if (sft_lookup(sft, currentCodepoint, &glyph) < 0) {
-		ERROR(eh, QLS_ERROR_GLIPH_MISSING, "codepoint 0x%04X missing", currentCodepoint);
+
+	SFT_Glyph glyph = qls_lookup(eh, rData, currentCodepoint);
+	if (eh->code != QLS_ERROR_OK) {
 		return;
 	}
 	if (prevCodepoint != 0) {
-		SFT_Glyph gPrev;
-		if (sft_lookup(sft, prevCodepoint, &gPrev) < 0) {
-			ERROR(eh, QLS_ERROR_GLIPH_MISSING, "codepoint 0x%04X missing", prevCodepoint);
+		//TODO cache gPrev, instead of query again
+		SFT_Glyph gPrev = qls_lookup(eh, rData, currentCodepoint);
+		if (eh->code != QLS_ERROR_OK) {
 			return;
 		}
 		SFT_Kerning kerning;
@@ -499,10 +548,6 @@ static inline void advancePen(
 	SCHRIFT_F64_addEq(pen->x, gmtx.advanceWidth);
 }
 
-static inline bool prescanLine_IsLineTooWide(SCHRIFT_F64 availableWidth, uint_fast16_t l, SCHRIFT_F64 w) {
-    return 1 <= l && SCHRIFT_F64_compare_lt(availableWidth , w);
-}
-
 static inline void prescanLine(T_ErrorHandler* eh, T_RenderData* rData, UTF16_Reader* reader, T_Result_PrescanLine* outResult)
 {
 	SCHRIFT_F64 letterSpacing = rData->letterSpacing;
@@ -533,6 +578,8 @@ static inline void prescanLine(T_ErrorHandler* eh, T_RenderData* rData, UTF16_Re
 	T_Result_PrescanLine ret = {0};
 	ret.lineStart = reader->pos;
 	ret.lineEnd = reader->end;
+	//TODO this will be updated based on qls_lookup()..
+	ret.lMetrics = &(rData->font->lineMetrics);
 	T_DPoint pen = {0,0};
 	uint32_t prevCodepoint = 0;
 	uint32_t codepoint = 0;
@@ -618,22 +665,11 @@ static inline SCHRIFT_F64 getSpareHeight(int32_t boxHeight, SCHRIFT_F64 textHeig
 }
 
 static inline void prescanText(T_ErrorHandler* eh, T_RenderData* r, const uint16_t* text, uint32_t textLen, T_Result_PrescanText* outResult) {
-    uint_fast16_t nLines = 0;
-	UTF16_Reader reader = {
-			.start = text,
-			.end = text + textLen,
-			.pos = text };
-    T_Result_PrescanLine lineData = {0};
-    do {
-        prescanLine(eh, r, &reader, &lineData);
-        if (eh->code != QLS_ERROR_OK) {
-            return;
-        }
-        nLines += 1;
-        //reader = lineData.nextLineStart;
-    } while (!lineData.wasLastLine);
-
-    outResult->textHeight = SCHRIFT_F64_sub(SCHRIFT_F64_mul(SCHRIFT_F64_from_u16_fast(nLines) , (SCHRIFT_F64_add(SCHRIFT_F64_sub(r->lineMetrics.ascender , r->lineMetrics.descender) , r->lineMetrics.lineGap))) , r->lineMetrics.lineGap);
+	T_RenderData r2 = *r;
+	//never recursive!
+	r2.hAlign =  HALIGN_LEFT;
+	r2.vAlign = VALIGN_TOP;
+	outResult->textHeight =	layoutAndRender(eh, &r2, text, textLen, NULL).height;
 }
 
 static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, T_RenderData* r, const uint16_t* text, uint32_t textLen, T_SurfaceData* surface) {
@@ -644,10 +680,8 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, T_RenderData* r, con
      * Should result.height = 0, when the whole text is blank?
      */
     T_DPoint pen = {
-        .y = SCHRIFT_F64_add(SCHRIFT_F64_from_s32(r->minPen.y) , r->lineMetrics.ascender)
+       0.0,0.0
     };
-    
-    enum { VALIGN_TOP, VALIGN_MIDDLE, VALIGN_BOTTOM };
     switch (r->vAlign) { // pen.y += ...
         default:
         case VALIGN_TOP: {
@@ -659,7 +693,7 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, T_RenderData* r, con
             if (eh->code != QLS_ERROR_OK) {
                 return (T_SizeInt) {0, 0};
             }
-            SCHRIFT_F64_addEq(pen.y , SCHRIFT_F64_div(getSpareHeight(renderData_GetHeight(r), textData.textHeight) , SCHRIFT_F64_from_s32(2)));
+            pen.y = SCHRIFT_F64_div(getSpareHeight(renderData_GetHeight(r), textData.textHeight) , SCHRIFT_F64_from_s32(2));
             break;
         }
         case VALIGN_BOTTOM: {
@@ -668,11 +702,12 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, T_RenderData* r, con
             if (eh->code != QLS_ERROR_OK) {
                 return (T_SizeInt) {0, 0};
             }
-            SCHRIFT_F64_addEq(pen.y , getSpareHeight(renderData_GetHeight(r), textData.textHeight));
+            pen.y = getSpareHeight(renderData_GetHeight(r), textData.textHeight);
             break;
         }
     }
-
+    pen.y += r->minPen.y;
+    double penStart = pen.y;
     uint_fast16_t iLine = 0;
     UTF16_Reader reader = {
 		.start = text,
@@ -687,17 +722,17 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, T_RenderData* r, con
      *      lineWidthMax = ...
      *      OPT render line: for (codepoint in line) advance & render
      */
-
+    double lineGap = 0;
     do {
         prescanLine(eh, r, &reader, &lineData);
         if (eh->code != QLS_ERROR_OK) {
             return (T_SizeInt) {0, 0};
         }
+        SFT_LMetrics * lm = lineData.lMetrics;
         lineWidthMax = SCHRIFT_F64_max(lineWidthMax, lineData.width);
-
+        pen.y += lm->ascender + lineGap;
         pen.x = SCHRIFT_F64_from_s32(r->minPen.x);
         SCHRIFT_F64 spaceJustification = SCHRIFT_F64_from_s32(0);
-        enum { HALIGN_LEFT, HALIGN_MIDDLE, HALIGN_RIGHT, HALIGN_JUSTIFY }; //TODO single source of truth
         switch (r->hAlign) { // pen.x += ... ; spaceJustification = ...; lineWidthMax = ...
             default:
             case HALIGN_LEFT: {
@@ -734,13 +769,15 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, T_RenderData* r, con
 
         iLine += 1;
         reader.pos = lineData.nextLineStart;
-        SCHRIFT_F64_addEq(pen.y , SCHRIFT_F64_add(SCHRIFT_F64_sub(r->lineMetrics.ascender , r->lineMetrics.descender) , r->lineMetrics.lineGap));
+        pen.y -= lm->descender;
+        lineGap = lm->lineGap;
     } while (!lineData.wasLastLine);
 
-    	// TODO should not sizes be rounded up instead of just casting to int?
+	// TODO should not sizes be rounded up instead of just casting to int? -> I think YES
+    // TODO line gap of final line should be included or not? -> not sure, I think NO
     return (T_SizeInt) {
-        .height = SCHRIFT_F64_cast_to_s32(SCHRIFT_F64_sub(SCHRIFT_F64_mul(SCHRIFT_F64_from_u16_fast(iLine) , (SCHRIFT_F64_add(SCHRIFT_F64_sub(r->lineMetrics.ascender , r->lineMetrics.descender) , r->lineMetrics.lineGap))) , r->lineMetrics.lineGap)),
-        .width = SCHRIFT_F64_cast_to_s32(lineWidthMax)
+        .width = SCHRIFT_F64_cast_to_s32(lineWidthMax+.5f),
+        .height = SCHRIFT_F64_cast_to_s32(pen.y - penStart + .5f)
     };
 }
 
@@ -871,7 +908,7 @@ int main() {
     r.sft.yScale = SCHRIFT_F64_from_s32(PX_SIZE);
     r.sft.font = sft_loadfile("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf");
 
-    sft_lmetrics(&r.sft, &r.lineMetrics);
+    sft_lmetrics(&r.sft, &r->font->lineMetrics);
 
     T_ErrorHandler eh = {0};
 
