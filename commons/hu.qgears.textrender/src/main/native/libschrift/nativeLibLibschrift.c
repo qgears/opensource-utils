@@ -837,7 +837,7 @@ int main() {
     uint32_t l = 0;
     uint32_t max = sizeof(message) / sizeof (uint16_t);
     {
-        const unsigned char helloworld[] = "Hello World!\nHello world";
+        const unsigned char helloworld[] = "Hello World!  \nHello world!";
         uint16_t* writer = message;
 		for (int i = 0; helloworld[i] != '\0' && l < max; ++i) {
 			*writer++ = helloworld[i];
@@ -845,7 +845,7 @@ int main() {
 		}
     }
 
-    enum { HEIGHT = 50, WIDTH = 150, STRIDE = ((WIDTH + 3) & ~3)};
+    enum { HEIGHT = 50, WIDTH = 80, STRIDE = ((WIDTH + 3) & ~3)};
     uint8_t canvas[HEIGHT * STRIDE] = {0};
     T_SurfaceData surface = {
         .data = canvas,
@@ -861,7 +861,7 @@ int main() {
         .maxPen = {WIDTH, HEIGHT},
         .wrapMode = QLS_WRAP_WORD,
         .letterSpacing = SCHRIFT_F64_from_s32(1),
-        .hAlign = HALIGN_JUSTIFY,
+        .hAlign = HALIGN_RIGHT,
         .vAlign = VALIGN_BOTTOM
     };
 
