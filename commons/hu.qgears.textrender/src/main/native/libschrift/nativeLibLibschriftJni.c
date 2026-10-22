@@ -9,11 +9,13 @@
 
 static void throwException(JNIEnv *env, T_ErrorHandler* eh);
 static void dispose_native_font(T_ErrorHandler* eh, JNIEnv *env, jobject fontObject);
-static T_TrueTypeFont* get_or_create_native_font(T_ErrorHandler * eh, JNIEnv *env, jobject fontObject);
+static T_TrueTypeFont* create_native_font(T_ErrorHandler * eh, JNIEnv *env, jobject fontObject);
 static jfieldID get_field_id(T_ErrorHandler * eh, JNIEnv *env, jobject object, const char* fieldName, const char* signature);
 static double get_double_field(T_ErrorHandler * eh, JNIEnv *env, jobject object, const char* fieldName);
 static float get_float_field(T_ErrorHandler * eh, JNIEnv *env, jobject object, const char* fieldName);
 static jstring get_string_field(T_ErrorHandler * eh, JNIEnv *env, jobject object, const char* fieldName);
+static T_FontList loadFontList(T_ErrorHandler* eh, JNIEnv* env, jobject fontListObject);
+static void freeFontList(T_FontList* fontList);
 
 /*
  * Method:    createSurfaceWithDataPrivate
@@ -40,7 +42,7 @@ JNIEXPORT jlong JNICALL Java_hu_qgears_textrender_libschrift_LibschriftNative_cr
  * Signature: (JLjava/lang/String;Ljava/lang/String;Lhu/qgears/images/text/EHorizontalAlign;Lhu/qgears/images/text/EVerticalAlign;IIIIFFFFZLhu/qgears/images/text/EWrapMode;)Lhu/qgears/images/SizeInt;
  */
 JNIEXPORT jobject JNICALL Java_hu_qgears_textrender_libschrift_LibschriftNative_renderTextPrivate
-  (JNIEnv *env, jobject obj, jlong surfaceId, jobject font, jstring text, jobject hAlign, jobject vAlign, 
+  (JNIEnv *env, jobject obj, jlong surfaceId, jobject fontList, jstring text, jobject hAlign, jobject vAlign,
    jint x, jint y, jint width, jint height, jfloat r, jfloat g, jfloat b, 
    jfloat a, jboolean clip, jobject wrapMode)
 {
@@ -57,15 +59,19 @@ JNIEXPORT jobject JNICALL Java_hu_qgears_textrender_libschrift_LibschriftNative_
     int wrapModeValue = (*env)->CallIntMethod(env, wrapMode, (*env)->GetMethodID(env, (*env)->GetObjectClass(env, wrapMode), "ordinal", "()I"));
     
     T_ErrorHandler eh = {0};
-    T_TrueTypeFont* c_font = get_or_create_native_font(&eh,env,font);
+
+
+    T_FontList c_fontList = loadFontList(&eh,env,fontList);
+
     T_SizeInt result = {0};
     if (eh.code == QLS_ERROR_OK)
     {
         // Forward to native implementation
-        result = qls_renderTextPrivate(&eh,(uint64_t)surfaceId, c_font, c_text,(uint32_t) length,
+        result = qls_renderTextPrivate(&eh,(uint64_t)surfaceId, &c_fontList, c_text,(uint32_t) length,
                                          (uint32_t)hAlignValue, (uint32_t)vAlignValue, x, y, width, height, SCHRIFT_F32_from_float(r), SCHRIFT_F32_from_float(g), 
                                          SCHRIFT_F32_from_float(b), SCHRIFT_F32_from_float(a), clip, (uint32_t)wrapModeValue);
     }
+    freeFontList(&c_fontList);
     
     // Release the Java strings
     (*env)->ReleaseStringChars(env, text, c_text);
@@ -96,7 +102,7 @@ JNIEXPORT jobject JNICALL Java_hu_qgears_textrender_libschrift_LibschriftNative_
  * Signature: (Ljava/lang/String;Ljava/lang/String;Lhu/qgears/images/text/EHorizontalAlign;Lhu/qgears/images/text/EVerticalAlign;IILhu/qgears/images/text/EWrapMode;)Lhu/qgears/images/SizeInt;
  */
 JNIEXPORT jobject JNICALL Java_hu_qgears_textrender_libschrift_LibschriftNative_layoutTextPrivate
-  (JNIEnv *env, jobject obj, jobject font, jstring text, jobject hAlign, jobject vAlign, 
+  (JNIEnv *env, jobject obj, jobject fontList, jstring text, jobject hAlign, jobject vAlign,
    jint width, jint height, jobject wrapMode)
 {
     (void)obj;
@@ -108,13 +114,14 @@ JNIEXPORT jobject JNICALL Java_hu_qgears_textrender_libschrift_LibschriftNative_
     uint32_t wrapModeValue = (uint32_t)(*env)->CallIntMethod(env, wrapMode, (*env)->GetMethodID(env, (*env)->GetObjectClass(env, wrapMode), "ordinal", "()I"));
     uint32_t hAlignValue = (uint32_t)(*env)->CallIntMethod(env, hAlign, (*env)->GetMethodID(env, (*env)->GetObjectClass(env, hAlign), "ordinal", "()I"));
     
-    T_TrueTypeFont* c_font = get_or_create_native_font(&eh,env,font);
-    T_SizeInt result;
+    T_FontList c_fontList = loadFontList(&eh,env,fontList);
+    T_SizeInt result = {0};
     if (eh.code == QLS_ERROR_OK)
     {
         // Forward to native implementation
-        result = qls_layoutTextPrivate(&eh,c_font,c_text, textLen, hAlignValue, width, wrapModeValue);
+        result = qls_layoutTextPrivate(&eh,&c_fontList,c_text, textLen, hAlignValue, width, wrapModeValue);
     }
+    freeFontList(&c_fontList);
     
     // Release the Java strings
     (*env)->ReleaseStringChars(env, text, c_text);
@@ -195,9 +202,76 @@ static jstring get_string_field(T_ErrorHandler * eh, JNIEnv *env, jobject object
     return (jstring)(*env)->GetObjectField(env, object, fieldId);
 }
 
-static T_TrueTypeFont* get_or_create_native_font(T_ErrorHandler * eh, JNIEnv *env, jobject fontObject)
+/**
+ * Reads hu.qgears.textrender.FontList.fonts (TrueTypeFont[]) and resolves each element
+ * to its native T_TrueTypeFont (created lazily via nativePtr if not yet initialized).
+ * The returned list must be released with freeFontList() - also in case of error.
+ * The T_TrueTypeFont instances are owned by the Java TrueTypeFont objects.
+ */
+static T_FontList loadFontList(T_ErrorHandler* eh, JNIEnv* env, jobject fontListObject)
 {
-    T_TrueTypeFont* font;
+    T_FontList result = {0};
+
+    jfieldID fontsFieldId = get_field_id(eh, env, fontListObject, "fonts",
+                                         "[Lhu/qgears/textrender/TrueTypeFont;");
+    if (eh->code != QLS_ERROR_OK) {
+        return result;
+    }
+
+    jobjectArray fontsArray = (jobjectArray)(*env)->GetObjectField(env, fontListObject, fontsFieldId);
+    if (fontsArray == NULL) {
+        ERROR(eh, QLS_ERROR_INVALID_FONT_LIST_OBJ, "FontList.fonts is null");
+        return result;
+    }
+
+    jsize count = (*env)->GetArrayLength(env, fontsArray);
+    if (count <= 0) {
+        ERROR(eh, QLS_ERROR_INVALID_FONT_LIST_OBJ, "FontList.fonts is empty");
+        (*env)->DeleteLocalRef(env, fontsArray);
+        return result;
+    }
+
+    result.fonts = (T_TrueTypeFont**)malloc((size_t)count * sizeof(T_TrueTypeFont*));
+    if (result.fonts == NULL) {
+        ERROR(eh, QLS_ERROR_INVALID_FONT_LIST_OBJ, "Out of memory allocating font list of %d", (int)count);
+        (*env)->DeleteLocalRef(env, fontsArray);
+        return result;
+    }
+
+    for (jsize i = 0; i < count && eh->code == QLS_ERROR_OK; i++) {
+        jobject fontObject = (*env)->GetObjectArrayElement(env, fontsArray, i);
+        if (fontObject == NULL) {
+            ERROR(eh, QLS_ERROR_INVALID_FONT_LIST_OBJ, "FontList.fonts[%d] is null", (int)i);
+            break;
+        }
+        T_TrueTypeFont* font = create_native_font(eh, env, fontObject);
+        (*env)->DeleteLocalRef(env, fontObject);
+        if (eh->code == QLS_ERROR_OK) {
+            if (font == NULL || font->font == NULL) {
+                ERROR(eh, QLS_ERROR_INVALID_FONT_LIST_OBJ, "Native font of FontList.fonts[%d] is not initialized", (int)i);
+            } else {
+                result.fonts[result.fontsCount++] = font;
+            }
+        }
+    }
+
+    (*env)->DeleteLocalRef(env, fontsArray);
+    return result;
+}
+
+static void freeFontList(T_FontList* fontList)
+{
+    if (fontList->fonts) {
+        // only the pointer array is owned here; fonts belong to the Java TrueTypeFont objects
+        free(fontList->fonts);
+        fontList->fonts = NULL;
+    }
+    fontList->fontsCount = 0;
+}
+
+static T_TrueTypeFont* create_native_font(T_ErrorHandler * eh, JNIEnv *env, jobject fontObject)
+{
+    T_TrueTypeFont* font = NULL;
 
     jfieldID nativePtrFieldId = get_field_id(eh,env,fontObject,"nativePtr","J");
     if (eh->code == QLS_ERROR_OK)
@@ -211,16 +285,18 @@ static T_TrueTypeFont* get_or_create_native_font(T_ErrorHandler * eh, JNIEnv *en
             font->letterSpacing = SCHRIFT_F64_from_double( get_double_field(eh,env,fontObject, "letterSpacing") );
             if (eh->code == QLS_ERROR_OK)
             {
+                // fontSize is needed by qls_load_font to compute line metrics
+                font->fontSize = SCHRIFT_F32_from_float(get_float_field(eh,env,fontObject,"fontSize"));
+            }
+            if (eh->code == QLS_ERROR_OK)
+            {
                 jstring ttfFilePathString = get_string_field(eh,env,fontObject, "ttfFilePath");
                 if (eh->code == QLS_ERROR_OK)
                 {
                     // Just store the string pointer - don't allocate new memory
                     font->ttfFilePath = (*env)->GetStringUTFChars(env, ttfFilePathString, 0);
+                    qls_load_font(eh,font);
                 }
-            }
-            if (eh->code == QLS_ERROR_OK)
-            {
-                font->fontSize = SCHRIFT_F32_from_float(get_float_field(eh,env,fontObject,"fontSize"));
             }
         }
     }
@@ -286,6 +362,7 @@ JNIEXPORT void JNICALL Java_hu_qgears_textrender_libschrift_LibschriftNative_cle
 JNIEXPORT void JNICALL Java_hu_qgears_textrender_TrueTypeFont_nativeDispose
   (JNIEnv *env, jobject fontObject)
 {
+	//called from synchronized
     T_ErrorHandler eh = {0};
     dispose_native_font(&eh,env,fontObject);
     if (eh.code != QLS_ERROR_OK)
@@ -293,3 +370,17 @@ JNIEXPORT void JNICALL Java_hu_qgears_textrender_TrueTypeFont_nativeDispose
         throwException(env,&eh);
     }
 }
+
+JNIEXPORT void JNICALL Java_hu_qgears_textrender_TrueTypeFont_nativeInit
+  (JNIEnv *env, jobject fontObject)
+{
+	//called from constructor context
+    T_ErrorHandler eh = {0};
+    create_native_font(&eh,env,fontObject);
+    if (eh.code != QLS_ERROR_OK)
+    {
+        throwException(env,&eh);
+    }
+}
+
+

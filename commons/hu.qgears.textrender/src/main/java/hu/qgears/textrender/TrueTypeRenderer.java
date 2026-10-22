@@ -14,10 +14,11 @@ public class TrueTypeRenderer {
 	public static final ENativeImageComponentOrder DEFAULT_CO = ENativeImageComponentOrder.BGRA;
 	private TrueTypeNativeInterface rendererNative;
 	
-	private IFontManager fontManager= new DefaultFontManger();
+	private IFontManager fontManager;
 	
 	public TrueTypeRenderer(TrueTypeNativeInterface rendererNative) {
 		this.rendererNative = rendererNative;
+		fontManager= new DefaultFontManger();
 	}
 	public TrueTypeRenderer(boolean stbMode) {
 		if (stbMode) {

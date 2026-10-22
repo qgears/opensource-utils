@@ -10,15 +10,20 @@ public class TrueTypeFont {
 	public TrueTypeFont(String ttfFilePath, float fontSize) {
 		this.ttfFilePath = ttfFilePath;
 		this.fontSize = fontSize;
+		nativeInit();
 	}
 	
 	public void setLetterSpacing(double letterSpacing) {
 		this.letterSpacing = letterSpacing;
 	}
 	
-	public void dispose() {
-		nativeDispose();
+	public synchronized void dispose() {
+		if (nativePtr != 0) {
+			nativeDispose();
+			nativePtr = 0;
+		}
 	}
 
 	private native void nativeDispose();
+	private native void nativeInit();
 }

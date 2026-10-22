@@ -35,7 +35,8 @@ typedef enum {
     QLS_ERROR_GLIPH_KERNING,
     QLS_ERROR_LINE_METRICS,
     QLS_ERROR_UNSUPPORTED_PIXEL_FORMAT,
-    QLS_ERROR_INVALID_FONT_OBJ
+    QLS_ERROR_INVALID_FONT_OBJ,
+    QLS_ERROR_INVALID_FONT_LIST_OBJ
 } QLS_ERROR_CODE;
 
 #define QLS_MAX_ERROR_MSG_SIZE (256u)
@@ -64,9 +65,16 @@ struct _T_TrueTypeFont {
     SCHRIFT_F64 letterSpacing;
     /* Java UTF8 chars, read only! */
     const char* ttfFilePath;
-    T_TrueTypeFont* fallbackFonts;
-    uint32_t fallbackFontsCount;
 };
+
+/**
+ * C representation of Java FontList object.
+ * fonts[0] is the primary font, the rest are fallback fonts in priority order.
+ */
+typedef struct  {
+    T_TrueTypeFont** fonts;
+    uint32_t fontsCount;
+} T_FontList;
 
 /**
  * C representation of Java SizeInt object
@@ -120,7 +128,7 @@ void qls_disposeSurfacePrivate(uint64_t surfaceHandle);
  * 
  * @return The bounding box calculated during laying out the text
  */
-T_SizeInt qls_renderTextPrivate(T_ErrorHandler* errorHandler, uint64_t surfaceHandle, T_TrueTypeFont* font, const uint16_t* text, uint32_t textLen,  
+T_SizeInt qls_renderTextPrivate(T_ErrorHandler* errorHandler, uint64_t surfaceHandle, T_FontList* fontList, const uint16_t* text, uint32_t textLen,
                             uint32_t hAlign, uint32_t vAlign, int32_t x, int32_t y, int32_t width, int32_t height,
                             SCHRIFT_F32 r, SCHRIFT_F32 g, SCHRIFT_F32 b, SCHRIFT_F32 a, bool clip, uint32_t wrapMode);
 
@@ -137,11 +145,13 @@ T_SizeInt qls_renderTextPrivate(T_ErrorHandler* errorHandler, uint64_t surfaceHa
  * 
  * @return The bounding box calculated during laying out the text
  */
-T_SizeInt qls_layoutTextPrivate(T_ErrorHandler* errorHandler, T_TrueTypeFont* font, const uint16_t* text, uint32_t textLen,
+T_SizeInt qls_layoutTextPrivate(T_ErrorHandler* errorHandler, T_FontList* fontList, const uint16_t* text, uint32_t textLen,
                          uint32_t hAlign, int32_t width, uint32_t wrapMode);
 
 void qls_clearSurfacePrivate(uint64_t id);
 
+
+void qls_load_font(T_ErrorHandler* eh, T_TrueTypeFont* font);
 
 #ifdef __cplusplus
 }
