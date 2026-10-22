@@ -101,7 +101,7 @@ enum { VALIGN_TOP, VALIGN_MIDDLE, VALIGN_BOTTOM };
 #define PIX(r)  SCHRIFT_F32_trunc_to_u8_to_u32((SCHRIFT_F32_mul_u32(r , 0xFFu)))
 #define LOG(...) ;printf(__VA_ARGS__);printf("\n");fflush(stdout)
 /* Line height of a SFT_LMetrics* : ascender - descender + lineGap */
-#define LINE_HEIGHT(lm) ((lm)->ascender - (lm)->descender + (lm)->lineGap)
+#define LINE_HEIGHT(lm) SCHRIFT_F64_add(SCHRIFT_F64_sub((lm)->ascender, (lm)->descender), (lm)->lineGap)
 
 static inline uint32_t blend_bgra_premultiplied(uint32_t dst, uint32_t pcolor, uint8_t mask);
 static inline void copy_rect(int32_t startx, int32_t starty, T_SurfaceData* surface, SFT_Image* img, uint32_t color);
@@ -617,9 +617,9 @@ static inline void prescanLine(T_ErrorHandler* eh, T_RenderData* rData, UTF16_Re
 		}
 		else if (ret.lMetrics != current)
 		{
-			double h1 = LINE_HEIGHT(ret.lMetrics);
-			double h2 = LINE_HEIGHT( current);
-			if (h2 > h1) {
+			SCHRIFT_F64 h1 = LINE_HEIGHT(ret.lMetrics);
+			SCHRIFT_F64 h2 = LINE_HEIGHT(current);
+			if (SCHRIFT_F64_compare_lt(h1, h2)) {
 				ret.lMetrics = current;
 			}
 		}
@@ -688,9 +688,9 @@ static inline SCHRIFT_F64 getSpareHeight(int32_t boxHeight, SCHRIFT_F64 textHeig
 static inline void prescanText(T_ErrorHandler* eh, T_RenderData* r, const uint16_t* text, uint32_t textLen, T_Result_PrescanText* outResult) {
 	T_RenderData r2 = *r;
 	//never recursive!
-	r2.hAlign =  HALIGN_LEFT;
+	r2.hAlign = HALIGN_LEFT;
 	r2.vAlign = VALIGN_TOP;
-	outResult->textHeight =	layoutAndRender(eh, &r2, text, textLen, NULL).height;
+	outResult->textHeight = SCHRIFT_F64_from_s32(layoutAndRender(eh, &r2, text, textLen, NULL).height);
 }
 
 static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, T_RenderData* r, const uint16_t* text, uint32_t textLen, T_SurfaceData* surface) {
@@ -701,7 +701,7 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, T_RenderData* r, con
      * Should result.height = 0, when the whole text is blank?
      */
     T_DPoint pen = {
-       0.0,0.0
+       SCHRIFT_F64_const_zero, SCHRIFT_F64_const_zero
     };
     switch (r->vAlign) { // pen.y += ...
         default:
@@ -727,8 +727,8 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, T_RenderData* r, con
             break;
         }
     }
-    pen.y += r->minPen.y;
-    double penStart = pen.y;
+    pen.y = SCHRIFT_F64_add(pen.y, SCHRIFT_F64_from_s32(r->minPen.y));
+    SCHRIFT_F64 penStart = pen.y;
     uint_fast16_t iLine = 0;
     UTF16_Reader reader = {
 		.start = text,
@@ -743,7 +743,7 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, T_RenderData* r, con
      *      lineWidthMax = ...
      *      OPT render line: for (codepoint in line) advance & render
      */
-    double lineGap = 0;
+    SCHRIFT_F64 lineGap = SCHRIFT_F64_const_zero;
     do {
         prescanLine(eh, r, &reader, &lineData);
         if (eh->code != QLS_ERROR_OK) {
@@ -751,7 +751,7 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, T_RenderData* r, con
         }
         SFT_LMetrics * lm = lineData.lMetrics;
         lineWidthMax = SCHRIFT_F64_max(lineWidthMax, lineData.width);
-        pen.y += lm->ascender + lineGap;
+        pen.y = SCHRIFT_F64_add(pen.y, SCHRIFT_F64_add(lm->ascender, lineGap));
         pen.x = SCHRIFT_F64_from_s32(r->minPen.x);
         SCHRIFT_F64 spaceJustification = SCHRIFT_F64_from_s32(0);
         switch (r->hAlign) { // pen.x += ... ; spaceJustification = ...; lineWidthMax = ...
@@ -794,15 +794,15 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, T_RenderData* r, con
 
         iLine += 1;
         reader.pos = lineData.nextLineStart;
-        pen.y -= lm->descender;
+        pen.y = SCHRIFT_F64_sub(pen.y, lm->descender);
         lineGap = lm->lineGap;
     } while (!lineData.wasLastLine);
 
 	// TODO should not sizes be rounded up instead of just casting to int? -> I think YES
     // TODO line gap of final line should be included or not? -> not sure, I think NO
     return (T_SizeInt) {
-        .width = SCHRIFT_F64_cast_to_s32(lineWidthMax+.5f),
-        .height = SCHRIFT_F64_cast_to_s32(pen.y - penStart + .5f)
+        .width = SCHRIFT_F64_cast_to_s32(SCHRIFT_F64_add(lineWidthMax, SCHRIFT_F64_const_half)),
+        .height = SCHRIFT_F64_cast_to_s32(SCHRIFT_F64_add(SCHRIFT_F64_sub(pen.y, penStart), SCHRIFT_F64_const_half))
     };
 }
 
@@ -933,7 +933,7 @@ int main() {
     r.sft.yScale = SCHRIFT_F64_from_s32(PX_SIZE);
     r.sft.font = sft_loadfile("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf");
 
-    sft_lmetrics(&r.sft, &r->font->lineMetrics);
+    sft_lmetrics(&r.sft, &(r.font->lineMetrics));
 
     T_ErrorHandler eh = {0};
 
