@@ -7,9 +7,9 @@ public class DefaultFontManger implements IFontManager {
 	private static final TrueTypeFont LIB_SANS = new TrueTypeFont("/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",12f);
 
 	@Override
-	public TrueTypeFont getFont(TextParameters t) {
+	public FontList getFont(TextParameters t) {
 		
-		return LIB_SANS;
+		return FontList.from(LIB_SANS);
 	}
 
 	@Override

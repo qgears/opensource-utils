@@ -18,7 +18,7 @@ JNIEXPORT jlong JNICALL Java_hu_qgears_textrender_libschrift_LibschriftNative_cr
 /*
  * Class:     hu_qgears_textrender_libschrift_LibschriftNative
  * Method:    renderTextPrivate
- * Signature: (JLhu/qgears/textrender/TrueTypeFont;Ljava/lang/String;Lhu/qgears/images/text/EHorizontalAlign;Lhu/qgears/images/text/EVerticalAlign;IIIIFFFFZLhu/qgears/images/text/EWrapMode;)Lhu/qgears/images/SizeInt;
+ * Signature: (JLhu/qgears/textrender/FontList;Ljava/lang/String;Lhu/qgears/images/text/EHorizontalAlign;Lhu/qgears/images/text/EVerticalAlign;IIIIFFFFZLhu/qgears/images/text/EWrapMode;)Lhu/qgears/images/SizeInt;
  */
 JNIEXPORT jobject JNICALL Java_hu_qgears_textrender_libschrift_LibschriftNative_renderTextPrivate
   (JNIEnv *, jobject, jlong, jobject, jstring, jobject, jobject, jint, jint, jint, jint, jfloat, jfloat, jfloat, jfloat, jboolean, jobject);
@@ -26,7 +26,7 @@ JNIEXPORT jobject JNICALL Java_hu_qgears_textrender_libschrift_LibschriftNative_
 /*
  * Class:     hu_qgears_textrender_libschrift_LibschriftNative
  * Method:    layoutTextPrivate
- * Signature: (Lhu/qgears/textrender/TrueTypeFont;Ljava/lang/String;Lhu/qgears/images/text/EHorizontalAlign;Lhu/qgears/images/text/EVerticalAlign;IILhu/qgears/images/text/EWrapMode;)Lhu/qgears/images/SizeInt;
+ * Signature: (Lhu/qgears/textrender/FontList;Ljava/lang/String;Lhu/qgears/images/text/EHorizontalAlign;Lhu/qgears/images/text/EVerticalAlign;IILhu/qgears/images/text/EWrapMode;)Lhu/qgears/images/SizeInt;
  */
 JNIEXPORT jobject JNICALL Java_hu_qgears_textrender_libschrift_LibschriftNative_layoutTextPrivate
   (JNIEnv *, jobject, jobject, jstring, jobject, jobject, jint, jint, jobject);

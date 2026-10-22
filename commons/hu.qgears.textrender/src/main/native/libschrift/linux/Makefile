@@ -48,7 +48,7 @@ TESTPROG_FLAGS=-DINCLUDE_MAIN=1 \
 
 all : lib bversion testprog
 
-lib : ../hu_qgears_textrender_libschrift_LibschriftNative.h
+lib : ../hu_qgears_textrender_libschrift_LibschriftNative.h ../hu_qgears_textrender_TrueTypeRenderer.h
 	mkdir -p $(OUTPUTDIR)
 	gcc -o $(OUTPUTDIR)/$(SO_NAME) \
 	$(C_FLAGS) -shared \
@@ -75,9 +75,11 @@ testprog:
 
 ../hu_qgears_textrender_libschrift_LibschriftNative.h : 
 	javac -cp $(JNIDEPS) \
-	-h $(JNI_HEADERS) $(PROJDIR)/src/main/java/hu/qgears/textrender/libschrift/LibschriftNative.java $(PROJDIR)/src/main/java/hu/qgears/textrender/TrueTypeFont.java
+	-h $(JNI_HEADERS) $(PROJDIR)/src/main/java/hu/qgears/textrender/libschrift/LibschriftNative.java 
 
-
+../hu_qgears_textrender_TrueTypeRenderer.h :
+	javac -cp $(JNIDEPS) \
+	-h $(JNI_HEADERS) $(PROJDIR)/src/main/java/hu/qgears/textrender/TrueTypeFont.java
 
 %.s : ../%.c 
 	gcc $(C_FLAGS) -fverbose-asm -S -o $@ $<

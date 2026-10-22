@@ -53,6 +53,7 @@ typedef struct {
 typedef struct {
     SFT sft;
     T_TrueTypeFont* font;
+    T_FontList* fontList;
     T_IPoint minPen;
     T_IPoint maxPen;
     uint32_t color;
@@ -99,10 +100,12 @@ enum { VALIGN_TOP, VALIGN_MIDDLE, VALIGN_BOTTOM };
 #define LIMIT(x,min,max) ((x) < (min) ? (min) : ((x) > (max) ? (max) : (x)))
 #define PIX(r)  SCHRIFT_F32_trunc_to_u8_to_u32((SCHRIFT_F32_mul_u32(r , 0xFFu)))
 #define LOG(...) ;printf(__VA_ARGS__);printf("\n");fflush(stdout)
+/* Line height of a SFT_LMetrics* : ascender - descender + lineGap */
+#define LINE_HEIGHT(lm) ((lm)->ascender - (lm)->descender + (lm)->lineGap)
 
 static inline uint32_t blend_bgra_premultiplied(uint32_t dst, uint32_t pcolor, uint8_t mask);
 static inline void copy_rect(int32_t startx, int32_t starty, T_SurfaceData* surface, SFT_Image* img, uint32_t color);
-static void qls_load_font(T_ErrorHandler* eh,T_RenderData* r, T_TrueTypeFont* font);
+static inline void qls_apply_font(T_RenderData* r, T_TrueTypeFont* font);
 static T_SurfaceData* qls_get_surfacedata(uint64_t id);
 /**
  * Looks up the glyph belonging to the given codepoint. If the codepoint is not
@@ -113,8 +116,9 @@ static T_SurfaceData* qls_get_surfacedata(uint64_t id);
  *         fonts. In case of error the error handler is filled and 0 returned.
  */
 static inline SFT_Glyph qls_lookup(T_ErrorHandler* eh, T_RenderData* rData, uint32_t codepoint);
-static inline void advancePen(
-		T_ErrorHandler* eh, T_RenderData * rData, uint32_t prevCodepoint, uint32_t currentCodepoint, T_DPoint* pen,T_SurfaceData* surface, SCHRIFT_F64 spaceJustification);
+static inline SFT_Glyph advancePen(
+		T_ErrorHandler* eh, T_RenderData * rData, SFT_Glyph gPrev, uint32_t prevCodepoint, uint32_t currentCodepoint, T_DPoint* pen,T_SurfaceData* surface, SCHRIFT_F64 spaceJustification);
+
 /**
  * Stops advancing at the terminating '\0'.
  */
@@ -206,17 +210,19 @@ void qls_disposeSurfacePrivate(uint64_t surfaceHandle)
     free(surfaceData);
 }
 
-T_SizeInt qls_renderTextPrivate(T_ErrorHandler* errorHandler, uint64_t surfaceHandle, T_TrueTypeFont* font, const uint16_t* text, uint32_t textLen,
+T_SizeInt qls_renderTextPrivate(T_ErrorHandler* errorHandler, uint64_t surfaceHandle, T_FontList* fontList, const uint16_t* text, uint32_t textLen,
                             uint32_t hAlign, uint32_t vAlign, int32_t x, int32_t y, int32_t width, int32_t height,
                             SCHRIFT_F32 r, SCHRIFT_F32 g, SCHRIFT_F32 b, SCHRIFT_F32 a, bool clip, uint32_t wrapMode)
 {
     T_SizeInt result = {0, 0};
+    T_TrueTypeFont* font = fontList->fonts[0];
     T_SurfaceData* surface = qls_get_surfacedata(surfaceHandle);
     if (surface) {
         uint32_t* surfaceData = (uint32_t*)surface->data;
         if (surfaceData) 
         {
             T_RenderData rData = {0};
+            rData.fontList = fontList;
             rData.minPen.x = x;
             rData.minPen.y = y;
             rData.maxPen.x = x + width;
@@ -227,7 +233,7 @@ T_SizeInt qls_renderTextPrivate(T_ErrorHandler* errorHandler, uint64_t surfaceHa
             rData.vAlign = vAlign;
             if (rData.maxPen.y > rData.minPen.y && rData.maxPen.x > rData.minPen.x)
             {
-                qls_load_font(errorHandler, &rData,font);
+                qls_apply_font( &rData,font);
                 if (errorHandler->code == QLS_ERROR_OK)
                 {
                     rData.color = PIX(r) | (PIX(g) << 8) | (PIX(b) << 16) | (PIX(a) << 24);
@@ -254,20 +260,21 @@ T_SizeInt qls_renderTextPrivate(T_ErrorHandler* errorHandler, uint64_t surfaceHa
     return result;
 }
 
-T_SizeInt qls_layoutTextPrivate(T_ErrorHandler* errorHandler, T_TrueTypeFont* font, const uint16_t* text, 
+T_SizeInt qls_layoutTextPrivate(T_ErrorHandler* errorHandler, T_FontList* fontList, const uint16_t* text,
                             uint32_t textLen, uint32_t hAlign, int32_t width, uint32_t wrapMode)
 {
     T_SizeInt result = {0,0};
+    T_TrueTypeFont* font = fontList->fonts[0];
     T_RenderData r = {0};
+    r.fontList = fontList;
     r.maxPen.x = width;
     r.maxPen.y = INT32_MAX;
     r.sft.flags = SFT_DOWNWARD_Y;
     r.letterSpacing = font->letterSpacing;
     r.wrapMode = wrapMode;
     r.hAlign = hAlign;
-    enum { VALIGN_TOP, VALIGN_MIDDLE, VALIGN_BOTTOM }; // TODO single source of truth
     r.vAlign = VALIGN_TOP;
-    qls_load_font(errorHandler,&r,font);
+    qls_apply_font(&r,font);
     if (errorHandler->code == QLS_ERROR_OK)
     {
         result = layoutAndRender(errorHandler, &r, text,textLen, NULL);
@@ -276,6 +283,36 @@ T_SizeInt qls_layoutTextPrivate(T_ErrorHandler* errorHandler, T_TrueTypeFont* fo
         // }
     }
     return result;
+}
+
+void qls_load_font(T_ErrorHandler *eh, T_TrueTypeFont *font) {
+	SFT sft = {0};
+	sft.xScale = SCHRIFT_F64_from_SCHRIFT_F32(font->fontSize);
+	sft.yScale = SCHRIFT_F64_from_SCHRIFT_F32(font->fontSize);
+	sft.flags = SFT_DOWNWARD_Y;
+	if (font->font == NULL) {
+		//lazy init font
+		font->font = sft_loadfile(font->ttfFilePath);
+		if (font->font == NULL) {
+			ERROR(eh, QLS_ERROR_FONT_LOAD, "TTF load failed %s",
+					filename(font->ttfFilePath));
+			return;
+		} else {
+			sft.font = font->font;
+			if (sft_lmetrics(&sft, &(font->lineMetrics)) < 0) {
+				ERROR(eh, QLS_ERROR_LINE_METRICS,
+						"Failed to init line metrics of font %s",
+						filename(font->ttfFilePath));
+				return;
+			} else {
+				LOG("LineMetrics of %s asc %lf, desc %lf, gap %lf",
+						filename(font->ttfFilePath),
+						SCHRIFT_F64_to_double(font->lineMetrics.ascender),
+						SCHRIFT_F64_to_double(font->lineMetrics.descender),
+						SCHRIFT_F64_to_double(font->lineMetrics.lineGap));
+			}
+		}
+	}
 }
 
 /*********************************************/
@@ -379,37 +416,12 @@ static inline void copy_rect(int32_t startx, int32_t starty, T_SurfaceData* surf
     }
 }
 
-static void qls_load_font(T_ErrorHandler* eh, T_RenderData* r, T_TrueTypeFont* font) {
+
+static inline void qls_apply_font(T_RenderData* r, T_TrueTypeFont* font) {
     SFT* sft = &(r->sft);
     sft->xScale = SCHRIFT_F64_from_SCHRIFT_F32(font->fontSize);
     sft->yScale = SCHRIFT_F64_from_SCHRIFT_F32(font->fontSize);
     sft->flags = SFT_DOWNWARD_Y;
-
-    if (font->font == NULL)
-    {
-        //lazy init font
-        font->font = sft_loadfile(font->ttfFilePath);
-        if (font->font == NULL)
-        {
-            ERROR(eh,QLS_ERROR_FONT_LOAD, "TTF load failed %s" , filename(font->ttfFilePath));
-            return;
-        }
-        else
-        {
-            sft->font = font->font;
-		    if (sft_lmetrics(sft,&(font->lineMetrics)) < 0)
-            {
-		        ERROR(eh,QLS_ERROR_LINE_METRICS, "Failed to init line metrics of font %s" , filename(font->ttfFilePath));
-		        return;
-		    } else {
-		        LOG("LineMetrics of %s asc %lf, desc %lf, gap %lf",
-                    filename(font->ttfFilePath),
-                    SCHRIFT_F64_to_double(font->lineMetrics.ascender),
-                    SCHRIFT_F64_to_double(font->lineMetrics.descender),
-                    SCHRIFT_F64_to_double(font->lineMetrics.lineGap));
-		    }
-		}
-    }
     sft->font = font->font;
     r->font = font;
 }
@@ -423,17 +435,18 @@ static inline SFT_Glyph qls_lookup(T_ErrorHandler* eh, T_RenderData* rData, uint
 {
 	SFT_Glyph glyph = 0;
 	SFT* sft = &rData->sft;
+	T_FontList* fl = rData->fontList;
 	if (sft_lookup(sft, codepoint, &glyph) < 0) {
+		//check with currently applied font
 		ERROR(eh, QLS_ERROR_GLIPH_MISSING, "codepoint 0x%04X missing", codepoint);
 		return 0;
 	}
-	T_TrueTypeFont* orig = rData->font;
-	if (glyph == 0 && (orig->fallbackFontsCount > 0))
-	{
-		//codepoint has not been not found, try to fallback
-		for (uint32_t i = 0; (i < orig->fallbackFontsCount) && (glyph == 0); i++) {
-			T_TrueTypeFont* fallBack = &(orig->fallbackFonts[i]);
-			qls_load_font(eh, rData, fallBack);
+	T_TrueTypeFont* current = rData->font;
+	for (uint32_t i = 0; (i < fl->fontsCount) && (glyph == 0); i++) {
+		T_TrueTypeFont* font = fl->fonts[i];
+		if (font != current)
+		{
+			qls_apply_font(rData, font);
 			if (eh->code != QLS_ERROR_OK){
 				return 0;
 			}
@@ -441,11 +454,6 @@ static inline SFT_Glyph qls_lookup(T_ErrorHandler* eh, T_RenderData* rData, uint
 				ERROR(eh, QLS_ERROR_GLIPH_MISSING, "codepoint 0x%04X missing", codepoint);
 				return 0;
 			}
-		}
-		//restore
-		qls_load_font(eh, rData, orig);
-		if (eh->code != QLS_ERROR_OK){
-			return 0;
 		}
 	}
 	if (glyph == 0)
@@ -479,8 +487,8 @@ static inline SCHRIFT_F64 fractionalPart(SCHRIFT_F64 d) {
     return SCHRIFT_F64_sub(d , SCHRIFT_F64_from_s32(wholePart(d)));
 }
 
-static inline void advancePen(
-		T_ErrorHandler* eh, T_RenderData * rData, uint32_t prevCodepoint, uint32_t currentCodepoint, T_DPoint* pen,T_SurfaceData* surface, SCHRIFT_F64 spaceJustification)
+static inline SFT_Glyph advancePen(
+		T_ErrorHandler* eh, T_RenderData * rData, SFT_Glyph gPrev, uint32_t prevCodepoint, uint32_t currentCodepoint, T_DPoint* pen,T_SurfaceData* surface, SCHRIFT_F64 spaceJustification)
 {
     SFT_GMetrics gmtx = {0};
 	SFT * sft = &rData->sft;
@@ -488,28 +496,24 @@ static inline void advancePen(
 
 	SFT_Glyph glyph = qls_lookup(eh, rData, currentCodepoint);
 	if (eh->code != QLS_ERROR_OK) {
-		return;
+		return 0;
 	}
 	if (prevCodepoint != 0) {
-		//TODO cache gPrev, instead of query again
-		SFT_Glyph gPrev = qls_lookup(eh, rData, currentCodepoint);
-		if (eh->code != QLS_ERROR_OK) {
-			return;
-		}
 		SFT_Kerning kerning;
 		if (sft_kerning(sft, gPrev, glyph, &kerning) < 0) {
 			ERROR(eh, QLS_ERROR_GLIPH_KERNING, "Invalid kerning between codepoints 0x%04X 0x%04X ", prevCodepoint, currentCodepoint);
-			return;
+			return 0;
 		}
 		SCHRIFT_F64_addEq(pen->x , rData->letterSpacing);
 		SCHRIFT_F64_addEq(pen->x , kerning.xShift);
 	}
+
 	//render
 	 sft->xOffset = fractionalPart(pen->x);
 	 sft->yOffset = fractionalPart(pen->y);
 	 if (sft_gmetrics(sft, glyph, &gmtx) < 0) {
 		ERROR(eh, QLS_ERROR_GLIPH_MISSING, "codepoint 0x%04X bad glyph metrics", currentCodepoint);
-		return;
+		return 0;
 	 }
 
 	 //NOTE: sft->xOffset is read by sft_gmetrics
@@ -528,10 +532,13 @@ static inline void advancePen(
 		if (sft_render(sft, glyph, img) < 0) {
 			ERROR(eh, QLS_ERROR_GLIPH_RENDER, "codepoint 0x%04X not rendered",
 					currentCodepoint);
-			return;
+			return 0;
 		}
 
 		const int32_t screenX = wholePart(pen->x)
+				/*TODO leftSideBearing is a small number, typically < 1 - wholePart converts it to 0 every time-
+			      should be part of xOffset before render, or just added to penX to preserve its value
+			     */
 				+ wholePart(gmtx.leftSideBearing);
 		const int32_t screenY = wholePart(pen->y) + gmtx.yOffset;
 		copy_rect(screenX, screenY, surface, &img, rData->color);
@@ -546,11 +553,11 @@ static inline void advancePen(
 		SCHRIFT_F64_addEq(pen->x, spaceJustification);
 	}
 	SCHRIFT_F64_addEq(pen->x, gmtx.advanceWidth);
+	return glyph;
 }
 
 static inline void prescanLine(T_ErrorHandler* eh, T_RenderData* rData, UTF16_Reader* reader, T_Result_PrescanLine* outResult)
 {
-	SCHRIFT_F64 letterSpacing = rData->letterSpacing;
     SCHRIFT_F64 availableWidth = SCHRIFT_F64_from_s32(renderData_GetWidth(rData));
 	outResult->lineStart = reader->pos;
 
@@ -578,13 +585,13 @@ static inline void prescanLine(T_ErrorHandler* eh, T_RenderData* rData, UTF16_Re
 	T_Result_PrescanLine ret = {0};
 	ret.lineStart = reader->pos;
 	ret.lineEnd = reader->end;
-	//TODO this will be updated based on qls_lookup()..
-	ret.lMetrics = &(rData->font->lineMetrics);
+	ret.lMetrics = NULL;
 	T_DPoint pen = {0,0};
-	uint32_t prevCodepoint = 0;
 	uint32_t codepoint = 0;
 	const uint16_t* lastSpace = NULL;
 	SCHRIFT_F64 widthAtLastSpace = SCHRIFT_F64_from_s32(0);
+	SFT_Glyph previousGliph = 0;
+	uint32_t prevCodepoint = 0;
 	while (reader-> pos < reader->end) {
 		//position in front of `codepoint`, so a codepoint that does not belong to this line can be excluded
 		const uint16_t* charStart = reader->pos;
@@ -599,10 +606,24 @@ static inline void prescanLine(T_ErrorHandler* eh, T_RenderData* rData, UTF16_Re
         	//pen is still in front of the space
         	widthAtLastSpace = pen.x;
         }
-		advancePen(eh, rData, prevCodepoint, codepoint, &pen, NULL, SCHRIFT_F64_from_s32(0));
+		previousGliph = advancePen(eh, rData,previousGliph, prevCodepoint, codepoint, &pen, NULL, SCHRIFT_F64_from_s32(0));
 		if (eh->code != QLS_ERROR_OK) {
 			return;
 		}
+		SFT_LMetrics * current = &(rData->font->lineMetrics);
+		if (ret.lMetrics == NULL)
+		{
+			ret.lMetrics = current;
+		}
+		else if (ret.lMetrics != current)
+		{
+			double h1 = LINE_HEIGHT(ret.lMetrics);
+			double h2 = LINE_HEIGHT( current);
+			if (h2 > h1) {
+				ret.lMetrics = current;
+			}
+		}
+
 
 		if (SCHRIFT_F64_compare_lt(availableWidth, pen.x)) {
         	//current character does not fit into line
@@ -761,9 +782,10 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, T_RenderData* r, con
 
         reader.pos = lineData.lineStart;
         uint32_t lastCodepoint = 0;
+        SFT_Glyph prevG= 0;
         while (reader.pos < lineData.lineEnd) { // renderGlyph(...)
             uint32_t codepoint = utf16_read_codepoint(&reader);
-            advancePen(eh, r,  lastCodepoint, codepoint, &pen, surface, spaceJustification);
+            prevG = advancePen(eh, r, prevG, lastCodepoint, codepoint, &pen, surface, spaceJustification);
             if (eh->code != QLS_ERROR_OK){
             	return (T_SizeInt) {0, 0};
             }

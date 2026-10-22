@@ -15,6 +15,14 @@ extern "C" {
 JNIEXPORT void JNICALL Java_hu_qgears_textrender_TrueTypeFont_nativeDispose
   (JNIEnv *, jobject);
 
+/*
+ * Class:     hu_qgears_textrender_TrueTypeFont
+ * Method:    nativeInit
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_hu_qgears_textrender_TrueTypeFont_nativeInit
+  (JNIEnv *, jobject);
+
 #ifdef __cplusplus
 }
 #endif
