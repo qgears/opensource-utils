@@ -10,6 +10,7 @@
 static void throwException(JNIEnv *env, T_ErrorHandler* eh);
 static void dispose_native_font(T_ErrorHandler* eh, JNIEnv *env, jobject fontObject);
 static T_TrueTypeFont* create_native_font(T_ErrorHandler * eh, JNIEnv *env, jobject fontObject);
+static T_TrueTypeFont* get_native_font(T_ErrorHandler * eh, JNIEnv *env, jobject fontObject);
 static jfieldID get_field_id(T_ErrorHandler * eh, JNIEnv *env, jobject object, const char* fieldName, const char* signature);
 static double get_double_field(T_ErrorHandler * eh, JNIEnv *env, jobject object, const char* fieldName);
 static float get_float_field(T_ErrorHandler * eh, JNIEnv *env, jobject object, const char* fieldName);
@@ -204,9 +205,7 @@ static jstring get_string_field(T_ErrorHandler * eh, JNIEnv *env, jobject object
 
 /**
  * Reads hu.qgears.textrender.FontList.fonts (TrueTypeFont[]) and resolves each element
- * to its native T_TrueTypeFont (created lazily via nativePtr if not yet initialized).
- * The returned list must be released with freeFontList() - also in case of error.
- * The T_TrueTypeFont instances are owned by the Java TrueTypeFont objects.
+ * to its native T_TrueTypeFont
  */
 static T_FontList loadFontList(T_ErrorHandler* eh, JNIEnv* env, jobject fontListObject)
 {
@@ -244,13 +243,13 @@ static T_FontList loadFontList(T_ErrorHandler* eh, JNIEnv* env, jobject fontList
             ERROR(eh, QLS_ERROR_INVALID_FONT_LIST_OBJ, "FontList.fonts[%d] is null", (int)i);
             break;
         }
-        T_TrueTypeFont* font = create_native_font(eh, env, fontObject);
+        T_TrueTypeFont* font = get_native_font(eh, env, fontObject);
         (*env)->DeleteLocalRef(env, fontObject);
         if (eh->code == QLS_ERROR_OK) {
             if (font == NULL || font->font == NULL) {
                 ERROR(eh, QLS_ERROR_INVALID_FONT_LIST_OBJ, "Native font of FontList.fonts[%d] is not initialized", (int)i);
             } else {
-                result.fonts[result.fontsCount++] = font;
+	            result.fonts[result.fontsCount++] = font;
             }
         }
     }
@@ -267,6 +266,18 @@ static void freeFontList(T_FontList* fontList)
         fontList->fonts = NULL;
     }
     fontList->fontsCount = 0;
+}
+
+static T_TrueTypeFont* get_native_font(T_ErrorHandler * eh, JNIEnv *env, jobject fontObject)
+{
+    T_TrueTypeFont* font = NULL;
+
+    jfieldID nativePtrFieldId = get_field_id(eh,env,fontObject,"nativePtr","J");
+    if (eh->code == QLS_ERROR_OK)
+    {
+        font = (T_TrueTypeFont*) ((*env)->GetLongField(env, fontObject, nativePtrFieldId));
+    }
+    return font;
 }
 
 static T_TrueTypeFont* create_native_font(T_ErrorHandler * eh, JNIEnv *env, jobject fontObject)

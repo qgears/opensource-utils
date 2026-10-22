@@ -585,7 +585,7 @@ static inline void prescanLine(T_ErrorHandler* eh, T_RenderData* rData, UTF16_Re
 	T_Result_PrescanLine ret = {0};
 	ret.lineStart = reader->pos;
 	ret.lineEnd = reader->end;
-	ret.lMetrics = NULL;
+	ret.lMetrics = &(rData->font->lineMetrics);
 	T_DPoint pen = {0,0};
 	uint32_t codepoint = 0;
 	const uint16_t* lastSpace = NULL;
