@@ -68,4 +68,5 @@ public class NativeBinary {
 		URL res=getUrl(nativeLoader.getClass());
 		return res != null;
 	}
+	
 }

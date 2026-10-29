@@ -11,10 +11,10 @@ ARCHPOSTFIX=`uname -m | sed -e 's/\bx86\b/i686/'`
 OS_RELEASE_ID=`grep -w "ID" /etc/os-release | cut -d'=' -f2`
 OS_RELEASE_VERSION=`grep -w "VERSION_ID" /etc/os-release | cut -d'=' -f2 | tr -d '\"'`
 SO_NAME:=libqlibschrift-${OS_RELEASE_ID}-${OS_RELEASE_VERSION}-${ARCHPOSTFIX}.so
-SO_SOFT_FLOAT_NAME:=libqlibschrift_sf-${OS_RELEASE_ID}-${OS_RELEASE_VERSION}-${ARCHPOSTFIX}.so
 # .so named in a generic way, for workspace builds in  not explicitly supported 
 # distributions
 SO_GENERIC_NAME:=libqlibschrift-${ARCHPOSTFIX}.so
+SO_SOFT_FLOAT_NAME:=libqlibschrift_sf-${ARCHPOSTFIX}.so
 
 
 
