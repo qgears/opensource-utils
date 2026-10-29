@@ -101,7 +101,7 @@ enum { VALIGN_TOP, VALIGN_MIDDLE, VALIGN_BOTTOM };
 #define PIX(r)  SCHRIFT_F32_trunc_to_u8_to_u32((SCHRIFT_F32_mul_u32(r , 0xFFu)))
 #define LOG(...) ;printf(__VA_ARGS__);printf("\n");fflush(stdout)
 /* Line height of a SFT_LMetrics* : ascender - descender + lineGap */
-#define LINE_HEIGHT(lm) SCHRIFT_F64_add(SCHRIFT_F64_sub((lm)->ascender, (lm)->descender), (lm)->lineGap)
+#define LINE_HEIGHT(lm) SCHRIFT_F64_add(SCHRIFT_F64_sub(lm->ascender, lm->descender), lm->lineGap)
 
 static inline uint32_t blend_bgra_premultiplied(uint32_t dst, uint32_t pcolor, uint8_t mask);
 static inline void copy_rect(int32_t startx, int32_t starty, T_SurfaceData* surface, SFT_Image* img, uint32_t color);
