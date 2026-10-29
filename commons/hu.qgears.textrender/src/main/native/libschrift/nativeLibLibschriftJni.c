@@ -12,8 +12,8 @@ static void dispose_native_font(T_ErrorHandler* eh, JNIEnv *env, jobject fontObj
 static T_TrueTypeFont* create_native_font(T_ErrorHandler * eh, JNIEnv *env, jobject fontObject);
 static T_TrueTypeFont* get_native_font(T_ErrorHandler * eh, JNIEnv *env, jobject fontObject);
 static jfieldID get_field_id(T_ErrorHandler * eh, JNIEnv *env, jobject object, const char* fieldName, const char* signature);
-static double get_double_field(T_ErrorHandler * eh, JNIEnv *env, jobject object, const char* fieldName);
-static float get_float_field(T_ErrorHandler * eh, JNIEnv *env, jobject object, const char* fieldName);
+static SCHRIFT_F64 get_double_field(T_ErrorHandler * eh, JNIEnv *env, jobject object, const char* fieldName);
+static SCHRIFT_F32 get_float_field(T_ErrorHandler * eh, JNIEnv *env, jobject object, const char* fieldName);
 static jstring get_string_field(T_ErrorHandler * eh, JNIEnv *env, jobject object, const char* fieldName);
 static T_FontList loadFontList(T_ErrorHandler* eh, JNIEnv* env, jobject fontListObject);
 static void freeFontList(T_FontList* fontList);
@@ -181,19 +181,19 @@ static jfieldID get_field_id(T_ErrorHandler * eh, JNIEnv *env, jobject object, c
     return fieldId;
 }
 
-static double get_double_field(T_ErrorHandler * eh, JNIEnv *env, jobject object, const char* fieldName) {
+static SCHRIFT_F64 get_double_field(T_ErrorHandler * eh, JNIEnv *env, jobject object, const char* fieldName) {
     jfieldID fieldId = get_field_id(eh, env, object, fieldName, "D");
     if (fieldId == NULL) {
-        return 0.0;
+        return SCHRIFT_F64_const_zero;
     }
-    return (double)(*env)->GetDoubleField(env, object, fieldId);
+    return SCHRIFT_F64_from_double((*env)->GetDoubleField(env, object, fieldId));
 }
-static float get_float_field(T_ErrorHandler * eh, JNIEnv *env, jobject object, const char* fieldName) {
+static SCHRIFT_F32 get_float_field(T_ErrorHandler * eh, JNIEnv *env, jobject object, const char* fieldName) {
     jfieldID fieldId = get_field_id(eh, env, object, fieldName, "F");
     if (fieldId == NULL) {
-        return 0.0;
+        return SCHRIFT_F32_from_float(0.0f);
     }
-    return (float)(*env)->GetFloatField(env, object, fieldId);
+    return SCHRIFT_F32_from_float((*env)->GetFloatField(env, object, fieldId));
 }
 static jstring get_string_field(T_ErrorHandler * eh, JNIEnv *env, jobject object, const char* fieldName) {
     jfieldID fieldId = get_field_id(eh, env, object, fieldName, "Ljava/lang/String;");
@@ -293,11 +293,11 @@ static T_TrueTypeFont* create_native_font(T_ErrorHandler * eh, JNIEnv *env, jobj
             font = (T_TrueTypeFont*) malloc(sizeof(T_TrueTypeFont));
             (*env)->SetLongField(env, fontObject, nativePtrFieldId,(jlong)font);
             memset(font,0, sizeof(T_TrueTypeFont));
-            font->letterSpacing = SCHRIFT_F64_from_double( get_double_field(eh,env,fontObject, "letterSpacing") );
+            font->letterSpacing = get_double_field(eh,env,fontObject, "letterSpacing");
             if (eh->code == QLS_ERROR_OK)
             {
                 // fontSize is needed by qls_load_font to compute line metrics
-                font->fontSize = SCHRIFT_F32_from_float(get_float_field(eh,env,fontObject,"fontSize"));
+                font->fontSize = get_float_field(eh,env,fontObject,"fontSize");
             }
             if (eh->code == QLS_ERROR_OK)
             {

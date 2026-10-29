@@ -49,6 +49,7 @@
 #define SCHRIFT_F64_mul_s32_SCHRIFT_F64(ia, fb) S_F32_mul(S_F32_from_s64(ia),fb)
 #define SCHRIFT_F64_abs(f) S_F32_mul(f, S_F32_from_s64(S_F32_signum(f)))
 #define SCHRIFT_F64_nextafter(a,b) S_F32_nextafter(a,b)
-
+#define SCHRIFT_F32_from_float(f) S_F32_fromFloat(f)
+#define SCHRIFT_F64_from_double(d) S_F32_fromFloat((float)d)
 #endif
 
