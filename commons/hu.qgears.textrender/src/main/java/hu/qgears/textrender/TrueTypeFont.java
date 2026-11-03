@@ -5,6 +5,7 @@ public class TrueTypeFont {
 	public String ttfFilePath;
 	private double letterSpacing;
 	private float fontSize;
+	private boolean isUnderline;
 	private long nativePtr = 0;
 	
 	public TrueTypeFont(String ttfFilePath, float fontSize) {

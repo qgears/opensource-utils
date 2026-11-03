@@ -67,7 +67,7 @@ public class TrueTypeRenderer {
 					x,y,w,h,
 					c[0],c[1],c[2],c[3],
 					true
-					,params.wrapMode);
+					,params.wrapMode, params.textDecoration);
 		} finally {
 			rendererNative.disposeSurface(s);
 		}

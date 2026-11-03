@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import hu.qgears.images.ENativeImageComponentOrder;
 import hu.qgears.images.SizeInt;
 import hu.qgears.images.text.EHorizontalAlign;
+import hu.qgears.images.text.ETextDecoration;
 import hu.qgears.images.text.EVerticalAlign;
 import hu.qgears.images.text.EWrapMode;
 import hu.qgears.images.text.RGBAColor;
@@ -40,18 +41,18 @@ import hu.qgears.textrender.TrueTypeNativeInterface;
 	@Override
 	public SizeInt renderText(long surfaceHandle, FontList fontFamily, String str, EHorizontalAlign hAlign,
 			EVerticalAlign vAlign, int x, int y, int width, int height, float r, float g, float b, float a,
-			boolean clip, EWrapMode wrapMode) {
+			boolean clip, EWrapMode wrapMode, ETextDecoration textDecoration) {
 
 		// TODO parameter verficifation : handle null args here instead of the native
 		// impl
 		RGBAColor.fromFloats(r, g, b, a).toIntPixel();
 		return renderTextPrivate(surfaceHandle, fontFamily.fonts[0], str, hAlign, vAlign, x, y, width, height, r, g, b, a, clip,
-				wrapMode);
+				wrapMode, textDecoration);
 	}
 
 	private native SizeInt renderTextPrivate(long surfaceHandle, TrueTypeFont fontFamily, String str, EHorizontalAlign hAlign,
 			EVerticalAlign vAlign, int x, int y, int width, int height, float r, float g, float b, float a,
-			boolean clip, EWrapMode wrapMode);
+			boolean clip, EWrapMode wrapMode, ETextDecoration textDecoration);
 
 	@Override
 	public SizeInt layoutText(FontList fontFamily, String text, EHorizontalAlign hAlign, EVerticalAlign vAlign, int width,
