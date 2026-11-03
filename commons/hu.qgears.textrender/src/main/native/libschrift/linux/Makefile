@@ -28,8 +28,17 @@ endif
 
 JNIDEPS=$(PROJDIR)/target/classes:$(PROJDIR)/../hu.qgears.images/target/classes:$(PROJDIR)/../hu.qgears.commons/target/classes:$(PROJDIR)/../hu.qgears.nativeloader/target/classes
 
+
+ifeq ($(RELEASE),1)
+#for release builds is the default
+    CONDITIONAL_FLAGS = -O2 
+else
+#debug is the default
+    CONDITIONAL_FLAGS = -g -O0 -DDEBUG=1
+endif
+
 C_FLAGS=-fPIC -D_REENTRANT \
-	-g -std=c99 -O0 -pedantic -Wconversion  \
+	$(CONDITIONAL_FLAGS) -fvisibility=hidden -std=c99 -pedantic -Wconversion  \
 	${JNI_INCLUDE_PLATFORM} ${JNI_INCLUDE}
 
 # sources shared by the shared library and the standalone manual-test programs

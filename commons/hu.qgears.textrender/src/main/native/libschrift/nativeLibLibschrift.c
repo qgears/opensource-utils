@@ -99,7 +99,9 @@ enum { VALIGN_TOP, VALIGN_MIDDLE, VALIGN_BOTTOM };
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 #define LIMIT(x,min,max) ((x) < (min) ? (min) : ((x) > (max) ? (max) : (x)))
 #define PIX(r)  SCHRIFT_F32_trunc_to_u8_to_u32((SCHRIFT_F32_mul_u32(r , 0xFFu)))
-#define LOG(...) ;printf(__VA_ARGS__);printf("\n");fflush(stdout)
+
+
+
 /* Line height of a SFT_LMetrics* : ascender - descender + lineGap */
 #define LINE_HEIGHT(lm) SCHRIFT_F64_add(SCHRIFT_F64_sub(lm->ascender, lm->descender), lm->lineGap)
 

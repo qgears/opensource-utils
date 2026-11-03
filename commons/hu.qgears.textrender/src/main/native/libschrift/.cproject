@@ -24,6 +24,7 @@
 							<tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.402717229" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler">
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.c.compiler.option.preprocessor.def.symbols.1560678694" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="INCLUDE_MAIN=1"/>
+									<listOptionValue builtIn="false" value="DEBUG=1"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.518543150" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>

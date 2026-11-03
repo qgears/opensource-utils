@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include "schrift.h"
 #include "float_macros.h"
 
@@ -50,6 +51,11 @@ typedef struct {
 
 #define ERROR(eh,ec,...) do { eh->code = ec;eh->file = __FILE__; eh->line = __LINE__; snprintf(eh->errorMsg,QLS_MAX_ERROR_MSG_SIZE, __VA_ARGS__); } while (0)
 
+#ifdef DEBUG
+#define LOG(...) do { printf(__VA_ARGS__); printf("\n"); fflush(stdout); } while (0)
+#else
+#define LOG(...) do { } while (0)
+#endif
 
 /**
  * C representation of Java TrueTypeFont object
