@@ -1,3 +1,12 @@
+#ifndef FLOAT_MACROS_ORIGINAL_H
+#define FLOAT_MACROS_ORIGINAL_H
+
+/**
+ * This version converts back all floating point operations and types
+ * to the original 32 or 64 bit version (double supported)
+ */
+
+
 #define integer_long long
 #define SCHRIFT_F32 float
 #define SCHRIFT_F64 double
@@ -45,5 +54,5 @@
 #define SCHRIFT_F32_from_float(f)f
 #define SCHRIFT_F64_from_double(d)d
 
-
+#endif /* FLOAT_MACROS_ORIGINAL_H */
 

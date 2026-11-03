@@ -7,7 +7,11 @@
 #ifdef SOFTFLOAT
 #include "float_macros_softfloat.h"
 #else
-#include "float_macros_original.h"
+	#ifndef USE_DOUBLE
+		#include "float_macros_original_32.h"
+	#else
+		#include "float_macros_original.h"
+	#endif
 #endif
 
 #endif
