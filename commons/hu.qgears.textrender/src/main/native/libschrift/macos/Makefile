@@ -19,15 +19,34 @@ ifndef OUTPUTDIR
 endif
 
 
-C_FLAGS=-fPIC -D_REENTRANT -shared \
-	-g -std=c99 -O0 -pedantic -Wconversion \
+ifeq ($(RELEASE),1)
+    CONDITIONAL_FLAGS = -O2
+else
+    CONDITIONAL_FLAGS = -g -O0 -DDEBUG=1
+endif
+
+# Flags making hardware float arithmetic bit-exact with the Linux builds
+# (see linux/Makefile for the full rationale):
+#  -ffp-contract=off : never fuse a*b+c into FMA; clang fuses by default.
+#  -fno-fast-math    : forbid value-changing optimizations.
+# -fexcess-precision is omitted: on clang it only affects _Float16, and arm64
+# has no x87-style excess precision.
+DETERMINISTIC_FP_FLAGS= \
+	-ffp-contract=off \
+	-fno-fast-math
+
+C_FLAGS=-fPIC -D_REENTRANT \
+	$(CONDITIONAL_FLAGS) -fvisibility=hidden -std=c99 -pedantic -Wconversion \
+	$(DETERMINISTIC_FP_FLAGS) \
 	${JNI_INCLUDE} -I $(HOMEBREW)/include
+
+SOURCES_LIB=../nativeLibLibschrift.c ../schrift.c ../util.c ../nativeLibLibschriftJni.c
 
 all : ../hu_qgears_textrender_libschrift_LibschriftNative.h
 	mkdir -p $(OUTPUTDIR)
 	gcc -o $(OUTPUTDIR)/$(SO_NAME) \
-	$(C_FLAGS) \
-	../natveLibLibschrift.c ../nativeLibLibschriftJni.c ../schrift.c ../util.c \
+	$(C_FLAGS) -shared \
+	$(SOURCES_LIB) \
 	-L $(HOMEBREW)/lib  -lm
 
 %.s : ../%.c 
