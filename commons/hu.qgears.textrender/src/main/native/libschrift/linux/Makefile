@@ -7,7 +7,7 @@ JNI_INCLUDE:=-I/usr/lib/jvm/java-1.7.0-openjdk-${JNI_ARCHPOSTFIX}/include \
     -I/usr/lib/jvm/java-1.11.0-openjdk-${JNI_ARCHPOSTFIX}/include/linux \
     -I/usr/lib/jvm/default-java/include \
     -I/usr/lib/jvm/default-java/include/linux
-ARCHPOSTFIX=`uname -m | sed -e 's/\bx86\b/i686/'`
+ARCHPOSTFIX:=$(shell uname -m | sed -e 's/\bx86\b/i686/')
 OS_RELEASE_ID=`grep -w "ID" /etc/os-release | cut -d'=' -f2`
 OS_RELEASE_VERSION=`grep -w "VERSION_ID" /etc/os-release | cut -d'=' -f2 | tr -d '\"'`
 SO_NAME:=libqlibschrift-${OS_RELEASE_ID}-${OS_RELEASE_VERSION}-${ARCHPOSTFIX}.so
@@ -37,9 +37,34 @@ else
     CONDITIONAL_FLAGS = -g -O0 -DDEBUG=1
 endif
 
+# Flags making hardware float arithmetic bit-exact across i386/x86_64/arm64
+# Linux and macOS, independently of the optimization level:
+#  -ffp-contract=off  : never fuse a*b+c into FMA (single rounding gives
+#                       different results; arm64 and clang fuse by default,
+#                       x86_64 does too with -march supporting FMA).
+#  -fno-fast-math     : forbid value-changing optimizations (reassociation,
+#                       reciprocal division, flush-to-zero, finite-math).
+#  -fexcess-precision=standard : round to the declared type on every
+#                       assignment and cast (only matters with x87).
+#  -msse2 -mfpmath=sse (i386 only): use SSE instead of the x87 FPU, whose
+#                       80-bit intermediates make results depend on register
+#                       spilling; gives FLT_EVAL_METHOD == 0 like x86_64/arm64.
+# Do not add -march=native, -Ofast, -ffast-math or -funsafe-math-optimizations.
+DETERMINISTIC_FP_FLAGS= \
+	-ffp-contract=off \
+	-fno-fast-math \
+	-fexcess-precision=standard
+
+ifneq ($(filter i386 i486 i586 i686,$(ARCHPOSTFIX)),)
+    DETERMINISTIC_FP_FLAGS += -msse2 -mfpmath=sse
+endif
+
 C_FLAGS=-fPIC -D_REENTRANT \
 	$(CONDITIONAL_FLAGS) -fvisibility=hidden -std=c99 -pedantic -Wconversion  \
+	$(DETERMINISTIC_FP_FLAGS) \
 	${JNI_INCLUDE_PLATFORM} ${JNI_INCLUDE}
+
+SOFT_FLOAT_FLAGS=-DSOFTFLOAT=1
 
 # sources shared by the shared library and the standalone manual-test programs
 SOURCES=../nativeLibLibschrift.c ../schrift.c ../util.c
@@ -48,11 +73,6 @@ JNI_HEADERS=../hu_qgears_textrender_libschrift_LibschriftNative.h ../hu_qgears_t
 
 SOURCES_LIB=$(SOURCES) ../nativeLibLibschriftJni.c
 
-SOFT_FLOAT_FLAGS= \
-	-DSOFTFLOAT=1 \
-	-fno-fast-math \
-	-ffp-contract=off \
-	-fexcess-precision=standard
 
 .DEFAULT_GOAL := all
 .PHONY: all lib bversion testprog asms clean softfloatlib restore_soft restore_normal restore
