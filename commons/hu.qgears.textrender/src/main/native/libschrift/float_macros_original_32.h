@@ -28,7 +28,7 @@
 #define SCHRIFT_F64_const_100 100.0f
 #define SCHRIFT_F64_compare_lt(a,b)a<b
 #define SCHRIFT_F64_compare_gteq(a,b)a>=b
-#define SCHRIFT_F64_nextafter(a,b)(float)nextafter(a,b)
+#define SCHRIFT_F64_nextafter(a,b) nextafterf(a,b)
 #define SCHRIFT_F64_floor_to_int(a)(int) floor(a)
 #define SCHRIFT_F64_ceil_to_int(a)(int) ceil (a)
 #define SCHRIFT_F64_mul_s32_double(a,b)a*b

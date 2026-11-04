@@ -75,7 +75,7 @@ SOURCES_LIB=$(SOURCES) ../nativeLibLibschriftJni.c
 
 
 .DEFAULT_GOAL := all
-.PHONY: all lib bversion testprog asms clean softfloatlib restore_soft restore_normal restore
+.PHONY: all lib bversion testprog asms clean softfloatlib restore_soft restore_normal restore restore_float32
 
 all : lib softfloatlib bversion testprog
 
@@ -139,7 +139,13 @@ restore_normal : $(SOURCES_LIB)
 		perl expand_macros.pl ../float_macros_original.h $$f > restored_normal/$$(basename $$f) || exit 1; \
 	done
 
-restore : restore_normal restore_soft
+restore_float32 : $(SOURCES_LIB)
+	mkdir -p restore_float32
+	@for f in $(SOURCES_LIB); do \
+		perl expand_macros.pl ../float_macros_original_32.h $$f > restore_float32/$$(basename $$f) || exit 1; \
+	done
+
+restore : restore_normal restore_soft restore_float32
 
 clean:
 	@rm -fv $(OUTPUTDIR)/$(SO_NAME) $(OUTPUTDIR)/$(SO_GENERIC_NAME)
