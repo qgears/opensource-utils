@@ -208,7 +208,7 @@ void qls_disposeSurfacePrivate(uint64_t surfaceHandle)
     }
     
     // Cast handle back to T_SurfaceData pointer and free it
-    T_SurfaceData* surfaceData = (T_SurfaceData*)surfaceHandle;
+    T_SurfaceData* surfaceData = (T_SurfaceData*)(uintptr_t)surfaceHandle;
     free(surfaceData);
 }
 
@@ -412,7 +412,7 @@ static inline void copy_rect(int32_t startx, int32_t starty, T_SurfaceData* surf
                     surfaceData4[dst_pix] = blend_bgra_premultiplied(surfaceData4[dst_pix], color,src_alpha);
                 } else {
                     uint32_t da = surfaceData[dst_pix];
-                    surfaceData[dst_pix] = (uint8_t)(src_alpha + da * (255 - src_alpha) / 255);
+                    surfaceData[dst_pix] = (uint8_t)(src_alpha + da * (255u - src_alpha) / 255u);
                 }
             }
         }
@@ -431,7 +431,7 @@ static inline void qls_apply_font(T_RenderData* r, T_TrueTypeFont* font) {
 
 static T_SurfaceData* qls_get_surfacedata(uint64_t id) {
     // Cast the handle back to T_SurfaceData pointer
-    return (T_SurfaceData*)id;
+    return (T_SurfaceData*)(uintptr_t)id;
 }
 
 static inline SFT_Glyph qls_lookup(T_ErrorHandler* eh, T_RenderData* rData, uint32_t codepoint)

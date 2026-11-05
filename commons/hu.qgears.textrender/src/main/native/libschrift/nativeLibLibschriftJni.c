@@ -31,7 +31,7 @@ JNIEXPORT jlong JNICALL Java_hu_qgears_textrender_libschrift_LibschriftNative_cr
     // Forward to native implementation
     uint64_t result = qls_createSurfaceWithDataPrivate(&eh,data, width, height,pixelformat);
     if (eh.code == QLS_ERROR_OK) {
-        return (jlong)(uintptr_t)result;
+        return (jlong)result;
     } else {
         throwException(env,&eh);
         return 0;
@@ -277,7 +277,7 @@ static T_TrueTypeFont* get_native_font(T_ErrorHandler * eh, JNIEnv *env, jobject
     jfieldID nativePtrFieldId = get_field_id(eh,env,fontObject,"nativePtr","J");
     if (eh->code == QLS_ERROR_OK)
     {
-        font = (T_TrueTypeFont*) ((*env)->GetLongField(env, fontObject, nativePtrFieldId));
+        font = (T_TrueTypeFont*)(uintptr_t)((*env)->GetLongField(env, fontObject, nativePtrFieldId));
     }
     return font;
 }
@@ -289,11 +289,11 @@ static T_TrueTypeFont* create_native_font(T_ErrorHandler * eh, JNIEnv *env, jobj
     jfieldID nativePtrFieldId = get_field_id(eh,env,fontObject,"nativePtr","J");
     if (eh->code == QLS_ERROR_OK)
     {
-        font = (T_TrueTypeFont*) ((*env)->GetLongField(env, fontObject, nativePtrFieldId));
+        font = (T_TrueTypeFont*)(uintptr_t)((*env)->GetLongField(env, fontObject, nativePtrFieldId));
         if (!font)
         {
             font = (T_TrueTypeFont*) malloc(sizeof(T_TrueTypeFont));
-            (*env)->SetLongField(env, fontObject, nativePtrFieldId,(jlong)font);
+            (*env)->SetLongField(env, fontObject, nativePtrFieldId,(jlong)(uintptr_t)font);
             memset(font,0, sizeof(T_TrueTypeFont));
             font->letterSpacing = get_double_field(eh,env,fontObject, "letterSpacing");
             if (eh->code == QLS_ERROR_OK)
@@ -322,7 +322,7 @@ static void dispose_native_font(T_ErrorHandler* eh, JNIEnv *env, jobject fontObj
     jfieldID nativePtrFieldId = get_field_id(eh,env,fontObject,"nativePtr","J");
     if (eh->code == QLS_ERROR_OK)
     {
-        font = (T_TrueTypeFont*) ((*env)->GetLongField(env, fontObject, nativePtrFieldId));
+        font = (T_TrueTypeFont*)(uintptr_t)((*env)->GetLongField(env, fontObject, nativePtrFieldId));
         if (font)
         {
             (*env)->SetLongField(env, fontObject, nativePtrFieldId,0);
