@@ -439,31 +439,30 @@ static inline SFT_Glyph qls_lookup(T_ErrorHandler* eh, T_RenderData* rData, uint
 	SFT_Glyph glyph = 0;
 	SFT* sft = &rData->sft;
 	T_FontList* fl = rData->fontList;
-	if (sft_lookup(sft, codepoint, &glyph) < 0) {
-		//check with currently applied font
-		ERROR(eh, QLS_ERROR_GLIPH_MISSING, "codepoint 0x%04X missing", codepoint);
-		return 0;
-	}
-	T_TrueTypeFont* current = rData->font;
-	for (uint32_t i = 0; (i < fl->fontsCount) && (glyph == 0); i++) {
+	// Always search in font list order, starting from the primary font
+	for (uint32_t i = 0; i < fl->fontsCount; i++) {
 		T_TrueTypeFont* font = fl->fonts[i];
-		if (font != current)
+		if (font != rData->font)
 		{
 			qls_apply_font(rData, font);
 			if (eh->code != QLS_ERROR_OK){
 				return 0;
 			}
-			if (sft_lookup(sft, codepoint, &glyph) < 0) {
-				ERROR(eh, QLS_ERROR_GLIPH_MISSING, "codepoint 0x%04X missing", codepoint);
-				return 0;
-			}
+		}
+		if (sft_lookup(sft, codepoint, &glyph) < 0) {
+			ERROR(eh, QLS_ERROR_GLIPH_MISSING, "codepoint 0x%04X missing", codepoint);
+			return 0;
+		}
+		if (glyph != 0) {
+			return glyph;
 		}
 	}
-	if (glyph == 0)
-	{
-		LOG("WARN codepoint not found %d -> glyph %ld",codepoint,glyph);
+	// Not found in any font: the missing glyph of the primary font is rendered
+	if (fl->fontsCount > 0 && rData->font != fl->fonts[0]) {
+		qls_apply_font(rData, fl->fonts[0]);
 	}
-	return glyph;
+	LOG("WARN codepoint not found %d", codepoint);
+	return 0;
 }
 
 static inline bool ctypeIsLineEnding(uint32_t c) {
