@@ -6,6 +6,43 @@
  * to a 32 bit representation (double downcasted to float)
  */
 
+#include <stdint.h>
+
+/* libm-free replacements, results are bit-identical to floor/ceil/fabs/nextafterf */
+static inline int schrift_f32_floor_to_int(float x)
+{
+	int i = (int) x;
+	return i - ((float) i > x);
+}
+
+static inline int schrift_f32_ceil_to_int(float x)
+{
+	int i = (int) x;
+	return i + ((float) i < x);
+}
+
+static inline float schrift_f32_nextafter(float x, float y)
+{
+	union { float f; uint32_t u; } v;
+	if (__builtin_isnan(x) || __builtin_isnan(y)) {
+		return x + y;
+	}
+	if (x == y) {
+		return y;
+	}
+	if (x == 0.0f) {
+		v.u = 1u;
+		return y > 0.0f ? v.f : -v.f;
+	}
+	v.f = x;
+	if ((x < y) == (x > 0.0f)) {
+		v.u++;
+	} else {
+		v.u--;
+	}
+	return v.f;
+}
+
 #define integer_long long
 #define SCHRIFT_F32 float
 #define SCHRIFT_F64 float
@@ -28,13 +65,13 @@
 #define SCHRIFT_F64_const_100 100.0f
 #define SCHRIFT_F64_compare_lt(a,b)a<b
 #define SCHRIFT_F64_compare_gteq(a,b)a>=b
-#define SCHRIFT_F64_nextafter(a,b) nextafterf(a,b)
-#define SCHRIFT_F64_floor_to_int(a)(int) floor(a)
-#define SCHRIFT_F64_ceil_to_int(a)(int) ceil (a)
+#define SCHRIFT_F64_nextafter(a,b) schrift_f32_nextafter(a,b)
+#define SCHRIFT_F64_floor_to_int(a)schrift_f32_floor_to_int(a)
+#define SCHRIFT_F64_ceil_to_int(a)schrift_f32_ceil_to_int(a)
 #define SCHRIFT_F64_mul_s32_double(a,b)a*b
 #define SCHRIFT_F64_mul_s32_SCHRIFT_F64(a,b)(float)a*b
 #define SCHRIFT_F64_from_long(a)(float)a
-#define SCHRIFT_F64_abs(a)(float)fabs(a)
+#define SCHRIFT_F64_abs(a)__builtin_fabsf(a)
 #define SCHRIFT_F64_compare_lteq(a,b)a<=b
 #define SCHRIFT_F64_signum(a)SIGN(a)
 #define SCHRIFT_F64_min(a,b)MIN(a,b)

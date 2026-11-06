@@ -8,15 +8,11 @@ JNI_INCLUDE:=-I/usr/lib/jvm/java-1.7.0-openjdk-${JNI_ARCHPOSTFIX}/include \
     -I/usr/lib/jvm/default-java/include \
     -I/usr/lib/jvm/default-java/include/linux
 ARCHPOSTFIX:=$(shell uname -m | sed -e 's/\bx86\b/i686/')
-OS_RELEASE_ID=`grep -w "ID" /etc/os-release | cut -d'=' -f2`
-OS_RELEASE_VERSION=`grep -w "VERSION_ID" /etc/os-release | cut -d'=' -f2 | tr -d '\"'`
-SO_NAME:=libqlibschrift-${OS_RELEASE_ID}-${OS_RELEASE_VERSION}-${ARCHPOSTFIX}.so
-# .so named in a generic way, for workspace builds in  not explicitly supported 
-# distributions
-SO_GENERIC_NAME:=libqlibschrift-${ARCHPOSTFIX}.so
+SO_NAME:=libqlibschrift-${ARCHPOSTFIX}.so
 SO_SOFT_FLOAT_NAME:=libqlibschrift_sf-${ARCHPOSTFIX}.so
 
-
+# highest glibc symbol version allowed in the x86 libs (Debian 9)
+GLIBC_MAX ?= 2.24
 
 #used by the maven editor_platform_build process, see pom.xml in project.
 PROJDIR= ../../../../..
@@ -66,6 +62,9 @@ C_FLAGS=-fPIC -D_REENTRANT \
 
 SOFT_FLOAT_FLAGS=-DSOFTFLOAT=1
 
+# fail at link time on unresolved symbols (e.g. a leftover libm call)
+LIB_LDFLAGS=-Wl,-z,defs
+
 # sources shared by the shared library and the standalone manual-test programs
 SOURCES=../nativeLibLibschrift.c ../schrift.c ../util.c
 
@@ -75,7 +74,7 @@ SOURCES_LIB=$(SOURCES) ../nativeLibLibschriftJni.c
 
 
 .DEFAULT_GOAL := all
-.PHONY: all lib bversion testprog asms clean softfloatlib restore_soft restore_normal restore restore_float32
+.PHONY: all lib lib_original checkdeps bversion testprog asms clean softfloatlib restore_soft restore_normal restore restore_float32
 
 all : lib softfloatlib bversion testprog
 
@@ -85,8 +84,38 @@ lib : $(JNI_HEADERS) $(SOURCES_LIB)
 	$(C_FLAGS) -shared \
 	-Wl,-soname,$(SO_NAME) \
 	$(SOURCES_LIB) \
+	$(LIB_LDFLAGS)
+
+# optional: original double based code, depends on libm; overwrites the lib output
+lib_original : $(JNI_HEADERS) $(SOURCES_LIB)
+	mkdir -p $(OUTPUTDIR)
+	gcc -o $(OUTPUTDIR)/$(SO_NAME) \
+	-DUSE_DOUBLE=1 \
+	$(C_FLAGS) -shared \
+	-Wl,-soname,$(SO_NAME) \
+	$(SOURCES_LIB) \
+	$(LIB_LDFLAGS) \
 	-lm
-	cp -f $(OUTPUTDIR)/$(SO_NAME) $(OUTPUTDIR)/$(SO_GENERIC_NAME)
+
+# optional: verify the x86 libs in OUTPUTDIR load on glibc $(GLIBC_MAX)
+CHECKDEPS_LIBS=libqlibschrift-i686.so libqlibschrift_sf-i686.so \
+	libqlibschrift-x86_64.so libqlibschrift_sf-x86_64.so
+
+checkdeps :
+	@rc=0; \
+	for n in $(CHECKDEPS_LIBS); do \
+		f=$(OUTPUTDIR)/$$n; \
+		[ -f $$f ] || continue; \
+		max=$$(objdump -T $$f | grep -o 'GLIBC_[0-9.]*' | sed 's/GLIBC_//' | sort -Vu | tail -n1); \
+		if [ "$$(printf '%s\n%s\n' "$$max" "$(GLIBC_MAX)" | sort -V | tail -n1)" != "$(GLIBC_MAX)" ]; then \
+			echo "FAIL $$f requires GLIBC_$$max > GLIBC_$(GLIBC_MAX):"; \
+			objdump -T $$f | grep "GLIBC_$$max"; \
+			rc=1; \
+		else \
+			echo "OK   $$f (max GLIBC_$$max)"; \
+		fi; \
+	done; \
+	exit $$rc
 
 softfloatlib : $(JNI_HEADERS) $(SOURCES_LIB)
 	mkdir -p $(OUTPUTDIR)
@@ -95,23 +124,21 @@ softfloatlib : $(JNI_HEADERS) $(SOURCES_LIB)
 	$(C_FLAGS)  -shared \
 	-Wl,-soname,$(SO_SOFT_FLOAT_NAME) \
 	$(SOURCES_LIB) \
-	-lm
+	$(LIB_LDFLAGS)
 
 bversion:
 	gcc $(SOFT_FLOAT_FLAGS) \
 	-DINCLUDE_MAIN=1 \
 	-o libschrift_manualtest_softfloat.exe \
 	$(C_FLAGS) \
-	$(SOURCES) \
-	-lm
+	$(SOURCES)
 
 testprog:
 	gcc \
 	-DINCLUDE_MAIN=1 \
 	-o libschrift_manualtest.exe \
 	$(C_FLAGS) \
-	$(SOURCES) \
-	 -lm
+	$(SOURCES)
 
 ../hu_qgears_textrender_libschrift_LibschriftNative.h : 
 	javac -cp $(JNIDEPS) \
@@ -148,7 +175,7 @@ restore_float32 : $(SOURCES_LIB)
 restore : restore_normal restore_soft restore_float32
 
 clean:
-	@rm -fv $(OUTPUTDIR)/$(SO_NAME) $(OUTPUTDIR)/$(SO_GENERIC_NAME)
+	@rm -fv $(OUTPUTDIR)/$(SO_NAME)
 	@rm -fv $(OUTPUTDIR)/$(SO_SOFT_FLOAT_NAME)
 	@rm -fv *.s
 	@rm -fv *.exe

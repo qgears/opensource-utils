@@ -10,7 +10,7 @@ ifneq ($(strip $(DEBIAN13)),)
 #	make -C ../stbtt/linux RELEASE=1
 else
 ifneq ($(strip $(DEBIAN9)),)
-	make -C ../libschrift/linux RELEASE=1 lib softfloatlib
+	make -C ../libschrift/linux RELEASE=1 lib softfloatlib checkdeps
 #	make -C ../stbtt/linux RELEASE=1
 else
 	@echo "This build system is only supported on Debian 13 and 9. Exiting."
