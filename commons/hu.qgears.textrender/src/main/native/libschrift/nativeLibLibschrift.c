@@ -98,6 +98,17 @@ enum { VALIGN_TOP, VALIGN_MIDDLE, VALIGN_BOTTOM };
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 #define LIMIT(x,min,max) ((x) < (min) ? (min) : ((x) > (max) ? (max) : (x)))
+/* Glyph bitmaps up to this many bytes are rendered into a stack buffer, larger ones are malloc'd.
+ * 4096 = 64x64 px; kept small because sft_render itself uses a large stack buffer. */
+#define GLYPH_STACK_BUFFER_SIZE 4096
+/* Allocate values on the stack if they are small enough, else spill to heap (same as STACK_ALLOC in schrift.c,
+ * but memory is NOT zeroed). `var` must be a declared pointer variable (not a struct member). */
+#define QLS_STACK_ALLOC(var, type, thresh, count) \
+	type var##_stack_[thresh]; \
+	var = ((size_t)(count) <= (size_t)(thresh)) ? var##_stack_ : (type*)malloc(sizeof(type) * (size_t)(count));
+/* Frees `var` only if it was spilled to the heap by QLS_STACK_ALLOC. */
+#define QLS_STACK_FREE(var) \
+	do { if ((var) != var##_stack_) free(var); } while (0)
 #define PIX(r)  SCHRIFT_F32_trunc_to_u8_to_u32((SCHRIFT_F32_mul_u32(r , 0xFFu)))
 
 
@@ -402,8 +413,9 @@ static inline void copy_rect(int32_t startx, int32_t starty, T_SurfaceData* surf
     int32_t rowStride = surface->color ? surface->width : ((surface->width + 3) & ~3);
     
     uint8_t* imageData = ((uint8_t*)img->pixels);
-    for (j = min_src_x,dstj = startx+min_src_x; j < max_src_x; j++, dstj++ ) {
-        for (i = min_src_y, dsti = starty+min_src_y; i < max_src_y; i++, dsti++ ) {
+    // row-major traversal (rows outer, columns inner) for cache-friendly access of both buffers
+    for (i = min_src_y, dsti = starty+min_src_y; i < max_src_y; i++, dsti++ ) {
+        for (j = min_src_x,dstj = startx+min_src_x; j < max_src_x; j++, dstj++ ) {
             int32_t dst_pix = (dsti*rowStride) + dstj;
             int32_t src_pix = (i*img->width) + j;
             uint8_t src_alpha = imageData[src_pix];
@@ -480,12 +492,12 @@ static inline bool ctypeIsGraphical(uint32_t c) {
     return !ctypeIsSpace(c) && !ctypeIsLineEnding(c);
 }
 
+/** floor(d): rounds towards -inf, consistent with libschrift's bbox rounding */
 static inline int32_t wholePart(SCHRIFT_F64 d) {
-    // TODO optimize wholePart/fractionalPart counting of SOFTFLOAT
-    return SCHRIFT_F64_trunc_cast_to_s32( d);
+    return SCHRIFT_F64_floor_to_int(d);
 }
+/** d - floor(d): always in [0,1), also for negative d */
 static inline SCHRIFT_F64 fractionalPart(SCHRIFT_F64 d) {
-    // TODO optimize wholePart/fractionalPart counting of SOFTFLOAT
     return SCHRIFT_F64_sub(d , SCHRIFT_F64_from_s32(wholePart(d)));
 }
 
@@ -512,38 +524,51 @@ static inline SFT_Glyph advancePen(
 
 	//render
 	 sft->xOffset = fractionalPart(pen->x);
-	 sft->yOffset = fractionalPart(pen->y);
+	 // libschrift yOffset is Y-up!
+	 sft->yOffset =  SCHRIFT_F64_neg(fractionalPart(pen->y));
 	 if (sft_gmetrics(sft, glyph, &gmtx) < 0) {
 		ERROR(eh, QLS_ERROR_GLIPH_MISSING, "codepoint 0x%04X bad glyph metrics", currentCodepoint);
 		return 0;
 	 }
 
 	 //NOTE: sft->xOffset is read by sft_gmetrics
-	 if (surface != NULL)
+	 //glyphs without outline (e.g. space) have 0 area: nothing to render
+	 if (surface != NULL && gmtx.minWidth > 0 && gmtx.minHeight > 0)
 	 {
 		 //this is the real renderer stuff. Skip this in case of layout info calculation
 		SFT_Image img = {
-				.width = (gmtx.minWidth + 3) & ~3, //TODO consider aligning to 8?
+				// no row padding: libschrift uses width as stride, copy_rect reads per byte
+				.width = gmtx.minWidth,
 				.height = gmtx.minHeight
 		};
-		// VLA! TODO allocate variable array on stack?
-		uint8_t pixels[img.width * img.height];
-		// memset 0 is called by sft_render on array, no need to clean pixels
+		// small glyphs on stack, large ones spill to heap
+		// sft_render writes every pixel, no need to clean pixels
+		uint8_t* pixels;
+		QLS_STACK_ALLOC(pixels, uint8_t, GLYPH_STACK_BUFFER_SIZE, (size_t)img.width * (size_t)img.height);
 		img.pixels = pixels;
+		if (pixels == NULL) {
+			ERROR(eh, QLS_ERROR_GLIPH_RENDER, "codepoint 0x%04X out of memory (%dx%d)",
+					currentCodepoint, img.width, img.height);
+			return 0;
+		}
 
 		if (sft_render(sft, glyph, img) < 0) {
+			QLS_STACK_FREE(pixels);
 			ERROR(eh, QLS_ERROR_GLIPH_RENDER, "codepoint 0x%04X not rendered",
 					currentCodepoint);
 			return 0;
 		}
 
+		/* pen.x = W + f, f was passed to libschrift as xOffset.
+		 * Bitmap column 0 is at bbox[0] = floor(xMin*scale + f) relative to W.
+		 * leftSideBearing = lsb*scale + f (already contains f), so floor(leftSideBearing) == bbox[0].
+		 * Must be floor (not trunc): negative bearings (e.g. 'j') round towards -inf like libschrift does.
+		 * leftSideBearing only positions the bitmap, it is NOT added to the pen (advanceWidth contains it). */
 		const int32_t screenX = wholePart(pen->x)
-				/*TODO leftSideBearing is a small number, typically < 1 - wholePart converts it to 0 every time-
-			      should be part of xOffset before render, or just added to penX to preserve its value
-			     */
-				+ wholePart(gmtx.leftSideBearing);
+				+ SCHRIFT_F64_floor_to_int(gmtx.leftSideBearing);
 		const int32_t screenY = wholePart(pen->y) + gmtx.yOffset;
 		copy_rect(screenX, screenY, surface, &img, rData->color);
+		QLS_STACK_FREE(pixels);
 	}
 
 	 //restore offset for next char
