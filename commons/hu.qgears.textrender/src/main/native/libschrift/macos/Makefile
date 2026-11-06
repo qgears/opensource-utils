@@ -47,7 +47,7 @@ all : ../hu_qgears_textrender_libschrift_LibschriftNative.h
 	gcc -o $(OUTPUTDIR)/$(SO_NAME) \
 	$(C_FLAGS) -shared \
 	$(SOURCES_LIB) \
-	-L $(HOMEBREW)/lib  -lm
+	-L $(HOMEBREW)/lib
 
 %.s : ../%.c 
 	gcc $(C_FLAGS) -fverbose-asm -S -o $@ $<
