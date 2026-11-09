@@ -61,6 +61,7 @@ typedef struct {
     uint32_t wrapMode;
     uint32_t hAlign;
     uint32_t vAlign;
+    uint32_t textDecoration;
 } T_RenderData;
 
 typedef struct {
@@ -118,6 +119,7 @@ enum { VALIGN_TOP, VALIGN_MIDDLE, VALIGN_BOTTOM };
 
 static inline uint32_t blend_bgra_premultiplied(uint32_t dst, uint32_t pcolor, uint8_t mask);
 static inline void copy_rect(int32_t startx, int32_t starty, T_SurfaceData* surface, SFT_Image* img, uint32_t color);
+static inline void render_underline(T_ErrorHandler* eh, const T_RenderData* r, T_SurfaceData* surface, SCHRIFT_F64 peny, SCHRIFT_F64 penstartx, SCHRIFT_F64 penendx);
 static inline void qls_apply_font(T_RenderData* r, T_TrueTypeFont* font);
 static T_SurfaceData* qls_get_surfacedata(uint64_t id);
 /**
@@ -245,6 +247,7 @@ T_SizeInt qls_renderTextPrivate(T_ErrorHandler* errorHandler, uint64_t surfaceHa
             rData.wrapMode = wrapMode;
             rData.hAlign = hAlign;
             rData.vAlign = vAlign;
+            rData.textDecoration = textDecoration;
             if (rData.maxPen.y > rData.minPen.y && rData.maxPen.x > rData.minPen.x)
             {
                 qls_apply_font( &rData,font);
@@ -431,6 +434,34 @@ static inline void copy_rect(int32_t startx, int32_t starty, T_SurfaceData* surf
     }
 }
 
+static inline void render_underline(T_ErrorHandler* eh, const T_RenderData* r, T_SurfaceData* surface, SCHRIFT_F64 peny, SCHRIFT_F64 penstartx, SCHRIFT_F64 penendx) {
+    enum { TEXTDECORATION_NONE, TEXTDECORATION_UNDERLINE };
+    if (r != NULL && r->textDecoration == TEXTDECORATION_UNDERLINE && surface != NULL && surface->data != NULL) {
+        const int32_t y = SCHRIFT_F64_ceil_to_int(peny); //TODO consider nextafterf before ceil_to_int
+        if (0 <= y && y < surface->height) {
+
+            const int32_t x0 = MAX(0, SCHRIFT_F64_floor_to_int(penstartx)); // floor to int: pen positions in [0,1) point to pixel[0]
+            const int32_t xmax = MIN(SCHRIFT_F64_floor_to_int(penendx), surface->width); // exclusive
+
+            //XXX keep code in synch with copy_rectangle(...)
+            uint32_t* surfaceData4 = (uint32_t *)surface->data;
+            uint8_t* surfaceData = surface->data;
+            const int32_t rowStride = surface->color ? surface->width : ((surface->width + 3) & ~3);
+
+            for (int32_t x = x0; x < xmax; ++x) {
+                const int32_t dst_pix = y * rowStride + x;
+                if (surface->color)
+                {
+                    surfaceData4[dst_pix] = blend_bgra_premultiplied(surfaceData4[dst_pix], r->color, 255u);
+                }
+                else
+                {
+                    surfaceData[dst_pix] = (uint8_t)(255u);
+                }
+            }
+        }
+    }
+}
 
 static inline void qls_apply_font(T_RenderData* r, T_TrueTypeFont* font) {
     SFT* sft = &(r->sft);
@@ -806,6 +837,7 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, T_RenderData* r, con
             }
         }
 
+        const SCHRIFT_F64 underlineStartX = pen.x;
 
         reader.pos = lineData.lineStart;
         uint32_t lastCodepoint = 0;
@@ -818,6 +850,8 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, T_RenderData* r, con
             }
             lastCodepoint = codepoint;
         }
+
+        render_underline(eh, r, surface, pen.y, underlineStartX, pen.x);
 
         iLine += 1;
         reader.pos = lineData.nextLineStart;
