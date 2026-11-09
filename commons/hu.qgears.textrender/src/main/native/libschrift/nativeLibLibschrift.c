@@ -976,28 +976,37 @@ int main() {
         .width = WIDTH
     };
 
+    T_ErrorHandler eh = {0};
+    T_TrueTypeFont* fonts[1] = {0};
+    T_FontList fontList = {
+        .fontsCount = 1,
+        .fonts = fonts
+    };
+    enum { PX_SIZE = 8 };
+    T_TrueTypeFont font = {
+        .ttfFilePath = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        .fontSize = SCHRIFT_F64_from_s32(PX_SIZE)
+    };
+    fonts[0] = &font;
+    qls_load_font(&eh, fonts[0]);
+
     enum { HALIGN_LEFT, HALIGN_MIDDLE, HALIGN_RIGHT, HALIGN_JUSTIFY };
     enum { VALIGN_TOP, VALIGN_MIDDLE, VALIGN_BOTTOM };
+    enum { TEXTDECORATION_NONE, TEXTDECORATION_UNDERLINE };
     T_RenderData r = {
+        .font = fonts[0],
+        .fontList = &fontList,
         .color = ~(uint32_t)0,
         .minPen = {0, 0},
         .maxPen = {WIDTH, HEIGHT},
         .wrapMode = QLS_WRAP_WORD,
-        .letterSpacing = SCHRIFT_F64_from_s32(1),
+        .letterSpacing = SCHRIFT_F64_const_zero,
         .hAlign = HALIGN_RIGHT,
-        .vAlign = VALIGN_BOTTOM
+        .vAlign = VALIGN_BOTTOM,
+        .textDecoration = TEXTDECORATION_UNDERLINE
     };
 
-    enum { PX_SIZE = 8 };
-    r.sft.flags |= SFT_DOWNWARD_Y;
-    r.sft.xScale = SCHRIFT_F64_from_s32(PX_SIZE);
-    r.sft.yScale = SCHRIFT_F64_from_s32(PX_SIZE);
-    r.sft.font = sft_loadfile("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf");
-
-    sft_lmetrics(&r.sft, &(r.font->lineMetrics));
-
-    T_ErrorHandler eh = {0};
-
+    qls_apply_font(&r, fonts[0]);
 
     layoutAndRender(&eh, &r, message,l, &surface);
 
