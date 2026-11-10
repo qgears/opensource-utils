@@ -7,7 +7,7 @@ import hu.qgears.images.text.EHorizontalAlign;
 import hu.qgears.images.text.ETextDecoration;
 import hu.qgears.images.text.EVerticalAlign;
 import hu.qgears.images.text.EWrapMode;
-import hu.qgears.textrender.FontList;
+import hu.qgears.textrender.FontSettings;
 import hu.qgears.textrender.TrueTypeNativeInterface;
 
 /*package*/ class LibschriftNative implements TrueTypeNativeInterface {
@@ -37,14 +37,14 @@ import hu.qgears.textrender.TrueTypeNativeInterface;
 	private native long createSurfaceWithDataPrivate(ByteBuffer data, int w, int h, int pixelFormat);
 
 	@Override
-	public SizeInt renderText(long surfaceHandle, FontList fontList, String text, EHorizontalAlign hAlign,
+	public SizeInt renderText(long surfaceHandle, FontSettings fontSettings, String text, EHorizontalAlign hAlign,
 			EVerticalAlign vAlign, int x, int y, int width, int height, float r, float g, float b, float a,
 			boolean clip, EWrapMode wrapMode, ETextDecoration textDecoration) {
 		if (surfaceHandle == 0) {
 			throw new IllegalArgumentException("surfaceHandle must not be 0");
 		}
-		if (fontList == null) {
-			throw new IllegalArgumentException("fontList must not be null");
+		if (fontSettings == null) {
+			throw new IllegalArgumentException("fontSettings must not be null");
 		}
 		if (text == null) {
 			throw new IllegalArgumentException("text must not be null");
@@ -79,19 +79,19 @@ import hu.qgears.textrender.TrueTypeNativeInterface;
 		if (a < 0f || a > 1f) {
 			throw new IllegalArgumentException("a must be in range [0,1]: " + a);
 		}
-		return renderTextPrivate(surfaceHandle, fontList, text, hAlign, vAlign, x, y, width, height, r, g, b, a, clip,
+		return renderTextPrivate(surfaceHandle, fontSettings, text, hAlign, vAlign, x, y, width, height, r, g, b, a, clip,
 				wrapMode, textDecoration);
 	}
 
-	private native SizeInt renderTextPrivate(long surfaceHandle, FontList fontList, String text, EHorizontalAlign hAlign,
+	private native SizeInt renderTextPrivate(long surfaceHandle, FontSettings fontSettings, String text, EHorizontalAlign hAlign,
 			EVerticalAlign vAlign, int x, int y, int width, int height, float r, float g, float b, float a,
 			boolean clip, EWrapMode wrapMode, ETextDecoration textDecoration);
 
 	@Override
-	public SizeInt layoutText(FontList fontList, String text, EHorizontalAlign hAlign, EVerticalAlign vAlign, int width,
+	public SizeInt layoutText(FontSettings fontSettings, String text, EHorizontalAlign hAlign, EVerticalAlign vAlign, int width,
 			int height, EWrapMode wrapMode) {
-		if (fontList == null) {
-			throw new IllegalArgumentException("fontList must not be null");
+		if (fontSettings == null) {
+			throw new IllegalArgumentException("fontSettings must not be null");
 		}
 		if (text == null) {
 			throw new IllegalArgumentException("text must not be null");
@@ -111,10 +111,10 @@ import hu.qgears.textrender.TrueTypeNativeInterface;
 		if (wrapMode == null) {
 			throw new IllegalArgumentException("wrapMode must not be null");
 		}
-		return layoutTextPrivate(fontList, text, hAlign, vAlign, width, height, wrapMode);
+		return layoutTextPrivate(fontSettings, text, hAlign, vAlign, width, height, wrapMode);
 	}
 
-	private native SizeInt layoutTextPrivate(FontList fontList, String text, EHorizontalAlign hAlign,
+	private native SizeInt layoutTextPrivate(FontSettings fontSettings, String text, EHorizontalAlign hAlign,
 			EVerticalAlign vAlign, int width, int height, EWrapMode wrapMode);
 
 	@Override

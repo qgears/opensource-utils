@@ -8,7 +8,7 @@ import hu.qgears.images.text.ETextDecoration;
 import hu.qgears.images.text.EVerticalAlign;
 import hu.qgears.images.text.EWrapMode;
 import hu.qgears.images.text.RGBAColor;
-import hu.qgears.textrender.FontList;
+import hu.qgears.textrender.FontSettings;
 import hu.qgears.textrender.TrueTypeFont;
 import hu.qgears.textrender.TrueTypeNativeInterface;
 
@@ -39,7 +39,7 @@ import hu.qgears.textrender.TrueTypeNativeInterface;
 	private native long createSurfaceWithDataPrivate(ByteBuffer data, int w, int h, int pixelFormat);
 
 	@Override
-	public SizeInt renderText(long surfaceHandle, FontList fontFamily, String str, EHorizontalAlign hAlign,
+	public SizeInt renderText(long surfaceHandle, FontSettings fontFamily, String str, EHorizontalAlign hAlign,
 			EVerticalAlign vAlign, int x, int y, int width, int height, float r, float g, float b, float a,
 			boolean clip, EWrapMode wrapMode, ETextDecoration textDecoration) {
 
@@ -55,7 +55,7 @@ import hu.qgears.textrender.TrueTypeNativeInterface;
 			boolean clip, EWrapMode wrapMode, ETextDecoration textDecoration);
 
 	@Override
-	public SizeInt layoutText(FontList fontFamily, String text, EHorizontalAlign hAlign, EVerticalAlign vAlign, int width,
+	public SizeInt layoutText(FontSettings fontFamily, String text, EHorizontalAlign hAlign, EVerticalAlign vAlign, int width,
 			int height, EWrapMode wrapMode) {
 		// TODO parameter verification
 		return layoutTextPrivate(fontFamily.fonts[0], text, hAlign, vAlign, width, height, wrapMode);

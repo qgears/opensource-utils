@@ -4,7 +4,7 @@ import hu.qgears.images.text.TextParameters;
 
 public interface IFontManager {
 
-	FontList getFont(TextParameters t);
+	FontSettings getFont(TextParameters t);
 
 	void dispose();
 }

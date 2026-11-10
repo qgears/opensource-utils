@@ -4,12 +4,11 @@ import hu.qgears.images.text.TextParameters;
 
 public class DefaultFontManger implements IFontManager {
 
-	private static final TrueTypeFont LIB_SANS = new TrueTypeFont("/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",12f);
+	private static final TrueTypeFont LIB_SANS = new TrueTypeFont("/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf");
 
 	@Override
-	public FontList getFont(TextParameters t) {
-		
-		return FontList.from(LIB_SANS);
+	public FontSettings getFont(TextParameters t) {
+		return FontSettings.from(t, LIB_SANS);
 	}
 
 	@Override

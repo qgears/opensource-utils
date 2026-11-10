@@ -30,6 +30,7 @@ typedef enum {
     QLS_ERROR_MISSING_FONT,
     QLS_ERROR_LONG_FONT_PATH,
     QLS_ERROR_FONT_LOAD,
+    QLS_ERROR_FONT_APPLY,
     QLS_ERROR_GLIPH_MISSING,
     QLS_ERROR_GLIPH_METRICS_BAD,
     QLS_ERROR_GLIPH_RENDER,
@@ -37,7 +38,7 @@ typedef enum {
     QLS_ERROR_LINE_METRICS,
     QLS_ERROR_UNSUPPORTED_PIXEL_FORMAT,
     QLS_ERROR_INVALID_FONT_OBJ,
-    QLS_ERROR_INVALID_FONT_LIST_OBJ
+    QLS_ERROR_INVALID_FONT_SETTINGS_OBJ
 } QLS_ERROR_CODE;
 
 #define QLS_MAX_ERROR_MSG_SIZE (256u)
@@ -63,24 +64,23 @@ typedef struct {
 typedef struct _T_TrueTypeFont T_TrueTypeFont;
 
 struct _T_TrueTypeFont {
-    /*The font loaded by libschrift - lazy init*/
+    /*The font loaded by libschrift */
     SFT_Font * font;
-    /*The line metrics loaded by libschrift - lazy init*/
-    SFT_LMetrics lineMetrics;
-    SCHRIFT_F32 fontSize;
-    SCHRIFT_F64 letterSpacing;
     /* Java UTF8 chars, read only! */
     const char* ttfFilePath;
 };
 
 /**
- * C representation of Java FontList object.
+ * C representation of Java FontSettings object.
  * fonts[0] is the primary font, the rest are fallback fonts in priority order.
  */
 typedef struct  {
     T_TrueTypeFont** fonts;
     uint32_t fontsCount;
-} T_FontList;
+    SCHRIFT_F32 fontSize;
+    SCHRIFT_F64 letterSpacing;
+    bool isUnderline;
+} T_FontSettings;
 
 /**
  * C representation of Java SizeInt object
@@ -116,7 +116,7 @@ void qls_disposeSurfacePrivate(uint64_t surfaceHandle);
  * Renders text onto a surface
  * 
  * @param surfaceHandle The surface handle returned by {@link #createSurfaceWithData(ByteBuffer, int, int)}.
- * @param font The font parameters
+ * @param fontSettings The fonts (primary + fallbacks) and font parameters
  * @param text Text to render as UTF-16 character array (as JNI->GetStringChars returns)
  * @param textLen The number of UTF-16 chars in text
  * @param hAlign Horizontal alignment
@@ -134,7 +134,7 @@ void qls_disposeSurfacePrivate(uint64_t surfaceHandle);
  * 
  * @return The bounding box calculated during laying out the text
  */
-T_SizeInt qls_renderTextPrivate(T_ErrorHandler* errorHandler, uint64_t surfaceHandle, T_FontList* fontList, const uint16_t* text, uint32_t textLen,
+T_SizeInt qls_renderTextPrivate(T_ErrorHandler* errorHandler, uint64_t surfaceHandle, T_FontSettings* fontSettings, const uint16_t* text, uint32_t textLen,
                             uint32_t hAlign, uint32_t vAlign, int32_t x, int32_t y, int32_t width, int32_t height,
                             SCHRIFT_F32 r, SCHRIFT_F32 g, SCHRIFT_F32 b, SCHRIFT_F32 a, bool clip, uint32_t wrapMode, uint32_t textDecoration);
 
@@ -142,7 +142,7 @@ T_SizeInt qls_renderTextPrivate(T_ErrorHandler* errorHandler, uint64_t surfaceHa
  * Calculates the layout of text without rendering it
  * 
  * @param errorHandler The error handler
- * @param font The font parameters
+ * @param fontSettings The fonts (primary + fallbacks) and font parameters
  * @param text Text to calculate layout for, specified as UTF-16 character array (as JNI->GetStringChars returns)
  * @param textLen The number of UTF-16 chars in text
  * @param hAlign The desired horizontal alignment (allow considering JUSTIFY properly)
@@ -151,7 +151,7 @@ T_SizeInt qls_renderTextPrivate(T_ErrorHandler* errorHandler, uint64_t surfaceHa
  * 
  * @return The bounding box calculated during laying out the text
  */
-T_SizeInt qls_layoutTextPrivate(T_ErrorHandler* errorHandler, T_FontList* fontList, const uint16_t* text, uint32_t textLen,
+T_SizeInt qls_layoutTextPrivate(T_ErrorHandler* errorHandler, T_FontSettings* fontSettings, const uint16_t* text, uint32_t textLen,
                          uint32_t hAlign, int32_t width, uint32_t wrapMode);
 
 void qls_clearSurfacePrivate(uint64_t id);
