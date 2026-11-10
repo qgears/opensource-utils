@@ -1,5 +1,7 @@
 package hu.qgears.textrender;
 
+import hu.qgears.textrender.libschrift.LibschriftAccessor;
+
 public class TrueTypeFont {
 
 	public String ttfFilePath;
@@ -7,6 +9,7 @@ public class TrueTypeFont {
 	
 	public TrueTypeFont(String ttfFilePath) {
 		this.ttfFilePath = ttfFilePath;
+		LibschriftAccessor.getInstance();
 		nativeInit();
 	}
 	
