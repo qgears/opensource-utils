@@ -97,6 +97,8 @@ typedef struct {
 enum { HALIGN_LEFT, HALIGN_CENTER, HALIGN_RIGHT, HALIGN_JUSTIFY }; //TODO single source of truth
 enum { VALIGN_TOP, VALIGN_MIDDLE, VALIGN_BOTTOM };
 
+#define CP_COMBINING_LOW_LINE 0x332u
+
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 #define LIMIT(x,min,max) ((x) < (min) ? (min) : ((x) > (max) ? (max) : (x)))
@@ -736,6 +738,10 @@ static inline void prescanLine(T_ErrorHandler* eh, T_RenderData* rData, UTF16_Re
         	ret.lineEnd = charStart;
         	break;
         }
+        if (codepoint == CP_COMBINING_LOW_LINE) {
+        	//does not advance the pen in layoutAndRender either
+        	continue;
+        }
         if (ctypeIsSpace(codepoint)){
         	ret.nSpaces++;
         	lastSpace = charStart;
@@ -917,7 +923,7 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, T_RenderData* r, con
         while (reader.pos < lineData.lineEnd) { // renderGlyph(...)
             uint32_t codepoint = utf16_read_codepoint(&reader);
             switch (codepoint) {
-                case 0x332u: /*combining low line*/ {
+                case CP_COMBINING_LOW_LINE: {
                     //TODO line-start combining low line, or combining low line after non-combiningbase character: get no bespoke support.
                     //TODO Single character underline: no special effort is made to make the line continuous and non-overlapping over spans of text
 
