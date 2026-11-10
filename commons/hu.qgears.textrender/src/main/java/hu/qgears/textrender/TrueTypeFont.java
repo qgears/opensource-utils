@@ -3,19 +3,11 @@ package hu.qgears.textrender;
 public class TrueTypeFont {
 
 	public String ttfFilePath;
-	private double letterSpacing;
-	private float fontSize;
-	private boolean isUnderline;
 	private long nativePtr = 0;
 	
-	public TrueTypeFont(String ttfFilePath, float fontSize) {
+	public TrueTypeFont(String ttfFilePath) {
 		this.ttfFilePath = ttfFilePath;
-		this.fontSize = fontSize;
 		nativeInit();
-	}
-	
-	public void setLetterSpacing(double letterSpacing) {
-		this.letterSpacing = letterSpacing;
 	}
 	
 	public synchronized void dispose() {
