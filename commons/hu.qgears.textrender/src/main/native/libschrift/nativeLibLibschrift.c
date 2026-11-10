@@ -304,15 +304,76 @@ T_SizeInt qls_layoutTextPrivate(T_ErrorHandler* errorHandler, T_FontSettings* fo
     return result;
 }
 
+/* Build switch: define MAP_FONTS_WITH_MMAP to mmap the TTF file (sft_loadfile).
+ * By default the whole file is read into a malloc'd buffer (T_TrueTypeFont.fontData, freed by qls_free_font). */
+#ifdef MAP_FONTS_WITH_MMAP
 void qls_load_font(T_ErrorHandler *eh, T_TrueTypeFont *font) {
 	if (font->font == NULL) {
-		//lazy init font
 		font->font = sft_loadfile(font->ttfFilePath);
 		if (font->font == NULL) {
 			ERROR(eh, QLS_ERROR_FONT_LOAD, "TTF load failed %s",
 					filename(font->ttfFilePath));
 			return;
 		}
+	}
+}
+#else
+void qls_load_font(T_ErrorHandler *eh, T_TrueTypeFont *font) {
+	if (font->font != NULL) {
+		return;
+	}
+	FILE* f = fopen(font->ttfFilePath, "rb");
+	if (f == NULL) {
+		ERROR(eh, QLS_ERROR_FONT_LOAD, "TTF open failed %s", filename(font->ttfFilePath));
+		return;
+	}
+	long fileSize = -1;
+	if (fseek(f, 0, SEEK_END) == 0) {
+		fileSize = ftell(f);
+	}
+	if (fileSize <= 0) {
+		fclose(f);
+		ERROR(eh, QLS_ERROR_FONT_LOAD, "TTF size query failed (%ld) %s", fileSize, filename(font->ttfFilePath));
+		return;
+	}
+	if (fseek(f, 0, SEEK_SET) != 0) {
+		fclose(f);
+		ERROR(eh, QLS_ERROR_FONT_LOAD, "TTF rewind failed %s", filename(font->ttfFilePath));
+		return;
+	}
+	size_t size = (size_t)fileSize;
+	void* data = malloc(size);
+	if (data == NULL) {
+		fclose(f);
+		ERROR(eh, QLS_ERROR_FONT_LOAD, "TTF out of memory (%lu bytes) %s",
+				(unsigned long)size, filename(font->ttfFilePath));
+		return;
+	}
+	size_t read = fread(data, 1, size, f);
+	fclose(f);
+	if (read != size) {
+		free(data);
+		ERROR(eh, QLS_ERROR_FONT_LOAD, "TTF read failed %s", filename(font->ttfFilePath));
+		return;
+	}
+	font->font = sft_loadmem(data, size);
+	if (font->font == NULL) {
+		free(data);
+		ERROR(eh, QLS_ERROR_FONT_LOAD, "TTF load failed %s", filename(font->ttfFilePath));
+		return;
+	}
+	font->fontData = data;
+}
+#endif
+
+void qls_free_font(T_TrueTypeFont* font) {
+	if (font->font != NULL) {
+		sft_freefont(font->font);
+		font->font = NULL;
+	}
+	if (font->fontData != NULL) {
+		free(font->fontData);
+		font->fontData = NULL;
 	}
 }
 

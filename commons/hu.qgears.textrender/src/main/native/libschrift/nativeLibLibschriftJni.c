@@ -342,11 +342,8 @@ static void dispose_native_font(T_ErrorHandler* eh, JNIEnv *env, jobject fontObj
                 (*env)->ReleaseStringUTFChars(env, ttfFilePathString, font->ttfFilePath);
                 font->ttfFilePath = NULL;
             }
-            if (font->font)
-            {
-                sft_freefont(font->font);
-                font->font = NULL;
-            }
+            qls_free_font(font);
+            free(font);
         }
     }
 }

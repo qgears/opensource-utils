@@ -68,6 +68,8 @@ struct _T_TrueTypeFont {
     SFT_Font * font;
     /* Java UTF8 chars, read only! */
     const char* ttfFilePath;
+    /* malloc'd TTF file content backing `font` (NULL when loaded with mmap) */
+    void* fontData;
 };
 
 /**
@@ -158,6 +160,8 @@ void qls_clearSurfacePrivate(uint64_t id);
 
 
 void qls_load_font(T_ErrorHandler* eh, T_TrueTypeFont* font);
+
+void qls_free_font(T_TrueTypeFont* font);
 
 #ifdef __cplusplus
 }
