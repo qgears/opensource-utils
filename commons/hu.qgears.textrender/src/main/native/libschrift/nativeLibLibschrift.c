@@ -724,6 +724,7 @@ static inline void prescanLine(T_ErrorHandler* eh, T_RenderData* rData, UTF16_Re
 	uint32_t codepoint = 0;
 	const uint16_t* lastSpace = NULL;
 	SCHRIFT_F64 widthAtLastSpace = SCHRIFT_F64_from_s32(0);
+	SFT_LMetrics metricsAtLastSpace = ret.lMetrics;
 	SFT_Glyph previousGliph = 0;
 	uint32_t prevCodepoint = 0;
 	while (reader-> pos < reader->end) {
@@ -743,17 +744,12 @@ static inline void prescanLine(T_ErrorHandler* eh, T_RenderData* rData, UTF16_Re
         	lastSpace = charStart;
         	//pen is still in front of the space
         	widthAtLastSpace = pen.x;
+        	metricsAtLastSpace = ret.lMetrics;
         }
 		previousGliph = advancePen(eh, rData,previousGliph, prevCodepoint, codepoint, &pen, NULL, SCHRIFT_F64_from_s32(0));
 		if (eh->code != QLS_ERROR_OK) {
 			return;
 		}
-		SCHRIFT_F64 h1 = LINE_HEIGHT(ret.lMetrics);
-		SCHRIFT_F64 h2 = LINE_HEIGHT(rData->lineMetrics);
-		if (SCHRIFT_F64_compare_lt(h1, h2)) {
-			ret.lMetrics = rData->lineMetrics;
-		}
-
 
 		if (SCHRIFT_F64_compare_lt(availableWidth, pen.x)) {
         	//current character does not fit into line
@@ -761,6 +757,8 @@ static inline void prescanLine(T_ErrorHandler* eh, T_RenderData* rData, UTF16_Re
         		ret.lineEnd = lastSpace;
         		ret.nSpaces--;   // the break space is not part of the line
         		ret.width = widthAtLastSpace;
+        		//store line metrics, at the possible wrap point
+        		ret.lMetrics = metricsAtLastSpace;
         		//we can wrap on last word
         		break;
         	} else if (wrapchar && charStart != ret.lineStart) {
@@ -775,6 +773,12 @@ static inline void prescanLine(T_ErrorHandler* eh, T_RenderData* rData, UTF16_Re
          		//wrap is not allowed, advance until next line break possibility
          	}
         }
+		//rData->lineMetrics is the font of the codepoint just accepted
+		SCHRIFT_F64 h1 = LINE_HEIGHT(ret.lMetrics);
+		SCHRIFT_F64 h2 = LINE_HEIGHT(rData->lineMetrics);
+		if (SCHRIFT_F64_compare_lt(h1, h2)) {
+			ret.lMetrics = rData->lineMetrics;
+		}
 		prevCodepoint = codepoint;
 		//kept one codepoint behind pen, so the `break`s above see the width excluding the breaking codepoint
 		ret.width = pen.x;
