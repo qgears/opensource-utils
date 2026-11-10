@@ -77,10 +77,6 @@ typedef struct {
     SFT_LMetrics lMetrics;
 } T_Result_PrescanLine;
 
-typedef struct {
-    SCHRIFT_F64 textHeight;
-} T_Result_PrescanText;
-
 typedef enum {
     QLS_WRAP_CHAR,
     QLS_WRAP_WORD,
@@ -173,7 +169,7 @@ static inline int32_t renderData_GetWidth(T_RenderData* r);
  * TODO: Introduce grapheme layer, or decide on partial support and canonize input (e.g. the same accented letter can be represented as either one or two codepoints!)
  */
 static inline void prescanLine(T_ErrorHandler* eh, T_RenderData* rData, UTF16_Reader* reader, T_Result_PrescanLine* outResult);
-static inline void prescanText(T_ErrorHandler* eh, T_RenderData* r, const uint16_t* text,uint32_t textLen, T_Result_PrescanText* outResult);
+static inline int32_t prescanText(T_ErrorHandler* eh, T_RenderData* r, const uint16_t* text,uint32_t textLen);
 static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, T_RenderData* r, const uint16_t* text,uint32_t textLen, T_SurfaceData* surface);
 
 /*********************************************/
@@ -815,16 +811,16 @@ static inline SCHRIFT_F64 getSpareWidth(int32_t boxWidth, SCHRIFT_F64 lineWidth)
 static inline int32_t renderData_GetHeight(T_RenderData* r) {
     return r->maxPen.y - r->minPen.y;
 }
-static inline SCHRIFT_F64 getSpareHeight(int32_t boxHeight, SCHRIFT_F64 textHeight) {
-    return SCHRIFT_F64_sub(SCHRIFT_F64_from_s32(boxHeight) , textHeight);
+static inline int32_t getSpareHeight(int32_t boxHeight, int32_t textHeight) {
+    return boxHeight - textHeight;
 }
 
-static inline void prescanText(T_ErrorHandler* eh, T_RenderData* r, const uint16_t* text, uint32_t textLen, T_Result_PrescanText* outResult) {
+static inline int32_t prescanText(T_ErrorHandler* eh, T_RenderData* r, const uint16_t* text, uint32_t textLen) {
 	T_RenderData r2 = *r;
 	//never recursive!
 	r2.hAlign = HALIGN_LEFT;
 	r2.vAlign = VALIGN_TOP;
-	outResult->textHeight = SCHRIFT_F64_from_s32(layoutAndRender(eh, &r2, text, textLen, NULL).height);
+	return layoutAndRender(eh, &r2, text, textLen, NULL).height;
 }
 
 static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, T_RenderData* r, const uint16_t* text, uint32_t textLen, T_SurfaceData* surface) {
@@ -843,21 +839,21 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, T_RenderData* r, con
             break;
         }
         case VALIGN_MIDDLE: {
-            T_Result_PrescanText textData = {0};
-            prescanText(eh, r, text,textLen, &textData);
+            int32_t textHeight = prescanText(eh, r, text, textLen);
             if (eh->code != QLS_ERROR_OK) {
                 return (T_SizeInt) {0, 0};
             }
-            pen.y = SCHRIFT_F64_div(getSpareHeight(renderData_GetHeight(r), textData.textHeight) , SCHRIFT_F64_from_s32(2));
+            //integer offset on purpose: the text rect lands on the same pixels as in layout
+            int32_t v_offset = getSpareHeight(renderData_GetHeight(r), textHeight) / 2;
+            pen.y = SCHRIFT_F64_from_s32(v_offset);
             break;
         }
         case VALIGN_BOTTOM: {
-            T_Result_PrescanText textData = {0};
-            prescanText(eh, r, text,textLen, &textData);
+            int32_t textHeight = prescanText(eh, r, text, textLen);
             if (eh->code != QLS_ERROR_OK) {
                 return (T_SizeInt) {0, 0};
             }
-            pen.y = getSpareHeight(renderData_GetHeight(r), textData.textHeight);
+            pen.y = SCHRIFT_F64_from_s32(getSpareHeight(renderData_GetHeight(r), textHeight));
             break;
         }
     }
@@ -952,11 +948,10 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, T_RenderData* r, con
         lineGap = lm->lineGap;
     } while (!lineData.wasLastLine);
 
-	// TODO should not sizes be rounded up instead of just casting to int? -> I think YES
     // TODO line gap of final line should be included or not? -> not sure, I think NO
     return (T_SizeInt) {
-        .width = SCHRIFT_F64_cast_to_s32(SCHRIFT_F64_add(lineWidthMax, SCHRIFT_F64_const_half)),
-        .height = SCHRIFT_F64_cast_to_s32(SCHRIFT_F64_add(SCHRIFT_F64_sub(pen.y, penStart), SCHRIFT_F64_const_half))
+        .width = SCHRIFT_F64_ceil_to_int(lineWidthMax),
+        .height = SCHRIFT_F64_ceil_to_int(SCHRIFT_F64_sub(pen.y, penStart))
     };
 }
 
