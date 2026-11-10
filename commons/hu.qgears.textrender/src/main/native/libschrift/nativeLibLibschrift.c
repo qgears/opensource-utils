@@ -119,6 +119,10 @@ enum { VALIGN_TOP, VALIGN_MIDDLE, VALIGN_BOTTOM };
 
 static inline uint32_t blend_bgra_premultiplied(uint32_t dst, uint32_t pcolor, uint8_t mask);
 static inline void copy_rect(int32_t startx, int32_t starty, T_SurfaceData* surface, SFT_Image* img, uint32_t color);
+/**
+ * Renders only if (surface != NULL and) r->textDecoration == underline (== 1u)
+ */
+static inline void render_underline_opt(T_ErrorHandler* eh, const T_RenderData* r, T_SurfaceData* surface, SCHRIFT_F64 peny, SCHRIFT_F64 penstartx, SCHRIFT_F64 penendx);
 static inline void render_underline(T_ErrorHandler* eh, const T_RenderData* r, T_SurfaceData* surface, SCHRIFT_F64 peny, SCHRIFT_F64 penstartx, SCHRIFT_F64 penendx);
 static inline void qls_apply_font(T_RenderData* r, T_TrueTypeFont* font);
 static T_SurfaceData* qls_get_surfacedata(uint64_t id);
@@ -434,9 +438,15 @@ static inline void copy_rect(int32_t startx, int32_t starty, T_SurfaceData* surf
     }
 }
 
-static inline void render_underline(T_ErrorHandler* eh, const T_RenderData* r, T_SurfaceData* surface, SCHRIFT_F64 peny, SCHRIFT_F64 penstartx, SCHRIFT_F64 penendx) {
+static inline void render_underline_opt(T_ErrorHandler* eh, const T_RenderData* r, T_SurfaceData* surface, SCHRIFT_F64 peny, SCHRIFT_F64 penstartx, SCHRIFT_F64 penendx) {
     enum { TEXTDECORATION_NONE, TEXTDECORATION_UNDERLINE };
-    if (r != NULL && r->textDecoration == TEXTDECORATION_UNDERLINE && surface != NULL && surface->data != NULL) {
+    if (r != NULL && r->textDecoration == TEXTDECORATION_UNDERLINE) {
+        render_underline(eh, r, surface, peny, penstartx, penendx);
+    }
+}
+
+static inline void render_underline(T_ErrorHandler* eh, const T_RenderData* r, T_SurfaceData* surface, SCHRIFT_F64 peny, SCHRIFT_F64 penstartx, SCHRIFT_F64 penendx) {
+    if (r != NULL /*&& ignoring r->textDecoration*/ && surface != NULL && surface->data != NULL) {
         const int32_t y = SCHRIFT_F64_ceil_to_int(peny); //TODO consider nextafterf before ceil_to_int
         if (0 <= y && y < surface->height) {
 
@@ -837,21 +847,38 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, T_RenderData* r, con
             }
         }
 
-        const SCHRIFT_F64 underlineStartX = pen.x;
+        const SCHRIFT_F64 lineStartX = pen.x;
+        SCHRIFT_F64 charStartX = pen.x;
+        SCHRIFT_F64 charEndX = pen.x;
 
         reader.pos = lineData.lineStart;
         uint32_t lastCodepoint = 0;
         SFT_Glyph prevG= 0;
         while (reader.pos < lineData.lineEnd) { // renderGlyph(...)
             uint32_t codepoint = utf16_read_codepoint(&reader);
-            prevG = advancePen(eh, r, prevG, lastCodepoint, codepoint, &pen, surface, spaceJustification);
-            if (eh->code != QLS_ERROR_OK){
-            	return (T_SizeInt) {0, 0};
+            switch (codepoint) {
+                case 0x332u: /*combining low line*/ {
+                    //TODO line-start combining low line, or combining low line after non-combiningbase character: get no bespoke support.
+                    //TODO Single character underline: no special effort is made to make the line continuous and non-overlapping over spans of text
+
+                    //NOTE: In case of layout, this code prevents U+332 from adding to the width, even as a missng glyph. And surface == NULL is handled.
+                    render_underline(eh, r, surface, pen.y, charStartX, charEndX);
+                    break;
+                }
+                default: {
+                    charStartX = pen.x; //TODO we should probably take the position AFTER we have added letter spacing
+                    prevG = advancePen(eh, r, prevG, lastCodepoint, codepoint, &pen, surface, spaceJustification);
+                    if (eh->code != QLS_ERROR_OK){
+                        return (T_SizeInt) {0, 0};
+                    }
+                    charEndX = pen.x;
+                    lastCodepoint = codepoint;
+                    break;
+                }
             }
-            lastCodepoint = codepoint;
         }
 
-        render_underline(eh, r, surface, pen.y, underlineStartX, pen.x);
+        render_underline_opt(eh, r, surface, pen.y, lineStartX, pen.x);
 
         iLine += 1;
         reader.pos = lineData.nextLineStart;
