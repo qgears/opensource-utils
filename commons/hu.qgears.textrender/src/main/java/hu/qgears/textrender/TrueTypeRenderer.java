@@ -53,6 +53,7 @@ public class TrueTypeRenderer {
 		
 		long s = rendererNative.createSurfaceWithData(image.getBuffer().getJavaAccessor(), image.getWidth(), image.getHeight(), image.getComponentOrder());
 		if (clear) {
+			//TODO clear only the x,y,w,h rectangle?
 			rendererNative.clearSurface(s);
 		}
 		try {
