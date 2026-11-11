@@ -56,7 +56,7 @@ ifneq ($(filter i386 i486 i586 i686,$(ARCHPOSTFIX)),)
 endif
 
 C_FLAGS=-fPIC -D_REENTRANT \
-	$(CONDITIONAL_FLAGS) -fvisibility=hidden -std=c99 -pedantic -Wconversion  \
+	$(CONDITIONAL_FLAGS) -fvisibility=hidden -std=c99 -pedantic -Wconversion -Wshadow  \
 	$(DETERMINISTIC_FP_FLAGS) \
 	${JNI_INCLUDE_PLATFORM} ${JNI_INCLUDE}
 
