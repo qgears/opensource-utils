@@ -48,6 +48,7 @@ static inline float schrift_f32_nextafter(float x, float y)
 #define SCHRIFT_F64 float
 #define SCHRIFT_F64_div(a,b)a/b
 #define SCHRIFT_F64_from_s32(a)(float)a
+#define SCHRIFT_F64_cast_from_u32(a)(float)a
 #define SCHRIFT_F64_cast_from_s32(a)(float)a
 #define SCHRIFT_F64_neg(a)-a
 #define SCHRIFT_F64_pos(a)+a

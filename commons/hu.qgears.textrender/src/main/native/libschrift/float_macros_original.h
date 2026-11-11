@@ -13,6 +13,7 @@
 #define SCHRIFT_F64_div(a,b)a/b
 #define SCHRIFT_F64_from_s32(a)a
 #define SCHRIFT_F64_cast_from_s32(a)(double)a
+#define SCHRIFT_F64_cast_from_u32(a)(double)a
 #define SCHRIFT_F64_neg(a)-a
 #define SCHRIFT_F64_pos(a)+a
 #define SCHRIFT_F64_mul(a,b)a*b

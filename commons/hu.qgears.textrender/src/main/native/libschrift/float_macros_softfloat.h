@@ -21,6 +21,7 @@
 #define SCHRIFT_F64_trunc_to_s32(f) S_F32_trunc_to_s32(f)
 #define SCHRIFT_F64_add(a,b) S_F32_add(a,b)
 #define SCHRIFT_F64_cast_from_s32(a) S_F32_from_s64(a)
+#define SCHRIFT_F64_cast_from_u32(a) S_F32_from_s64((s64)a)
 #define SCHRIFT_F64_const_100 S_F32_from_s64(100)
 #define SCHRIFT_F64_const_16384 S_F32_from_s64(16384)
 #define SCHRIFT_F64_const_2 S_F32_from_s64(2)

@@ -171,6 +171,8 @@ static inline int32_t renderData_GetWidth(T_RenderData* r);
 static inline void prescanLine(T_ErrorHandler* eh, T_RenderData* rData, UTF16_Reader* reader, T_Result_PrescanLine* outResult);
 static inline int32_t prescanText(T_ErrorHandler* eh, T_RenderData* r, const uint16_t* text,uint32_t textLen);
 static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, T_RenderData* r, const uint16_t* text,uint32_t textLen, T_SurfaceData* surface);
+static inline int32_t getSpareWidth(int32_t boxWidth, SCHRIFT_F64 lineWidth);
+
 
 /*********************************************/
 /*** External function implementations     ***/
@@ -809,8 +811,11 @@ static inline void prescanLine(T_ErrorHandler* eh, T_RenderData* rData, UTF16_Re
 static inline int32_t renderData_GetWidth(T_RenderData* r) {
     return r->maxPen.x - r->minPen.x;
 }
-static inline SCHRIFT_F64 getSpareWidth(int32_t boxWidth, SCHRIFT_F64 lineWidth) {
-    return SCHRIFT_F64_sub(SCHRIFT_F64_from_s32(boxWidth) , lineWidth);
+static inline int32_t getSpareWidth(int32_t boxWidth, SCHRIFT_F64 lineWidth) {
+	//treat the line with wider or equal than the exact value during int conversion
+	int32_t intLineWidth = SCHRIFT_F64_ceil_to_int(lineWidth);
+	return boxWidth - intLineWidth;
+
 }
 static inline int32_t renderData_GetHeight(T_RenderData* r) {
     return r->maxPen.y - r->minPen.y;
@@ -888,30 +893,33 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, T_RenderData* r, con
         pen.y = SCHRIFT_F64_add(pen.y, SCHRIFT_F64_add(lm->ascender, lineGap));
         pen.x = SCHRIFT_F64_from_s32(r->minPen.x);
         SCHRIFT_F64 spaceJustification = SCHRIFT_F64_from_s32(0);
+        int32_t hoffset = 0;
+        int32_t spareWidth  = getSpareWidth(renderData_GetWidth(r), lineData.width);
         switch (r->hAlign) { // pen.x += ... ; spaceJustification = ...; lineWidthMax = ...
             default:
             case HALIGN_LEFT: {
                 break;
             }
             case HALIGN_CENTER: {
-                SCHRIFT_F64_addEq(pen.x , SCHRIFT_F64_div(getSpareWidth(renderData_GetWidth(r), lineData.width) , SCHRIFT_F64_from_s32(2)));
+            	hoffset  = spareWidth / 2;
                 break;
             }
             case HALIGN_RIGHT: {
-                SCHRIFT_F64_addEq(pen.x , getSpareWidth(renderData_GetWidth(r), lineData.width));
+            	hoffset  = spareWidth;
                 break;
             }
             case HALIGN_JUSTIFY: {
-                if (0 < lineData.nSpaces && SCHRIFT_F64_compare_lt(SCHRIFT_F64_from_s32(0) , getSpareWidth(renderData_GetWidth(r), lineData.width))) {
-                    spaceJustification = SCHRIFT_F64_div(getSpareWidth(renderData_GetWidth(r), lineData.width) , SCHRIFT_F64_from_u16_fast(lineData.nSpaces));
+                if (0 < lineData.nSpaces && (spareWidth > 0)) {
+                    spaceJustification = SCHRIFT_F64_div(SCHRIFT_F64_from_s32(spareWidth) , SCHRIFT_F64_cast_from_u32(lineData.nSpaces));
                     lineWidthMax = SCHRIFT_F64_max(lineWidthMax, SCHRIFT_F64_from_s32(renderData_GetWidth(r)));
                 } else {
                 	//copy behavior of cairo - align CENTER
-                	SCHRIFT_F64_addEq(pen.x , SCHRIFT_F64_div(getSpareWidth(renderData_GetWidth(r), lineData.width) , SCHRIFT_F64_from_s32(2)));
+					hoffset  = getSpareWidth(renderData_GetWidth(r), lineData.width) / 2;
                 }
                 break;
             }
         }
+		SCHRIFT_F64_addEq(pen.x , SCHRIFT_F64_from_s32(hoffset));
 
         const SCHRIFT_F64 lineStartX = pen.x;
         SCHRIFT_F64 charStartX = pen.x;
@@ -1083,8 +1091,6 @@ int main() {
     fonts[0] = &font;
     qls_load_font(&eh, fonts[0]);
 
-    enum { HALIGN_LEFT, HALIGN_MIDDLE, HALIGN_RIGHT, HALIGN_JUSTIFY };
-    enum { VALIGN_TOP, VALIGN_MIDDLE, VALIGN_BOTTOM };
     enum { TEXTDECORATION_NONE, TEXTDECORATION_UNDERLINE };
     T_RenderData r = {
         .font = fonts[0],
