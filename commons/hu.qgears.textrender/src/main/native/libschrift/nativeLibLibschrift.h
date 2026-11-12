@@ -138,7 +138,7 @@ void qls_disposeSurfacePrivate(uint64_t surfaceHandle);
  */
 T_SizeInt qls_renderTextPrivate(T_ErrorHandler* errorHandler, uint64_t surfaceHandle, T_FontSettings* fontSettings, const uint16_t* text, uint32_t textLen,
                             uint32_t hAlign, uint32_t vAlign, int32_t x, int32_t y, int32_t width, int32_t height,
-                            SCHRIFT_F32 r, SCHRIFT_F32 g, SCHRIFT_F32 b, SCHRIFT_F32 a, bool clip, uint32_t wrapMode, uint32_t textDecoration);
+                            SCHRIFT_F32 r, SCHRIFT_F32 g, SCHRIFT_F32 b, SCHRIFT_F32 a, bool clip, uint32_t wrapMode);
 
 /**
  * Calculates the layout of text without rendering it
