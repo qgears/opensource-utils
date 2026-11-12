@@ -4,7 +4,6 @@ import java.nio.ByteBuffer;
 import hu.qgears.images.ENativeImageComponentOrder;
 import hu.qgears.images.SizeInt;
 import hu.qgears.images.text.EHorizontalAlign;
-import hu.qgears.images.text.ETextDecoration;
 import hu.qgears.images.text.EVerticalAlign;
 import hu.qgears.images.text.EWrapMode;
 import hu.qgears.textrender.FontSettings;
@@ -39,7 +38,7 @@ import hu.qgears.textrender.TrueTypeNativeInterface;
 	@Override
 	public SizeInt renderText(long surfaceHandle, FontSettings fontSettings, String text, EHorizontalAlign hAlign,
 			EVerticalAlign vAlign, int x, int y, int width, int height, float r, float g, float b, float a,
-			boolean clip, EWrapMode wrapMode, ETextDecoration textDecoration) {
+			boolean clip, EWrapMode wrapMode) {
 		if (surfaceHandle == 0) {
 			throw new IllegalArgumentException("surfaceHandle must not be 0");
 		}
@@ -64,9 +63,6 @@ import hu.qgears.textrender.TrueTypeNativeInterface;
 		if (wrapMode == null) {
 			throw new IllegalArgumentException("wrapMode must not be null");
 		}
-		if (textDecoration == null) {
-			throw new IllegalArgumentException("textDecoration must not be null");
-		}
 		if (r < 0f || r > 1f) {
 			throw new IllegalArgumentException("r must be in range [0,1]: " + r);
 		}
@@ -80,12 +76,12 @@ import hu.qgears.textrender.TrueTypeNativeInterface;
 			throw new IllegalArgumentException("a must be in range [0,1]: " + a);
 		}
 		return renderTextPrivate(surfaceHandle, fontSettings, text, hAlign, vAlign, x, y, width, height, r, g, b, a, clip,
-				wrapMode, textDecoration);
+				wrapMode);
 	}
 
 	private native SizeInt renderTextPrivate(long surfaceHandle, FontSettings fontSettings, String text, EHorizontalAlign hAlign,
 			EVerticalAlign vAlign, int x, int y, int width, int height, float r, float g, float b, float a,
-			boolean clip, EWrapMode wrapMode, ETextDecoration textDecoration);
+			boolean clip, EWrapMode wrapMode);
 
 	@Override
 	public SizeInt layoutText(FontSettings fontSettings, String text, EHorizontalAlign hAlign, EVerticalAlign vAlign, int width,

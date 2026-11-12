@@ -5,7 +5,6 @@ import java.nio.ByteBuffer;
 import hu.qgears.images.ENativeImageComponentOrder;
 import hu.qgears.images.SizeInt;
 import hu.qgears.images.text.EHorizontalAlign;
-import hu.qgears.images.text.ETextDecoration;
 import hu.qgears.images.text.EVerticalAlign;
 import hu.qgears.images.text.EWrapMode;
 
@@ -50,7 +49,6 @@ public interface TrueTypeNativeInterface {
 	 * @param a alpha channel of the color
 	 * @param clip clip text if does not fit into specified area
 	 * @param wrapMode How to wrap long texts amongst white spaces
-	 * @param textDecoration I.e. underline
 	 * @return The bounding box calculated during laying out the text 
 	 */
 	SizeInt renderText(
@@ -61,7 +59,7 @@ public interface TrueTypeNativeInterface {
 			EVerticalAlign vAlign, 
 			int x, int y, int width, int height, 
 			float r, float g, float b, float a, 
-			boolean clip, EWrapMode wrapMode, ETextDecoration textDecoration);
+			boolean clip, EWrapMode wrapMode);
 	/**
 	 * 
 	 * @param fontSettings

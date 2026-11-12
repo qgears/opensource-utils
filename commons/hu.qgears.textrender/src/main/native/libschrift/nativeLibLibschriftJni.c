@@ -42,12 +42,12 @@ JNIEXPORT jlong JNICALL Java_hu_qgears_textrender_libschrift_LibschriftNative_cr
 /*
  * Class:     hu_qgears_textrender_libschrift_LibschriftNative
  * Method:    renderTextPrivate
- * Signature: (JLhu/qgears/textrender/FontSettings;Ljava/lang/String;Lhu/qgears/images/text/EHorizontalAlign;Lhu/qgears/images/text/EVerticalAlign;IIIIFFFFZLhu/qgears/images/text/EWrapMode;Lhu/qgears/images/text/ETextDecoration;)Lhu/qgears/images/SizeInt;
+ * Signature: (JLhu/qgears/textrender/FontSettings;Ljava/lang/String;Lhu/qgears/images/text/EHorizontalAlign;Lhu/qgears/images/text/EVerticalAlign;IIIIFFFFZLhu/qgears/images/text/EWrapMode;)Lhu/qgears/images/SizeInt;
  */
 JNIEXPORT jobject JNICALL Java_hu_qgears_textrender_libschrift_LibschriftNative_renderTextPrivate
   (JNIEnv *env, jobject obj, jlong surfaceId, jobject fontSettings, jstring text, jobject hAlign, jobject vAlign,
    jint x, jint y, jint width, jint height, jfloat r, jfloat g, jfloat b, 
-   jfloat a, jboolean clip, jobject wrapMode, jobject textDecoration)
+   jfloat a, jboolean clip, jobject wrapMode)
 {
     (void)obj;
     
@@ -60,7 +60,6 @@ JNIEXPORT jobject JNICALL Java_hu_qgears_textrender_libschrift_LibschriftNative_
     int hAlignValue = (*env)->CallIntMethod(env, hAlign, (*env)->GetMethodID(env, (*env)->GetObjectClass(env, hAlign), "ordinal", "()I"));
     int vAlignValue = (*env)->CallIntMethod(env, vAlign, (*env)->GetMethodID(env, (*env)->GetObjectClass(env, vAlign), "ordinal", "()I"));
     int wrapModeValue = (*env)->CallIntMethod(env, wrapMode, (*env)->GetMethodID(env, (*env)->GetObjectClass(env, wrapMode), "ordinal", "()I"));
-    int textDecorationValue = (*env)->CallIntMethod(env, textDecoration, (*env)->GetMethodID(env, (*env)->GetObjectClass(env, textDecoration), "ordinal", "()I"));
     
     T_ErrorHandler eh = {0};
 
@@ -73,7 +72,7 @@ JNIEXPORT jobject JNICALL Java_hu_qgears_textrender_libschrift_LibschriftNative_
         // Forward to native implementation
         result = qls_renderTextPrivate(&eh,(uint64_t)surfaceId, &c_fontSettings, c_text,(uint32_t) length,
                                          (uint32_t)hAlignValue, (uint32_t)vAlignValue, x, y, width, height, SCHRIFT_F32_from_float(r), SCHRIFT_F32_from_float(g), 
-                                         SCHRIFT_F32_from_float(b), SCHRIFT_F32_from_float(a), clip, (uint32_t)wrapModeValue, (uint32_t)textDecorationValue);
+                                         SCHRIFT_F32_from_float(b), SCHRIFT_F32_from_float(a), clip, (uint32_t)wrapModeValue);
     }
     freeFontSettings(&c_fontSettings);
     

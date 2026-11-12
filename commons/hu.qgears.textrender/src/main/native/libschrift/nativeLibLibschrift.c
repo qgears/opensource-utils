@@ -62,7 +62,6 @@ typedef struct {
     uint32_t wrapMode;
     uint32_t hAlign;
     uint32_t vAlign;
-    uint32_t textDecoration;
 } T_RenderData;
 
 typedef struct {
@@ -232,9 +231,8 @@ void qls_disposeSurfacePrivate(uint64_t surfaceHandle)
 
 T_SizeInt qls_renderTextPrivate(T_ErrorHandler* errorHandler, uint64_t surfaceHandle, T_FontSettings* fontSettings, const uint16_t* text, uint32_t textLen,
                             uint32_t hAlign, uint32_t vAlign, int32_t x, int32_t y, int32_t width, int32_t height,
-                            SCHRIFT_F32 r, SCHRIFT_F32 g, SCHRIFT_F32 b, SCHRIFT_F32 a, bool clip, uint32_t wrapMode, uint32_t textDecoration)
+                            SCHRIFT_F32 r, SCHRIFT_F32 g, SCHRIFT_F32 b, SCHRIFT_F32 a, bool clip, uint32_t wrapMode)
 {
-    LOG("TextDecorationValue: %u", textDecoration);
     T_SizeInt result = {0, 0};
     T_TrueTypeFont* font = fontSettings->fonts[0];
     T_SurfaceData* surface = qls_get_surfacedata(surfaceHandle);
@@ -251,7 +249,6 @@ T_SizeInt qls_renderTextPrivate(T_ErrorHandler* errorHandler, uint64_t surfaceHa
             rData.wrapMode = wrapMode;
             rData.hAlign = hAlign;
             rData.vAlign = vAlign;
-            rData.textDecoration = textDecoration;
             if (rData.maxPen.y > rData.minPen.y && rData.maxPen.x > rData.minPen.x)
             {
                 qls_apply_font(errorHandler, &rData,0);
