@@ -118,7 +118,7 @@ enum { VALIGN_TOP, VALIGN_MIDDLE, VALIGN_BOTTOM };
 static inline uint32_t blend_bgra_premultiplied(uint32_t dst, uint32_t pcolor, uint8_t mask);
 static inline void copy_rect(int32_t startx, int32_t starty, T_SurfaceData* surface, SFT_Image* img, uint32_t color);
 /**
- * Renders only if (surface != NULL and) r->textDecoration == underline (== 1u)
+ * Renders only if (surface != NULL and) r->fontSettings->isUnderline == true
  */
 static inline void render_underline_opt(T_ErrorHandler* eh, const T_RenderData* r, T_SurfaceData* surface, SCHRIFT_F64 peny, SCHRIFT_F64 penstartx, SCHRIFT_F64 penendx);
 static inline void render_underline(T_ErrorHandler* eh, const T_RenderData* r, T_SurfaceData* surface, SCHRIFT_F64 peny, SCHRIFT_F64 penstartx, SCHRIFT_F64 penendx);
@@ -477,14 +477,13 @@ static inline void copy_rect(int32_t startx, int32_t starty, T_SurfaceData* surf
 }
 
 static inline void render_underline_opt(T_ErrorHandler* eh, const T_RenderData* r, T_SurfaceData* surface, SCHRIFT_F64 peny, SCHRIFT_F64 penstartx, SCHRIFT_F64 penendx) {
-    enum { TEXTDECORATION_NONE, TEXTDECORATION_UNDERLINE };
-    if (r != NULL && r->textDecoration == TEXTDECORATION_UNDERLINE) {
+    if (r != NULL && r->fontSettings != NULL && r->fontSettings->isUnderline) {
         render_underline(eh, r, surface, peny, penstartx, penendx);
     }
 }
 
 static inline void render_underline(T_ErrorHandler* eh, const T_RenderData* r, T_SurfaceData* surface, SCHRIFT_F64 peny, SCHRIFT_F64 penstartx, SCHRIFT_F64 penendx) {
-    if (r != NULL /*&& ignoring r->textDecoration*/ && surface != NULL && surface->data != NULL) {
+    if (r != NULL /*&& ignoring r->fontSettings->isUnderline*/ && surface != NULL && surface->data != NULL) {
         const int32_t y = SCHRIFT_F64_ceil_to_int(peny); //TODO consider nextafterf before ceil_to_int
         if (0 <= y && y < surface->height) {
 
@@ -1088,7 +1087,6 @@ int main() {
     fonts[0] = &font;
     qls_load_font(&eh, fonts[0]);
 
-    enum { TEXTDECORATION_NONE, TEXTDECORATION_UNDERLINE };
     T_RenderData r = {
         .font = fonts[0],
         .fontSettings = &fontSettings,
@@ -1098,7 +1096,6 @@ int main() {
         .wrapMode = QLS_WRAP_WORD,
         .hAlign = HALIGN_RIGHT,
         .vAlign = VALIGN_BOTTOM,
-        .textDecoration = TEXTDECORATION_UNDERLINE
     };
 
     qls_apply_font(&eh,&r, 0);
