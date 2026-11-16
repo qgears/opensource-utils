@@ -65,7 +65,7 @@ typedef struct {
 } T_RenderData;
 
 typedef struct {
-    uint32_t nSpaces;
+    uint32_t nVariableWidthSpaces;
     const uint16_t* lineStart;
     //exclusive, consistent with `len`
     const uint16_t* lineEnd;
@@ -93,6 +93,7 @@ enum { HALIGN_LEFT, HALIGN_CENTER, HALIGN_RIGHT, HALIGN_JUSTIFY }; //TODO single
 enum { VALIGN_TOP, VALIGN_MIDDLE, VALIGN_BOTTOM };
 
 #define CP_COMBINING_LOW_LINE 0x332u
+#define CP_ZERO_WIDTH_SPACE 0x200Bu
 
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
@@ -147,6 +148,7 @@ static inline uint32_t utf16_peek_codepoint(UTF16_Reader* reader );
 static inline bool ctypeIsLineEnding(uint32_t c);
 static inline bool ctypeIsSpace(uint32_t c);
 static inline bool ctypeIsGraphical(uint32_t c);
+static inline bool ctypeIsGraphemeBase(uint32_t c);
 static inline int32_t wholePart(SCHRIFT_F64 d);
 static inline SCHRIFT_F64 fractionalPart(SCHRIFT_F64 d);
 static inline int32_t renderData_GetWidth(T_RenderData* r);
@@ -591,10 +593,25 @@ static inline bool ctypeIsLineEnding(uint32_t c) {
     }
 }
 static inline bool ctypeIsSpace(uint32_t c) {
-    return c == ' ';
+	switch (c) {
+		case ' ':
+		case CP_ZERO_WIDTH_SPACE:
+			return true;
+		default:
+			return false;
+	}
 }
 static inline bool ctypeIsGraphical(uint32_t c) {
     return !ctypeIsSpace(c) && !ctypeIsLineEnding(c);
+}
+static inline bool ctypeIsGraphemeBase(uint32_t c) {
+	switch(c) {
+		case CP_COMBINING_LOW_LINE:
+		case CP_ZERO_WIDTH_SPACE:
+			return false;
+		default:
+			return !ctypeIsLineEnding(c);
+	}
 }
 
 /** floor(d): rounds towards -inf, consistent with libschrift's bbox rounding */
@@ -681,7 +698,7 @@ static inline SFT_Glyph advancePen(
 	 sft->yOffset = SCHRIFT_F64_from_s32(0);
 
 	 //after
-	if (ctypeIsSpace(currentCodepoint)) {
+	if (currentCodepoint == ' ') {
 		SCHRIFT_F64_addEq(pen->x, spaceJustification);
 	}
 	SCHRIFT_F64_addEq(pen->x, gmtx.advanceWidth);
@@ -723,8 +740,8 @@ static inline void prescanLine(T_ErrorHandler* eh, T_RenderData* rData, UTF16_Re
 	const uint16_t* lastSpace = NULL;
 	SCHRIFT_F64 widthAtLastSpace = SCHRIFT_F64_from_s32(0);
 	SFT_LMetrics metricsAtLastSpace = ret.lMetrics;
-	SFT_Glyph previousGliph = 0;
-	uint32_t prevCodepoint = 0;
+	SFT_Glyph prevGBGlyph = 0;
+	uint32_t prevGBCodepoint = 0;
 	while (reader-> pos < reader->end) {
 		//position in front of `codepoint`, so a codepoint that does not belong to this line can be excluded
 		const uint16_t* charStart = reader->pos;
@@ -738,22 +755,29 @@ static inline void prescanLine(T_ErrorHandler* eh, T_RenderData* rData, UTF16_Re
         	continue;
         }
         if (ctypeIsSpace(codepoint)){
-        	ret.nSpaces++;
+			if (codepoint == ' ') {
+				ret.nVariableWidthSpaces++;
+			}
         	lastSpace = charStart;
         	//pen is still in front of the space
         	widthAtLastSpace = pen.x;
         	metricsAtLastSpace = ret.lMetrics;
         }
-		previousGliph = advancePen(eh, rData,previousGliph, prevCodepoint, codepoint, &pen, NULL, SCHRIFT_F64_from_s32(0));
-		if (eh->code != QLS_ERROR_OK) {
-			return;
+
+		if (ctypeIsGraphemeBase(codepoint)) {
+			prevGBGlyph = advancePen(eh, rData, prevGBGlyph, prevGBCodepoint, codepoint, &pen, NULL, SCHRIFT_F64_from_s32(0));
+			if (eh->code != QLS_ERROR_OK) {
+				return;
+			}
 		}
 
 		if (SCHRIFT_F64_compare_lt(availableWidth, pen.x)) {
         	//current character does not fit into line
         	if (wrapword && lastSpace != NULL) {
         		ret.lineEnd = lastSpace;
-        		ret.nSpaces--;   // the break space is not part of the line
+				if (*lastSpace == ' ') {
+				ret.nVariableWidthSpaces--;   // the break space is not part of the line
+				}
         		ret.width = widthAtLastSpace;
         		//store line metrics, at the possible wrap point
         		ret.lMetrics = metricsAtLastSpace;
@@ -762,9 +786,9 @@ static inline void prescanLine(T_ErrorHandler* eh, T_RenderData* rData, UTF16_Re
         	} else if (wrapchar && charStart != ret.lineStart) {
         		//we can wrap on char boundary, but never produce an empty line
         		ret.lineEnd =  charStart;
-        		if (charStart == lastSpace) {
+			if (charStart == lastSpace && *lastSpace == ' ') {
         			//can happen in case of WRAP_CHAR
-        			ret.nSpaces--;   // the break space is not part of the line
+				ret.nVariableWidthSpaces--;   // the break space is not part of the line
         		}
         		break;
          	} else {
@@ -777,7 +801,9 @@ static inline void prescanLine(T_ErrorHandler* eh, T_RenderData* rData, UTF16_Re
 		if (SCHRIFT_F64_compare_lt(h1, h2)) {
 			ret.lMetrics = rData->lineMetrics;
 		}
-		prevCodepoint = codepoint;
+		if (ctypeIsGraphemeBase(codepoint)) {
+			prevGBCodepoint = codepoint;
+		}
 		//kept one codepoint behind pen, so the `break`s above see the width excluding the breaking codepoint
 		ret.width = pen.x;
 	}
@@ -905,8 +931,8 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, T_RenderData* r, con
                 break;
             }
             case HALIGN_JUSTIFY: {
-                if (0 < lineData.nSpaces && (spareWidth > 0)) {
-                    spaceJustification = SCHRIFT_F64_div(SCHRIFT_F64_from_s32(spareWidth) , SCHRIFT_F64_cast_from_u32(lineData.nSpaces));
+                if (0 < lineData.nVariableWidthSpaces && 0 < spareWidth) {
+                    spaceJustification = SCHRIFT_F64_div(SCHRIFT_F64_from_s32(spareWidth) , SCHRIFT_F64_cast_from_u32(lineData.nVariableWidthSpaces));
                     lineWidthMax = SCHRIFT_F64_max(lineWidthMax, SCHRIFT_F64_from_s32(renderData_GetWidth(r)));
                 } else {
                 	//copy behavior of cairo - align CENTER
@@ -918,7 +944,7 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, T_RenderData* r, con
 		SCHRIFT_F64_addEq(pen.x , SCHRIFT_F64_from_s32(hoffset));
 
         const SCHRIFT_F64 lineStartX = pen.x;
-        SCHRIFT_F64 charStartX = pen.x;
+        SCHRIFT_F64 charStartX = pen.x; //lastCharEndX, in reality
         SCHRIFT_F64 charEndX = pen.x;
 
         reader.pos = lineData.lineStart;
@@ -935,6 +961,9 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, T_RenderData* r, con
                     render_underline(eh, r, surface, pen.y, charStartX, charEndX);
                     break;
                 }
+				case CP_ZERO_WIDTH_SPACE: {
+					break; //could be a missing glyph
+				}
                 default: {
                     charStartX = pen.x; //TODO we should probably take the position AFTER we have added letter spacing
                     prevG = advancePen(eh, r, prevG, lastCodepoint, codepoint, &pen, surface, spaceJustification);
