@@ -7,7 +7,6 @@ import hu.qgears.images.NativeImage;
 import hu.qgears.images.SizeInt;
 import hu.qgears.images.text.TextParameters;
 import hu.qgears.textrender.libschrift.LibschriftAccessor;
-import hu.qgears.textrender.stbtt.StbNativeAccessor;
 
 public class TrueTypeRenderer {
 	
@@ -20,12 +19,8 @@ public class TrueTypeRenderer {
 		this.rendererNative = rendererNative;
 		fontManager= new DefaultFontManger();
 	}
-	public TrueTypeRenderer(boolean stbMode) {
-		if (stbMode) {
-			rendererNative = StbNativeAccessor.getInstance();
-		} else {
-			rendererNative = LibschriftAccessor.getInstance();
-		}
+	public TrueTypeRenderer() {
+		this(LibschriftAccessor.getInstance());
 	}
 	
 	public static NativeImage createNativeImageColor(int w, int h) {
