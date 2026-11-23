@@ -43,6 +43,54 @@ static inline float schrift_f32_nextafter(float x, float y)
 	return v.f;
 }
 
+static inline float schrift_f32_ceil_to_Zper0x1p8(float x) {
+	/**
+	 * Alternatives:
+	 * a) ldexp(f(ldexp(x, -8)), 8)
+	 * 		where f is one of: ceil, floor etc.
+	 * 		These are not available without math.h
+	 * 		A clean implementation would include bit manipulation
+	 * b) direct bit manipulation
+	 * 		check the exponent, to understand the place value of the bits of the mantissa
+	 * 		manipulate the mantissa directly
+	 * c) using fmodf(x, 0x1p-8f), then relying on arithmetic
+	 * 		A clean implementation of fmodf would include bit manipulation
+	 */
+
+	if (__builtin_isnanf(x) || __builtin_isinff(x)) {
+		return x;
+	}
+
+	/**
+	 * The mantissa of a float32 is 23 bits wide (plus the implicit 1)
+	 * From 0x1p15f and upward, there is no binary digit with place value smaller than 0x1p-8f
+	 * Our calculation will comfortably represent 0x1p15f and smaller numbers, as an int32, using up to 24 bits
+	 */
+	if (-0x1p15f < x && x < 0x1p15f) {
+		float x2 = x * 0x1p8f;
+		int32_t i = (int32_t) x2;
+		return (i + ((float) i < x2)) * 0x1p-8f;
+	}
+
+	//don't care, best-effort
+	return x;
+}
+
+static inline float schrift_f32_floor_to_Zper0x1p8(float x) {
+	if (__builtin_isnanf(x) || __builtin_isinff(x)) {
+		return x;
+	}
+
+	if (-0x1p15f < x && x < 0x1p15f) {
+		float x2 = x * 0x1p8f;
+		int32_t i = (int32_t) x2;
+		return (i - ((float) i > x2)) * 0x1p-8f;
+	}
+
+	//don't care, best-effort
+	return x;
+}
+
 #define integer_long long
 #define SCHRIFT_F32 float
 #define SCHRIFT_F64 float
@@ -90,6 +138,8 @@ static inline float schrift_f32_nextafter(float x, float y)
 #define SCHRIFT_F64_cast_to_s32(f)(int32_t)(f)
 #define SCHRIFT_F32_from_float(f)f
 #define SCHRIFT_F64_from_double(d)(float)d
+#define SCHRIFT_F64_floor_to_Zper0x1p8(d) schrift_f32_floor_to_Zper0x1p8(d)
+#define SCHRIFT_F64_ceil_to_Zper0x1p8(d) schrift_f32_ceil_to_Zper0x1p8(d)
 
 #endif /* FLOAT_MACROS_ORIGINAL_H */
 

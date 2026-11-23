@@ -52,5 +52,8 @@
 #define SCHRIFT_F64_nextafter(a,b) S_F32_nextafter(a,b)
 #define SCHRIFT_F32_from_float(f) S_F32_fromFloat(f)
 #define SCHRIFT_F64_from_double(d) S_F32_fromFloat((float)d)
+//TODO
+#define SCHRIFT_F64_floor_to_Zper0x1p8(d) (d)
+#define SCHRIFT_F64_ceil_to_Zper0x1p8(d) (d)
 #endif
 

@@ -6,6 +6,37 @@
  * to the original 32 or 64 bit version (double supported)
  */
 
+#include <stdint.h>
+
+static inline double schrift_f64_ceil_to_Zper0x1p8(double x) {
+	if (__builtin_isnan(x) || __builtin_isinf(x)) {
+		return x;
+	}
+
+	if (-0x1p15f < x && x < 0x1p15f) {
+		double x2 = x * 0x1p8f;
+		int32_t i = (int32_t) x2;
+		return (i + ((double) i < x2)) * 0x1p-8f;
+	}
+
+	//don't care, best-effort
+	return x;
+}
+
+static inline double schrift_f64_floor_to_Zper0x1p8(double x) {
+	if (__builtin_isnan(x) || __builtin_isinf(x)) {
+		return x;
+	}
+
+	if (-0x1p15f < x && x < 0x1p15f) {
+		double x2 = x * 0x1p8f;
+		int32_t i = (int32_t) x2;
+		return (i - ((double) i > x2)) * 0x1p-8f;
+	}
+
+	//don't care, best-effort
+	return x;
+}
 
 #define integer_long long
 #define SCHRIFT_F32 float
@@ -54,6 +85,8 @@
 #define SCHRIFT_F64_cast_to_s32(f)(int32_t)(f)
 #define SCHRIFT_F32_from_float(f)f
 #define SCHRIFT_F64_from_double(d)d
+#define SCHRIFT_F64_floor_to_Zper0x1p8(d) schrift_f64_floor_to_Zper0x1p8(d)
+#define SCHRIFT_F64_ceil_to_Zper0x1p8(d) schrift_f64_ceil_to_Zper0x1p8(d)
 
 #endif /* FLOAT_MACROS_ORIGINAL_H */
 
