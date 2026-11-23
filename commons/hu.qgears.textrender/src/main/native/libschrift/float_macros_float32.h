@@ -24,7 +24,7 @@ static inline int schrift_f32_ceil_to_int(float x)
 static inline float schrift_f32_nextafter(float x, float y)
 {
 	union { float f; uint32_t u; } v;
-	if (__builtin_isnan(x) || __builtin_isnan(y)) {
+	if (__builtin_isnanf(x) || __builtin_isnanf(y)) {
 		return x + y;
 	}
 	if (x == y) {
