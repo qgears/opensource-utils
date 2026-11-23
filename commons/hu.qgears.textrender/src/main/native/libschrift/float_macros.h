@@ -8,7 +8,7 @@
 #include "float_macros_softfloat.h"
 #else
 	#ifndef USE_DOUBLE
-		#include "float_macros_original_32.h"
+		#include "float_macros_float32.h"
 	#else
 		#include "float_macros_original.h"
 	#endif

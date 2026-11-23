@@ -169,7 +169,7 @@ restore_normal : $(SOURCES_LIB)
 restore_float32 : $(SOURCES_LIB)
 	mkdir -p restore_float32
 	@for f in $(SOURCES_LIB); do \
-		perl expand_macros.pl ../float_macros_original_32.h $$f > restore_float32/$$(basename $$f) || exit 1; \
+		perl expand_macros.pl ../float_macros_float32.h $$f > restore_float32/$$(basename $$f) || exit 1; \
 	done
 
 restore : restore_normal restore_soft restore_float32
