@@ -69,6 +69,26 @@
 			</dependency>
 			<dependency>
 				<groupId>hu.qgears</groupId>
+				<artifactId>hu.qgears.parser</artifactId>
+				<version>${internal-dep-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>hu.qgears</groupId>
+				<artifactId>hu.qgears.rtemplate.runtime</artifactId>
+				<version>[4.1.0-SNAPSHOT,)</version>
+			</dependency>
+			<dependency>
+				<groupId>hu.qgears</groupId>
+				<artifactId>hu.qgears.crossref</artifactId>
+				<version>${internal-dep-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>hu.qgears</groupId>
+				<artifactId>hu.qgears.emfcollab</artifactId>
+				<version>${internal-dep-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>hu.qgears</groupId>
 				<artifactId>lwjgl3.int</artifactId>
 				<version>${internal-dep-version}</version>
 			</dependency>

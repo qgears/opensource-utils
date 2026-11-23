@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1786465400461
-Build-Jdk: 21.0.11
+Bnd-LastModified: 1795456336532
+Build-Jdk: 21.0.12
 Built-By: agostoni
 Bundle-Description: Simple and effective RMI implementation for Java.
 Bundle-ManifestVersion: 2
@@ -18,6 +18,7 @@ Export-Package: hu.qgears.coolrmi;uses:="hu.qgears.coolrmi.messages,hu.q
  coolrmi,hu.qgears.coolrmi.messages,hu.qgears.coolrmi.multiplexer,hu.qge
  ars.coolrmi.streams";version="12.6.0.SNAPSHOT",hu.qgears.coolrmi.stream
  s;uses:="hu.qgears.commons,hu.qgears.coolrmi";version="12.6.0.SNAPSHOT"
-Import-Package: hu.qgears.commons,hu.qgears.commons.signal
+Import-Package: hu.qgears.commons;version="[12.6,13)",hu.qgears.commons.
+ signal;version="[12.6,13)"
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=11))"
 Tool: Bnd-2.3.0.201405100607

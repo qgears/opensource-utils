@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1786465397192
-Build-Jdk: 21.0.11
+Bnd-LastModified: 1795456331644
+Build-Jdk: 21.0.12
 Built-By: agostoni
 Bundle-Description: Custom effective shared memory implementation.
 Bundle-ManifestVersion: 2
@@ -17,7 +17,8 @@ Export-Package: hu.qgears.shm;uses:="hu.qgears.commons,hu.qgears.commons
  .0.SNAPSHOT",hu.qgears.shm.part;uses:="hu.qgears.commons,hu.qgears.comm
  ons.mem";version="12.6.0.SNAPSHOT",hu.qgears.shm.sem;uses:="hu.qgears.c
  ommons,hu.qgears.shm";version="12.6.0.SNAPSHOT"
-Import-Package: hu.qgears.commons,hu.qgears.commons.mem,hu.qgears.native
- loader,org.apache.log4j;version="[1.2,2)"
+Import-Package: hu.qgears.commons;version="[12.6,13)",hu.qgears.commons.
+ mem;version="[12.6,13)",hu.qgears.nativeloader;version="[12.6,13)",org.
+ apache.log4j;version="[1.2,2)"
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=11))"
 Tool: Bnd-2.3.0.201405100607
