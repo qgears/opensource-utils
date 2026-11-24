@@ -38,6 +38,36 @@ static inline double schrift_f64_floor_to_Zper0x1p8(double x) {
 	return x;
 }
 
+static inline float schrift_f64_ceil_to_Zper0x1p8(float x) {
+	if (__builtin_isnanf(x) || __builtin_isinff(x)) {
+		return x;
+	}
+
+	if (-0x1p15f < x && x < 0x1p15f) {
+		float x2 = x * 0x1p8f;
+		int32_t i = (int32_t) x2;
+		return (i + ((float) i < x2)) * 0x1p-8f;
+	}
+
+	//don't care, best-effort
+	return x;
+}
+
+static inline float schrift_f32_floor_to_Zper0x1p8(float x) {
+	if (__builtin_isnanf(x) || __builtin_isinff(x)) {
+		return x;
+	}
+
+	if (-0x1p15f < x && x < 0x1p15f) {
+		float x2 = x * 0x1p8f;
+		int32_t i = (int32_t) x2;
+		return (i - ((float) i > x2)) * 0x1p-8f;
+	}
+
+	//don't care, best-effort
+	return x;
+}
+
 #define integer_long long
 #define SCHRIFT_F32 float
 #define SCHRIFT_F64 double
@@ -87,6 +117,8 @@ static inline double schrift_f64_floor_to_Zper0x1p8(double x) {
 #define SCHRIFT_F64_from_double(d)d
 #define SCHRIFT_F64_floor_to_Zper0x1p8(d) schrift_f64_floor_to_Zper0x1p8(d)
 #define SCHRIFT_F64_ceil_to_Zper0x1p8(d) schrift_f64_ceil_to_Zper0x1p8(d)
+#define SCHRIFT_F32_floor_to_Zper0x1p8(f) schrift_f32_floor_to_Zper0x1p8(f)
+#define SCHRIFT_F32_ceil_to_Zper0x1p8(f) schrift_f32_ceil_to_Zper0x1p8(f)
 
 #endif /* FLOAT_MACROS_ORIGINAL_H */
 

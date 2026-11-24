@@ -55,5 +55,7 @@
 //TODO
 #define SCHRIFT_F64_floor_to_Zper0x1p8(d) (d)
 #define SCHRIFT_F64_ceil_to_Zper0x1p8(d) (d)
+#define SCHRIFT_F32_floor_to_Zper0x1p8(f) (f)
+#define SCHRIFT_F32_ceil_to_Zper0x1p8(f) (f)
 #endif
 

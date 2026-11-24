@@ -140,6 +140,8 @@ static inline float schrift_f32_floor_to_Zper0x1p8(float x) {
 #define SCHRIFT_F64_from_double(d)(float)d
 #define SCHRIFT_F64_floor_to_Zper0x1p8(d) schrift_f32_floor_to_Zper0x1p8(d)
 #define SCHRIFT_F64_ceil_to_Zper0x1p8(d) schrift_f32_ceil_to_Zper0x1p8(d)
+#define SCHRIFT_F32_floor_to_Zper0x1p8(f) schrift_f32_floor_to_Zper0x1p8(f)
+#define SCHRIFT_F32_ceil_to_Zper0x1p8(f) schrift_f32_ceil_to_Zper0x1p8(f)
 
 #endif /* FLOAT_MACROS_ORIGINAL_H */
 
