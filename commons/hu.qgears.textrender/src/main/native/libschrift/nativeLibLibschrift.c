@@ -487,7 +487,6 @@ static inline void copy_rect(int32_t startx, int32_t starty, T_SurfaceData* surf
     {
         return;
     }
-    dstj = startx+min_src_x;
     int32_t dstjend = dstj + max_src_x - min_src_x -1;
     if (!is_valid_range(0, surface->width, dstj, dstjend))
     {
@@ -495,7 +494,7 @@ static inline void copy_rect(int32_t startx, int32_t starty, T_SurfaceData* surf
     }
     // row-major traversal (rows outer, columns inner) for cache-friendly access of both buffers
     for (i = min_src_y; i < max_src_y; i++, dsti++ ) {
-        for (j = min_src_x; j < max_src_x; j++, dstj++ ) {
+        for (j = min_src_x,dstj = startx+min_src_x; j < max_src_x; j++, dstj++ ) {
             int32_t dst_pix = (dsti*rowStride) + dstj;
             int32_t src_pix = (i*img->width) + j;
             uint8_t src_alpha = imageData[src_pix];
