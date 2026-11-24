@@ -919,6 +919,13 @@ static inline void prescanLine(T_ErrorHandler* eh, T_RenderData* rData, UTF16_Re
 	//NOTE: "foobar\n\0" is considered one line - since we skip first, and test after
 	ret.wasLastLine = reader->end <= ret.nextLineStart;
 	*outResult = ret;
+
+#ifdef DEBUG
+    SCHRIFT_F64 excessPrecision = SCHRIFT_F64_sub(pen.x, SCHRIFT_F64_floor_to_Zper0x1p8(pen.x));
+    if (SCHRIFT_F64_to_double(excessPrecision) != 0.0) {
+        LOG("pen.x has excess precision: %g", SCHRIFT_F64_to_double(excessPrecision));
+    }
+#endif
 }
 
 static inline int32_t renderData_GetWidth(T_RenderData* r) {
