@@ -866,6 +866,12 @@ cmap_fmt12_13(SFT_Font *font, uint_fast32_t table, SFT_UChar charCode, SFT_Glyph
 		return -1;
 
 	numEntries = getu32(font, table + 12);
+	
+	/* Each group occupies 12 bytes */
+        if (numEntries > (len - 16) / 12)
+        {
+	    return SCHRIFT_ERROR_NUM_ENTRIES;
+        }
 
 	for (i = 0; i < numEntries; ++i) {
 		uint32_t firstCode, lastCode, glyphOffset;
@@ -1266,6 +1272,7 @@ compound_outline(SFT_Font *font, uint_fast32_t offset, int recDepth, Outline *ou
 	/* Guard against infinite recursion (compound glyphs that have themselves as component). */
 	if (recDepth >= 4)
 		return -1;
+	uint32_t countProtector = 0;
 	do {
 		memset(local, 0, sizeof local);
 		if (!is_safe_offset(font, offset, 4))
@@ -1326,6 +1333,11 @@ compound_outline(SFT_Font *font, uint_fast32_t offset, int recDepth, Outline *ou
 				return -1;
 			transform_points(outl->numPoints - basePoint, outl->points + basePoint, local);
 		}
+		countProtector++;
+		if(countProtector > SCHRIFT_MAX_ITERATION_COUNT)
+		{
+		    return SCHRIFT_ERROR_MAX_ITERATION_COUNT;
+		}
 	} while (flags & THERE_ARE_MORE_COMPONENTS);
 
 	return 0;
@@ -1373,6 +1385,7 @@ tesselate_curve(Curve curve, Outline *outl)
 #define STACK_SIZE 10
 	Curve stack[STACK_SIZE];
 	unsigned int top = 0;
+	uint32_t countProtector = 0;
 	for (;;) {
 		if (is_flat(outl, curve) || top >= STACK_SIZE) {
 			if (outl->numLines >= outl->capLines && grow_lines(outl) < 0)
@@ -1401,6 +1414,11 @@ tesselate_curve(Curve curve, Outline *outl)
 
 			stack[top++] = (Curve) { curve.beg, pivot, ctrl0 };
 			curve = (Curve) { pivot, curve.end, ctrl1 };
+		}
+		countProtector++;
+		if(countProtector > SCHRIFT_MAX_ITERATION_COUNT)
+		{
+		    return SCHRIFT_ERROR_MAX_ITERATION_COUNT;
 		}
 	}
 	return 0;
@@ -1474,13 +1492,17 @@ draw_line(Raster buf, Point origin, Point goal)
 
 	nextDistance = SCHRIFT_F64_min(nextCrossing.x, nextCrossing.y);
 	halfDeltaX = SCHRIFT_F64_mul(SCHRIFT_F64_const_half , delta.x);
+	
+	if (numSteps < 0 || numSteps > SCHRIFT_MAX_LINE_LENGTH)
+	{
+            return; // Protect against endless loop in case of bad arithmetics internal error
+	}
 
 	for (step = 0; step < numSteps; ++step) {
 		if(pixel.y<0 || pixel.y>=buf.height ||pixel.x<0 || pixel.x>=buf.width)
 		{
-			// TODO this should not happen but also when happens should be handled so that program can not fail!
-			printf("ERROR: out of raster pixel addressed!\n");
-			continue;
+			// Protect against addressing out of array in case of internal error 
+			return;
 		}
 		xAverage = SCHRIFT_F64_add(origin.x , SCHRIFT_F64_mul((SCHRIFT_F64_add(prevDistance , nextDistance)) , halfDeltaX));
 		yDifference = SCHRIFT_F64_mul((SCHRIFT_F64_sub(nextDistance , prevDistance)) , delta.y);
@@ -1500,8 +1522,7 @@ draw_line(Raster buf, Point origin, Point goal)
 	}
 	if(pixel.y<0 || pixel.y>=buf.height ||pixel.x<0 || pixel.x>=buf.width)
 	{
-		// TODO this should not happen but also when happens should be handled so that program can not fail!
-		printf("ERROR: out of raster pixel addressed!\n");
+		// Protect against addressing out of array in case of internal error 
 		return;
 	}
 	xAverage = SCHRIFT_F64_add(origin.x , SCHRIFT_F64_mul((SCHRIFT_F64_add(prevDistance , SCHRIFT_F64_const_1)) , halfDeltaX));
@@ -1520,9 +1541,12 @@ draw_lines(Outline *outl, Raster buf)
 	unsigned int i;
 	for (i = 0; i < outl->numLines; ++i) {
 		Line  line   = outl->lines[i];
-		Point origin = outl->points[line.beg];
-		Point goal   = outl->points[line.end];
-		draw_line(buf, origin, goal);
+		if (line.beg < outl->numPoints && line.end < outl->numPoints)
+		{
+		    Point origin = outl->points[line.beg];
+		    Point goal   = outl->points[line.end];
+		    draw_line(buf, origin, goal);
+		}
 	}
 }
 

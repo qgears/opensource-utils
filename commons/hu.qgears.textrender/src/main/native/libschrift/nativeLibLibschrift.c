@@ -117,6 +117,8 @@ enum { VALIGN_TOP, VALIGN_MIDDLE, VALIGN_BOTTOM };
 #define LINE_HEIGHT(lm) SCHRIFT_F64_add(SCHRIFT_F64_sub(lm.ascender, lm.descender), lm.lineGap)
 
 static inline uint32_t blend_bgra_premultiplied(uint32_t dst, uint32_t pcolor, uint8_t mask);
+/* Check whether the x0, x1 range is within the rangeMinIncluding and rangeMaxNotIncluding range. */
+static inline bool is_valid_range(int32_t rangeMinIncluding, int32_t rangeMaxNotIncluding, int32_t x0, int32_t x1);
 static inline void copy_rect(int32_t startx, int32_t starty, T_SurfaceData* surface, SFT_Image* img, uint32_t color);
 /**
  * Renders only if (surface != NULL and) r->fontSettings->isUnderline == true
@@ -137,8 +139,8 @@ static inline SFT_Glyph qls_lookup(T_ErrorHandler* eh, T_RenderData* rData, uint
 static inline SFT_Glyph advancePen(
 		T_ErrorHandler* eh, T_RenderData * rData, SFT_Glyph gPrev, uint32_t prevCodepoint, uint32_t currentCodepoint, T_DPoint* pen,T_SurfaceData* surface, SCHRIFT_F64 spaceJustification);
 
-/**
- * Stops advancing at the terminating '\0'.
+/** Returns the current code point pointed by reader->pos. Advances the pos towards end. Guarantees that iteration ends when whole input was read.
+ * Stops advancing and returns 0 in case the end was reached.
  */
 static inline uint32_t utf16_read_codepoint(UTF16_Reader* reader );
 /**
@@ -405,6 +407,14 @@ static inline uint32_t blend_bgra_premultiplied(uint32_t dst, uint32_t pcolor, u
     // result is written back in BGRA order, premultiplied by alpha
     return (chan_a << 24) | (chan_r << 16) | (chan_g << 8) | chan_b;
 }
+static inline bool is_valid_range(int32_t rangeMinIncluding, int32_t rangeMaxNotIncluding, int32_t x0, int32_t x1)
+{
+    if(x0<rangeMinIncluding) return false;
+    if(x0>=rangeMaxNotIncluding) return false;
+    if(x1<x0) return false;
+    if(x1>=rangeMaxNotIncluding) return false;
+    return true;
+}
 static inline void copy_rect(int32_t startx, int32_t starty, T_SurfaceData* surface, SFT_Image* img, uint32_t color)
 {
     // Ensure the source image and destination surface are valid
@@ -460,9 +470,32 @@ static inline void copy_rect(int32_t startx, int32_t starty, T_SurfaceData* surf
     int32_t rowStride = surface->color ? surface->width : ((surface->width + 3) & ~3);
     
     uint8_t* imageData = ((uint8_t*)img->pixels);
+    
+    // Validate loop end points to avoid endless loop or bad addressing. In case of error there is no means to signal error.
+    // Error is only possible if there is an internal error in the arithmetics above.
+    if (!is_valid_range(0, img->height, min_src_y, max_src_y))
+    {
+        return;
+    }
+    if (!is_valid_range(0, img->width, min_src_x, max_src_x))
+    {
+        return;
+    }
+    dsti = starty+min_src_y;
+    int32_t dstiend = dsti + max_src_y - min_src_y - 1;
+    if (!is_valid_range(0, surface->height, dsti, dstiend))
+    {
+        return;
+    }
+    dstj = startx+min_src_x;
+    int32_t dstjend = dstj + max_src_x - min_src_x -1;
+    if (!is_valid_range(0, surface->width, dstj, dstjend))
+    {
+        return;
+    }
     // row-major traversal (rows outer, columns inner) for cache-friendly access of both buffers
-    for (i = min_src_y, dsti = starty+min_src_y; i < max_src_y; i++, dsti++ ) {
-        for (j = min_src_x,dstj = startx+min_src_x; j < max_src_x; j++, dstj++ ) {
+    for (i = min_src_y; i < max_src_y; i++, dsti++ ) {
+        for (j = min_src_x; j < max_src_x; j++, dstj++ ) {
             int32_t dst_pix = (dsti*rowStride) + dstj;
             int32_t src_pix = (i*img->width) + j;
             uint8_t src_alpha = imageData[src_pix];
@@ -496,7 +529,13 @@ static inline void render_underline(T_ErrorHandler* eh, const T_RenderData* r, T
             uint32_t* surfaceData4 = (uint32_t *)surface->data;
             uint8_t* surfaceData = surface->data;
             const int32_t rowStride = surface->color ? surface->width : ((surface->width + 3) & ~3);
-
+            
+            if (!is_valid_range(0, surface->width, x0, xmax))
+            {
+                // Avoid indexing error in case of internal error bad arithmetics.
+                return;
+            }
+            
             for (int32_t x = x0; x < xmax; ++x) {
                 const int32_t dst_pix = y * rowStride + x;
                 if (surface->color)
@@ -895,6 +934,12 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, T_RenderData* r, con
 		.start = text,
 		.end = text + textLen,
 		.pos = text };
+    if (reader.end <= reader.start)
+    {
+        // Prevent endless loop by bad arithmetics internal error.
+        ERROR(eh, QLS_ERROR_INTERNAL_READER_INDEX, "Internal error reader index");
+        return (T_SizeInt) {0, 0};
+    }
     T_Result_PrescanLine lineData = {0};
     SCHRIFT_F64 lineWidthMax = SCHRIFT_F64_from_s32(0);
     /**
@@ -906,6 +951,7 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, T_RenderData* r, con
      */
     SCHRIFT_F64 lineGap = SCHRIFT_F64_const_zero;
     do {
+        const uint16_t * startPos = reader.pos;
         prescanLine(eh, r, &reader, &lineData);
         if (eh->code != QLS_ERROR_OK) {
             return (T_SizeInt) {0, 0};
@@ -950,6 +996,12 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, T_RenderData* r, con
         reader.pos = lineData.lineStart;
         uint32_t lastCodepoint = 0;
         SFT_Glyph prevG= 0;
+        if (lineData.lineEnd>reader.end)
+        {
+            // Avoid endless loop in case of bad arithmetics
+            ERROR(eh, QLS_ERROR_INTERNAL_LINEEND_INDEX, "Internal error lineEnd index");
+            return (T_SizeInt) {0, 0};
+        }
         while (reader.pos < lineData.lineEnd) { // renderGlyph(...)
             uint32_t codepoint = utf16_read_codepoint(&reader);
             switch (codepoint) {
@@ -983,7 +1035,13 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, T_RenderData* r, con
         reader.pos = lineData.nextLineStart;
         pen.y = SCHRIFT_F64_sub(pen.y, lm->descender);
         lineGap = lm->lineGap;
-    } while (!lineData.wasLastLine);
+        if (startPos>=reader.pos)
+        {
+            // Prevent endless loop in case reader.pos does not advance in a loop cycle. This can only happen in case of an internal error of the logic.
+            ERROR(eh, QLS_ERROR_INTERNAL_ENDLESS_LOOP, "Internal error endless loop in layoutAndRender");
+            return (T_SizeInt) {0, 0};
+        }
+    } while (!lineData.wasLastLine && reader.pos < reader.end);
 
     // TODO line gap of final line should be included or not? -> not sure, I think NO
     return (T_SizeInt) {
