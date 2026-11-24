@@ -993,7 +993,7 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, T_RenderData* r, con
 		.start = text,
 		.end = text + textLen,
 		.pos = text };
-    if (reader.end <= reader.start)
+    if (reader.end < reader.start)
     {
         // Prevent endless loop by bad arithmetics internal error.
         ERROR(eh, QLS_ERROR_INTERNAL_READER_INDEX, "Internal error reader index");
