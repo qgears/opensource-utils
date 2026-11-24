@@ -17,7 +17,6 @@ public class TrueTypeRenderer {
 	
 	public TrueTypeRenderer(TrueTypeNativeInterface rendererNative) {
 		this.rendererNative = rendererNative;
-		fontManager= new DefaultFontManger();
 	}
 	public TrueTypeRenderer() {
 		this(LibschriftAccessor.getInstance());
