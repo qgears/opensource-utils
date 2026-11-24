@@ -68,8 +68,8 @@ static inline float schrift_f32_ceil_to_Zper0x1p8(float x) {
 	 */
 	if (-0x1p15f < x && x < 0x1p15f) {
 		float x2 = x * 0x1p8f;
-		int32_t i = (int32_t) x2;
-		return (i + ((float) i < x2)) * 0x1p-8f;
+		float i = (float)(int32_t) x2; // |x2| < 0x1p23
+		return (i + (i < x2)) * 0x1p-8f;
 	}
 
 	//don't care, best-effort
@@ -83,8 +83,8 @@ static inline float schrift_f32_floor_to_Zper0x1p8(float x) {
 
 	if (-0x1p15f < x && x < 0x1p15f) {
 		float x2 = x * 0x1p8f;
-		int32_t i = (int32_t) x2;
-		return (i - ((float) i > x2)) * 0x1p-8f;
+		float i = (float)(int32_t) x2; // |x2| < 0x1p23
+		return ((float)i - ((float) i > x2)) * 0x1p-8f;
 	}
 
 	//don't care, best-effort
