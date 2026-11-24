@@ -562,6 +562,7 @@ static inline void qls_apply_font(T_ErrorHandler *eh, T_RenderData* r, uint32_t 
 {
     SFT* sft = &(r->sft);
 	T_FontSettings *fontSettings = r->fontSettings;
+    //xScale, fontSize: precision OK
     sft->xScale = SCHRIFT_F64_from_SCHRIFT_F32(fontSettings->fontSize);
     sft->yScale = SCHRIFT_F64_from_SCHRIFT_F32(fontSettings->fontSize);
     sft->flags = SFT_DOWNWARD_Y;
@@ -583,7 +584,10 @@ static inline void qls_apply_font(T_ErrorHandler *eh, T_RenderData* r, uint32_t 
 				filename(r->font->ttfFilePath));
 		return;
 	} else {
-		LOG("LineMetrics of %s asc %lf, desc %lf, gap %lf",
+        r->lineMetrics.ascender = SCHRIFT_F64_ceil_to_Zper0x1p8(r->lineMetrics.ascender);
+        r->lineMetrics.descender = SCHRIFT_F64_floor_to_Zper0x1p8(r->lineMetrics.descender);
+        r->lineMetrics.lineGap = SCHRIFT_F64_ceil_to_Zper0x1p8(r->lineMetrics.lineGap);
+		LOG("LineMetrics of %s asc %g, desc %g, gap %g",
 				filename(r->font->ttfFilePath),
 				SCHRIFT_F64_to_double(r->lineMetrics.ascender),
 				SCHRIFT_F64_to_double(r->lineMetrics.descender),
@@ -686,6 +690,8 @@ static inline SFT_Glyph advancePen(
 			ERROR(eh, QLS_ERROR_GLIPH_KERNING, "Invalid kerning between codepoints 0x%04X 0x%04X ", prevCodepoint, currentCodepoint);
 			return 0;
 		}
+        kerning.xShift = SCHRIFT_F64_floor_to_Zper0x1p8(kerning.xShift); //arbitrary choice between floor and ceil
+
 		SCHRIFT_F64_addEq(pen->x , rData->fontSettings->letterSpacing);
 		SCHRIFT_F64_addEq(pen->x , kerning.xShift);
 	}
@@ -698,6 +704,7 @@ static inline SFT_Glyph advancePen(
 		ERROR(eh, QLS_ERROR_GLIPH_MISSING, "codepoint 0x%04X bad glyph metrics", currentCodepoint);
 		return 0;
 	 }
+     gmtx.advanceWidth = SCHRIFT_F64_ceil_to_Zper0x1p8(gmtx.advanceWidth); //other properties' precision OK
 
 	 //NOTE: sft->xOffset is read by sft_gmetrics
 	 //glyphs without outline (e.g. space) have 0 area: nothing to render
@@ -733,7 +740,7 @@ static inline SFT_Glyph advancePen(
 		 * Must be floor (not trunc): negative bearings (e.g. 'j') round towards -inf like libschrift does.
 		 * leftSideBearing only positions the bitmap, it is NOT added to the pen (advanceWidth contains it). */
 		const int32_t screenX = wholePart(pen->x)
-				+ SCHRIFT_F64_floor_to_int(gmtx.leftSideBearing);
+				+ SCHRIFT_F64_floor_to_int(gmtx.leftSideBearing); //precision OK
 		const int32_t screenY = wholePart(pen->y) + gmtx.yOffset;
 		copy_rect(screenX, screenY, surface, &img, rData->color);
 		QLS_STACK_FREE(pixels);
@@ -986,6 +993,7 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, T_RenderData* r, con
             case HALIGN_JUSTIFY: {
                 if (0 < lineData.nVariableWidthSpaces && 0 < spareWidth) {
                     spaceJustification = SCHRIFT_F64_div(SCHRIFT_F64_from_s32(spareWidth) , SCHRIFT_F64_cast_from_u32(lineData.nVariableWidthSpaces));
+                    spaceJustification = SCHRIFT_F64_floor_to_Zper0x1p8(spaceJustification);
                     lineWidthMax = SCHRIFT_F64_max(lineWidthMax, SCHRIFT_F64_from_s32(renderData_GetWidth(r)));
                 } else {
                 	//copy behavior of cairo - align CENTER
