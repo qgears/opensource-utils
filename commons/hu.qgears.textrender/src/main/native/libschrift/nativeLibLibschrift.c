@@ -116,6 +116,8 @@ enum { VALIGN_TOP, VALIGN_MIDDLE, VALIGN_BOTTOM };
 /* Line height of a SFT_LMetrics* : ascender - descender + lineGap */
 #define LINE_HEIGHT(lm) SCHRIFT_F64_add(SCHRIFT_F64_sub(lm.ascender, lm.descender), lm.lineGap)
 
+static inline void preprocess_parameter_color(SCHRIFT_F32* a);
+static inline void preprocess_parameter_fontSettings(T_FontSettings* fontSettings);
 static inline uint32_t blend_bgra_premultiplied(uint32_t dst, uint32_t pcolor, uint8_t mask);
 /* Check whether the x0, x1 range is within the rangeMinIncluding and rangeMaxNotIncluding range. */
 static inline bool is_valid_range(int32_t rangeMinIncluding, int32_t rangeMaxIncluding, int32_t x0, int32_t x1);
@@ -244,6 +246,12 @@ T_SizeInt qls_renderTextPrivate(T_ErrorHandler* errorHandler, uint64_t surfaceHa
                             uint32_t hAlign, uint32_t vAlign, int32_t x, int32_t y, int32_t width, int32_t height,
                             SCHRIFT_F32 r, SCHRIFT_F32 g, SCHRIFT_F32 b, SCHRIFT_F32 a, bool clip, uint32_t wrapMode)
 {
+    preprocess_parameter_color(&r);
+    preprocess_parameter_color(&g);
+    preprocess_parameter_color(&b);
+    preprocess_parameter_color(&a);
+    preprocess_parameter_fontSettings(fontSettings);
+
     T_SizeInt result = {0, 0};
     T_TrueTypeFont* font = fontSettings->fonts[0];
     T_SurfaceData* surface = qls_get_surfacedata(surfaceHandle);
@@ -292,6 +300,8 @@ T_SizeInt qls_renderTextPrivate(T_ErrorHandler* errorHandler, uint64_t surfaceHa
 T_SizeInt qls_layoutTextPrivate(T_ErrorHandler* errorHandler, T_FontSettings* fontSettings, const uint16_t* text,
                             uint32_t textLen, uint32_t hAlign, int32_t width, uint32_t wrapMode)
 {
+    preprocess_parameter_fontSettings(fontSettings);
+
     T_SizeInt result = {0,0};
     T_RenderData r = {0};
     r.fontSettings = fontSettings;
@@ -388,6 +398,26 @@ void qls_free_font(T_TrueTypeFont* font) {
 /*********************************************/
 /***   Static function implementations     ***/
 /*********************************************/
+static inline void preprocess_parameter_color(SCHRIFT_F32* a) {
+    //TODO add bespoke handling, for NaN?
+    if (SCHRIFT_F64_compare_lt(SCHRIFT_F64_from_SCHRIFT_F32(*a), SCHRIFT_F64_const_zero)) {
+        *a = SCHRIFT_F32_from_float(0.0f);
+    } else if (SCHRIFT_F64_compare_lt(SCHRIFT_F64_const_1, SCHRIFT_F64_from_SCHRIFT_F32(*a))) {
+        *a = SCHRIFT_F32_from_float(1.0f);
+    } else {
+        *a = SCHRIFT_F32_floor_to_Zper0x1p8(*a);
+    }
+}
+static inline void preprocess_parameter_fontSettings(T_FontSettings* fontSettings) {
+    if (fontSettings != NULL) {
+        //We do not expect fractional font sizes, in reality -> no difference
+        //We can re-add excess precision if want to: it will not cause excess precision in pen.x, pen.y
+        SCHRIFT_F32_ceil_to_Zper0x1p8(fontSettings->fontSize);
+        //We do not expect negative letterSpacing
+        SCHRIFT_F64_floor_to_Zper0x1p8(fontSettings->letterSpacing);
+    }
+}
+
 static inline uint32_t blend_bgra_premultiplied(uint32_t dst, uint32_t pcolor, uint8_t alpha)
 {
     // pcolor is packed in RGBA byte order (byte0=R, byte1=G, byte2=B, byte3=A)
