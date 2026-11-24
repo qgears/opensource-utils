@@ -405,7 +405,7 @@ static inline void preprocess_parameter_color(SCHRIFT_F32* a) {
     } else if (SCHRIFT_F64_compare_lt(SCHRIFT_F64_const_1, SCHRIFT_F64_from_SCHRIFT_F32(*a))) {
         *a = SCHRIFT_F32_from_float(1.0f);
     } else {
-        *a = SCHRIFT_F32_floor_to_Zper0x1p8(*a);
+        // *a = SCHRIFT_F32_floor_to_Zper0x1p8(*a);
     }
 }
 static inline void preprocess_parameter_fontSettings(T_FontSettings* fontSettings) {
