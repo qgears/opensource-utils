@@ -470,30 +470,8 @@ static inline void copy_rect(int32_t startx, int32_t starty, T_SurfaceData* surf
     int32_t rowStride = surface->color ? surface->width : ((surface->width + 3) & ~3);
     
     uint8_t* imageData = ((uint8_t*)img->pixels);
-    
-    // Validate loop end points to avoid endless loop or bad addressing. In case of error there is no means to signal error.
-    // Error is only possible if there is an internal error in the arithmetics above.
-    if (!is_valid_range(0, img->height, min_src_y, max_src_y))
-    {
-        return;
-    }
-    if (!is_valid_range(0, img->width, min_src_x, max_src_x))
-    {
-        return;
-    }
-    dsti = starty+min_src_y;
-    int32_t dstiend = dsti + max_src_y - min_src_y - 1;
-    if (!is_valid_range(0, surface->height, dsti, dstiend))
-    {
-        return;
-    }
-    int32_t dstjend = dstj + max_src_x - min_src_x -1;
-    if (!is_valid_range(0, surface->width, dstj, dstjend))
-    {
-        return;
-    }
     // row-major traversal (rows outer, columns inner) for cache-friendly access of both buffers
-    for (i = min_src_y; i < max_src_y; i++, dsti++ ) {
+    for (i = min_src_y, dsti = starty+min_src_y; i < max_src_y; i++, dsti++ ) {
         for (j = min_src_x,dstj = startx+min_src_x; j < max_src_x; j++, dstj++ ) {
             int32_t dst_pix = (dsti*rowStride) + dstj;
             int32_t src_pix = (i*img->width) + j;
