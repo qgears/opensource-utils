@@ -98,8 +98,7 @@ lib_original : $(JNI_HEADERS) $(SOURCES_LIB)
 	-lm
 
 # optional: verify the x86 libs in OUTPUTDIR load on glibc $(GLIBC_MAX)
-CHECKDEPS_LIBS=libqlibschrift-i686.so libqlibschrift_sf-i686.so \
-	libqlibschrift-x86_64.so libqlibschrift_sf-x86_64.so
+CHECKDEPS_LIBS=$(SO_NAME) $(SO_SOFT_FLOAT_NAME)
 
 checkdeps :
 	@rc=0; \
