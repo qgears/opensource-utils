@@ -24,7 +24,7 @@ static inline int schrift_f32_ceil_to_int(float x)
 static inline float schrift_f32_nextafter(float x, float y)
 {
 	union { float f; uint32_t u; } v;
-	if (__builtin_isnanf(x) || __builtin_isnanf(y)) {
+	if (__builtin_isnan(x) || __builtin_isnan(y)) {
 		return x + y;
 	}
 	if (x == y) {
@@ -57,7 +57,7 @@ static inline float schrift_f32_ceil_to_Zper0x1p8(float x) {
 	 * 		A clean implementation of fmodf would include bit manipulation
 	 */
 
-	if (__builtin_isnanf(x) || __builtin_isinff(x)) {
+	if (__builtin_isnan(x) || __builtin_isinf(x)) {
 		return x;
 	}
 
@@ -77,7 +77,7 @@ static inline float schrift_f32_ceil_to_Zper0x1p8(float x) {
 }
 
 static inline float schrift_f32_floor_to_Zper0x1p8(float x) {
-	if (__builtin_isnanf(x) || __builtin_isinff(x)) {
+	if (__builtin_isnan(x) || __builtin_isinf(x)) {
 		return x;
 	}
 
