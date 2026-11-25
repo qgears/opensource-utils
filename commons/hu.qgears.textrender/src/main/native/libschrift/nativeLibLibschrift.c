@@ -646,7 +646,7 @@ static inline SFT_Glyph qls_lookup(T_ErrorHandler* eh, T_RenderData* rData, uint
 			}
 		}
 		if (sft_lookup(sft, codepoint, &glyph) < 0) {
-			ERROR(eh, QLS_ERROR_GLIPH_MISSING, "codepoint 0x%04X missing", codepoint);
+			ERROR(eh, QLS_ERROR_GLIPH_LOOKUP, "codepoint 0x%04X lookup failed (invalid font)", codepoint);
 			return 0;
 		}
 		if (glyph != 0) {
@@ -740,7 +740,7 @@ static inline void advancePen(
 	 // libschrift yOffset is Y-up!
 	 sft->yOffset =  SCHRIFT_F64_neg(fractionalPart(pen->y));
 	 if (sft_gmetrics(sft, glyph, &gmtx) < 0) {
-		ERROR(eh, QLS_ERROR_GLIPH_MISSING, "codepoint 0x%04X bad glyph metrics", currentCodepoint);
+		ERROR(eh, QLS_ERROR_GLIPH_METRICS_BAD, "codepoint 0x%04X bad glyph metrics", currentCodepoint);
 		return;
 	 }
      gmtx.advanceWidth = SCHRIFT_F64_ceil_to_Zper0x1p8(gmtx.advanceWidth); //other properties' precision OK
@@ -908,11 +908,16 @@ static inline void prescanLine(T_ErrorHandler* eh, T_RenderData* rData, UTF16_Re
 		utf16_read_codepoint(reader);
 	}
 	//drop line endings, but only the first one!
-	if (reader->pos < reader->end && '\r' == *reader->pos) {
-		reader->pos++;
-	}
-	if (reader->pos < reader->end && '\n' == *reader->pos) {
-		reader->pos++;
+	if (reader->pos < reader->end && '\0' == *reader->pos) {
+		//TODO we drop internal per zero's as well ,as the renderer treats \0's as line endings... but maybe it is just a bug
+        reader->pos++;
+	} else {
+		if (reader->pos < reader->end && '\r' == *reader->pos) {
+			reader->pos++;
+		}
+		if (reader->pos < reader->end && '\n' == *reader->pos) {
+			reader->pos++;
+		}
 	}
 
 	ret.nextLineStart = reader->pos;
@@ -1094,7 +1099,8 @@ static inline T_SizeInt layoutAndRender(T_ErrorHandler* eh, T_RenderData* r, con
         reader.pos = lineData.nextLineStart;
         pen.y = SCHRIFT_F64_sub(pen.y, lm->descender);
         lineGap = lm->lineGap;
-        if (startPos>=reader.pos)
+        // empty text: the single (empty) last line does not advance
+        if (!lineData.wasLastLine && startPos>=reader.pos)
         {
             // Prevent endless loop in case reader.pos does not advance in a loop cycle. This can only happen in case of an internal error of the logic.
             ERROR(eh, QLS_ERROR_INTERNAL_ENDLESS_LOOP, "Internal error endless loop in layoutAndRender");
@@ -1119,9 +1125,10 @@ static inline uint32_t utf16_read_codepoint(UTF16_Reader* reader ) {
 		if (cp >= 0xD800 && cp <= 0xDBFF && (reader->pos < reader->end ))
 		{
 			uint32_t lo = *reader->pos;
-			reader->pos++;
+			// unpaired surrogate is returned as is, the next code unit must not be consumed
 			if (lo >= 0xDC00 && lo <= 0xDFFF)
 			{
+				reader->pos++;
 				cp = 0x10000 + (((cp - 0xD800) << 10) | (lo - 0xDC00));
 			}
 		}

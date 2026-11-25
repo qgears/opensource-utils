@@ -25,9 +25,10 @@
 extern "C" {
 #endif
 
-#define SCHRIFT_ERROR_NUM_ENTRIES 130
+/* Error codes must be negative: all callers treat a return value < 0 as error. */
+#define SCHRIFT_ERROR_NUM_ENTRIES (-130)
 #define SCHRIFT_MAX_ITERATION_COUNT 65536
-#define SCHRIFT_ERROR_MAX_ITERATION_COUNT 131
+#define SCHRIFT_ERROR_MAX_ITERATION_COUNT (-131)
 #define SCHRIFT_MAX_LINE_LENGTH 65536
 
 #define SFT_DOWNWARD_Y 0x01
