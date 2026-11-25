@@ -1,20 +1,23 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1795620111762
-Build-Jdk: 21.0.9
-Built-By: deveushu
+Bnd-LastModified: 1795621680648
+Build-Jdk: 21.0.12
+Built-By: agostoni
 Bundle-Description: Java remote tooling
 Bundle-ManifestVersion: 2
 Bundle-Name: hu.qgears.remote
 Bundle-SymbolicName: hu.qgears.remote
-Bundle-Version: 12.6.0
+Bundle-Version: 12.6.1.SNAPSHOT
 Created-By: Apache Maven Bundle Plugin
-Export-Package: hu.qgears.remote;uses:="hu.qgears.commons,hu.qgears.comm
- ons.signal,hu.qgears.coolrmi,hu.qgears.coolrmi.remoter,joptsimple.annot
- ,joptsimple.tool";version="12.6.0",hu.qgears.remote.ignore;uses:="hu.qg
- ears.commons";version="12.6.0",hu.qgears.remote.main;uses:="hu.qgears.r
- emote,joptsimple.tool";version="12.6.0"
-Import-Package: hu.qgears.commons,hu.qgears.commons.signal,hu.qgears.coo
- lrmi,hu.qgears.coolrmi.messages,hu.qgears.coolrmi.remoter,joptsimple.an
- not;version="[2.0,3)",joptsimple.tool;version="[2.0,3)"
+Export-Package: hu.qgears.remote;version="12.6.0";uses:="hu.qgears.commo
+ ns,hu.qgears.commons.signal,hu.qgears.coolrmi,hu.qgears.coolrmi.remoter
+ ,joptsimple.annot,joptsimple.tool",hu.qgears.remote.ignore;version="12.
+ 6.0";uses:="hu.qgears.commons",hu.qgears.remote.main;version="12.6.0";u
+ ses:="hu.qgears.remote,joptsimple.tool"
+Import-Package: hu.qgears.commons;version="[12.6,13)",hu.qgears.commons.
+ signal;version="[12.6,13)",hu.qgears.coolrmi;version="[12.6,13)",hu.qge
+ ars.coolrmi.messages;version="[12.6,13)",hu.qgears.coolrmi.remoter;vers
+ ion="[12.6,13)",joptsimple.annot;version="[2.0,3)",joptsimple.tool;vers
+ ion="[2.0,3)"
+Originally-Created-By: Apache Maven Bundle Plugin
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=11))"
 Tool: Bnd-2.3.0.201405100607

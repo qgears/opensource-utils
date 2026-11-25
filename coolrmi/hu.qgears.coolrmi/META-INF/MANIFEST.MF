@@ -1,23 +1,25 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1795620111447
-Build-Jdk: 21.0.9
-Built-By: deveushu
+Bnd-LastModified: 1795621680430
+Build-Jdk: 21.0.12
+Built-By: agostoni
 Bundle-Description: Simple and effective RMI implementation for Java.
 Bundle-ManifestVersion: 2
 Bundle-Name: hu.qgears.coolrmi
 Bundle-SymbolicName: hu.qgears.coolrmi
-Bundle-Version: 12.6.0
+Bundle-Version: 12.6.1.SNAPSHOT
 Created-By: Apache Maven Bundle Plugin
-Export-Package: hu.qgears.coolrmi;uses:="hu.qgears.coolrmi.messages,hu.q
- gears.coolrmi.remoter,hu.qgears.coolrmi.streams";version="12.6.0",hu.qg
- ears.coolrmi.messages;uses:="hu.qgears.commons,hu.qgears.commons.signal
- ,hu.qgears.coolrmi,hu.qgears.coolrmi.remoter,hu.qgears.coolrmi.streams"
- ;version="12.6.0",hu.qgears.coolrmi.multiplexer;uses:="hu.qgears.coolrm
- i.messages";version="12.6.0",hu.qgears.coolrmi.remoter;uses:="hu.qgears
- .commons,hu.qgears.commons.signal,hu.qgears.coolrmi,hu.qgears.coolrmi.m
- essages,hu.qgears.coolrmi.multiplexer,hu.qgears.coolrmi.streams";versio
- n="12.6.0",hu.qgears.coolrmi.streams;uses:="hu.qgears.commons,hu.qgears
- .coolrmi";version="12.6.0"
-Import-Package: hu.qgears.commons,hu.qgears.commons.signal
+Export-Package: hu.qgears.coolrmi;version="12.6.0";uses:="hu.qgears.cool
+ rmi.messages,hu.qgears.coolrmi.remoter,hu.qgears.coolrmi.streams",hu.qg
+ ears.coolrmi.messages;version="12.6.0";uses:="hu.qgears.commons,hu.qgea
+ rs.commons.signal,hu.qgears.coolrmi,hu.qgears.coolrmi.remoter,hu.qgears
+ .coolrmi.streams",hu.qgears.coolrmi.multiplexer;version="12.6.0";uses:=
+ "hu.qgears.coolrmi.messages",hu.qgears.coolrmi.remoter;version="12.6.0"
+ ;uses:="hu.qgears.commons,hu.qgears.commons.signal,hu.qgears.coolrmi,hu
+ .qgears.coolrmi.messages,hu.qgears.coolrmi.multiplexer,hu.qgears.coolrm
+ i.streams",hu.qgears.coolrmi.streams;version="12.6.0";uses:="hu.qgears.
+ commons,hu.qgears.coolrmi"
+Import-Package: hu.qgears.commons;version="[12.6,13)",hu.qgears.commons.
+ signal;version="[12.6,13)"
+Originally-Created-By: Apache Maven Bundle Plugin
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=11))"
 Tool: Bnd-2.3.0.201405100607
