@@ -1,18 +1,18 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1795456330768
-Build-Jdk: 21.0.12
-Built-By: agostoni
+Bnd-LastModified: 1795620101621
+Build-Jdk: 21.0.9
+Built-By: deveushu
 Bundle-Description: Common helper classes and methods.
 Bundle-ManifestVersion: 2
 Bundle-Name: hu.qgears.commons
 Bundle-SymbolicName: hu.qgears.commons
-Bundle-Version: 12.6.0.SNAPSHOT
+Bundle-Version: 12.6.0
 Created-By: Apache Maven Bundle Plugin
 Export-Package: hu.qgears.commons;uses:="hu.qgears.commons.mem,hu.qgears
- .commons.signal,javax.xml.parsers,org.xml.sax";version="12.6.0.SNAPSHOT
- ",hu.qgears.commons.csv;version="12.6.0.SNAPSHOT",hu.qgears.commons.mem
- ;uses:="hu.qgears.commons";version="12.6.0.SNAPSHOT",hu.qgears.commons.
- signal;uses:="hu.qgears.commons";version="12.6.0.SNAPSHOT"
+ .commons.signal,javax.xml.parsers,org.xml.sax";version="12.6.0",hu.qgea
+ rs.commons.csv;version="12.6.0",hu.qgears.commons.mem;uses:="hu.qgears.
+ commons";version="12.6.0",hu.qgears.commons.signal;uses:="hu.qgears.com
+ mons";version="12.6.0"
 Import-Package: javax.xml.parsers,org.apache.log4j;version="[1.2,2)",org
  .xml.sax
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=11))"

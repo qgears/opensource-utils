@@ -1,15 +1,15 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1795456336352
-Build-Jdk: 21.0.12
-Built-By: agostoni
+Bnd-LastModified: 1795620110949
+Build-Jdk: 21.0.9
+Built-By: deveushu
 Bundle-Description: Cross reference utility.
 Bundle-ManifestVersion: 2
 Bundle-Name: hu.qgears.crossref
 Bundle-SymbolicName: hu.qgears.crossref
-Bundle-Version: 12.6.0.SNAPSHOT
+Bundle-Version: 12.6.0
 Created-By: Apache Maven Bundle Plugin
 Export-Package: hu.qgears.crossref;uses:="hu.qgears.commons";version="12
- .6.0.SNAPSHOT"
-Import-Package: hu.qgears.commons;version="[12.6,13)"
+ .6.0"
+Import-Package: hu.qgears.commons
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=11))"
 Tool: Bnd-2.3.0.201405100607
