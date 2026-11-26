@@ -1,28 +1,32 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1795712727749
-Build-Jdk: 21.0.9
-Built-By: deveushu
+Bnd-LastModified: 1795713812356
+Build-Jdk: 21.0.12
+Built-By: agostoni
 Bundle-Description: The hu.qgears.xtextgrammar bundle.
 Bundle-ManifestVersion: 2
 Bundle-Name: hu.qgears.xtextgrammar
 Bundle-SymbolicName: hu.qgears.xtextgrammar
-Bundle-Version: 12.6.1
+Bundle-Version: 12.6.2.SNAPSHOT
 Created-By: Apache Maven Bundle Plugin
 Export-Package: hu.qgears.xtextgrammar;uses:="hu.qgears.commons,hu.qgear
  s.crossref,hu.qgears.emfcollab.backref,hu.qgears.parser,hu.qgears.parse
  r.coloring,hu.qgears.parser.impl,hu.qgears.parser.language,hu.qgears.pa
  rser.tokenizer,hu.qgears.rtemplate.runtime,hu.qgears.xtextgrammar.conte
  ntassist,org.eclipse.emf.common.notify,org.eclipse.emf.ecore,org.eclips
- e.emf.ecore.resource,org.eclipse.emf.ecore.util";version="12.6.1",hu.qg
- ears.xtextgrammar.contentassist;version="12.6.1"
-Import-Package: hu.qgears.commons,hu.qgears.crossref,hu.qgears.emfcollab
- .backref,hu.qgears.parser,hu.qgears.parser.coloring,hu.qgears.parser.ex
- pression,hu.qgears.parser.impl,hu.qgears.parser.language,hu.qgears.pars
- er.language.impl,hu.qgears.parser.tokenizer,hu.qgears.parser.tokenizer.
- impl,hu.qgears.parser.tokenizer.recognizer,hu.qgears.parser.util,hu.qge
- ars.rtemplate.runtime;version="[2.0,3)",org.eclipse.emf.common.notify;v
- ersion="[2.46,3)",org.eclipse.emf.common.util;version="[2.46,3)",org.ec
- lipse.emf.ecore,org.eclipse.emf.ecore.resource;version="[2.43,3)",org.e
- clipse.emf.ecore.util;version="[2.43,3)"
+ e.emf.ecore.resource,org.eclipse.emf.ecore.util";version="12.6.2.SNAPSH
+ OT",hu.qgears.xtextgrammar.contentassist;version="12.6.2.SNAPSHOT"
+Import-Package: hu.qgears.commons;version="[12.6,13)",hu.qgears.crossref
+ ;version="[12.6,13)",hu.qgears.emfcollab.backref;version="[12.6,13)",hu
+ .qgears.parser;version="[12.6,13)",hu.qgears.parser.coloring;version="[
+ 12.6,13)",hu.qgears.parser.expression;version="[12.6,13)",hu.qgears.par
+ ser.impl;version="[12.6,13)",hu.qgears.parser.language;version="[12.6,1
+ 3)",hu.qgears.parser.language.impl;version="[12.6,13)",hu.qgears.parser
+ .tokenizer;version="[12.6,13)",hu.qgears.parser.tokenizer.impl;version=
+ "[12.6,13)",hu.qgears.parser.tokenizer.recognizer;version="[12.6,13)",h
+ u.qgears.parser.util;version="[12.6,13)",hu.qgears.rtemplate.runtime;ve
+ rsion="[2.0,3)",org.eclipse.emf.common.notify;version="[2.46,3)",org.ec
+ lipse.emf.common.util;version="[2.46,3)",org.eclipse.emf.ecore,org.ecli
+ pse.emf.ecore.resource;version="[2.43,3)",org.eclipse.emf.ecore.util;ve
+ rsion="[2.43,3)"
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=11))"
 Tool: Bnd-2.3.0.201405100607
