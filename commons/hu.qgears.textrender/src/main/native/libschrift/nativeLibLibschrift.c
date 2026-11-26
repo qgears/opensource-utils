@@ -124,11 +124,11 @@ static inline bool is_valid_range(int32_t rangeMinIncluding, int32_t rangeMaxInc
 /** Copy pixels from source image img to the target surface "surface".
  * @param startx x coordinate on the target to start drawing pixels of img from
  * @param starty y coordinate on the target to start drawing pixels of img from
+ * @param rData
  * @param surface target to copy pixels onto - color or alpha surface
  * @param img source to copy pixels from - grayscale image of the character in libschrift format
- * @param color in case of color surface output this color is used to draw the character.
  */
-static inline void copy_rect(int32_t startx, int32_t starty, T_SurfaceData* surface, SFT_Image* img, uint32_t color);
+static inline void copy_rect(int32_t startx, int32_t starty, T_RenderData * rData, T_SurfaceData* surface, SFT_Image* img);
 /**
  * Renders only if (surface != NULL and) r->fontSettings->isUnderline == true
  */
@@ -452,22 +452,28 @@ static inline bool is_valid_range(int32_t rangeMinIncluding, int32_t rangeMaxInc
     if(x1>rangeMaxIncluding){ return false;}
     return true;
 }
-static inline void copy_rect(int32_t startx, int32_t starty, T_SurfaceData* surface, SFT_Image* img, uint32_t color)
+static inline void copy_rect(int32_t startx, int32_t starty, T_RenderData * rData, T_SurfaceData* surface, SFT_Image* img)
 {
     // Ensure the source image and destination surface are valid
     if (!surface || !img || !img->pixels) {
         return;
     }
+    uint32_t color = rData->color;
+    const int32_t hLimitx = MIN(rData->maxPen.x, surface->width);
+    const int32_t hLimity = MIN(rData->maxPen.y, surface->height);
+
+    const int32_t lLimitx = MAX(rData->minPen.x,0);
+    const int32_t lLimity = MAX(rData->minPen.y,0);
 
     int32_t min_src_x = 0;
-    if (startx < 0) {
-        min_src_x = -startx;
+    if (startx < lLimitx) {
+        min_src_x = lLimitx - startx;
         if (min_src_x >= img->width){
             return;
         }
     }
     int32_t max_src_x = 0;
-    int32_t distance_from_right =  surface->width - (img->width + startx);
+    int32_t distance_from_right =  hLimitx - (img->width + startx);
     if (distance_from_right > 0) {
         max_src_x = img->width;
     } else {
@@ -479,14 +485,14 @@ static inline void copy_rect(int32_t startx, int32_t starty, T_SurfaceData* surf
     }
 
     int32_t min_src_y = 0;
-    if (starty < 0) {
-        min_src_y = -starty;
+    if (starty < lLimity) {
+        min_src_y = lLimity - starty;
         if (min_src_y >= img->height){
             return;
         }
     }
     int32_t max_src_y = 0;
-    int32_t distance_from_down =  surface->height - (img->height + starty);
+    int32_t distance_from_down =  hLimity - (img->height + starty);
     if (distance_from_down > 0) {
         max_src_y = img->height;
     } else {
@@ -557,10 +563,17 @@ static inline void render_underline_opt(T_ErrorHandler* eh, const T_RenderData* 
 static inline void render_underline(T_ErrorHandler* eh, const T_RenderData* r, T_SurfaceData* surface, SCHRIFT_F64 peny, SCHRIFT_F64 penstartx, SCHRIFT_F64 penendx) {
     if (r != NULL /*&& ignoring r->fontSettings->isUnderline*/ && surface != NULL && surface->data != NULL) {
         const int32_t y = SCHRIFT_F64_ceil_to_int(peny); //TODO consider nextafterf before ceil_to_int
-        if (0 <= y && y < surface->height) {
+        int32_t lLimity = MAX(0,r->minPen.y);
+        int32_t lLimitX = MAX(0,r->minPen.x);
 
-            const int32_t x0 = MAX(0, SCHRIFT_F64_floor_to_int(penstartx)); // floor to int: pen positions in [0,1) point to pixel[0]
-            const int32_t xmax = MIN(SCHRIFT_F64_floor_to_int(penendx), surface->width); // exclusive
+        int32_t hLimity = MIN(surface->height,r->maxPen.y);
+        int32_t hLimitX = MIN(surface->width ,r->maxPen.x);
+
+
+        if (lLimity <= y && y < hLimity) {
+
+            const int32_t x0 = MAX(lLimitX, SCHRIFT_F64_floor_to_int(penstartx)); // floor to int: pen positions in [0,1) point to pixel[0]
+            const int32_t xmax = MIN(SCHRIFT_F64_floor_to_int(penendx), hLimitX); // exclusive
 
             //XXX keep code in synch with copy_rectangle(...)
             uint32_t* surfaceData4 = (uint32_t *)surface->data;
@@ -781,7 +794,7 @@ static inline void advancePen(
 		const int32_t screenX = wholePart(pen->x)
 				+ SCHRIFT_F64_floor_to_int(gmtx.leftSideBearing); //precision OK
 		const int32_t screenY = wholePart(pen->y) + gmtx.yOffset;
-		copy_rect(screenX, screenY, surface, &img, rData->color);
+		copy_rect(screenX, screenY, rData, surface, &img);
 		QLS_STACK_FREE(pixels);
 	}
 
